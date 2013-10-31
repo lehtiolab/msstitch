@@ -1,7 +1,7 @@
 import sys
 from lxml import etree
 from genshi.core import Markup
-import reader
+import readers
 
 def target_decoy_generator(element_generator, decoy, ns):
     for ev,el in element_generator:
@@ -39,7 +39,7 @@ def filter_unique_peptides(input_files, score, ns):
         print >> sys.stdout, 'WARNING: You are attempting to filter unique peptides from a non-fractioned dataset. This may be unneccessary.'
     # first get all pep sequences
     pepseqs = {}
-    pepgens = reader.get_peptides_multiple_fractions(input_files, ns)
+    pepgens = readers.get_peptides_multiple_fractions(input_files, ns)
     for pepgen in pepgens:
         for ac,el in pepgen:
             pepseqs[ el.attrib['{%s}peptide_id'] ] = 1
@@ -50,7 +50,7 @@ def filter_unique_peptides(input_files, score, ns):
     # now yield one unique peptide per seq. The looped over code could be in own
     # function to increase readability, but function calls are expensive.
     for pepseq in pepseqs:
-        pepgens = reader.get_peptides_multiple_fractions(input_files, ns)
+        pepgens = readers.get_peptides_multiple_fractions(input_files, ns)
         # manually pop first peptide from generator to populate highest dict.
         ac,el = pepgen[0].next()
         featscore = float(el.xpath('xmlns:%s' % scores[score], namespaces=ns)[0].text)
