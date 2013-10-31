@@ -2,10 +2,10 @@ from lxml import etree
 from genshi.template import MarkupTemplate
 
 
-def write_percolator_xml(fn, staticxml, feats, ns):
+def write_percolator_xml(staticxml, feats, fn):
     """Given the static percolator xml root and process info nodes, and all
-    psms and peptides as iterators in a dict, this generates percolator out data
-    into a Genshi template."""
+    psms and peptides as iterators in a dict {'peptide': pep_iterator, 'psm':
+    psm_iterator}, this generates percolator out data into a Genshi template."""
 
     # First prepare xml template for Genshi containing static percolator xml 
     # and a for loop for Genshi to fill in
