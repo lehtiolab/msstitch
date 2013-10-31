@@ -1,5 +1,6 @@
 import sys
 from lxml import etree
+from genshi.core import Markup
 
 def readPercout(fname):
     doc = None
@@ -35,9 +36,16 @@ def get_percolator_static_xml(fn, ns):
 def generate_psms_multiple_fractions(fns, ns):
     for fn in fns:
         for ac,el in etree.iterparse(fn, tag='{%s}psm' % ns['xmlns']):
-            yield el
+            yield Markup(etree.tostring(el))
     
-def get_peptides_multiple_fractions(input_files, ns):
-    peptide_generators_fractions = []
+def generate_peptides_multiple_fractions(input_files, ns):
     for fn in input_files:
-        peptide_generators_fractions.append(etree.iterparse(fn, tag='{%s}peptide' % ns['xmlns']))
+        for ac,el in etree.iterparse(fn, tag='{%s}peptide' % ns['xmlns']):
+            yield el
+
+def generate_peptides_by_seq_multiple_fractions(input_files, seq, ns):
+    for fn in input_files:
+        for ac,el in etree.iterparse(fn, tag='{%s}peptide' % ns['xmlns']):
+            if el.attrib['{%s}peptide_id' % ns['xmlns']] != seq:
+                continue
+            yield el
