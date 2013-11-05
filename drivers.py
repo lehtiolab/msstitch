@@ -1,14 +1,18 @@
 # need to install:
-#genshi
-#libhdf5-dev 
-#python-dev
-#NumPy 1.5 or newer (1.6 recommended)
-#
-
+# genshi
+# libhdf5-dev 
+# python-dev
+# NumPy 1.5 or newer (1.6 recommended)
+import os
 
 import readers
 import filtering
 import writers
+
+def create_outfilepath(fn, outdir, suffix=None):
+    basefn = os.path.basename(fn)
+    outfn = basefn + suffix
+    return os.path.join(outdir, outfn)
 
 
 def merge_multiple_fractions(fns):
@@ -18,20 +22,24 @@ def merge_multiple_fractions(fns):
     pass
 
 
-def split_target_decoy(fn, targetfn='target.xml', decoyfn='decoy.xml'):
+def split_target_decoy(fns, outdir, targetsuffix='_target.xml', decoysuffix='_decoy.xml'):
     """ Calls splitter to split percolator output into target/decoy elements.
         Writes two new xml files with features. Currently only psms and
         peptides. Proteins not here, since one cannot do protein inference
         before having merged and remapped multifraction data anyway.
     """
-    namespace = readers.get_namespace(fn)
-    static_xml = readers.get_percolator_static_xml(fn, namespace)
-    split_elements = filtering.split_target_decoy(fn, namespace)
-    writers.write_percolator_xml(static_xml, split_elements['target'], targetfn)
-    writers.write_percolator_xml(static_xml, split_elements['decoy'], decoyfn)
+    for fn in fns:
+        namespace = readers.get_namespace(fn)
+        static_xml = readers.get_percolator_static_xml(fn, namespace)
+        split_elements = filtering.split_target_decoy(fn, namespace)
+        targetfn = create_outfilepath(fn, outdir, targetsuffix)
+        decoyfn = create_outfilepath(fn, outdir, decoysuffix)
+        writers.write_percolator_xml(static_xml, split_elements['target'], targetfn)
+        writers.write_percolator_xml(static_xml, split_elements['decoy'], decoyfn)
 
 
-def merge_unique_best_scoring_peptides(fns, score, mergedfn):
+def merge_unique_best_scoring_peptides(fns, outdir, score='svm',
+                outsuffix='_merged.xml'):
     """This function processes multiple percolator runs from fractions and
     filters out the best scoring peptides. It writes a single fraction with
     those peptides and ALL psms from all fractions. 
@@ -43,19 +51,5 @@ def merge_unique_best_scoring_peptides(fns, score, mergedfn):
     allpsms = readers.generate_psms_multiple_fractions(fns, namespace)
     uniquepeps = filtering.filter_unique_peptides(fns, score, namespace)
     features = {'psm': allpsms, 'peptide': uniquepeps}
-    writers.write_percolator_xml(static_xml, features, mergedfn)
-
-
-if __name__ == '__main__':
-    # just for testing
-    import time
-    t = time.time()
-    print 'lets roll'
-    fns = [
-    '/mnt/kalevalatmp/test_galaxydb/files/000/dataset_108_files/dataset_108.dat_task_0',
-    '/mnt/kalevalatmp/test_galaxydb/files/000/dataset_108_files/dataset_108.dat_task_1'
-    ]
-    print merge_unique_best_scoring_peptides(fns, 'svm',
-                    'merged.xml')
-    print 'Took %s seconds' % str(time.time() - t)
-
+    merged_fn = create_outfilepath(fns[0], outdir, outsuffix)
+    writers.write_percolator_xml(static_xml, features, merged_fn)
