@@ -29,6 +29,8 @@ parser.add_argument('-i', dest='infile', nargs='+',
         required=True, help='Input file(s)')
 
 parser.add_argument('-d', dest='outdir', required=True, help='Directory to output in')
+parser.add_argument('-s', dest='score', help='Score to filter unique peptides '
+'on (only for command mergebest)')
 #parser.add_argument('-o', dest='outfiles', nargs='+', help='Output file(s)')
 
 args = parser.parse_args()
