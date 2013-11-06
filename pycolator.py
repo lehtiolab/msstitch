@@ -18,12 +18,13 @@ def parser_file_exists(parser, fn):
         return fn
 
 parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
-parser.add_argument('command', type=str, help='How to manipulate the input:\n'
+parser.add_argument('-c', dest='command', type=str, help='How to manipulate the input:\n'
 'splittd - splits target and decoy data, multiple inputs to multiple outputs\n'
-'mergebest - merges xml files and only includes best scoring unique peptides\n'
+'mergebest - merges xml files and only includes best scoring unique peptides',
+required=True
 )
 
-parser.add_argument('-i', dest='infiles', nargs='+', 
+parser.add_argument('-i', dest='infile', nargs='+', 
         type=lambda x:parser_file_exists(parser, x), 
         required=True, help='Input file(s)')
 
@@ -38,5 +39,5 @@ commandmap = {
     }
 
 
-commandmap[args.command](args.infiles, args.outdir)
+commandmap[args.command](args.infile, args.outdir)
 
