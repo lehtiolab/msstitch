@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 """
 pycolator -- Percolator output manipulation
 
