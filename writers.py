@@ -1,29 +1,25 @@
 from lxml import etree
-from genshi.template import MarkupTemplate
-
 
 def write_percolator_xml(staticxml, feats, fn):
     """Given the static percolator xml root and process info nodes, and all
     psms and peptides as iterators in a dict {'peptide': pep_iterator, 'psm':
-    psm_iterator}, this generates percolator out data into a Genshi template."""
+    psm_iterator}, this generates percolator out data into a file."""
 
-    # First prepare xml template for Genshi containing static percolator xml 
-    # and a for loop for Genshi to fill in
-    etree.register_namespace('py', 'http://genshi.edgewall.org/')
-    peptides = etree.SubElement(staticxml, 'peptides', nsmap={'py': 'http://genshi.edgewall.org/'})
-    psms = etree.SubElement(staticxml, 'psms', nsmap={'py': 'http://genshi.edgewall.org/'})
-    etree.SubElement(peptides, '{http://genshi.edgewall.org/}for', each='pep in peps').text = '${pep}'
-    etree.SubElement(psms, '{http://genshi.edgewall.org/}for', each='psm in psms').text = '${psm}'
+    etree.SubElement(staticxml, 'psms').text='{$psms}'
     root = etree.tostring(staticxml, pretty_print=True, xml_declaration=True)
-    
-    # then insert peptides/psms into new formed template
-    tpl = MarkupTemplate(root, encoding='utf-8')
-    stream = tpl.generate(peps=feats['peptide'], psms=feats['psm'])
+    root = root[:root.find('{$psms}')]
     with open(fn, 'w') as fp:
-        for chunk in stream.serialize():
-            fp.write(chunk)
-    del(stream)
-
+        fp.write(root)
+        fp.write('\n')
+    with open(fn, 'a') as fp:
+        for psm in feats['psm']:
+            fp.write(psm)
+            fp.write('\n')
+        fp.write('</psms><peptides>\n')
+        for pep in feats['peptide']:
+            fp.write(pep)
+            fp.write('\n')
+        fp.write('</peptides></percolator_output>')
 
 
 def outputTabSep(fn, to_process, outputfn, ns):

@@ -1,6 +1,5 @@
 import sys
 from lxml import etree
-from genshi.core import Markup
 import readers
 
 def target_decoy_generator(element_generator, decoy, ns):
@@ -10,7 +9,6 @@ def target_decoy_generator(element_generator, decoy, ns):
             strxml = strxml.replace('xmlns="{0}" '.format(ns['xmlns']), '')
             strxml = strxml.replace('xmlns:p="{0}" '.format(ns['xmlns:p']), '')
             strxml = strxml.replace('xmlns:xsi="{0}" '.format(ns['xmlns:xsi']), '')
-            strxml = Markup(strxml)
         else:
             continue
         yield strxml
@@ -41,6 +39,7 @@ def filter_unique_peptides(input_files, score, ns):
     for el in pepgen:
         featscore = float(el.xpath('xmlns:%s' % scores[score], namespaces=ns)[0].text)
         seq = el.attrib['{%s}peptide_id' % ns['xmlns']]
+
         if seq not in highest:
             highest[seq] = {'pep_el': el, 'score': featscore}
         if score == 'svm': # greater than score is accepted
@@ -51,4 +50,4 @@ def filter_unique_peptides(input_files, score, ns):
                 highest[seq] = {'pep_el': el, 'score': featscore}
     
     for pep in highest.values():
-        yield Markup(etree.tostring(pep['pep_el']))
+        yield etree.tostring(pep['pep_el'])
