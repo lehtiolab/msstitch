@@ -2,13 +2,17 @@ import sys
 from lxml import etree
 import readers
 
+def stringify_strip_namespace_declaration(el, ns):
+    strxml = etree.tostring(el)
+    strxml = strxml.replace('xmlns="{0}" '.format(ns['xmlns']), '')
+    strxml = strxml.replace('xmlns:p="{0}" '.format(ns['xmlns:p']), '')
+    strxml = strxml.replace('xmlns:xsi="{0}" '.format(ns['xmlns:xsi']), '')
+    return strxml
+
 def target_decoy_generator(element_generator, decoy, ns):
     for ev,el in element_generator:
         if el.attrib['{%s}decoy' % ns['xmlns']] == decoy:
-            strxml = etree.tostring(el)
-            strxml = strxml.replace('xmlns="{0}" '.format(ns['xmlns']), '')
-            strxml = strxml.replace('xmlns:p="{0}" '.format(ns['xmlns:p']), '')
-            strxml = strxml.replace('xmlns:xsi="{0}" '.format(ns['xmlns:xsi']), '')
+            strxml = stringify_strip_namespace_declaration(el, ns)
         else:
             continue
         yield strxml
@@ -50,4 +54,4 @@ def filter_unique_peptides(input_files, score, ns):
                 highest[seq] = {'pep_el': el, 'score': featscore}
     
     for pep in highest.values():
-        yield etree.tostring(pep['pep_el'])
+        yield stringify_strip_namespace_declaration(pep['pep_el'], ns)
