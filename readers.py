@@ -1,7 +1,8 @@
 import sys
 from lxml import etree
-from genshi.core import Markup
+import filtering
 
+# Deprecate? FIXME
 def readPercout(fname):
     doc = None
     try:
@@ -14,10 +15,6 @@ def get_namespace(fn):
     ns = {'xmlns':'http://per-colator.com/percolator_out/14',
     'xmlns:p' : 'http://per-colator.com/percolator_out/14',
     'xmlns:xsi':'http://www.w3.org/2001/XMLSchema-instance',
-    'xsi:schemaLocation':'http://per-colator.com/percolator_out/14,https://github.com/percolator/percolator/raw/pout-1-4/src/xml/percolator_out.xsd',
-    'p:majorVersion':'0',
-    'p:minorVersion':'00',
-    'p:percolator_version':'Percolator version 0.00'
     }
     return ns
     # FIXME lookup from file
@@ -36,7 +33,7 @@ def get_percolator_static_xml(fn, ns):
 def generate_psms_multiple_fractions(fns, ns):
     for fn in fns:
         for ac,el in etree.iterparse(fn, tag='{%s}psm' % ns['xmlns']):
-            yield Markup(etree.tostring(el))
+            yield filtering.stringify_strip_namespace_declaration(el, ns['xmlns'])
     
 def generate_peptides_multiple_fractions(input_files, ns):
     for fn in input_files:
