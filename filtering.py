@@ -2,6 +2,9 @@ import sys
 from lxml import etree
 import readers
 
+def get_peptide_seq(peptide, ns):
+    return peptide.attrib['{%s}peptide_id' % ns['xmlns']]
+
 def stringify_strip_namespace_declaration(el, ns):
     strxml = etree.tostring(el)
     strxml = strxml.replace('xmlns="{0}" '.format(ns['xmlns']), '')
@@ -29,6 +32,17 @@ def split_target_decoy(fn, ns):
         
     return split_elements
 
+
+def filter_known_searchspace(peptides, searchspace, ns):
+    for peptide in peptides:
+        seq = get_peptide_seq(peptide, ns)
+        try:
+            searchspace[seq]
+        except KeyError:
+            yield peptide
+        else:
+            pass
+
 def filter_unique_peptides(input_files, score, ns):
     """ Filters unique peptides from multiple Percolator output XML files.
         Takes a dir with a set of XML files, a score to filter on and a namespace.
@@ -42,8 +56,8 @@ def filter_unique_peptides(input_files, score, ns):
     highest = {}
     for el in pepgen:
         featscore = float(el.xpath('xmlns:%s' % scores[score], namespaces=ns)[0].text)
-        seq = el.attrib['{%s}peptide_id' % ns['xmlns']]
-
+        seq = get_peptide_seq(el, ns)
+        
         if seq not in highest:
             highest[seq] = {'pep_el': el, 'score': featscore}
         if score == 'svm': # greater than score is accepted
