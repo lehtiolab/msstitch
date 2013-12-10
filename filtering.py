@@ -34,6 +34,9 @@ def split_target_decoy(fn, ns):
 
 
 def filter_known_searchspace(peptides, searchspace, ns):
+    """Yields peptides from generator as long as their sequence is not found in
+    known search space dict. Useful for excluding peptides that are found in
+    e.g. ENSEMBL or similar"""
     for peptide in peptides:
         seq = get_peptide_seq(peptide, ns)
         try:
@@ -43,18 +46,14 @@ def filter_known_searchspace(peptides, searchspace, ns):
         else:
             pass
 
-def filter_unique_peptides(input_files, score, ns):
+def filter_unique_peptides(peptides, score, ns):
     """ Filters unique peptides from multiple Percolator output XML files.
         Takes a dir with a set of XML files, a score to filter on and a namespace.
         Outputs an ElementTree.
     """
-    if len(input_files) == 1:
-        print >> sys.stdout, 'WARNING: You are attempting to filter unique peptides from a non-fractioned dataset. This may be unneccessary.'
     scores = {'q':'q_value', 'pep':'pep', 'p':'p_value', 'svm':'svm_score'}
-    pepgen = \
-        readers.generate_peptides_multiple_fractions(input_files, ns)
     highest = {}
-    for el in pepgen:
+    for el in peptides:
         featscore = float(el.xpath('xmlns:%s' % scores[score], namespaces=ns)[0].text)
         seq = get_peptide_seq(el, ns)
         

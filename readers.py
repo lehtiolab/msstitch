@@ -34,7 +34,9 @@ def generate_psms_multiple_fractions(fns, ns):
     for fn in fns:
         for ac,el in etree.iterparse(fn, tag='{%s}psm' % ns['xmlns']):
             yield filtering.stringify_strip_namespace_declaration(el, ns)
-    
+
+#FIXME these functions are NOT similar, as the PSM one outputs strings!
+
 def generate_peptides_multiple_fractions(input_files, ns):
     for fn in input_files:
         for ac,el in etree.iterparse(fn, tag='{%s}peptide' % ns['xmlns']):

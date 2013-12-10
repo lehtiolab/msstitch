@@ -1,8 +1,3 @@
-# need to install:
-# genshi
-# libhdf5-dev 
-# python-dev
-# NumPy 1.5 or newer (1.6 recommended)
 import os
 
 import readers
@@ -34,8 +29,12 @@ def split_target_decoy(fns, outdir, targetsuffix='_target.xml', decoysuffix='_de
         split_elements = filtering.split_target_decoy(fn, namespace)
         targetfn = create_outfilepath(fn, outdir, targetsuffix)
         decoyfn = create_outfilepath(fn, outdir, decoysuffix)
-        writers.write_percolator_xml(static_xml, split_elements['target'], targetfn)
-        writers.write_percolator_xml(static_xml, split_elements['decoy'], decoyfn)
+        writers.write_percolator_xml(static_xml, split_elements['target'], 
+                                        targetfn)
+        writers.write_percolator_xml(static_xml, split_elements['decoy'],
+                                        decoyfn)
+
+
 
 
 def merge_unique_best_scoring_peptides(fns, outdir, score='svm',
@@ -49,7 +48,8 @@ def merge_unique_best_scoring_peptides(fns, outdir, score='svm',
     namespace = readers.get_namespace(fns[0])
     static_xml = readers.get_percolator_static_xml(fns[0], namespace)
     allpsms = readers.generate_psms_multiple_fractions(fns, namespace)
-    uniquepeps = filtering.filter_unique_peptides(fns, score, namespace)
+    allpeps = readers.generate_psms_multiple_fractions(fns, namespace)
+    uniquepeps = filtering.filter_unique_peptides(allpeps, score, namespace)
     features = {'psm': allpsms, 'peptide': uniquepeps}
     merged_fn = create_outfilepath(fns[0], outdir, outsuffix)
     writers.write_percolator_xml(static_xml, features, merged_fn)
