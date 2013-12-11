@@ -1,6 +1,5 @@
-import sys
+import re
 from lxml import etree
-import readers
 
 def get_peptide_seq(peptide, ns):
     return peptide.attrib['{%s}peptide_id' % ns['xmlns']]
@@ -39,8 +38,11 @@ def filter_known_searchspace(peptides, searchspace, ns):
     e.g. ENSEMBL or similar"""
     for peptide in peptides:
         seq = get_peptide_seq(peptide, ns)
+        # Loose modifications
+        seq = re.sub('\[UNIMOD:\d*\]', '', seq)
         try:
             searchspace[seq]
+            print seq
         except KeyError:
             yield peptide
         else:
