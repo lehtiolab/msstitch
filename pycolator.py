@@ -33,7 +33,7 @@ parser.add_argument('-i', dest='infile', nargs='+',
 
 parser.add_argument('-d', dest='outdir', required=True, help='Directory to output in')
 parser.add_argument('-s', dest='score', help='Score to filter unique peptides '
-'on (only for command mergebest and filterknownmerge)')
+'on (only for command mergebest and filterknownmerge)', default='svm')
 parser.add_argument('-b', dest='database', help='Database file(s). Make sure'
 ' they are included when filterknown command is used, since they will be'
 ' used to exclude peptides from.', nargs='+', 
