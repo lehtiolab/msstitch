@@ -9,12 +9,7 @@ class BaseDriver(object):
     def __init__(self, fns, outdir, **kwargs):
         self.fns = fns
         self.outdir = outdir
-        if 'outsuffix' in kwargs:
-            self.outsuffix = kwargs['outsuffix']
-        if 'targetsuffix' in kwargs:
-            self.targetsuffix = kwargs['targetsuffix']
-        if 'decoysuffix' in kwargs:
-            self.decoysuffix = kwargs['decoysuffix']
+        self.outsuffix = kwargs.get('outsuffix', '.xml')
 
     def prepare_percolator_output(self, fn):
         """Returns namespace and static xml from percolator output file"""
@@ -35,6 +30,14 @@ def merge_multiple_fractions(fns):
     pass
 
 class SplitDriver(BaseDriver):
+    def __init__(self, fns, outdir, kwargs):
+        super(MergeDriver, self).__init__(fns, outdir, kwargs)
+        self.targetsuffix = kwargs.get('targetsuffix', '_target.xml')
+        self.decoysuffix = kwargs.get('decoysuffix', '_decoy.xml')
+
+    def run(self):
+        self.split()
+
     def split(self): #targetsuffix='_target.xml', decoysuffix='_decoy.xml'):
         """ Calls splitter to split percolator output into target/decoy elements.
             Writes two new xml files with features. Currently only psms and
@@ -61,10 +64,8 @@ class MergeDriver(BaseDriver):
 
     def __init__(self, fns, outdir, **kwargs):
         super(MergeDriver, self).__init__(fns, outdir, kwargs)
-        if 'score' in kwargs:
-            self.score = kwargs['score']
-        else:
-            self.score = 'svm'
+        self.outsuffix = kwargs.get('outsuffix', '_merged.xml')
+        self.score = kwargs.get('score', 'svm')
 
         if 'searchspace' in kwargs:
             self.searchspace = kwargs['searchspace']
