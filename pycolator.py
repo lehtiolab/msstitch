@@ -13,6 +13,7 @@ import argparse
 import os
 import drivers
 
+
 def parser_file_exists(parser, fn):
     if not os.path.exists(fn):
         parser.error('Input file %s not found!' % fn)
@@ -32,16 +33,24 @@ parser.add_argument('-i', dest='infile', nargs='+',
 
 parser.add_argument('-d', dest='outdir', required=True, help='Directory to output in')
 parser.add_argument('-s', dest='score', help='Score to filter unique peptides '
-'on (only for command mergebest)')
+'on (only for command mergebest and filterknownmerge)')
+parser.add_argument('-b', dest='database', help='Database file(s). Make sure'
+' they are included when filterknown command is used, since they will be'
+' used to exclude peptides from.')
+# FIXME make db files required after we figure out if supplying raw db files is
+# ok performance wise. If too slow, we may switch to sqlite db.
+
 #parser.add_argument('-o', dest='outfiles', nargs='+', help='Output file(s)')
 
 args = parser.parse_args()
 
 commandmap = {
-    'splittd'   : drivers.split_target_decoy,
-    'mergebest' : drivers.merge_unique_best_scoring_peptides,
+    'splittd'   : drivers.SplitDriver,
+    'mergebest' : drivers.MergeUniquePeptides,
+    'filterknown': drivers.MergeUniqueAndFilterKnownPeptides,
     }
 
 
-commandmap[args.command](args.infile, args.outdir)
+command = commandmap[args.command](args.infile, args.outdir, )
+command.run()
 
