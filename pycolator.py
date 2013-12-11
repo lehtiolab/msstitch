@@ -36,7 +36,9 @@ parser.add_argument('-s', dest='score', help='Score to filter unique peptides '
 'on (only for command mergebest and filterknownmerge)')
 parser.add_argument('-b', dest='database', help='Database file(s). Make sure'
 ' they are included when filterknown command is used, since they will be'
-' used to exclude peptides from.')
+' used to exclude peptides from.', nargs='+', 
+                     type=lambda x:parser_file_exists(parser, x))
+
 # FIXME make db files required after we figure out if supplying raw db files is
 # ok performance wise. If too slow, we may switch to sqlite db.
 
