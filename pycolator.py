@@ -51,6 +51,6 @@ commandmap = {
     }
 
 
-command = commandmap[args.command](args.infile, args.outdir, )
+command = commandmap[args.command](**vars(args))
 command.run()
 

@@ -6,9 +6,9 @@ import writers
 import databases
 
 class BaseDriver(object):
-    def __init__(self, fns, outdir, **kwargs):
-        self.fns = fns
-        self.outdir = outdir
+    def __init__(self, **kwargs):
+        self.fns = kwargs['infile']
+        self.outdir = kwargs['outdir']
         self.outsuffix = kwargs.get('outsuffix', '.xml')
 
     def prepare_percolator_output(self, fn):
@@ -30,8 +30,8 @@ def merge_multiple_fractions(fns):
     pass
 
 class SplitDriver(BaseDriver):
-    def __init__(self, fns, outdir, kwargs):
-        super(MergeDriver, self).__init__(fns, outdir, kwargs)
+    def __init__(self, **kwargs):
+        super(MergeDriver, self).__init__(fns, outdir, **kwargs)
         self.targetsuffix = kwargs.get('targetsuffix', '_target.xml')
         self.decoysuffix = kwargs.get('decoysuffix', '_decoy.xml')
 
@@ -62,8 +62,8 @@ class MergeDriver(BaseDriver):
     Namespace and static xml come from first percolator file. 
     Make sure fractions are from same percolator run."""
 
-    def __init__(self, fns, outdir, **kwargs):
-        super(MergeDriver, self).__init__(fns, outdir, kwargs)
+    def __init__(self, **kwargs):
+        super(MergeDriver, self).__init__(**kwargs)
         self.outsuffix = kwargs.get('outsuffix', '_merged.xml')
         self.score = kwargs.get('score', 'svm')
 
