@@ -65,8 +65,9 @@ class MergeDriver(BaseDriver):
     def __init__(self, **kwargs):
         super(MergeDriver, self).__init__(**kwargs)
         self.outsuffix = kwargs.get('outsuffix', '_merged.xml')
-        self.score = kwargs.get('score', 'svm')
-
+        self.score = kwargs.get('score')
+        if self.score is None:
+            self.score = 'svm'
         self.db = kwargs.get('database', False)
 
     def run(self):
@@ -77,7 +78,7 @@ class MergeDriver(BaseDriver):
     def prepare_merge(self):
         self.ns, self.static_xml = self.prepare_percolator_output(self.fns[0])
         self.allpsms = readers.generate_psms_multiple_fractions(self.fns, self.ns)
-        self.allpeps = readers.generate_psms_multiple_fractions(self.fns, self.ns)
+        self.allpeps = readers.generate_peptides_multiple_fractions(self.fns, self.ns)
 
     def write(self):
         merged_fn = self.create_outfilepath(self.fns[0], self.outsuffix)
@@ -92,11 +93,13 @@ class MergeUniqueAndFilterKnownPeptides(MergeDriver):
     filters out first peptides that are found in a specified searchspace. Then
     it keeps the remaining best scoring unique peptides."""
     def run(self):
+        print 'Digesting database into memory to get known search space'
         self.searchspace = databases.get_searchspace(self.db)
+        print 'Filtering and merging'
         super(MergeUniqueAndFilterKnownPeptides, self).run()
+        assert self.db not in [False, None]
 
     def merge(self):
-        self.prepare_merge()
         newpeps = filtering.filter_known_searchspace(self.allpeps,
                                             self.searchspace, self.ns)
         uniquepeps = filtering.filter_unique_peptides(newpeps, self.score,
@@ -108,8 +111,6 @@ class MergeUniquePeptides(MergeDriver):
     """This class processes multiple percolator runs from fractions and
     filters out the best scoring peptides."""
     def merge(self):
-        
-        self.prepare_merge()
         uniquepeps = filtering.filter_unique_peptides(self.allpeps, self.score,
                                                         self.ns)
         self.features = {'psm': self.allpsms, 'peptide': uniquepeps}
