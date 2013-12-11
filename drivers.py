@@ -35,17 +35,17 @@ def merge_multiple_fractions(fns):
     pass
 
 class SplitDriver(BaseDriver):
-    def split_target_decoy(self, fns, outdir, targetsuffix='_target.xml', decoysuffix='_decoy.xml'):
+    def split(self): #targetsuffix='_target.xml', decoysuffix='_decoy.xml'):
         """ Calls splitter to split percolator output into target/decoy elements.
             Writes two new xml files with features. Currently only psms and
             peptides. Proteins not here, since one cannot do protein inference
             before having merged and remapped multifraction data anyway.
         """
-        for fn in fns:
+        for fn in self.fns:
             namespace, static_xml = self.prepare_percolator_output(fn)
             split_elements = filtering.split_target_decoy(fn, namespace)
-            targetfn = create_outfilepath(fn, outdir, targetsuffix)
-            decoyfn = create_outfilepath(fn, outdir, decoysuffix)
+            targetfn = self.create_outfilepath(fn, self.outdir, self.targetsuffix)
+            decoyfn = self.create_outfilepath(fn, self.outdir, self.decoysuffix)
             writers.write_percolator_xml(static_xml, split_elements['target'], 
                                             targetfn)
             writers.write_percolator_xml(static_xml, split_elements['decoy'],
@@ -55,7 +55,10 @@ class SplitDriver(BaseDriver):
 
 class MergeDriver(BaseDriver):
     """Base class for merging multiple percolator fractions under different
-    sorts of filtering"""
+    sorts of filtering. It writes a single percolator out xml from multiple fractions.
+    Namespace and static xml come from first percolator file. 
+    Make sure fractions are from same percolator run."""
+
     def __init__(self, fns, outdir, **kwargs):
         super(MergeDriver, self).__init__(fns, outdir, kwargs)
         if 'score' in kwargs:
@@ -82,6 +85,9 @@ class MergeDriver(BaseDriver):
 
 
 class MergeUniqueAndFilterKnownPeptides(MergeDriver):
+    """This class processes multiple percolator runs from fractions and
+    filters out first peptides that are found in a specified searchspace. Then
+    it keeps the remaining best scoring unique peptides."""
     def merge(self):
         self.prepare_merge()
         newpeps = filtering.filter_known_searchspace(self.allpeps,
@@ -92,13 +98,10 @@ class MergeUniqueAndFilterKnownPeptides(MergeDriver):
 
 
 class MergeUniquePeptides(MergeDriver):
+    """This class processes multiple percolator runs from fractions and
+    filters out the best scoring peptides."""
     def merge(self):
-        """This function processes multiple percolator runs from fractions and
-        filters out the best scoring peptides. It writes a single fraction with
-        those peptides and ALL psms from all fractions. 
         
-        Namespace and static xml come from first percolator file. 
-        Make sure fractions are from same percolator run."""
         self.prepare_merge()
         uniquepeps = filtering.filter_unique_peptides(self.allpeps, self.score,
                                                         self.ns)
