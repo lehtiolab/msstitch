@@ -3,7 +3,7 @@ import os
 import readers
 import filtering
 import writers
-
+import databases
 
 class BaseDriver(object):
     def __init__(self, fns, outdir, **kwargs):
@@ -67,8 +67,7 @@ class MergeDriver(BaseDriver):
         self.outsuffix = kwargs.get('outsuffix', '_merged.xml')
         self.score = kwargs.get('score', 'svm')
 
-        if 'searchspace' in kwargs:
-            self.searchspace = kwargs['searchspace']
+        self.db = kwargs.get('database', False)
 
     def run(self):
         self.prepare_merge()
@@ -85,10 +84,17 @@ class MergeDriver(BaseDriver):
         writers.write_percolator_xml(self.static_xml, self.features, merged_fn)
 
 
+## FIXME we should split up merging and filtering step in case someone needs
+# only filtering, (which we dont have a current use case for).
+
 class MergeUniqueAndFilterKnownPeptides(MergeDriver):
     """This class processes multiple percolator runs from fractions and
     filters out first peptides that are found in a specified searchspace. Then
     it keeps the remaining best scoring unique peptides."""
+    def run(self):
+        self.searchspace = databases.get_searchspace(self.db)
+        super(MergeUniqueAndFilterKnownPeptides, self).run()
+
     def merge(self):
         self.prepare_merge()
         newpeps = filtering.filter_known_searchspace(self.allpeps,
