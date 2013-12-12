@@ -12,14 +12,21 @@ def write_percolator_xml(staticxml, feats, fn):
         fp.write(root)
         fp.write('\n')
     with open(fn, 'a') as fp:
+        psmcount = 0
         for psm in feats['psm']:
+            psmcount += 1
             fp.write(psm)
             fp.write('\n')
         fp.write('</psms><peptides>\n')
+
+        peptidecount = 0
         for pep in feats['peptide']:
+            peptidecount += 1
             fp.write(pep)
             fp.write('\n')
         fp.write('</peptides></percolator_output>')
+    print 'Wrote {0} psms, {1} peptides to file {2}'.format(psmcount,
+                                            peptidecount, fn)
 
 
 def outputTabSep(fn, to_process, outputfn, ns):
