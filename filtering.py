@@ -42,7 +42,6 @@ def filter_known_searchspace(peptides, searchspace, ns):
         seq = re.sub('\[UNIMOD:\d*\]', '', seq)
         try:
             searchspace[seq]
-            print seq
         except KeyError:
             yield peptide
         else:
