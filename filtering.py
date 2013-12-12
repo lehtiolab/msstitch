@@ -1,6 +1,8 @@
 import re
 from lxml import etree
 
+import sqlite
+
 def get_peptide_seq(peptide, ns):
     return peptide.attrib['{%s}peptide_id' % ns['xmlns']]
 
@@ -36,16 +38,16 @@ def filter_known_searchspace(peptides, searchspace, ns):
     """Yields peptides from generator as long as their sequence is not found in
     known search space dict. Useful for excluding peptides that are found in
     e.g. ENSEMBL or similar"""
+    lookup = sqlite.DatabaseConnection()
+    lookup.connect_searchspace(searchspace)
+
     for peptide in peptides:
         seq = get_peptide_seq(peptide, ns)
         # Loose modifications
         seq = re.sub('\[UNIMOD:\d*\]', '', seq)
-        try:
-            searchspace[seq]
-        except KeyError:
+        if not lookup.check_seq_exists(seq):
             yield peptide
-        else:
-            pass
+    lookup.close_connection()
 
 def filter_unique_peptides(peptides, score, ns):
     """ Filters unique peptides from multiple Percolator output XML files.

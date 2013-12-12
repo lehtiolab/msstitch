@@ -1,27 +1,27 @@
 from Bio import SeqIO
-# import sqlite3
+import sqlite
 
-
-def get_searchspace(dbfns):
+def create_searchspace(dbfns):
     """Given FASTA databases, proteins are trypsinized and resulting peptides
     stored in a database or dict for lookups"""
-    allpepdict = {}
+    lookup = sqlite.DatabaseConnection()
+    lookup.create_db()
+    
     for dbfn in dbfns:
-        # allpeps = []
+        allpeps = []
         protindex = SeqIO.index(dbfn, 'fasta')
         for acc in protindex:
             pepseqs = trypsinize(protindex[acc].seq)
-            for pep in pepseqs:
-                allpepdict[str(pep)] = 1
-        ########## below here, we do if there is not enough memory on nodes.
-        ## TEST FIRST WITH NORMAL DICT
-            #allpeps.extend(pepseqs)
-            #if len(allpeps)>10000: # more than x peps, then write to SQLite
-                #write_peps_to_sqlite(allpeps)
-                #allpeps = []
+            pepseqs = [(str(x),) for x in pepseqs]
+            allpeps.extend(pepseqs)
+            if len(allpeps)>1000000: # more than x peps, then write to SQLite
+                lookup.write_peps(allpeps)
+                allpeps = []
         # write remaining peps to sqlite
-        #write_peps_to_sqlite(allpeps)
-    return allpepdict
+        lookup.write_peps(allpeps)
+    lookup.index_peps()
+    lookup.close_connection()
+    return lookup.fn
 
     
 def write_peps_to_sqlite(peps):

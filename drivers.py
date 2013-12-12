@@ -1,5 +1,4 @@
 import os
-
 import readers
 import filtering
 import writers
@@ -94,7 +93,7 @@ class MergeUniqueAndFilterKnownPeptides(MergeDriver):
     it keeps the remaining best scoring unique peptides."""
     def run(self):
         print 'Digesting database into memory to get known search space'
-        self.searchspace = databases.get_searchspace(self.db)
+        self.searchspace = databases.create_searchspace(self.db)
         print 'Filtering and merging'
         super(MergeUniqueAndFilterKnownPeptides, self).run()
         assert self.db not in [False, None]
