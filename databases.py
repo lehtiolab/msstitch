@@ -12,7 +12,7 @@ def get_searchspace(dbfns):
         for acc in protindex:
             pepseqs = trypsinize(protindex[acc].seq)
             for pep in pepseqs:
-                allpepdict[pep] = 1
+                allpepdict[str(pep)] = 1
         ########## below here, we do if there is not enough memory on nodes.
         ## TEST FIRST WITH NORMAL DICT
             #allpeps.extend(pepseqs)
