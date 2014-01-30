@@ -30,7 +30,7 @@ def merge_multiple_fractions(fns):
 
 class SplitDriver(BaseDriver):
     def __init__(self, **kwargs):
-        super(MergeDriver, self).__init__(**kwargs)
+        super(SplitDriver, self).__init__(**kwargs)
         self.targetsuffix = kwargs.get('targetsuffix', '_target.xml')
         self.decoysuffix = kwargs.get('decoysuffix', '_decoy.xml')
 
