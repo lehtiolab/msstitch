@@ -46,8 +46,8 @@ class SplitDriver(BaseDriver):
         for fn in self.fns:
             namespace, static_xml = self.prepare_percolator_output(fn)
             split_elements = filtering.split_target_decoy(fn, namespace)
-            targetfn = self.create_outfilepath(fn, self.outdir, self.targetsuffix)
-            decoyfn = self.create_outfilepath(fn, self.outdir, self.decoysuffix)
+            targetfn = self.create_outfilepath(fn, self.targetsuffix)
+            decoyfn = self.create_outfilepath(fn, self.decoysuffix)
             writers.write_percolator_xml(static_xml, split_elements['target'], 
                                             targetfn)
             writers.write_percolator_xml(static_xml, split_elements['decoy'],
