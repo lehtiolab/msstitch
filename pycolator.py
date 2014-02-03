@@ -23,6 +23,7 @@ def parser_file_exists(parser, fn):
 parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
 parser.add_argument('-c', dest='command', type=str, help='How to manipulate the input:\n'
 'splittd - splits target and decoy data, multiple inputs to multiple outputs\n'
+'merge - merges xml files. nothing else.\n'
 'mergebest - merges xml files and only includes best scoring unique peptides\n'
 'filterknown - Filters out peptides that are found in a certain FASTA search\n'
 'space which is passed using the -b flag. Then merges xml files and only\n'
@@ -50,8 +51,9 @@ parser.add_argument('-b', dest='database', help='Database file(s). Make sure'
 args = parser.parse_args()
 
 commandmap = {
-    'splittd'   : drivers.SplitDriver,
-    'mergebest' : drivers.MergeUniquePeptides,
+    'splittd'    : drivers.SplitDriver,
+    'merge'      : drivers.MergeDriver,
+    'mergebest'  : drivers.MergeUniquePeptides,
     'filterknown': drivers.MergeUniqueAndFilterKnownPeptides,
     }
 

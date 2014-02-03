@@ -79,6 +79,10 @@ class MergeDriver(BaseDriver):
         self.allpsms = readers.generate_psms_multiple_fractions(self.fns, self.ns)
         self.allpeps = readers.generate_peptides_multiple_fractions(self.fns, self.ns)
 
+    def merge(self):
+        """"Merge all psms and peptides"""
+        self.features = {'psm': self.allpsms, 'peptide': self.allpeps}
+
     def write(self):
         merged_fn = self.create_outfilepath(self.fns[0], self.outsuffix)
         writers.write_percolator_xml(self.static_xml, self.features, merged_fn)
