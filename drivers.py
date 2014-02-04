@@ -44,13 +44,21 @@ class SplitDriver(BaseDriver):
             before having merged and remapped multifraction data anyway.
         """
         for fn in self.fns:
-            namespace, static_xml = self.prepare_percolator_output(fn)
-            split_elements = filtering.split_target_decoy(fn, namespace)
+            ns, static_xml = self.prepare_percolator_output(fn)
+            pep_target = readers.generate_peptides_multiple_fractions([fn], ns)
+            pep_decoy = readers.generate_peptides_multiple_fractions([fn], ns) 
+            psm_target = readers.generate_psms_multiple_fractions([fn], ns)
+            psm_decoy = readers.generate_psms_multiple_fractions([fn], ns)
+            elements_to_split = {
+            'target':   {'psm': psm_target, 'pep': pep_target},
+            'decoy' :   {'psm': psm_decoy,  'pep': pep_decoy},
+            }
+            split_els = filtering.split_target_decoy(elements_to_split, ns)
             targetfn = self.create_outfilepath(fn, self.targetsuffix)
             decoyfn = self.create_outfilepath(fn, self.decoysuffix)
-            writers.write_percolator_xml(static_xml, split_elements['target'], 
+            writers.write_percolator_xml(static_xml, split_els['target'], 
                                             targetfn)
-            writers.write_percolator_xml(static_xml, split_elements['decoy'],
+            writers.write_percolator_xml(static_xml, split_els['decoy'],
                                             decoyfn)
 
 

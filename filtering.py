@@ -27,18 +27,16 @@ def target_decoy_generator(element_generator, decoy, ns):
         else:
             clear_el(el)
 
-
-def split_target_decoy(fn, ns):
+def split_target_decoy(elements, ns):
     split_elements = {'target': {}, 'decoy': {}}
     feats_to_process = ['psm', 'peptide']
     for feat in feats_to_process:
-        targetfeatgen = etree.iterparse(fn, tag='{%s}%s' % (ns['xmlns'], feat))
-        decoyfeatgen = etree.iterparse(fn, tag='{%s}%s' % (ns['xmlns'], feat))
-        split_elements['target'][feat] = target_decoy_generator(targetfeatgen, 'false', ns)
-        split_elements['decoy'][feat] = target_decoy_generator(decoyfeatgen, 'true', ns)
+        split_elements['target'][feat] =  target_decoy_generator(
+                                        elements['target']['feat'], 'false', ns)
+        split_elements['decoy'][feat] = target_decoy_generator(
+                                        elements['decoy']['feat'], 'true', ns)
         
     return split_elements
-
 
 def filter_known_searchspace(peptides, searchspace, ns):
     """Yields peptides from generator as long as their sequence is not found in
