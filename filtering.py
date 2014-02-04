@@ -13,13 +13,19 @@ def stringify_strip_namespace_declaration(el, ns):
     strxml = strxml.replace('xmlns:xsi="{0}" '.format(ns['xmlns:xsi']), '')
     return strxml
 
+def clear_el(el):
+    el.clear()
+    if el.getprevious() is not None:
+        del(el.getparent()[0])
+
 def target_decoy_generator(element_generator, decoy, ns):
     for ev,el in element_generator:
         if el.attrib['{%s}decoy' % ns['xmlns']] == decoy:
             strxml = stringify_strip_namespace_declaration(el, ns)
+            clear_el(el)
+            yield strxml
         else:
-            continue
-        yield strxml
+            clear_el(el)
 
 
 def split_target_decoy(fn, ns):
@@ -47,6 +53,8 @@ def filter_known_searchspace(peptides, searchspace, ns):
         seq = re.sub('\[UNIMOD:\d*\]', '', seq)
         if not lookup.check_seq_exists(seq):
             yield peptide
+        else:
+            clear_el(peptide)
     lookup.close_connection()
 
 def filter_unique_peptides(peptides, score, ns):
@@ -59,15 +67,21 @@ def filter_unique_peptides(peptides, score, ns):
     for el in peptides:
         featscore = float(el.xpath('xmlns:%s' % scores[score], namespaces=ns)[0].text)
         seq = get_peptide_seq(el, ns)
-        
+         
         if seq not in highest:
             highest[seq] = {'pep_el': el, 'score': featscore}
         if score == 'svm': # greater than score is accepted
             if featscore > highest[seq]['score']:
                 highest[seq] = {'pep_el': el, 'score': featscore}
+            else:
+                clear_el(el)
         else: # lower than score is accepted
             if featscore < highest[seq]['score']:
                 highest[seq] = {'pep_el': el, 'score': featscore}
+            else:
+                clear_el(el)
     
     for pep in highest.values():
-        yield stringify_strip_namespace_declaration(pep['pep_el'], ns)
+        str_el = stringify_strip_namespace_declaration(pep['pep_el'], ns)
+        clear_el(el)
+        yield str_el
