@@ -76,12 +76,14 @@ class MergeDriver(BaseDriver):
 
     def prepare_merge(self):
         self.ns, self.static_xml = self.prepare_percolator_output(self.fns[0])
-        self.allpsms = readers.generate_psms_multiple_fractions(self.fns, self.ns)
+        self.allpsms_str = readers.generate_psms_multiple_fractions_strings(self.fns, self.ns)
+        self.allpeps_str = readers.generate_peptides_multiple_fractions_strings(self.fns, self.ns)
         self.allpeps = readers.generate_peptides_multiple_fractions(self.fns, self.ns)
+        self.allpsms = readers.generate_psms_multiple_fractions(self.fns, self.ns)
 
     def merge(self):
         """"Merge all psms and peptides"""
-        self.features = {'psm': self.allpsms, 'peptide': self.allpeps}
+        self.features = {'psm': self.allpsms_str, 'peptide': self.allpeps_str}
 
     def write(self):
         merged_fn = self.create_outfilepath(self.fns[0], self.outsuffix)
@@ -107,7 +109,7 @@ class MergeUniqueAndFilterKnownPeptides(MergeDriver):
                                             self.searchspace, self.ns)
         uniquepeps = filtering.filter_unique_peptides(newpeps, self.score,
                                                     self.ns)
-        self.features = {'psm': self.allpsms, 'peptide': uniquepeps}
+        self.features = {'psm': self.allpsms_str, 'peptide': uniquepeps}
 
 
 class MergeUniquePeptides(MergeDriver):
@@ -116,5 +118,5 @@ class MergeUniquePeptides(MergeDriver):
     def merge(self):
         uniquepeps = filtering.filter_unique_peptides(self.allpeps, self.score,
                                                         self.ns)
-        self.features = {'psm': self.allpsms, 'peptide': uniquepeps}
+        self.features = {'psm': self.allpsms_str, 'peptide': uniquepeps}
 
