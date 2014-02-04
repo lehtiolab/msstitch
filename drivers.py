@@ -50,8 +50,8 @@ class SplitDriver(BaseDriver):
             psm_target = readers.generate_psms_multiple_fractions([fn], ns)
             psm_decoy = readers.generate_psms_multiple_fractions([fn], ns)
             elements_to_split = {
-            'target':   {'psm': psm_target, 'pep': pep_target},
-            'decoy' :   {'psm': psm_decoy,  'pep': pep_decoy},
+            'target':   {'psm': psm_target, 'peptide': pep_target},
+            'decoy' :   {'psm': psm_decoy,  'peptide': pep_decoy},
             }
             split_els = filtering.split_target_decoy(elements_to_split, ns)
             targetfn = self.create_outfilepath(fn, self.targetsuffix)

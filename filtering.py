@@ -19,7 +19,7 @@ def clear_el(el):
         del(el.getparent()[0])
 
 def target_decoy_generator(element_generator, decoy, ns):
-    for ev,el in element_generator:
+    for el in element_generator:
         if el.attrib['{%s}decoy' % ns['xmlns']] == decoy:
             strxml = stringify_strip_namespace_declaration(el, ns)
             clear_el(el)
@@ -32,9 +32,9 @@ def split_target_decoy(elements, ns):
     feats_to_process = ['psm', 'peptide']
     for feat in feats_to_process:
         split_elements['target'][feat] =  target_decoy_generator(
-                                        elements['target']['feat'], 'false', ns)
+                                        elements['target'][feat], 'false', ns)
         split_elements['decoy'][feat] = target_decoy_generator(
-                                        elements['decoy']['feat'], 'true', ns)
+                                        elements['decoy'][feat], 'true', ns)
         
     return split_elements
 
