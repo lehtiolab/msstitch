@@ -22,12 +22,14 @@ def parser_file_exists(currentparser, fn):
 
 parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
 parser.add_argument('-c', dest='command', type=str, help='How to manipulate the input:\n'
-'splittd - splits target and decoy data, multiple inputs to multiple outputs\n'
-'merge - merges xml files. nothing else.\n'
-'mergebest - merges xml files and only includes best scoring unique peptides\n'
+'splittd - Splits target and decoy data, multiple inputs to multiple outputs\n'
+'merge - Merges xml files. nothing else.\n'
+'mergebest - Merges xml files and only includes best scoring unique peptides\n'
 'filterknown - Filters out peptides that are found in a certain FASTA search\n'
-'space which is passed using the -b flag. Then merges xml files and only\n'
-'includes best scoring unique peptides',
+'              space which is passed using the -b flag. Then merges xml files and only\n'
+'              includes best scoring unique peptides'
+'reassign - Reassigns statistics from a qvality output file onto a single'
+'           percolator input file. Needs -q flag.',
 required=True
 )
 
@@ -42,6 +44,9 @@ parser.add_argument('-b', dest='database', help='Database file(s). Make sure'
 ' they are included when filterknown command is used, since they will be'
 ' used to exclude peptides from.', nargs='+', 
                      type=lambda x:parser_file_exists(parser, x))
+parser.add_argument('-q', dest='qvalityout', help='Qvality output file. '
+                    'Required when using the reassign command.', 
+                    type=lambda x:parser_file_exists(parser, x))
 
 # FIXME make db files required after we figure out if supplying raw db files is
 # ok performance wise. If too slow, we may switch to sqlite db.
@@ -55,6 +60,7 @@ commandmap = {
     'merge'      : drivers.MergeDriver,
     'mergebest'  : drivers.MergeUniquePeptides,
     'filterknown': drivers.MergeUniqueAndFilterKnownPeptides,
+    'reassign'   : drivers.ReassignmentDriver,
     }
 
 

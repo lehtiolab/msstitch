@@ -2,6 +2,7 @@ import os
 import readers
 import filtering
 import writers
+import qvality
 import databases
 
 class BaseDriver(object):
@@ -54,6 +55,30 @@ class SplitDriver(BaseDriver):
                                             targetfn)
             writers.write_percolator_xml(static_xml, split_els['decoy'],
                                             decoyfn)
+
+
+class ReassignmentDriver(BaseDriver):
+    """Reassigns statistics from qvality output on a percolator output file"""
+    def __init__(self, **kwargs):
+        super(ReassignmentDriver, self).__init__(**kwargs)
+        self.qvalityout = kwargs['qvalityout']
+        self.outsuffix = kwargs.get('outsuffix', '_reassigned.xml')
+
+    def run(self):
+        self.reassign()
+
+    def reassign(self):
+        ns, static_xml = self.prepare_percolator_output(self.fns[0])
+        allpeps = readers.generate_peptides_multiple_fractions(self.fns, ns)
+        stats = qvality.parse_qvality_output(self.qvalityout)
+        features = {'peptide': qvality.reassign_elements(allpeps, 
+                                                         stats,
+                                                         ns),
+                    'psm': []
+                                                         }
+        outfn = self.create_outfilepath(self.fns[0], self.outsuffix)
+        writers.write_percolator_xml(static_xml, features, outfn)
+
 
 
 
