@@ -67,19 +67,20 @@ def filter_unique_peptides(peptides, score, ns):
         seq = get_peptide_seq(el, ns)
          
         if seq not in highest:
-            highest[seq] = {'pep_el': el, 'score': featscore}
+            highest[seq] = {
+                    'pep_el': stringify_strip_namespace_declaration(el,ns), 
+                    'score': featscore}
         if score == 'svm': # greater than score is accepted
             if featscore > highest[seq]['score']:
-                highest[seq] = {'pep_el': el, 'score': featscore}
-            else:
-                clear_el(el)
+                highest[seq] = {
+                    'pep_el': stringify_strip_namespace_declaration(el,ns),
+                    'score': featscore}
         else: # lower than score is accepted
             if featscore < highest[seq]['score']:
-                highest[seq] = {'pep_el': el, 'score': featscore}
-            else:
-                clear_el(el)
+                highest[seq] = {
+                    'pep_el': stringify_strip_namespace_declaration(el,ns),
+                    'score': featscore}
+        clear_el(el)
     
     for pep in highest.values():
-        str_el = stringify_strip_namespace_declaration(pep['pep_el'], ns)
-        clear_el(el)
-        yield str_el
+        yield pep['pep_el']
