@@ -22,12 +22,6 @@ class BaseDriver(object):
         return os.path.join(self.outdir, outfn)
 
 
-def merge_multiple_fractions(fns):
-    """Performs the work to merge parallelized percolator fractions.
-    Target/decoy split, filtering unique peptides, running qvality on resulting
-    score distributions for psms and peptides and setting values."""
-    pass
-
 class SplitDriver(BaseDriver):
     def __init__(self, **kwargs):
         super(SplitDriver, self).__init__(**kwargs)

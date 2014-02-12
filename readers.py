@@ -1,15 +1,5 @@
-import sys
 from lxml import etree
 import filtering
-
-# Deprecate? FIXME
-def readPercout(fname):
-    doc = None
-    try:
-        doc = etree.parse(fname)
-    except Exception:
-        sys.stderr.write('Could not parse XML provided in %s or error reading file. \n' % (fname))
-    return doc
 
 def get_namespace(fn):
     ns = {'xmlns':'http://per-colator.com/percolator_out/14',
@@ -18,7 +8,6 @@ def get_namespace(fn):
     }
     return ns
     # FIXME lookup from file
-
 
 def get_percolator_static_xml(fn, ns):
     rootgen = etree.iterparse(fn, tag='{%s}percolator_output' % ns['xmlns'], events=('start',))
@@ -29,8 +18,6 @@ def get_percolator_static_xml(fn, ns):
     root.append(process.next()[1])
     return root
 
-
-
 # Stringified element generators interfaces
 def generate_psms_multiple_fractions_strings(input_files, ns):
     return generate_tags_multiple_files_strings(input_files, ns, 'psm',
@@ -40,7 +27,7 @@ def generate_peptides_multiple_fractions_strings(input_files, ns):
     return generate_tags_multiple_files_strings(input_files, ns, 'peptide',
                                                 ['psm', 'protein'])
 
-# Element generators
+# Element generators interfaces
 def generate_psms_multiple_fractions(input_files, ns):
     return generate_tags_multiple_files(input_files, ns, 'psm',
                                                 ['peptide', 'protein'])
@@ -50,7 +37,7 @@ def generate_peptides_multiple_fractions(input_files, ns):
                                                 ['psm', 'protein'])
 
 
-# String and element generators
+# Generators that actually do the work
 def generate_tags_multiple_files_strings(input_files, ns, tag, ignore_tags):
     """
     Creates stringified output for percolator elements of certain tag.

@@ -14,9 +14,9 @@ import os
 import drivers
 
 
-def parser_file_exists(parser, fn):
+def parser_file_exists(currentparser, fn):
     if not os.path.exists(fn):
-        parser.error('Input file %s not found!' % fn)
+        currentparser.error('Input file %s not found!' % fn)
     else:
         return fn
 
