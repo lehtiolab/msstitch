@@ -136,7 +136,7 @@ class MergeUniqueAndFilterKnownPeptides(MergeDriver):
                                             self.searchspace, self.ns)
         uniquepeps = filtering.filter_unique_peptides(newpeps, self.score,
                                                     self.ns)
-        self.features = {'psm': self.allpsms_str, 'peptide': uniquepeps}
+        self.features = {'psm': [], 'peptide': uniquepeps}
 
 
 class MergeUniquePeptides(MergeDriver):
