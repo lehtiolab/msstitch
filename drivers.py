@@ -1,4 +1,6 @@
 import os
+import subprocess
+
 import readers
 import filtering
 import writers
@@ -22,6 +24,41 @@ class BaseDriver(object):
         outfn = basefn + suffix
         return os.path.join(self.outdir, outfn)
 
+
+class QvalityDriver(BaseDriver):
+    def __init__(self, **kwargs):
+        super(QvalityDriver, self).__init__(**kwargs)
+        self.featuretype = kwargs.get('feattype', 'peptide')
+        if self.featuretype not in ['peptide', 'psm']:
+            raise Exception, 'Featuretype (-f) should be peptide or psm.'
+        self.qvalityoptions = kwargs.get('options')
+
+    def run(self):
+        scorefiles = self.create_input_scorefiles()
+        self.run_qvality(scorefiles)
+
+    def create_input_scorefiles(self):
+        features_for_qvality = {}
+        scorefiles = {}
+        for t_or_d, fn in zip(['target', 'decoy'], self.fns):
+            ns, static_xml = self.prepare_percolator_output(fn)
+            features_for_qvality[t_or_d]['peptide'] = \
+                        readers.generate_peptides_multiple_fractions(fn, ns)
+            features_for_qvality[t_or_d]['psm'] = \
+                        readers.generate_psms_multiple_fractions(fn, ns)
+            scorefiles[t_or_d] = self.create_outfilepath(t_or_d, self.outsuffix)
+            feats_to_write = filtering.get_score(
+                        features_for_qvality[t_or_d][self.featuretype], ns)
+            writers.write_qvality_input(feats_to_write, scorefiles[t_or_d])
+        return scorefiles
+
+    def run_qvality(self, scorefiles):
+        outfn = self.create_outfilepath(self.fns[0], '_qvalityout.txt')
+        command = ['qvality']
+        command.extend(self.qvalityoptions)
+        command.extend(scorefiles['target'], scorefiles['decoy'])
+        command.extend('-o', outfn)
+        subprocess.call(command)
 
 class SplitDriver(BaseDriver):
     def __init__(self, **kwargs):
@@ -75,7 +112,7 @@ class ReassignmentDriver(BaseDriver):
                                                          stats,
                                                          ns),
                     'psm': []
-                                                         }
+                   }
         outfn = self.create_outfilepath(self.fns[0], self.outsuffix)
         writers.write_percolator_xml(static_xml, features, outfn)
 

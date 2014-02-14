@@ -28,6 +28,11 @@ def write_percolator_xml(staticxml, feats, fn):
     print 'Wrote {0} psms, {1} peptides to file {2}'.format(psmcount,
                                             peptidecount, fn)
 
+def write_qvality_input(scores, fn):
+    with open(fn, 'w') as fp:
+        for score in scores:
+            fp.write('{0}\n'.format(score))
+            
 
 def outputTabSep(fn, to_process, outputfn, ns):
     features = etree.iterparse(fn, tag='{%s}%s' % (ns['xmlns'], to_process) )

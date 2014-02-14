@@ -38,6 +38,13 @@ def split_target_decoy(elements, ns):
         
     return split_elements
 
+def get_score(elements, ns, scoretype='svm_score'):
+    for el in elements:
+        score = el.xpath('xmlns:{0}'.format(scoretype), namespaces=ns)[0].text
+        clear_el(el)
+        yield score
+    
+
 def filter_known_searchspace(peptides, searchspace, ns):
     """Yields peptides from generator as long as their sequence is not found in
     known search space dict. Useful for excluding peptides that are found in
