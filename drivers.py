@@ -31,7 +31,9 @@ class QvalityDriver(BaseDriver):
         self.featuretype = kwargs.get('feattype', 'peptide')
         if self.featuretype not in ['peptide', 'psm']:
             raise Exception, 'Featuretype (-f) should be peptide or psm.'
-        self.qvalityoptions = kwargs.get('options')
+        self.qvalityoptions = []
+        for option in kwargs.get('options'):
+            self.qvalityoptions.append(option.replace('***', '--'))
 
     def run(self):
         scorefiles = self.create_input_scorefiles()
@@ -56,8 +58,8 @@ class QvalityDriver(BaseDriver):
         outfn = self.create_outfilepath(self.fns[0], '_qvalityout.txt')
         command = ['qvality']
         command.extend(self.qvalityoptions)
-        command.extend(scorefiles['target'], scorefiles['decoy'])
-        command.extend('-o', outfn)
+        command.extend([scorefiles['target'], scorefiles['decoy']])
+        command.extend(['-o', outfn])
         subprocess.call(command)
 
 class SplitDriver(BaseDriver):
