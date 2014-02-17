@@ -32,22 +32,24 @@ class QvalityDriver(BaseDriver):
         if self.featuretype not in ['peptide', 'psm']:
             raise Exception, 'Featuretype (-f) should be peptide or psm.'
         self.qvalityoptions = []
-        for option in kwargs.get('options'):
-            self.qvalityoptions.append(option.replace('***', '--'))
+        options = kwargs.get('options')
+        if options is not None:
+            for option in kwargs.get('options'):
+                self.qvalityoptions.append(option.replace('***', '--'))
 
     def run(self):
         scorefiles = self.create_input_scorefiles()
         self.run_qvality(scorefiles)
 
     def create_input_scorefiles(self):
-        features_for_qvality = {}
         scorefiles = {}
+        features_for_qvality = {'target': {}, 'decoy': {}}
         for t_or_d, fn in zip(['target', 'decoy'], self.fns):
             ns, static_xml = self.prepare_percolator_output(fn)
             features_for_qvality[t_or_d]['peptide'] = \
-                        readers.generate_peptides_multiple_fractions(fn, ns)
+                        readers.generate_peptides_multiple_fractions([fn], ns)
             features_for_qvality[t_or_d]['psm'] = \
-                        readers.generate_psms_multiple_fractions(fn, ns)
+                        readers.generate_psms_multiple_fractions([fn], ns)
             scorefiles[t_or_d] = self.create_outfilepath(t_or_d, self.outsuffix)
             feats_to_write = filtering.get_score(
                         features_for_qvality[t_or_d][self.featuretype], ns)
