@@ -1,31 +1,16 @@
 import re
-from lxml import etree
-
+import formatting
 import sqlite
 
 def get_peptide_seq(peptide, ns):
     return peptide.attrib['{%s}peptide_id' % ns['xmlns']]
 
-def stringify_strip_namespace_declaration(el, ns):
-    strxml = etree.tostring(el)
-    strxml = strxml.replace('xmlns="{0}" '.format(ns['xmlns']), '')
-    strxml = strxml.replace('xmlns:p="{0}" '.format(ns['xmlns:p']), '')
-    strxml = strxml.replace('xmlns:xsi="{0}" '.format(ns['xmlns:xsi']), '')
-    return strxml
-
-def clear_el(el):
-    el.clear()
-    if el.getprevious() is not None:
-        del(el.getparent()[0])
-
 def target_decoy_generator(element_generator, decoy, ns):
     for el in element_generator:
         if el.attrib['{%s}decoy' % ns['xmlns']] == decoy:
-            strxml = stringify_strip_namespace_declaration(el, ns)
-            clear_el(el)
-            yield strxml
+            yield formatting.string_and_clear(el, ns)
         else:
-            clear_el(el)
+            formatting.clear_el(el)
 
 def split_target_decoy(elements, ns):
     split_elements = {'target': {}, 'decoy': {}}
@@ -41,7 +26,7 @@ def split_target_decoy(elements, ns):
 def get_score(elements, ns, scoretype='svm_score'):
     for el in elements:
         score = el.xpath('xmlns:{0}'.format(scoretype), namespaces=ns)[0].text
-        clear_el(el)
+        formatting.clear_el(el)
         yield score
     
 
@@ -59,7 +44,7 @@ def filter_known_searchspace(peptides, searchspace, ns):
         if not lookup.check_seq_exists(seq):
             yield peptide
         else:
-            clear_el(peptide)
+            formatting.clear_el(peptide)
     lookup.close_connection()
 
 def filter_unique_peptides(peptides, score, ns):
@@ -75,19 +60,19 @@ def filter_unique_peptides(peptides, score, ns):
          
         if seq not in highest:
             highest[seq] = {
-                    'pep_el': stringify_strip_namespace_declaration(el,ns), 
+                    'pep_el': formatting.stringify_strip_namespace_declaration(el,ns), 
                     'score': featscore}
         if score == 'svm': # greater than score is accepted
             if featscore > highest[seq]['score']:
                 highest[seq] = {
-                    'pep_el': stringify_strip_namespace_declaration(el,ns),
+                    'pep_el': formatting.stringify_strip_namespace_declaration(el,ns),
                     'score': featscore}
         else: # lower than score is accepted
             if featscore < highest[seq]['score']:
                 highest[seq] = {
-                    'pep_el': stringify_strip_namespace_declaration(el,ns),
+                    'pep_el': formatting.stringify_strip_namespace_declaration(el,ns),
                     'score': featscore}
-        clear_el(el)
+        formatting.clear_el(el)
     
     for pep in highest.values():
         yield pep['pep_el']

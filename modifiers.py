@@ -1,6 +1,6 @@
 import sys
 
-import filtering
+import formatting
 
 def parse_qvality_output(fn):
     statistics = {}
@@ -26,9 +26,7 @@ def reassign_elements(elements, stats, ns):
         if warning is not None:
             sys.stdout.write(warning)
         oldq.text, oldpep.text = newq, newpep
-        str_el = filtering.stringify_strip_namespace_declaration(el, ns)
-        filtering.clear_el(el)
-        yield str_el
+        yield formatting.string_and_clear(el, ns)
 
 
 def lookup_statistic(element, stats):

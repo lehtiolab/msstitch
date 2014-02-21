@@ -43,9 +43,7 @@ def generate_tags_multiple_files_strings(input_files, ns, tag, ignore_tags):
     Creates stringified output for percolator elements of certain tag.
     """
     for el in generate_tags_multiple_files(input_files, ns, tag, ignore_tags):
-        str_el = filtering.stringify_strip_namespace_declaration(el, ns)
-        filtering.clear_el(el)
-        yield str_el
+        yield formatting.string_and_clear(el, ns)
         
 def generate_tags_multiple_files(input_files, ns, tag, ignore_tags):
     """
