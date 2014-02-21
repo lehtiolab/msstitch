@@ -52,3 +52,39 @@ def lookup_statistic(element, stats):
         pep = (float(stats[stat_score]['PEP']) + float(stats[lower]['PEP']))/2
         
     return str(qval), str(pep), warning
+
+
+def include_full_filename_in_psm(psms, mzidfn, ns):
+    for psm in psms:
+        psm_id = psm.xpath() #FIXME how does psm look?
+        new_psm_id = fix_psmid_with_incomplete_filename(psm_id, mzidfn)
+        psm.id = new_psm_id # FIXME
+        yield formatting.string_and_clear(psm, ns)
+
+def include_full_filename_in_peptide_psmref(peptides, mzidfn, ns):
+    for peptide in peptides:
+        for psmref in peptide.xpath() #FIXME
+            psm_id = psmref.xpath() # FIXME
+            new_psm_id = fix_psmid_with_incomplete_filename(psm_id, mzidfn)
+            psmref.id = new_psm_id # FIXME
+        yield formatting.string_and_clear(peptide, ns)
+
+def fix_psmid_with_incomplete_filename(psm_id, fn):
+    """It looks like that filenames are cut by msgf2pin for inclusion 
+    in the psm id. Either by removing extension (may contain fraction or task),
+    or by truncating a certain length."""
+    if psm_id.startswith(fn):
+        return psm_id
+    
+    charindex = 0
+    while True:
+        charindex+=1
+        # cut incomplete filename from psm id
+        if psm_id[:charindex] != fn[:charindex]:
+            new_psm_id = psm_id[charindex-1:]
+            break
+    # add underscore if needed, then filename
+    if not new_psm_id[0] == '_':
+        new_psm_id = '_{0}'.format(new_psm_id)
+    new_psm_id = '{0}{1}'.format(fn, new_psm_id)
+    return new_psm_id
