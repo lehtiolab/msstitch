@@ -1,5 +1,5 @@
 from Bio import SeqIO
-import sqlite
+from app import sqlite
 
 
 def create_searchspace(dbfns):
