@@ -34,8 +34,7 @@ def filter_known_searchspace(peptides, searchspace, ns):
     """Yields peptides from generator as long as their sequence is not found in
     known search space dict. Useful for excluding peptides that are found in
     e.g. ENSEMBL or similar"""
-    lookup = sqlite.DatabaseConnection()
-    lookup.connect_searchspace(searchspace)
+    lookup = sqlite.DatabaseConnection(searchspace)
 
     for peptide in peptides:
         seq = get_peptide_seq(peptide, ns)

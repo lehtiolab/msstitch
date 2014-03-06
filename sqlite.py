@@ -6,6 +6,8 @@ from tempfile import mkstemp
 class DatabaseConnection(object):
     def __init__(self, fn=None):
         self.fn = fn
+        if self.fn is not None:
+            self.connect(self.fn)
 
     def create_db(self, tables):
         """Creates a sqlite db file.
@@ -13,7 +15,7 @@ class DatabaseConnection(object):
         """
         fd, self.fn = mkstemp(prefix='pycolator_tmp_')
         os.close(fd)
-        self.connect_searchspace(self.fn)
+        self.connect(self.fn)
         for table in tables:
             columns = tables[table]
             sql = 'CREATE TABLE ?({0})'.format(','.join(['?'] * len(columns)))
@@ -21,7 +23,7 @@ class DatabaseConnection(object):
             self.conn.execute(sql, sql_names)
         self.conn.commit()
 
-    def connect_searchspace(self, fn):
+    def connect(self, fn):
         self.conn = sqlite3.connect(fn)
 
     def close_connection(self):
