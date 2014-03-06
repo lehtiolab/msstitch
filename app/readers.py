@@ -1,5 +1,5 @@
 from lxml import etree
-import filtering
+import formatting
 
 def get_namespace(fn):
     ns = {'xmlns':'http://per-colator.com/percolator_out/14',
@@ -44,7 +44,7 @@ def generate_tags_multiple_files_strings(input_files, ns, tag, ignore_tags):
     """
     for el in generate_tags_multiple_files(input_files, ns, tag, ignore_tags):
         yield formatting.string_and_clear(el, ns)
-        
+
 def generate_tags_multiple_files(input_files, ns, tag, ignore_tags):
     """
     Base generator for percolator xml psm, peptide, protein output.
@@ -54,7 +54,7 @@ def generate_tags_multiple_files(input_files, ns, tag, ignore_tags):
             if el.tag=='{%s}%s' % (ns['xmlns'], tag):
                 yield el
             elif el.tag in ['{%s}%s' % (ns['xmlns'], x) for x in ignore_tags]:
-                filtering.clear_el(el)
+                formatting.clear_el(el)
 
 
 
