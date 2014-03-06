@@ -31,16 +31,17 @@ class DatabaseConnection(object):
         self.create_db({'known_searchspace': ['seqs']})
 
     def write_peps(self, peps):
-        self.conn.executemany("INSERT INTO pycolator(seqs) VALUES (?)", peps)
+        self.conn.executemany(
+            'INSERT INTO known_searchspace(seqs) VALUES (?)', peps)
         self.conn.commit()
 
     def index_peps(self):
-        self.conn.execute("CREATE INDEX seqs_index ON pycolator(seqs)")
+        self.conn.execute('CREATE INDEX seqs_index ON known_searchspace(seqs)')
         self.conn.commit()
-    
+
     def check_seq_exists(self, seq):
         cur = self.conn.execute(
-                "select exists(select seqs from pycolator where seqs=? limit 1)", 
-                (seq,) )
+            'select exists(select seqs from known_searchspace '
+            'where seqs=? limit 1)',
+            (seq, ))
         return cur.fetchone()[0] == 1
-
