@@ -2,8 +2,10 @@ import re
 import formatting
 import sqlite
 
+
 def get_peptide_seq(peptide, ns):
     return peptide.attrib['{%s}peptide_id' % ns['xmlns']]
+
 
 def target_decoy_generator(element_generator, decoy, ns):
     for el in element_generator:
@@ -12,16 +14,18 @@ def target_decoy_generator(element_generator, decoy, ns):
         else:
             formatting.clear_el(el)
 
+
 def split_target_decoy(elements, ns):
     split_elements = {'target': {}, 'decoy': {}}
     feats_to_process = ['psm', 'peptide']
     for feat in feats_to_process:
-        split_elements['target'][feat] =  target_decoy_generator(
-                                        elements['target'][feat], 'false', ns)
+        split_elements['target'][feat] = target_decoy_generator(
+            elements['target'][feat], 'false', ns)
         split_elements['decoy'][feat] = target_decoy_generator(
-                                        elements['decoy'][feat], 'true', ns)
+            elements['decoy'][feat], 'true', ns)
 
     return split_elements
+
 
 def get_score(elements, ns, scoretype='svm_score'):
     for el in elements:
@@ -46,30 +50,37 @@ def filter_known_searchspace(peptides, searchspace, ns):
             formatting.clear_el(peptide)
     lookup.close_connection()
 
+
 def filter_unique_peptides(peptides, score, ns):
     """ Filters unique peptides from multiple Percolator output XML files.
-        Takes a dir with a set of XML files, a score to filter on and a namespace.
+        Takes a dir with a set of XMLs, a score to filter on and a namespace.
         Outputs an ElementTree.
     """
-    scores = {'q':'q_value', 'pep':'pep', 'p':'p_value', 'svm':'svm_score'}
+    scores = {'q': 'q_value',
+              'pep': 'pep',
+              'p': 'p_value',
+              'svm': 'svm_score'}
     highest = {}
     for el in peptides:
-        featscore = float(el.xpath('xmlns:%s' % scores[score], namespaces=ns)[0].text)
+        featscore = float(el.xpath('xmlns:%s' % scores[score],
+                                   namespaces=ns)[0].text)
         seq = get_peptide_seq(el, ns)
 
         if seq not in highest:
             highest[seq] = {
-                    'pep_el': formatting.stringify_strip_namespace_declaration(el,ns),
-                    'score': featscore}
-        if score == 'svm': # greater than score is accepted
+                'pep_el': formatting.stringify_strip_namespace_declaration(
+                    el, ns), 'score': featscore}
+        if score == 'svm':  # greater than score is accepted
             if featscore > highest[seq]['score']:
                 highest[seq] = {
-                    'pep_el': formatting.stringify_strip_namespace_declaration(el,ns),
+                    'pep_el':
+                    formatting.stringify_strip_namespace_declaration(el, ns),
                     'score': featscore}
-        else: # lower than score is accepted
+        else:  # lower than score is accepted
             if featscore < highest[seq]['score']:
                 highest[seq] = {
-                    'pep_el': formatting.stringify_strip_namespace_declaration(el,ns),
+                    'pep_el':
+                    formatting.stringify_strip_namespace_declaration(el, ns),
                     'score': featscore}
         formatting.clear_el(el)
 
