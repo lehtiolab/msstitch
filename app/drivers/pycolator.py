@@ -1,11 +1,11 @@
 import os
 import subprocess
 
-import readers
-import filtering
-import writers
-import qvality
-from lookups import sequences
+from app import readers
+from app import filtering
+from app import writers
+from app import qvality
+from app.lookups import sequences
 
 class BaseDriver(object):
     def __init__(self, **kwargs):
