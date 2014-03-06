@@ -29,6 +29,8 @@ class DatabaseConnection(object):
     def close_connection(self):
         self.conn.close()
 
+
+class SearchSpaceDB(DatabaseConnection):
     def create_searchspacedb(self):
         self.create_db({'known_searchspace': ['seqs']})
 

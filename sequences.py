@@ -5,7 +5,7 @@ import sqlite
 def create_searchspace(dbfns):
     """Given FASTA databases, proteins are trypsinized and resulting peptides
     stored in a database or dict for lookups"""
-    lookup = sqlite.DatabaseConnection()
+    lookup = sqlite.SearchSpaceDB()
     lookup.create_searchspacedb()
 
     for dbfn in dbfns:
