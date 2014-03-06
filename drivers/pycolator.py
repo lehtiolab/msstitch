@@ -5,7 +5,7 @@ import readers
 import filtering
 import writers
 import qvality
-import sequences
+from lookups import sequences
 
 class BaseDriver(object):
     def __init__(self, **kwargs):
