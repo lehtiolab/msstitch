@@ -10,7 +10,7 @@ EXAMPLE:
 
 import argparse
 import os
-import drivers
+from drivers import pycolator as drivers
 
 
 def parser_file_exists(currentparser, fn):
