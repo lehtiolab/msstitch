@@ -20,7 +20,7 @@ def split_target_decoy(elements, ns):
                                         elements['target'][feat], 'false', ns)
         split_elements['decoy'][feat] = target_decoy_generator(
                                         elements['decoy'][feat], 'true', ns)
-        
+
     return split_elements
 
 def get_score(elements, ns, scoretype='svm_score'):
@@ -28,7 +28,7 @@ def get_score(elements, ns, scoretype='svm_score'):
         score = el.xpath('xmlns:{0}'.format(scoretype), namespaces=ns)[0].text
         formatting.clear_el(el)
         yield score
-    
+
 
 def filter_known_searchspace(peptides, searchspace, ns):
     """Yields peptides from generator as long as their sequence is not found in
@@ -57,10 +57,10 @@ def filter_unique_peptides(peptides, score, ns):
     for el in peptides:
         featscore = float(el.xpath('xmlns:%s' % scores[score], namespaces=ns)[0].text)
         seq = get_peptide_seq(el, ns)
-         
+
         if seq not in highest:
             highest[seq] = {
-                    'pep_el': formatting.stringify_strip_namespace_declaration(el,ns), 
+                    'pep_el': formatting.stringify_strip_namespace_declaration(el,ns),
                     'score': featscore}
         if score == 'svm': # greater than score is accepted
             if featscore > highest[seq]['score']:
@@ -73,6 +73,6 @@ def filter_unique_peptides(peptides, score, ns):
                     'pep_el': formatting.stringify_strip_namespace_declaration(el,ns),
                     'score': featscore}
         formatting.clear_el(el)
-    
+
     for pep in highest.values():
         yield pep['pep_el']
