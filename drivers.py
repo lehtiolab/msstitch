@@ -5,7 +5,7 @@ import readers
 import filtering
 import writers
 import qvality
-import databases
+import sequences
 
 class BaseDriver(object):
     def __init__(self, **kwargs):
@@ -82,7 +82,7 @@ class SplitDriver(BaseDriver):
         for fn in self.fns:
             ns, static_xml = self.prepare_percolator_output(fn)
             pep_target = readers.generate_peptides_multiple_fractions([fn], ns)
-            pep_decoy = readers.generate_peptides_multiple_fractions([fn], ns) 
+            pep_decoy = readers.generate_peptides_multiple_fractions([fn], ns)
             psm_target = readers.generate_psms_multiple_fractions([fn], ns)
             psm_decoy = readers.generate_psms_multiple_fractions([fn], ns)
             elements_to_split = {
@@ -92,7 +92,7 @@ class SplitDriver(BaseDriver):
             split_els = filtering.split_target_decoy(elements_to_split, ns)
             targetfn = self.create_outfilepath(fn, self.targetsuffix)
             decoyfn = self.create_outfilepath(fn, self.decoysuffix)
-            writers.write_percolator_xml(static_xml, split_els['target'], 
+            writers.write_percolator_xml(static_xml, split_els['target'],
                                             targetfn)
             writers.write_percolator_xml(static_xml, split_els['decoy'],
                                             decoyfn)
@@ -112,7 +112,7 @@ class ReassignmentDriver(BaseDriver):
         ns, static_xml = self.prepare_percolator_output(self.fns[0])
         allpeps = readers.generate_peptides_multiple_fractions(self.fns, ns)
         stats = qvality.parse_qvality_output(self.qvalityout)
-        features = {'peptide': qvality.reassign_elements(allpeps, 
+        features = {'peptide': qvality.reassign_elements(allpeps,
                                                          stats,
                                                          ns),
                     'psm': []
@@ -126,7 +126,7 @@ class ReassignmentDriver(BaseDriver):
 class MergeDriver(BaseDriver):
     """Base class for merging multiple percolator fractions under different
     sorts of filtering. It writes a single percolator out xml from multiple fractions.
-    Namespace and static xml come from first percolator file. 
+    Namespace and static xml come from first percolator file.
     Make sure fractions are from same percolator run."""
 
     def __init__(self, **kwargs):
@@ -167,7 +167,7 @@ class MergeUniqueAndFilterKnownPeptides(MergeDriver):
     it keeps the remaining best scoring unique peptides."""
     def run(self):
         print 'Digesting database into memory to get known search space'
-        self.searchspace = databases.create_searchspace(self.db)
+        self.searchspace = sequences.create_searchspace(self.db)
         print 'Filtering and merging'
         super(MergeUniqueAndFilterKnownPeptides, self).run()
         assert self.db not in [False, None]
