@@ -29,12 +29,12 @@ def generate_peptides_multiple_fractions_strings(input_files, ns):
 
 # Element generators interfaces
 def generate_psms_multiple_fractions(input_files, ns):
-    return generate_tags_multiple_files(input_files, ns, 'psm',
-                                                ['peptide', 'protein'])
+    return generate_tags_multiple_files(input_files, 'psm',
+                                                ['peptide', 'protein'], ns)
 
 def generate_peptides_multiple_fractions(input_files, ns):
-    return generate_tags_multiple_files(input_files, ns, 'peptide',
-                                                ['psm', 'protein'])
+    return generate_tags_multiple_files(input_files, 'peptide',
+                                                ['psm', 'protein'], ns)
 
 
 # Generators that actually do the work
@@ -42,18 +42,23 @@ def generate_tags_multiple_files_strings(input_files, ns, tag, ignore_tags):
     """
     Creates stringified output for percolator elements of certain tag.
     """
-    for el in generate_tags_multiple_files(input_files, ns, tag, ignore_tags):
+    for el in generate_tags_multiple_files(input_files, tag, ignore_tags, ns):
         yield formatting.string_and_clear(el, ns)
 
-def generate_tags_multiple_files(input_files, ns, tag, ignore_tags):
+
+def generate_tags_multiple_files(input_files, tag, ignore_tags, ns=None):
     """
     Base generator for percolator xml psm, peptide, protein output.
     """
+    if ns is None:
+        xmlns = ''
+    else:
+        xmlns = '{%s}' % ns['xmlns']
     for fn in input_files:
-        for ac,el in etree.iterparse(fn):
-            if el.tag=='{%s}%s' % (ns['xmlns'], tag):
+        for ac, el in etree.iterparse(fn):
+            if el.tag == '{0}{1}'.format(xmlns, tag):
                 yield el
-            elif el.tag in ['{%s}%s' % (ns['xmlns'], x) for x in ignore_tags]:
+            elif el.tag in ['{0}{1}'.format(xmlns, x) for x in ignore_tags]:
                 formatting.clear_el(el)
 
 
