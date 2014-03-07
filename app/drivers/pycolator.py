@@ -2,7 +2,7 @@ import os
 import subprocess
 
 from app.readers import pycolator as readers
-from app import filtering
+from app.preparation import pycolator as preparation
 from app import writers
 from app import qvality
 from app.lookups import sequences
@@ -51,7 +51,7 @@ class QvalityDriver(BaseDriver):
             features_for_qvality[t_or_d]['psm'] = \
                         readers.generate_psms_multiple_fractions([fn], ns)
             scorefiles[t_or_d] = self.create_outfilepath(t_or_d, self.outsuffix)
-            feats_to_write = filtering.get_score(
+            feats_to_write = preparation.get_score(
                         features_for_qvality[t_or_d][self.featuretype], ns)
             writers.write_qvality_input(feats_to_write, scorefiles[t_or_d])
         return scorefiles
@@ -89,7 +89,7 @@ class SplitDriver(BaseDriver):
             'target':   {'psm': psm_target, 'peptide': pep_target},
             'decoy' :   {'psm': psm_decoy,  'peptide': pep_decoy},
             }
-            split_els = filtering.split_target_decoy(elements_to_split, ns)
+            split_els = preparation.split_target_decoy(elements_to_split, ns)
             targetfn = self.create_outfilepath(fn, self.targetsuffix)
             decoyfn = self.create_outfilepath(fn, self.decoysuffix)
             writers.write_percolator_xml(static_xml, split_els['target'],
@@ -173,9 +173,9 @@ class MergeUniqueAndFilterKnownPeptides(MergeDriver):
         assert self.db not in [False, None]
 
     def merge(self):
-        newpeps = filtering.filter_known_searchspace(self.allpeps,
+        newpeps = preparation.filter_known_searchspace(self.allpeps,
                                             self.searchspace, self.ns)
-        uniquepeps = filtering.filter_unique_peptides(newpeps, self.score,
+        uniquepeps = preparation.filter_unique_peptides(newpeps, self.score,
                                                     self.ns)
         self.features = {'psm': [], 'peptide': uniquepeps}
 
@@ -184,7 +184,7 @@ class MergeUniquePeptides(MergeDriver):
     """This class processes multiple percolator runs from fractions and
     filters out the best scoring peptides."""
     def merge(self):
-        uniquepeps = filtering.filter_unique_peptides(self.allpeps, self.score,
+        uniquepeps = preparation.filter_unique_peptides(self.allpeps, self.score,
                                                         self.ns)
         self.features = {'psm': self.allpsms_str, 'peptide': uniquepeps}
 

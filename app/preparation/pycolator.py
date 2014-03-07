@@ -1,6 +1,6 @@
 import re
-import formatting
-import sqlite
+from app import formatting
+from app import sqlite
 
 
 def get_peptide_seq(peptide, ns):
