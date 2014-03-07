@@ -1,4 +1,4 @@
-import basereaders
+import basereader
 
 
 def psm_generator(mzidfile):
