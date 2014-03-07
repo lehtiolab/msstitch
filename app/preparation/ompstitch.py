@@ -1,12 +1,12 @@
 from app import sqlite
 from app import formatting
-from app.readers import ompstitch as reader
+from app.readers import ompstitch as readers
 
 
 def generate_psms_quanted(quantdbfn, psms):
     quantdb = sqlite.QuantDB(quantdbfn)
     for psm in psms:
-        psm_scan_nr = reader.get_psm_scan_nr(psm)
+        psm_scan_nr = readers.get_psm_scan_nr(psm)
         quant = lookup_quant(psm_scan_nr, quantdb)
         output = create_psm_out(psm, quant)
         formatting.clear_el(psm)
@@ -19,5 +19,10 @@ def lookup_quant(psm_scan_nr, quantdb):
 
 
 def create_psm_out(psm, quant):
+    """Return dict with keys == headerfields,
+    values == psm values for those."""
     # FIXME look how Zazzi's mzid with Percolator turns out
-    pass
+    psmout = {}
+    header = ['mzIdentML ID', 'scan_nr', 'mzml_filename', 'sequence',
+              'q-value', 'PEP']  # protein IDs, peptide ID in percolator out?
+    return header, psmout
