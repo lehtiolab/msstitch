@@ -18,3 +18,12 @@ def generate_tags_multiple_files(input_files, tag, ignore_tags, ns=None):
                 formatting.clear_el(el)
 
 
+def generate_tags_multiple_files_strings(input_files, ns, tag, ignore_tags):
+    """
+    Creates stringified xml output of elements with certain tag.
+    ignore_tags are the ones that are not cleared when met
+    """
+    for el in generate_tags_multiple_files(input_files, tag, ignore_tags, ns):
+        yield formatting.string_and_clear(el, ns)
+
+

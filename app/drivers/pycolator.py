@@ -1,7 +1,7 @@
 import os
 import subprocess
 
-from app import readers
+from app.readers import pycolator as readers
 from app import filtering
 from app import writers
 from app import qvality
