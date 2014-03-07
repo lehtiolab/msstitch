@@ -3,7 +3,7 @@ import subprocess
 
 from app.readers import pycolator as readers
 from app.preparation import pycolator as preparation
-from app import writers
+from app.writers import pycolator as writers
 from app import qvality
 from app.lookups import sequences
 
@@ -119,8 +119,6 @@ class ReassignmentDriver(BaseDriver):
                    }
         outfn = self.create_outfilepath(self.fns[0], self.outsuffix)
         writers.write_percolator_xml(static_xml, features, outfn)
-
-
 
 
 class MergeDriver(BaseDriver):
