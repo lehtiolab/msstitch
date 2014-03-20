@@ -13,7 +13,8 @@ def create_searchspace(dbfns):
         protindex = SeqIO.index(dbfn, 'fasta')
         for acc in protindex:
             pepseqs = trypsinize(protindex[acc].seq)
-            pepseqs = [(str(x),) for x in pepseqs]
+            # Exchange all leucines to isoleucines because MS can't differ
+            pepseqs = [(str(pep).replace('L', 'I'),) for pep in pepseqs]
             allpeps.extend(pepseqs)
             if len(allpeps) > 1000000:  # more than x peps, write to SQLite
                 lookup.write_peps(allpeps)
@@ -23,10 +24,6 @@ def create_searchspace(dbfns):
     lookup.index_peps()
     lookup.close_connection()
     return lookup.fn
-
-
-def write_peps_to_sqlite(peps):
-    pass
 
 
 def trypsinize(proseq):

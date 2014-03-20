@@ -42,6 +42,10 @@ def filter_known_searchspace(peptides, searchspace, ns):
 
     for peptide in peptides:
         seq = get_peptide_seq(peptide, ns)
+        # Exchange leucines for isoleucines since MS can't differ and we
+        # don't want to find 'novel' peptides which only have a difference
+        # in this amino acid
+        seq = seq.replace('L', 'I')
         # Loose modifications
         seq = re.sub('\[UNIMOD:\d*\]', '', seq)
         if not lookup.check_seq_exists(seq):
