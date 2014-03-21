@@ -30,8 +30,11 @@ parser.add_argument('-c', dest='command', type=str,
                     required=True
                     )
 parser.add_argument('-d', dest='outdir', required=True,
-                    help='Directory to output in')
-parser.add_argument('--ids', dest='ids', help='mzIdentML file',
+                    help='Directory to output in',
+                    type=lambda x: parser_file_exists(parser, x))
+parser.add_argument('--mzid', dest='mzid', help='mzIdentML file',
+                    type=lambda x: parser_file_exists(parser, x))
+parser.add_argument('--mzidtsv', dest='mzidtsv', help='TSV table of mzIdentML',
                     type=lambda x: parser_file_exists(parser, x))
 
 # not supported yet

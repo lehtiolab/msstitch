@@ -19,6 +19,7 @@ class MzidPercoTSVDriver(BaseDriver):
     def __init__(self, **kwargs):
         super(MzidPercoTSVDriver, self).__init__(**kwargs)
         self.idfn = kwargs.get('ids', None)
+        self.tsv = kwargs.get('mzidtsv', None)
         self.multipsm_per_scan = kwargs.get('allpsms', False)
         assert self.idfn is not None
 
@@ -26,14 +27,10 @@ class MzidPercoTSVDriver(BaseDriver):
         self.get_psms()
         self.write()
 
-    def get_psms(self, quantdb):
+    def get_psms(self):
         """Runs MSGF+ mzid2tsv converter to create table on mzid file.
         Then adds percolator data from mzid file to table.
         """
-        mzidtsv = 'mzid.tsv'
-        subprocess.call(['java', '-Xmx3500M', '-cp', 'MSGFPlus.jar',
-                         'edu.ucsd.msjava.ui.MzIDToTsv', '-i', self.idfn,
-                         '-o', mzidtsv])
         if self.multipsm_per_scan is True:
             # FIXME not supported yet
             # Create mzid PSM/sequence sqlite (fn, scan, rank, sequence)
@@ -41,10 +38,10 @@ class MzidPercoTSVDriver(BaseDriver):
         else:
             seqlookup = None
 
-        self.header = prep.get_header_from_mzidtsv(mzidtsv,
+        self.header = prep.get_header_from_mzidtsv(self.tsv,
                                                    self.multipsm_per_scan)
         self.psms = prep.add_percolator_to_mzidtsv(self.idfn,
-                                                   mzidtsv,
+                                                   self.tsv,
                                                    self.multipsm_per_scan,
                                                    seqlookup)
 
