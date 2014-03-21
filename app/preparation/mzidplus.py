@@ -33,8 +33,9 @@ def add_percolator_to_mzidtsv(mzidfn, tsvfn, multipsm, seqdb=None):
     """Takes a MSGF+ tsv and adds percolator data from corresponding
     mzIdentML that has been generated with pout2mzid.
     """
-    specfnids = readers.get_mzid_specfile_ids(mzidfn)
-    specresults = readers.mzid_spec_result_generator(mzidfn)
+    namespace = readers.get_mzid_namespace(mzidfn)
+    specfnids = readers.get_mzid_specfile_ids(mzidfn, namespace)
+    specresults = readers.mzid_spec_result_generator(mzidfn, namespace)
     with open(tsvfn) as mzidfp:
         # skip header
         next(mzidfp)

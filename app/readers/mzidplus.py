@@ -4,9 +4,13 @@ import basereader
 import ml
 
 
-def mzid_spec_result_generator(mzidfile):
+def get_mzid_namespace(mzidfile):
+    return basereader.get_namespace_from_top(mzidfile, None)
+
+
+def mzid_spec_result_generator(mzidfile, namespace):
     return basereader.generate_tags_multiple_files(
-        [mzidfile],
+        [mzidfile], namespace,
         'SpectrumIdentificationResult',
         ['MzIdentML',
          'DataCollection',
@@ -14,20 +18,20 @@ def mzid_spec_result_generator(mzidfile):
          'SpectrumIdentificationList'])
 
 
-def mzid_specdata_generator(mzidfile):
+def mzid_specdata_generator(mzidfile, namespace):
     return basereader.generate_tags_multiple_files(
-        [mzidfile],
+        [mzidfile], namespace,
         'SpectraData',
         ['MzIdentML',
          'DataCollection',
          'Inputs'])
 
 
-def get_mzid_specfile_ids(mzidfn):
+def get_mzid_specfile_ids(mzidfn, namespace):
     """Returns mzid spectra data filenames and their IDs used in the
     mzIdentML file as a dict. Keys == IDs, values == fns"""
     sid_fn = {}
-    for specdata in mzid_spec_result_generator(mzidfn):
+    for specdata in mzid_spec_result_generator(mzidfn, namespace):
         sid_fn[specdata.attrib['id']] = specdata.attrib['name']
     return sid_fn
 
