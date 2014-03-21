@@ -48,12 +48,18 @@ def get_specresult_mzml_id(specresult):
     return specresult.attrib['spectraData_ref']
 
 
-def get_specidentitem_percolator_data(item):
-    svm = item.xpath('userParam@[name="svm-score"]')[0].attrib['value']
-    psmq = item.xpath('cvParam@[name="MS-GF:QValue"]')[0].attrib['value']
-    pepq = item.xpath('cvParam@[name="MS-GF:PepQValue"]')[0].attrib['value']
-    psmpep = item.xpath('cvParam@[name="MS-GF:PEP"]')[0].attrib['value']
-    ppep = item.find('userParam@[name="peptide-level-PEP"]')[0].attrib['value']
+def get_specidentitem_percolator_data(item, namespace):
+    def get_xpath(it, ns, tag, select_key, select_val):
+        it.xpath('{0}{1}[@{2}="{3}"]'.format(ns['xmlns'],
+                                             tag,
+                                             select_key,
+                                             select_val)
+                 )[0].attrib['value']
+    svm = get_xpath(item, namespace, 'userParam', 'name', 'svm-score')
+    psmq = get_xpath(item, namespace, 'cvParam', 'name', 'MS-GF:QValue')
+    pepq = get_xpath(item, namespace, 'cvParam', 'name', 'MS-GF:PepQValue')
+    psmpep = get_xpath(item, namespace, 'cvParam', 'name', 'MS-GF:PEP')
+    ppep = get_xpath(item, namespace, 'userParam', 'name', 'peptide-level-PEP')
     return {'svm': svm,
             'psmq': psmq,
             'pepq': pepq,

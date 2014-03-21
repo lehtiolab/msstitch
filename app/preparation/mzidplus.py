@@ -1,10 +1,14 @@
 from app.readers import mzidplus as readers
 
 
-def get_percodata(specresult, line, multipsm, seqdb):
+def get_percodata(specresult, namespace, line, multipsm, seqdb):
     # FIXME MS-GF:etc elements may get different name
     """Extracts percolator data from specresult and returns a dict"""
     out = {'line': line, 'rank': None}
+    try:
+        xmlns = '{%s}' % namespace['xmlns']
+    except TypeError:
+        xmlns = ''
     if multipsm is True:
         pass  # FIXME support later
         # loop through psms in specresult
@@ -14,7 +18,8 @@ def get_percodata(specresult, line, multipsm, seqdb):
     else:  # only the first element
         percoline = []
         perco = readers.get_specidentitem_percolator_data(
-            specresult.find('SpectrumIdentificationItem'))
+            specresult.find('{0}SpectrumIdentificationItem'.format(xmlns)),
+            namespace)
 
     percoline.extend([perco['svm'], perco['psmq'], perco['psmpep'],
                       perco['pepq'], perco['peppep']])
