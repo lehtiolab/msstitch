@@ -1,5 +1,5 @@
 from lxml import etree
-import formatting
+from app import formatting
 
 
 def generate_tags_multiple_files(input_files, tag, ignore_tags, ns=None):
