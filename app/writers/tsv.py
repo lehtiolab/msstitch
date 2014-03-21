@@ -20,4 +20,3 @@ def write_tsv_line_from_list(linelist, outfp):
 
 def write_quantpsm_tsv(header, psms):
     write_tsv(header, psms)
-
