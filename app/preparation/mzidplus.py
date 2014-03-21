@@ -59,7 +59,7 @@ def add_percolator_to_mzidtsv(mzidfn, tsvfn, multipsm, seqdb=None):
                 if line[2] == specdata['scan'] \
                    and line[0] == specdata['fn']:
                     # add percolator stuff to line
-                    outline = get_percodata(specresult, namespace line,
+                    outline = get_percodata(specresult, namespace, line,
                                             multipsm, seqdb)
                     writelines.append(outline)
                     break  # goes to next line in tsv
