@@ -13,7 +13,7 @@ def write_tsv(headerfields, features, outfn):
 
 def write_tsv_line_from_list(linelist, outfp):
     """Utility method to convert list to tsv line with carriage return"""
-    line = linelist.join('\t')
+    line = '\t'.join(linelist)
     outfp.write(line)
     outfp.write('\n')
 

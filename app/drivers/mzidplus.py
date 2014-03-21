@@ -9,7 +9,7 @@ class BaseDriver(object):
     def __init__(self, **kwargs):
         self.outdir = kwargs['outdir']
 
-    def create_outfilepath(self, fn, suffix=None):
+    def create_outfilepath(self, fn, suffix=''):
         basefn = os.path.basename(fn)
         outfn = basefn + suffix
         return os.path.join(self.outdir, outfn)
@@ -18,7 +18,7 @@ class BaseDriver(object):
 class MzidPercoTSVDriver(BaseDriver):
     def __init__(self, **kwargs):
         super(MzidPercoTSVDriver, self).__init__(**kwargs)
-        self.idfn = kwargs.get('ids', None)
+        self.idfn = kwargs.get('mzid', None)
         self.tsv = kwargs.get('mzidtsv', None)
         self.multipsm_per_scan = kwargs.get('allpsms', False)
         assert self.idfn is not None

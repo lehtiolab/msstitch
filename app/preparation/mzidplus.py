@@ -73,4 +73,4 @@ def get_header_from_mzidtsv(fn, multipsm):
         line.append('rank')
     line.extend(['svm score', 'q-value', 'PEP', 'peptide-level q-value',
                  'peptide-level PEP'])
-    return '\t'.join(line)
+    return line
