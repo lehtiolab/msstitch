@@ -12,10 +12,12 @@ def mzid_spec_result_generator(mzidfile, namespace):
     return basereader.generate_tags_multiple_files(
         [mzidfile],
         'SpectrumIdentificationResult',
-        ['MzIdentML',
-         'DataCollection',
-         'AnalysisData',
-         'SpectrumIdentificationList'],
+        ['cvList',
+         'AnalysisSoftwareList',
+         'SequenceCollection',
+         'AnalysisProtocolCollection',
+         'AnalysisCollection',
+         ],
         namespace)
 
 
@@ -23,9 +25,13 @@ def mzid_specdata_generator(mzidfile, namespace):
     return basereader.generate_tags_multiple_files(
         [mzidfile],
         'SpectraData',
-        ['MzIdentML',
-         'DataCollection',
-         'Inputs'],
+        ['cvList',
+         'AnalysisSoftwareList',
+         'SequenceCollection',
+         'AnalysisProtocolCollection',
+         'AnalysisCollection',
+         'AnalysisData',
+         ],
         namespace)
 
 
