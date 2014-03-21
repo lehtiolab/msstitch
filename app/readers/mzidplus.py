@@ -10,28 +10,30 @@ def get_mzid_namespace(mzidfile):
 
 def mzid_spec_result_generator(mzidfile, namespace):
     return basereader.generate_tags_multiple_files(
-        [mzidfile], namespace,
+        [mzidfile],
         'SpectrumIdentificationResult',
         ['MzIdentML',
          'DataCollection',
          'AnalysisData',
-         'SpectrumIdentificationList'])
+         'SpectrumIdentificationList'],
+        namespace)
 
 
 def mzid_specdata_generator(mzidfile, namespace):
     return basereader.generate_tags_multiple_files(
-        [mzidfile], namespace,
+        [mzidfile],
         'SpectraData',
         ['MzIdentML',
          'DataCollection',
-         'Inputs'])
+         'Inputs'],
+        namespace)
 
 
 def get_mzid_specfile_ids(mzidfn, namespace):
     """Returns mzid spectra data filenames and their IDs used in the
     mzIdentML file as a dict. Keys == IDs, values == fns"""
     sid_fn = {}
-    for specdata in mzid_spec_result_generator(mzidfn, namespace):
+    for specdata in mzid_specdata_generator(mzidfn, namespace):
         sid_fn[specdata.attrib['id']] = specdata.attrib['name']
     return sid_fn
 
