@@ -19,8 +19,8 @@ def generate_tags_multiple_files(input_files, tag, ignore_tags, ns=None):
         for ac, el in etree.iterparse(fn):
             if el.tag == '{0}{1}'.format(xmlns, tag):
                 yield el
-            elif el.tag not in ['{0}{1}'.format(xmlns, x) for x in
-                                ignore_tags]:
+            elif el.tag in ['{0}{1}'.format(xmlns, x) for x in
+                            ignore_tags]:
                 formatting.clear_el(el)
 
 
