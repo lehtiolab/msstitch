@@ -1,14 +1,5 @@
 import basereader
-
-
-def psm_generator(mzidfile):
-    return basereader.generate_tags_multiple_files(
-        [mzidfile],
-        'SpectrumIdentificationResult',
-        ['MzIdentML',
-         'DataCollection',
-         'AnalysisData',
-         'SpectrumIdentificationList'])
+import ml
 
 
 def mzml_generator(mzmlfile):
@@ -45,19 +36,6 @@ def get_mzml_rt(spectrum):
             pass
 
 
-def get_scan_nr(element, attribname):
-    """General method to get a scan nr from xml element of mzML/mzIdentML"""
-    info = element.attrib[attribname]
-    infomap = {y[0]: y[1] for x in info.split() for y in x.split('=')}
-    return infomap['scan']
-
-
 def get_spec_scan_nr(spectrum):
     """Returns scan number of mzML spectrum as a str."""
-    return get_scan_nr(spectrum, 'id')
-
-
-def get_psm_scan_nr(psm):
-    """Returns scan nr of an mzIdentML PSM as a str. The PSM is given
-    as a SpectrumIdentificationResult element."""
-    return get_scan_nr(psm, 'spectrumID')
+    return ml.get_scan_nr(spectrum, 'id')

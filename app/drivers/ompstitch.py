@@ -1,9 +1,8 @@
 import os
+import subprocess
 
-from app.lookups import quant as lookups
-from app.readers import ompstitch as readers
-from app.preparation import ompstitch as preparation
-from app.writers import ompstitch as writers
+from app.preparation import mzidplus as prep
+from app.writers import tsv as writers
 
 
 class BaseDriver(object):
@@ -16,29 +15,39 @@ class BaseDriver(object):
         return os.path.join(self.outdir, outfn)
 
 
-class QuantTSVDriver(BaseDriver):
+class MzidPercoTSVDriver(BaseDriver):
     def __init__(self, **kwargs):
-        super(QuantTSVDriver, self).__init__(**kwargs)
-        self.spectrafn = kwargs.get('spectra', None)
-        self.quantfn = kwargs.get('quants', None)
+        super(MzidPercoTSVDriver, self).__init__(**kwargs)
         self.idfn = kwargs.get('ids', None)
-        if None in [self.spectrafn, self.quantfn, self.idfn]:
-            raise Exception(
-                'Need to specify spectra file, quant file and PSM file')
+        self.multipsm_per_scan = kwargs.get('allpsms', False)
+        assert self.idfn is not None
 
     def run(self):
         self.get_psms()
         self.write()
 
-    def get_psms(self):
-        """Creates a lookup db with scan nrs and quants. Then looks up psms
-        in the db via their scan nr and outputs generator of psms with
-        quant info."""
-        spectra = readers.mzml_generator(self.spectrafn)
-        consensus_quants = readers.quant_generator(self.quantfn)
-        quantdbfn = lookups.create_quant_lookup(spectra, consensus_quants)
-        psms = readers.psm_generator(self.idfn)
-        self.psms = preparation.generate_psms_quanted(quantdbfn, psms)
+    def get_psms(self, quantdb):
+        """Runs MSGF+ mzid2tsv converter to create table on mzid file.
+        Then adds percolator data from mzid file to table.
+        """
+        mzidtsv = 'mzid.tsv'
+        subprocess.call(['java', '-Xmx3500M', '-cp', 'MSGFPlus.jar',
+                         'edu.ucsd.msjava.ui.MzIDToTsv', '-i', self.idfn,
+                         '-o', mzidtsv])
+        if self.multipsm_per_scan is True:
+            # FIXME not supported yet
+            # Create mzid PSM/sequence sqlite (fn, scan, rank, sequence)
+            pass
+        else:
+            seqlookup = None
+
+        self.header = prep.get_header_from_mzidtsv(mzidtsv,
+                                                   self.multipsm_per_scan)
+        self.psms = prep.add_percolator_to_mzidtsv(self.idfn,
+                                                   mzidtsv,
+                                                   self.multipsm_per_scan,
+                                                   seqlookup)
 
     def write(self):
-        writers.write_quantpsm_tsv(self.psms)
+        outfn = self.create_outfilepath('percomzid.tsv')
+        writers.write_tsv(self.header, self.psms, outfn)

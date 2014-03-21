@@ -6,7 +6,7 @@ mzidplus -- Modifying MSGF+ mzIdentML output
 USAGE:
    mzidplus.py [option] [input files]
 EXAMPLE:
-    ompstitch.py -c percotsv -i psms.mzid -d /data psmquant.tsv
+   mzidplus.py -c percotsv -i psms.mzid -d /data -o psmquant.tsv
 """
 
 import argparse
@@ -33,6 +33,11 @@ parser.add_argument('-d', dest='outdir', required=True,
                     help='Directory to output in')
 parser.add_argument('--ids', dest='ids', help='mzIdentML file',
                     type=lambda x: parser_file_exists(parser, x))
+
+# not supported yet
+#parser.add_argument('--allpsms', dest='allpsms', action='store_true',
+#                    help='All PSMs from a single scan should be included, '
+#                    'not only the best scoring one.')
 
 args = parser.parse_args()
 
