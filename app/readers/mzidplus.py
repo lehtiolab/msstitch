@@ -58,13 +58,16 @@ def get_specidentitem_percolator_data(item, namespace):
     """Loop through SpecIdentificationItem children. Find
     percolator data by matching to a dict lookup. Return a
     dict containing percolator data"""
-    percomap = {'userParam': {'svm-score': 'svm',
-                              'peptide-level-PEP': 'peppep'
-                              },
-                'cvParam': {'MS-GF:QValue': 'psmq',
-                            'MS-GF:PepQValue': 'pepq',
-                            'MS-GF:PEP': 'psmpep',
-                            },
+    xmlns = '{%s}' % namespace['xmlns']
+    percomap = {'{0}userParam'.format(xmlns):
+                {'svm-score': 'svm',
+                 'peptide-level-PEP': 'peppep'
+                 },
+                '{0}cvParam'.format(xmlns):
+                {'MS-GF:QValue': 'psmq',
+                 'MS-GF:PepQValue': 'pepq',
+                 'MS-GF:PEP': 'psmpep',
+                 },
                 }
     percodata = {}
     for child in item:
