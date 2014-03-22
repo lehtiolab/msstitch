@@ -55,20 +55,23 @@ def get_specresult_mzml_id(specresult):
 
 
 def get_specidentitem_percolator_data(item, namespace):
-    def get_xpath(it, ns, tag, select_key, select_val):
-        it.xpath('{0}{1}[@{2}="{3}"]'.format(ns['xmlns'],
-                                             tag,
-                                             select_key,
-                                             select_val)
-                 )[0].attrib['value']
-    svm = get_xpath(item, namespace, 'userParam', 'name', 'svm-score')
-    psmq = get_xpath(item, namespace, 'cvParam', 'name', 'MS-GF:QValue')
-    pepq = get_xpath(item, namespace, 'cvParam', 'name', 'MS-GF:PepQValue')
-    psmpep = get_xpath(item, namespace, 'cvParam', 'name', 'MS-GF:PEP')
-    ppep = get_xpath(item, namespace, 'userParam', 'name', 'peptide-level-PEP')
-    return {'svm': svm,
-            'psmq': psmq,
-            'pepq': pepq,
-            'psmpep': psmpep,
-            'peppep': ppep,
-            }
+    """Loop through SpecIdentificationItem children. Find
+    percolator data by matching to a dict lookup. Return a
+    dict containing percolator data"""
+    percomap = {'userParam': {'svm-score': 'svm',
+                              'peptide-level-PEP': 'peppep'
+                              },
+                'cvParam': {'MS-GF:QValue': 'psmq',
+                            'MS-GF:PepQValue': 'pepq',
+                            'MS-GF:PEP': 'psmpep',
+                            },
+                }
+    percodata = {}
+    for child in item:
+        try:
+            percoscore = percomap[child.tag][child.attrib['name']]
+        except KeyError:
+            continue
+        else:
+            percodata[percoscore] = child.attrib['value']
+    return percodata
