@@ -2,7 +2,7 @@ import os
 import subprocess
 
 from app.preparation import mzidplus as prep
-from app.writers import tsv as writers
+from app.writers import mzidplus as writers
 
 
 class BaseDriver(object):
@@ -47,4 +47,4 @@ class MzidPercoTSVDriver(BaseDriver):
 
     def write(self):
         outfn = self.create_outfilepath('percomzid.tsv')
-        writers.write_tsv(self.header, self.psms, outfn)
+        writers.write_mzid_tsv(self.header, self.psms, outfn)

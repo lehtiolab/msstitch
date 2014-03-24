@@ -1,4 +1,5 @@
 def write_tsv(headerfields, features, outfn):
+    # FIXME Not using this method currently
     """Writes dict of features to tab separated format.
     headerfields - list of field names in header in correct order
     features - dict of features with keys == headerfields
