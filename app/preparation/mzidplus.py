@@ -23,7 +23,7 @@ def get_percoline(specresult, namespace, line, multipsm, seqdb):
 
     percoline.extend([perco['svm'], perco['psmq'], perco['psmpep'],
                       perco['pepq'], perco['peppep']])
-    out['line'] = '\t'.join(line + percoline)
+    out['line'] = line + percoline
     return out
 
 
@@ -56,6 +56,8 @@ def add_percolator_to_mzidtsv(mzidfn, tsvfn, multipsm, seqdb=None):
                     # Only keep best ranking psm
                     # FIXME we assume best ranking is first line. Fix this in
                     # future
+                    yield writelines
+                    writelines = []
                     break
                 if line[2] == specdata['scan'] \
                    and line[0] == specdata['fn']:

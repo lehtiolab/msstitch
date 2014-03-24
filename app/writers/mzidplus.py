@@ -16,5 +16,4 @@ def write_mzid_tsv(header, scanresults, outfn):
                 else:
                     line = []
                 line.extend(psm['line'])
-                line = None
-                tsv.write_tsv_line_from_list(line)
+                tsv.write_tsv_line_from_list(line, fp)
