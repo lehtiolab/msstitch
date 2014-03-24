@@ -77,4 +77,10 @@ def get_specidentitem_percolator_data(item, namespace):
             continue
         else:
             percodata[percoscore] = child.attrib['value']
+    outkeys = [y for x in percomap.values() for y in x.values()]
+    for key in outkeys():
+        try:
+            percodata[key]
+        except KeyError:
+            percodata[key] = 'NA'
     return percodata
