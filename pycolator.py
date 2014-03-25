@@ -1,11 +1,12 @@
 #!/usr/bin/python
+# FIXME docstring bad command format
 """
 pycolator -- Percolator output manipulation
 
 USAGE:
     python pycolator.py [option] [input file] [output file]
 EXAMPLE:
-    python pycolator.py splittd input.xml output.xml
+    python pycolator.py -c splittd input.xml output.xml
 """
 
 import argparse
