@@ -1,5 +1,4 @@
 import os
-import subprocess
 
 from app.preparation import mzidplus as prep
 from app.writers import mzidplus as writers
