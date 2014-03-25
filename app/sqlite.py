@@ -13,14 +13,13 @@ class DatabaseConnection(object):
         """Creates a sqlite db file.
         tables is a dict with keys=table names, values=lists of cols.
         """
-        fd, self.fn = mkstemp(prefix='pycolator_tmp_')
+        fd, self.fn = mkstemp(prefix='msstitcher_tmp_')
         os.close(fd)
         self.connect(self.fn)
         for table in tables:
             columns = tables[table]
-            sql = 'CREATE TABLE ?({0})'.format(','.join(['?'] * len(columns)))
-            sql_names = (table, ) + tuple(columns)
-            self.conn.execute(sql, sql_names)
+            self.conn.execute('CREATE TABLE {0}({1})'.format(
+                table, ', '.join(columns)))
         self.conn.commit()
 
     def connect(self, fn):
