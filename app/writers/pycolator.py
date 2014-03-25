@@ -31,8 +31,8 @@ def write_percolator_xml(staticxml, feats, fn):
             fp.write(pep)
             fp.write('\n')
         fp.write('</peptides></percolator_output>')
-    print 'Wrote {0} psms, {1} peptides to file {2}'.format(psmcount,
-                                                            peptidecount, fn)
+    print(('Wrote {0} psms, {1} peptides to file {2}'.format(psmcount,
+                                                            peptidecount, fn)))
 
 
 def write_qvality_input(scores, fn):

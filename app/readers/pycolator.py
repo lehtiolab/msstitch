@@ -1,5 +1,5 @@
 from lxml import etree
-import basereader
+from . import basereader
 
 
 def get_namespace(fn):

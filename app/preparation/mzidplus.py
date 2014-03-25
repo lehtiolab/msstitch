@@ -28,7 +28,7 @@ def get_percoline(specresult, namespace, line, multipsm, seqdb):
 
 
 def get_specresult_data(specresults, id_fnlookup):
-    specresult = specresults.next()
+    specresult = next(specresults)
     scannr = readers.get_specresult_scan_nr(specresult)
     mzmlid = readers.get_specresult_mzml_id(specresult)
     return specresult, {'scan': scannr, 'fn': id_fnlookup[mzmlid]}

@@ -40,7 +40,7 @@ def get_quant_data(cons_el):
 
 def store_quants(quants, quantdb):
     sql_quants = []
-    for scannr, quantdata in quants.iteritems():
+    for specfile, scannr, quantdata in list(quants.items()):
         for quantmap in sorted(quantdata.keys()):
             sql_quants.append((scannr, quantmap, quantdata[quantmap]))
     quantdb.store_quants(sql_quants)

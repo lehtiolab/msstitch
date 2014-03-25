@@ -1,6 +1,7 @@
 import sys
 
-import formatting
+from . import formatting
+
 
 def parse_qvality_output(fn):
     statistics = {}
@@ -13,7 +14,7 @@ def parse_qvality_output(fn):
                     score = float(line[0])
                 except ValueError:
                     continue
-                statistics[score] = {'PEP':line[1], 'q':line[2] }
+                statistics[score] = {'PEP': line[1], 'q': line[2]}
     return statistics
 
 
@@ -30,58 +31,62 @@ def reassign_elements(elements, stats, ns):
 
 
 def lookup_statistic(element, stats):
-    """ Finds statistics that correspond to PSM/peptide/protein feature's score.
-        Loops through list of qvality generated scores until it finds values closest
-        to the feature's svm_score."""
+    """ Finds statistics that correspond to PSM/peptide/protein feature's
+    score. Loops through list of qvality generated scores until it finds
+    values closest to the feature's svm_score."""
     score = float(element.text)
     if score in stats:
         return stats[score]['q'], stats[score]['PEP'], None
-    
+
     else:
         lower, warning = None, None
-        for stat_score in sorted(stats.keys() ):
+        for stat_score in sorted(stats.keys()):
             if score < stat_score:
                 break
             lower = stat_score
         if score > stat_score:
-            warning = 'WARNING! Values found with higher svm_score than in qvality recalculation!'
+            warning = ('WARNING! Values found with higher svm_score than in '
+                       'qvality recalculation!')
         if not lower:
-            warning = 'WARNING! Values found with lower svm_score than in qvality recalculation were set to PEP=1, qval=1.'
+            warning = ('WARNING! Values found with lower svm_score than in '
+                       'qvality recalculation were set to PEP=1, qval=1.')
             return '1', '1', warning
-        qval = (float(stats[stat_score]['q']) + float(stats[lower]['q']))/2
+        qval = (float(stats[stat_score]['q']) + float(stats[lower]['q'])) / 2
         pep = (float(stats[stat_score]['PEP']) + float(stats[lower]['PEP']))/2
-        
+
     return str(qval), str(pep), warning
 
 
 def include_full_filename_in_psm(psms, mzidfn, ns):
     for psm in psms:
-        psm_id = psm.xpath() #FIXME how does psm look?
+        psm_id = psm.xpath()  # FIXME how does psm look?
         new_psm_id = fix_psmid_with_incomplete_filename(psm_id, mzidfn)
-        psm.id = new_psm_id # FIXME
+        psm.id = new_psm_id  # FIXME
         yield formatting.string_and_clear(psm, ns)
+
 
 def include_full_filename_in_peptide_psmref(peptides, mzidfn, ns):
     for peptide in peptides:
-        for psmref in peptide.xpath() #FIXME
-            psm_id = psmref.xpath() # FIXME
+        for psmref in peptide.xpath():  # FIXME
+            psm_id = psmref.xpath()  # FIXME
             new_psm_id = fix_psmid_with_incomplete_filename(psm_id, mzidfn)
-            psmref.id = new_psm_id # FIXME
+            psmref.id = new_psm_id  # FIXME
         yield formatting.string_and_clear(peptide, ns)
 
+
 def fix_psmid_with_incomplete_filename(psm_id, fn):
-    """It looks like that filenames are cut by msgf2pin for inclusion 
+    """It looks like that filenames are cut by msgf2pin for inclusion
     in the psm id. Either by removing extension (may contain fraction or task),
     or by truncating a certain length."""
     if psm_id.startswith(fn):
         return psm_id
-    
+
     charindex = 0
     while True:
-        charindex+=1
+        charindex += 1
         # cut incomplete filename from psm id
         if psm_id[:charindex] != fn[:charindex]:
-            new_psm_id = psm_id[charindex-1:]
+            new_psm_id = psm_id[charindex - 1:]
             break
     # add underscore if needed, then filename
     if not new_psm_id[0] == '_':

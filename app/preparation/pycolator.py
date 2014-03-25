@@ -88,5 +88,5 @@ def filter_unique_peptides(peptides, score, ns):
                     'score': featscore}
         formatting.clear_el(el)
 
-    for pep in highest.values():
+    for pep in list(highest.values()):
         yield pep['pep_el']

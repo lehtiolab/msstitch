@@ -1,5 +1,5 @@
-import basereader
-import ml
+from . import basereader
+from . import ml
 
 
 def mzml_generator(mzmlfile):

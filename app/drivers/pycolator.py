@@ -30,7 +30,7 @@ class QvalityDriver(BaseDriver):
         super(QvalityDriver, self).__init__(**kwargs)
         self.featuretype = kwargs.get('feattype', 'peptide')
         if self.featuretype not in ['peptide', 'psm']:
-            raise Exception, 'Featuretype (-f) should be peptide or psm.'
+            raise Exception('Featuretype (-f) should be peptide or psm.')
         self.qvalityoptions = []
         options = kwargs.get('options')
         if options is not None:
@@ -164,9 +164,9 @@ class MergeUniqueAndFilterKnownPeptides(MergeDriver):
     filters out first peptides that are found in a specified searchspace. Then
     it keeps the remaining best scoring unique peptides."""
     def run(self):
-        print 'Digesting database into memory to get known search space'
+        print('Digesting database into memory to get known search space')
         self.searchspace = sequences.create_searchspace(self.db)
-        print 'Filtering and merging'
+        print('Filtering and merging')
         super(MergeUniqueAndFilterKnownPeptides, self).run()
         assert self.db not in [False, None]
 

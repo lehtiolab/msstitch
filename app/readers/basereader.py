@@ -3,7 +3,7 @@ from app import formatting
 
 
 def get_namespace_from_top(fn, key='xmlns'):
-    ac, el = etree.iterparse(fn).next()
+    ac, el = next(etree.iterparse(fn))
     return {'xmlns': el.nsmap[key]}
 
 

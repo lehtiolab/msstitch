@@ -1,4 +1,4 @@
-import tsv
+from . import tsv
 
 
 def write_mzid_tsv(header, scanresults, outfn):
