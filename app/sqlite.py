@@ -67,6 +67,10 @@ class QuantDB(DatabaseConnection):
             'spectra_filename=? AND scan_nr=?', (spectrafile, scannr))
         return cur.fetchall()
 
+    def get_all_quantmaps(self):
+        cur = self.conn.execute(
+            'SELECT DISTINCT quantmap FROM quant')
+        return cur.fetchall()
 
 class PeptideFilterDB(DatabaseConnection):
     pass
