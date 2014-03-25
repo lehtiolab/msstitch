@@ -1,14 +1,13 @@
 def write_tsv(headerfields, features, outfn):
-    # FIXME Not using this method currently
-    """Writes dict of features to tab separated format.
+    """Writes header and generator of lines to tab separated file.
+
     headerfields - list of field names in header in correct order
-    features - dict of features with keys == headerfields
+    features - generates 1 list per line that belong to header
     outfn - filename to output to. Overwritten if exists
     """
     with open(outfn, 'w') as fp:
         write_tsv_line_from_list(headerfields, fp)
-        for feat in features:
-            line = [features[x] for x in headerfields]
+        for line in features:
             write_tsv_line_from_list(line, fp)
 
 
