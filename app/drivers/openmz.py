@@ -37,8 +37,15 @@ class TSVQuantDriver(BaseDriver):
         consensus_quants = readers.quant_generator(self.quantfn)
         return lookups.create_quant_lookup(spectra, consensus_quants)
 
-    def generate_psms(self, quantdb):
-        self.psms = preparation.generate_psms_quanted(quantdb, self.tsvfn)
+    def generate_tsv_content(self, quantdb):
+        """Creates iterator to write to new tsv. Contains input tsv
+        lines plus quant data for these."""
+        quantheader = preparation.get_quant_header(quantdb)
+        self.header = preparation.create_tsv_header_quant(self.tsvfn,
+                                                          quantheader)
+        self.psms = preparation.generate_psms_quanted(quantdb,
+                                                      self.tsvfn,
+                                                      quantheader)
 
     def write(self):
         outfn = self.create_outfilepath(self.tsvm, 'quants')
