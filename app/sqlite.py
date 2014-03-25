@@ -31,7 +31,7 @@ class DatabaseConnection(object):
 
 class SearchSpaceDB(DatabaseConnection):
     def create_searchspacedb(self):
-        self.create_db({'known_searchspace': ['seqs']})
+        self.create_db({'known_searchspace': ['seqs TEXT']})
 
     def write_peps(self, peps):
         self.conn.executemany(
@@ -52,17 +52,19 @@ class SearchSpaceDB(DatabaseConnection):
 
 class QuantDB(DatabaseConnection):
     def create_quantdb(self):
-        self.create_db({'quant': ['scan_nr', 'quantmap', 'intensity']})
+        self.create_db({'quant': ['spectra_filename TEXT', 'scan_nr TEXT',
+                                  'quantmap TEXT', 'intensity REAL']})
 
     def store_quants(self, quants):
         self.conn.executemany(
-            'INSERT INTO quant(scan_nr, quantmap, intensity) VALUES (?, ?, ?)',
+            'INSERT INTO quant(spectra_filename, scan_nr, quantmap, intensity)'
+            ' VALUES (?, ?, ?, ?)',
             (quants,))
 
-    def lookup_quant(self, scannr):
+    def lookup_quant(self, spectrafile, scannr):
         cur = self.conn.execute(
-            'SELECT quantmap, intensity FROM quant WHERE scan_nr=?',
-            scannr)
+            'SELECT quantmap, intensity FROM quant WHERE '
+            'spectra_filename=? AND scan_nr=?', (spectrafile, scannr))
         return cur.fetchall()
 
 
