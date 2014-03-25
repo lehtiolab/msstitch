@@ -3,7 +3,7 @@ import os
 from app.lookups import quant as lookups
 from app.readers import openmz as readers
 from app.preparation import openmz as preparation
-from app.writers import openmz as writers
+from app.writers import tsv as writers
 
 
 class BaseDriver(object):
