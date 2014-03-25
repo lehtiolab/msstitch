@@ -1,6 +1,6 @@
 from app import sqlite
 from app import formatting
-from app.readers import ompstitch as readers
+from app.readers import openmz as readers
 
 
 def create_quant_lookup(fn_spectra, consensus_els):
@@ -31,6 +31,7 @@ def create_quant_lookup(fn_spectra, consensus_els):
             quants = {}
         formatting.clear_el(consensus_el)
         formatting.clear_el(spectrum)
+    store_quants(quants, quantdb)
     return quantdb.fn
 
 
