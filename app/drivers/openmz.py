@@ -33,9 +33,9 @@ class TSVQuantDriver(BaseDriver):
         spectra file/scan number data for looking up quant data.
         Returns sqlite file name.
         """
-        spectra = readers.mzml_generator(self.spectrafn)
+        fn_spectra = readers.mzml_generator(self.spectrafns)
         consensus_quants = readers.quant_generator(self.quantfn)
-        return lookups.create_quant_lookup(spectra, consensus_quants)
+        return lookups.create_quant_lookup(fn_spectra, consensus_quants)
 
     def generate_tsv_content(self, quantdb):
         """Creates iterator to write to new tsv. Contains input tsv

@@ -9,7 +9,8 @@ def get_namespace_from_top(fn, key='xmlns'):
 
 def generate_tags_multiple_files(input_files, tag, ignore_tags, ns=None):
     """
-    Base generator for percolator xml psm, peptide, protein output.
+    Base generator for percolator xml psm, peptide, protein output,
+    as well as for mzML, mzIdentML.
     """
     if ns is None:
         xmlns = ''

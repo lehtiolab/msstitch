@@ -2,14 +2,17 @@ from . import basereader
 from . import ml
 
 
-def mzml_generator(mzmlfile):
-    return basereader.generate_tags_multiple_files(
-        [mzmlfile],
-        'spectrum',
-        ['indexedmzML',
-         'mzML',
-         'run',
-         'spectrumList'])
+def mzml_generator(mzmlfiles):
+    for fn in mzmlfiles:
+        spectra = basereader.generate_tags_multiple_files(
+            fn,
+            'spectrum',
+            ['indexedmzML',
+             'mzML',
+             'run',
+             'spectrumList'])
+        for spectrum in spectra:
+            yield fn, spectrum
 
 
 def quant_generator(consfile):
