@@ -11,8 +11,8 @@ class BaseDriver(object):
         self.outdir = kwargs['outdir']
 
     def create_outfilepath(self, fn, suffix=None):
-        basefn = os.path.basename(fn)
-        outfn = basefn + suffix
+        basefn, ext = os.path.splitext(os.path.basename(fn))
+        outfn = basefn + suffix + ext
         return os.path.join(self.outdir, outfn)
 
 
@@ -41,4 +41,5 @@ class TSVQuantDriver(BaseDriver):
         self.psms = preparation.generate_psms_quanted(quantdb, self.tsvfn)
 
     def write(self):
-        writers.write_quantpsm_tsv(self.psms)
+        outfn = self.create_outfilepath(self.tsvm, 'quants')
+        writers.write_quantpsm_tsv(self.header, self.psms, outfn)
