@@ -35,6 +35,9 @@ parser.add_argument('-d', dest='outdir', required=True,
                     type=lambda x: parser_file_exists(parser, x))
 parser.add_argument('--mzidtsv', dest='mzidtsv', help='TSV table of mzIdentML',
                     type=lambda x: parser_file_exists(parser, x))
+parser.add_argument('--quant', dest='quants', help='Quant data in '
+                    'consensusXML format',
+                    type=lambda x: parser_file_exists(parser, x))
 parser.add_argument('--spectra', dest='spectra', help='mzML files', nargs='+',
                     type=lambda x: parser_file_exists(parser, x))
 
@@ -47,7 +50,7 @@ parser.add_argument('--spectra', dest='spectra', help='mzML files', nargs='+',
 args = parser.parse_args()
 
 commandmap = {
-    'percotsv': drivers.TSVQuantDriver,
+    'quanttsv': drivers.TSVQuantDriver,
 }
 
 command = commandmap[args.command](**vars(args))

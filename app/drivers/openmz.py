@@ -19,7 +19,7 @@ class BaseDriver(object):
 class TSVQuantDriver(BaseDriver):
     def __init__(self, **kwargs):
         super(TSVQuantDriver, self).__init__(**kwargs)
-        self.spectrafn = kwargs.get('spectra', None)
+        self.spectrafns = kwargs.get('spectra', None)
         self.quantfn = kwargs.get('quants', None)
         self.tsvfn = kwargs.get('tsv', None)
 
