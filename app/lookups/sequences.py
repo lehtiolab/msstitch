@@ -27,20 +27,23 @@ def create_searchspace(dbfns):
 
 
 def trypsinize(proseq):
-    """Trypsinize a sequence. From Yafeng Zhu."""
-    indice = [0]
+    """Trypsinize a sequence. From Yafeng Zhu. Returns fully
+    tryptic, and overlapping peptides if there are a sequence of
+    tryptic residues"""
+    indices = [0]
     peptides = []
-    for i in range(0, len(proseq) - 1):
-        if proseq[i] == 'K' and proseq[i + 1] != 'P':
-            indice.append(i + 1)
-        elif proseq[i] == 'R' and proseq[i + 1] != 'P':
-            indice.append(i + 1)
+    for aa, i in enumerate(range(0, len(proseq) - 1)):
+        nextaa = proseq[i + 1]
+        if aa in ['K', 'P'] and nextaa != 'P':
+            indices.append(i + 1)
 
-    indice.append(-1)
-    for j in range(0, len(indice) - 1):
-        if indice[j] + 1 == indice[j + 1]:
-            peptides.append(proseq[indice[j]:indice[j + 2]])
-            peptides.append(proseq[indice[j - 1]:indice[j + 1]])
+    indices.append(-1)
+    for j in range(0, len(indices) - 1):
+        if indices[j] + 1 == indices[j + 1]:
+            peptides.append(proseq[indices[j]:indices[j + 2]])
+            peptides.append(proseq[indices[j - 1]:indices[j + 1]])
+        elif indices[j + 1] == -1:
+            peptides.append(proseq[indices[j]:])
         else:
-            peptides.append(proseq[indice[j]:indice[j + 1]])
+            peptides.append(proseq[indices[j]:indices[j + 1]])
     return peptides
