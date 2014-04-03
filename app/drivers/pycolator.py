@@ -127,6 +127,36 @@ class ReassignmentDriver(BaseDriver):
         writers.write_percolator_xml(static_xml, features, outfn)
 
 
+class FilterPeptideLengthDriver(BaseDriver):
+    """Filters on peptide length, to be specified in calling. Outputs to
+    multiple files if multiple file input is given. No PSMs will be
+    outputted."""
+    def __init__(self, **kwargs):
+        super(FilterPeptideLengthDriver, self).__init__(**kwargs)
+        self.outsuffix = kwargs.get('outsuffix', 'filtered.xml')
+        self.minlength = kwargs.get('minlength', 0)
+        self.maxlength = kwargs.get('maxlength', None)
+
+    def prepare(self, fn):
+        self.ns, self.static_xml = self.prepare_percolator_output(fn)
+        self.allpeps = self.get_all_peptides()
+        self.allpsms = self.get_all_psms()
+
+    def run(self):
+        for fn in self.fns:
+            self.prepare(fn)
+            self.features = {'psm': [],
+                             'peptide': preparation.filter_peptide_length(
+                                 self.allpeps, self.ns,
+                                 self.minlength, self.maxlength)
+                             }
+            self.write(fn)
+
+    def write(self, fn):
+        outfn = self.create_outfilepath(fn, self.outsuffix)
+        writers.write_percolator_xml(self.static_xml, self.features, outfn)
+
+
 class MergeDriver(BaseDriver):
     """Base class for merging multiple percolator fractions under different
     sorts of filtering. It writes a single percolator out xml from multiple fractions.

@@ -28,6 +28,7 @@ parser.add_argument('-c', dest='command', type=str, help='How to manipulate the 
 'filterknown    - Filters out peptides that are found in a certain FASTA search\n'
 '                 space which is passed using the -b flag. Then merges xml files and only\n'
 '                 includes best scoring unique peptides'
+'filterlen      - Filters out peptides that exceed --maxlen and --minlen\n'
 'qvality        - Runs qvality on two inputfiles: one containing target and \n'
 '                 containing decoy data. It is assumed that the first file \n'
 '                 specified under -i is the target and the second is the\n'
@@ -44,6 +45,11 @@ parser.add_argument('-i', dest='infile', nargs='+',
 parser.add_argument('-d', dest='outdir', required=True, help='Directory to output in')
 parser.add_argument('-s', dest='score', help='Score to filter unique peptides '
 'on (only for command mergebest and filterknownmerge)', default='svm')
+parser.add_argument('--maxlen', dest='maxlength', help='Maximum length of '
+                    'peptide to be included in filtered data.', default=None)
+parser.add_argument('--minlen', dest='minlength', help='Minimum length of '
+                    'peptide to be included in filtered data.', default=None)
+
 parser.add_argument('-b', dest='database', help='Database file(s). Make sure'
 ' they are included when filterknown command is used, since they will be'
 ' used to exclude peptides from.', nargs='+',
@@ -52,8 +58,6 @@ parser.add_argument('-f', dest='feattype', help='Feature type to use for '
                     'qvality. Can either be psm or peptide.')
 parser.add_argument('-o', dest='options', nargs='+',
                     help='Extra options that may be passed to qvality.')
-
-
 parser.add_argument('-q', dest='qvalityout', help='Qvality output file. '
                     'Required when using the reassign command.',
                     type=lambda x:parser_file_exists(parser, x))
@@ -69,6 +73,7 @@ commandmap = {
     'splittd'    : drivers.SplitDriver,
     'merge'      : drivers.MergeDriver,
     'mergebest'  : drivers.MergeUniquePeptides,
+    'filterlen'  : drivers.FilterPeptideLengthDriver,
     'filterknown': drivers.MergeUniqueAndFilterKnownPeptides,
     'qvality'    : drivers.QvalityDriver,
     'reassign'   : drivers.ReassignmentDriver,

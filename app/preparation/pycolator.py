@@ -34,6 +34,17 @@ def get_score(elements, ns, scoretype='svm_score'):
         yield score
 
 
+def filter_peptide_length(peptides, ns, minlen=0, maxlen=None):
+    if maxlen is None:
+        maxlen = float('inf')
+    for pep in peptides:
+        seq = pep.attrib['{%s}peptide_id']
+        if len(seq) > minlen and len(seq) < maxlen:
+            yield pep
+        else:
+            formatting.clear_el(pep)
+
+
 def filter_known_searchspace(peptides, searchspace, ns):
     """Yields peptides from generator as long as their sequence is not found in
     known search space dict. Useful for excluding peptides that are found in
