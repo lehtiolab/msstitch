@@ -19,6 +19,12 @@ class BaseDriver(object):
         static = readers.get_percolator_static_xml(fn, ns)
         return ns, static
 
+    def get_all_peptides(self):
+        return readers.generate_peptides_multiple_fractions(self.fns, self.ns)
+
+    def get_all_psms(self):
+        return readers.generate_psms_multiple_fractions(self.fns, self.ns)
+
     def create_outfilepath(self, fn, suffix=None):
         basefn = os.path.basename(fn)
         outfn = basefn + suffix
@@ -142,10 +148,13 @@ class MergeDriver(BaseDriver):
 
     def prepare_merge(self):
         self.ns, self.static_xml = self.prepare_percolator_output(self.fns[0])
-        self.allpsms_str = readers.generate_psms_multiple_fractions_strings(self.fns, self.ns)
-        self.allpeps_str = readers.generate_peptides_multiple_fractions_strings(self.fns, self.ns)
-        self.allpeps = readers.generate_peptides_multiple_fractions(self.fns, self.ns)
-        self.allpsms = readers.generate_psms_multiple_fractions(self.fns, self.ns)
+        self.allpeps = self.get_all_peptides()
+        self.allpsms = self.get_all_psms()
+
+        self.allpsms_str = readers.generate_psms_multiple_fractions_strings(
+            self.fns, self.ns)
+        self.allpeps_str = readers.generate_peptides_multiple_fractions_strings(
+            self.fns, self.ns)
 
     def merge(self):
         """"Merge all psms and peptides"""
