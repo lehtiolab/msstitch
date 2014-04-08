@@ -26,24 +26,32 @@ def create_searchspace(dbfns):
     return lookup.fn
 
 
-def trypsinize(proseq):
-    """Trypsinize a sequence. From Yafeng Zhu. Returns fully
-    tryptic, and overlapping peptides if there are a sequence of
-    tryptic residues"""
-    indices = [0]
-    peptides = []
-    for aa, i in enumerate(range(0, len(proseq) - 1)):
-        nextaa = proseq[i + 1]
-        if aa in ['K', 'P'] and nextaa != 'P':
-            indices.append(i + 1)
+def trypsinize(proseq, proline_cut=False):
+    # TODO add cysteine to non cut options, use enums
+    """Trypsinize a protein sequence. Returns a list of peptides.
+    Peptides include both cut and non-cut when P is behind a tryptic
+    residue. Multiple consequent tryptic residues are treated as follows:
+    PEPKKKTIDE - [PEPK, PEPKK, PEPKKK, KKTIDE, KTIDE, TIDE, K, K, KK ]
+    """
+    outpeps = []
+    currentpeps = ['']
+    trypres = set(['K', 'R'])
+    noncutters = set()
+    if not proline_cut:
+        noncutters.add('P')
+    for i, aa in enumerate(proseq):
+        currentpeps = ['{0}{1}'.format(x, aa) for x in currentpeps]
+        if aa in trypres and proseq[i + 1] not in noncutters:
+            outpeps.extend(currentpeps)  # do actual cut by storing peptides
+            if proseq[i + 1] in trypres.union('P'):
+                # add new peptide to list if we are also to run on
+                currentpeps.append('')
+            elif trypres.issuperset(currentpeps[-1]):
+                currentpeps = [x for x in currentpeps if trypres.issuperset(x)]
+                currentpeps.append('')
+            else:
+                currentpeps = ['']
 
-    indices.append(-1)
-    for j in range(0, len(indices) - 1):
-        if indices[j] + 1 == indices[j + 1]:
-            peptides.append(proseq[indices[j]:indices[j + 2]])
-            peptides.append(proseq[indices[j - 1]:indices[j + 1]])
-        elif indices[j + 1] == -1:
-            peptides.append(proseq[indices[j]:])
-        else:
-            peptides.append(proseq[indices[j]:indices[j + 1]])
-    return peptides
+    if currentpeps != ['']:
+        outpeps.extend(currentpeps)
+    return outpeps
