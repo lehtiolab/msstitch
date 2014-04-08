@@ -26,8 +26,7 @@ parser.add_argument('-c', dest='command', type=str, help='How to manipulate the 
 'merge          - Merges xml files. nothing else.\n'
 'mergebest      - Merges xml files and only includes best scoring unique peptides\n'
 'filterknown    - Filters out peptides that are found in a certain FASTA search\n'
-'                 space which is passed using the -b flag. Then merges xml files and only\n'
-'                 includes best scoring unique peptides'
+'                 space which is passed using the -b flag.\n'
 'filterlen      - Filters out peptides that exceed --maxlen and --minlen\n'
 'qvality        - Runs qvality on two inputfiles: one containing target and \n'
 '                 containing decoy data. It is assumed that the first file \n'
@@ -54,6 +53,16 @@ parser.add_argument('-b', dest='database', help='Database file(s). Make sure'
 ' they are included when filterknown command is used, since they will be'
 ' used to exclude peptides from.', nargs='+',
                      type=lambda x:parser_file_exists(parser, x))
+parser.add_argument('--cutproline', dest='proline', help='With flag, trypsin is '
+                    'considered to cut before a proline residue. The filter '
+                    'known will filter against both cut and non-cut peptides.',
+                    action='store_const', const=True, default=False)
+parser.add_argument('--falloff', dest='falloff', help='With flag, the filter '
+                    'known will filter against both intact peptides and those '
+                    'that match to the C-terminal part of a tryptic peptide '
+                    'from the database.',
+                    action='store_const', const=True, default=False)
+
 parser.add_argument('-f', dest='feattype', help='Feature type to use for '
                     'qvality. Can either be psm or peptide.')
 parser.add_argument('-o', dest='options', nargs='+',

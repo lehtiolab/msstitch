@@ -2,7 +2,7 @@ from Bio import SeqIO
 from app import sqlite
 
 
-def create_searchspace(dbfns):
+def create_searchspace(dbfns, proline_cut=False):
     """Given FASTA databases, proteins are trypsinized and resulting peptides
     stored in a database or dict for lookups"""
     lookup = sqlite.SearchSpaceDB()
@@ -12,7 +12,7 @@ def create_searchspace(dbfns):
         allpeps = []
         protindex = SeqIO.index(dbfn, 'fasta')
         for acc in protindex:
-            pepseqs = trypsinize(protindex[acc].seq)
+            pepseqs = trypsinize(protindex[acc].seq, proline_cut)
             # Exchange all leucines to isoleucines because MS can't differ
             pepseqs = [(str(pep).replace('L', 'I'),) for pep in pepseqs]
             allpeps.extend(pepseqs)

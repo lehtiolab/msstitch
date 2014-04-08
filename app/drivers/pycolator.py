@@ -169,7 +169,6 @@ class MergeDriver(BaseDriver):
         self.score = kwargs.get('score')
         if self.score is None:
             self.score = 'svm'
-        self.db = kwargs.get('database', False)
 
     def run(self):
         self.prepare_merge()
@@ -202,19 +201,26 @@ class MergeUniqueAndFilterKnownPeptides(MergeDriver):
     """This class processes multiple percolator runs from fractions and
     filters out first peptides that are found in a specified searchspace. Then
     it keeps the remaining best scoring unique peptides."""
+    # FIXME create merge drivers, filter drivers, split drivers in diff files
+    # app/drivers/pycolator/split, merge, filter, etc
+    def __init__(self, **kwargs):
+        super(MergeDriver, self).__init__(**kwargs)
+        self.db = kwargs.get('database', False)
+        self.outsuffix = kwargs.get('outsuffix', '_filterknown.xml')
+        self.prolinecut = kwargs.get('proline')
+        self.falloff = kwargs.get('falloff')
+
     def run(self):
-        print('Digesting database into memory to get known search space')
-        self.searchspace = sequences.create_searchspace(self.db)
-        print('Filtering and merging')
+        self.searchspace = sequences.create_searchspace(self.db,
+                                                        self.prolinecut)
         super(MergeUniqueAndFilterKnownPeptides, self).run()
         assert self.db not in [False, None]
 
     def merge(self):
-        newpeps = preparation.filter_known_searchspace(self.allpeps,
-                                            self.searchspace, self.ns)
-        uniquepeps = preparation.filter_unique_peptides(newpeps, self.score,
-                                                    self.ns)
-        self.features = {'psm': [], 'peptide': uniquepeps}
+        novelpeps = preparation.filter_known_searchspace(self.allpeps,
+                                                         self.searchspace,
+                                                         self.ns)
+        self.features = {'psm': [], 'peptide': novelpeps}
 
 
 class MergeUniquePeptides(MergeDriver):
