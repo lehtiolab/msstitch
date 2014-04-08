@@ -45,7 +45,7 @@ def filter_peptide_length(peptides, ns, minlen=0, maxlen=None):
             formatting.clear_el(pep)
 
 
-def filter_known_searchspace(peptides, searchspace, ns):
+def filter_known_searchspace(peptides, searchspace, ns, ntermwildcards):
     """Yields peptides from generator as long as their sequence is not found in
     known search space dict. Useful for excluding peptides that are found in
     e.g. ENSEMBL or similar"""
@@ -59,7 +59,7 @@ def filter_known_searchspace(peptides, searchspace, ns):
         seq = seq.replace('L', 'I')
         # Loose modifications
         seq = re.sub('\[UNIMOD:\d*\]', '', seq)
-        if not lookup.check_seq_exists(seq):
+        if not lookup.check_seq_exists(seq, ntermwildcards):
             yield peptide
         else:
             formatting.clear_el(peptide)

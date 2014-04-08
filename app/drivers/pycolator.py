@@ -212,14 +212,16 @@ class MergeUniqueAndFilterKnownPeptides(MergeDriver):
 
     def run(self):
         self.searchspace = sequences.create_searchspace(self.db,
-                                                        self.prolinecut)
+                                                        self.prolinecut,
+                                                        self.falloff)
         super(MergeUniqueAndFilterKnownPeptides, self).run()
         assert self.db not in [False, None]
 
     def merge(self):
         novelpeps = preparation.filter_known_searchspace(self.allpeps,
                                                          self.searchspace,
-                                                         self.ns)
+                                                         self.ns,
+                                                         self.falloff)
         self.features = {'psm': [], 'peptide': novelpeps}
 
 

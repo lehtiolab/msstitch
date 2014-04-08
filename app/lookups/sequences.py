@@ -2,7 +2,7 @@ from Bio import SeqIO
 from app import sqlite
 
 
-def create_searchspace(dbfns, proline_cut=False):
+def create_searchspace(dbfns, proline_cut=False, reverse_seqs=True):
     """Given FASTA databases, proteins are trypsinized and resulting peptides
     stored in a database or dict for lookups"""
     lookup = sqlite.SearchSpaceDB()
@@ -17,7 +17,7 @@ def create_searchspace(dbfns, proline_cut=False):
             pepseqs = [(str(pep).replace('L', 'I'),) for pep in pepseqs]
             allpeps.extend(pepseqs)
             if len(allpeps) > 1000000:  # more than x peps, write to SQLite
-                lookup.write_peps(allpeps)
+                lookup.write_peps(allpeps, reverse_seqs)
                 allpeps = []
         # write remaining peps to sqlite
         lookup.write_peps(allpeps)

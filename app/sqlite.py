@@ -33,7 +33,13 @@ class SearchSpaceDB(DatabaseConnection):
     def create_searchspacedb(self):
         self.create_db({'known_searchspace': ['seqs TEXT']})
 
-    def write_peps(self, peps):
+    def write_peps(self, peps, reverse_seqs=True):
+        """Writes peps to db. We can reverse to be able to look up
+        peptides that have some amino acids missing at the N-terminal.
+        This way we can still use the index.
+        """
+        if reverse_seqs:
+            peps = [x[::-1] for x in peps]
         self.conn.executemany(
             'INSERT INTO known_searchspace(seqs) VALUES (?)', peps)
         self.conn.commit()
@@ -42,11 +48,22 @@ class SearchSpaceDB(DatabaseConnection):
         self.conn.execute('CREATE INDEX seqs_index ON known_searchspace(seqs)')
         self.conn.commit()
 
-    def check_seq_exists(self, seq):
-        cur = self.conn.execute(
-            'select exists(select seqs from known_searchspace '
-            'where seqs=? limit 1)',
-            (seq, ))
+    def check_seq_exists(self, seq, ntermwildcards=False):
+        """Look up sequence in sqlite DB. Returns True or False if it
+        exists (or not). When looking up a reversed DB with
+        ntermwildcards: we reverse the sequence of the pep and add
+        a LIKE and %-suffix to the query.
+        """
+        if ntermwildcards:
+            seq = seq[::-1]
+            comparator, seqmod = ' LIKE ', '%'
+        else:
+            comparator, seqmod = '=', ''
+
+        sql = ('select exists(select seqs from known_searchspace '
+               'where seqs{0}? limit 1)'.format(comparator))
+        seq = '{0}{1}'.format(seq, seqmod)
+        cur = self.conn.execute(sql, (seq, ))
         return cur.fetchone()[0] == 1
 
 
