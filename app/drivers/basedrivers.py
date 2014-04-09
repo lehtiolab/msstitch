@@ -25,10 +25,10 @@ class PycolatorDriver(object):
         return ns, static
 
     def get_all_peptides(self):
-        return readers.generate_peptides_multiple_fractions(self.fn, self.ns)
+        return readers.generate_peptides(self.fn, self.ns)
 
     def get_all_psms(self):
-        return readers.generate_psms_multiple_fractions(self.fn, self.ns)
+        return readers.generate_psms(self.fn, self.ns)
 
     def prepare(self, fn):
         self.ns, self.static_xml = self.prepare_percolator_output(fn)

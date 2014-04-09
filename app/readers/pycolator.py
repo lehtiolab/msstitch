@@ -46,3 +46,12 @@ def generate_psms_multiple_fractions(input_files, ns):
 def generate_peptides_multiple_fractions(input_files, ns):
     return basereader.generate_tags_multiple_files(input_files, 'peptide',
                                                    ['psm', 'protein'], ns)
+
+
+def generate_psms(fn, ns):
+    return basereader.generate_tags_multiple_files(fn, 'psm',
+                                                   ['peptide', 'protein'], ns)
+
+
+def generate_peptides(fn, ns):
+    return basereader.generate_xmltags(fn, 'peptide', ['psm', 'protein'], ns)
