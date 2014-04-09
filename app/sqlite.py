@@ -9,13 +9,15 @@ class DatabaseConnection(object):
         if self.fn is not None:
             self.connect(self.fn)
 
-    def create_db(self, tables):
+    def create_db(self, tables, outfn=None):
         """Creates a sqlite db file.
         tables is a dict with keys=table names, values=lists of cols.
         """
-        fd, self.fn = mkstemp(prefix='msstitcher_tmp_')
+        if outfn is None:
+            fd, outfn = mkstemp(prefix='msstitcher_tmp_')
+
         os.close(fd)
-        self.connect(self.fn)
+        self.connect(outfn)
         for table in tables:
             columns = tables[table]
             self.conn.execute('CREATE TABLE {0}({1})'.format(
@@ -30,8 +32,8 @@ class DatabaseConnection(object):
 
 
 class SearchSpaceDB(DatabaseConnection):
-    def create_searchspacedb(self):
-        self.create_db({'known_searchspace': ['seqs TEXT']})
+    def create_searchspacedb(self, outfn):
+        self.create_db({'known_searchspace': ['seqs TEXT']}, outfn)
 
     def write_peps(self, peps, reverse_seqs=True):
         """Writes peps to db. We can reverse to be able to look up
