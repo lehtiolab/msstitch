@@ -15,16 +15,13 @@ def target_decoy_generator(element_generator, decoy, ns):
             formatting.clear_el(el)
 
 
-def split_target_decoy(elements, ns):
-    split_elements = {'target': {}, 'decoy': {}}
-    feats_to_process = ['psm', 'peptide']
+def split_target_decoy(elements, ns, filter_type):
+    td = {'target': 'false', 'decoy': 'true'}
+    feats_to_process = {'psm': None, 'peptide': None}
     for feat in feats_to_process:
-        split_elements['target'][feat] = target_decoy_generator(
-            elements['target'][feat], 'false', ns)
-        split_elements['decoy'][feat] = target_decoy_generator(
-            elements['decoy'][feat], 'true', ns)
-
-    return split_elements
+        feats_to_process[feat] = target_decoy_generator(
+            elements[feat], td[filter_type], ns)
+    return feats_to_process
 
 
 def get_score(elements, ns, scoretype='svm_score'):
