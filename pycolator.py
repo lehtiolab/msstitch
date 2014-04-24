@@ -23,24 +23,32 @@ def parser_file_exists(currentparser, fn):
 parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
 parser.add_argument('-c', dest='command', type=str, help='How to manipulate the input:\n'
 'splittd        - Splits target and decoy data, multiple inputs to multiple outputs\n'
-'merge          - Merges xml files. nothing else.\n'
-'mergebest      - Merges xml files and only includes best scoring unique peptides\n'
-'filterknown    - Filters out peptides that are found in a certain FASTA search\n'
-'                 space which is passed using the -b flag.\n'
+'merge          - Merges percolator xml files. nothing else. Use -i for\n'
+'                 base file, and specify files with --multifiles\n'
+'trypticlookup  - Creates a lookup DB from a FASTA file for use with e.g. filterknown\n'
+'                 --cutproline and --ntermwildcards can be used.\n'
+'filteruni      - Only includes best scoring unique peptides in a (merged) file\n'
+'filterknown    - Filters out peptides that are found in a certain lookup DB\n'
+'                 passed using the -b flag. Use with or without\n'
+'                 --cutproline and --ntermwildcards\n'
 'filterlen      - Filters out peptides that exceed --maxlen and --minlen\n'
-'qvality        - Runs qvality on two inputfiles: one containing target and \n'
-'                 containing decoy data. It is assumed that the first file \n'
-'                 specified under -i is the target and the second is the\n'
-'                 decoy.'
+'qvality        - Runs qvality on an inputfile: target and decoy data.\n'
+'                 When using separate files for target and decoy, \n'
+'                 use --decoy to specify the decoy input file\n'
 'reassign - Reassigns statistics from a qvality output file onto a single'
 '           percolator input file. Needs -q flag.',
 required=True
 )
 
-parser.add_argument('-i', dest='infile', nargs='+',
-        type=lambda x:parser_file_exists(parser, x),
-        required=True, help='Input file(s)')
-
+parser.add_argument('-i', dest='infile',
+        type=lambda x: parser_file_exists(parser, x),
+        required=True, help='Input file')
+parser.add_argument('--multifiles', dest='multifile_input',
+                    type=lambda x: parser_file_exists(parser, x),
+                    required=True,
+                    help='Multiple input files for use in e.g. merging data.'
+                    ' Features will be picked from these and e.g. merged in '
+                    'the file specified with -i.')
 parser.add_argument('-d', dest='outdir', required=True, help='Directory to output in')
 parser.add_argument('-s', dest='score', help='Score to filter unique peptides '
 'on (only for command mergebest and filterknownmerge)', default='svm')
@@ -57,16 +65,25 @@ parser.add_argument('--cutproline', dest='proline', help='With flag, trypsin is 
                     'considered to cut before a proline residue. The filter '
                     'known will filter against both cut and non-cut peptides.',
                     action='store_const', const=True, default=False)
-parser.add_argument('--falloff', dest='falloff', help='With flag, the filter '
+parser.add_argument('--ntermwildcards', dest='falloff', help='With flag, the filter '
                     'known will filter against both intact peptides and those '
                     'that match to the C-terminal part of a tryptic peptide '
-                    'from the database.',
+                    'from the database. Database should be built with this'
+                    'flag in order for the lookup to work, since sequences'
+                    'will be stored and looked up reversed',
                     action='store_const', const=True, default=False)
 
+parser.add_argument('--decoy', dest='decoyfn',
+                    type=lambda x: parser_file_exists(parser, x),
+                    help='Decoy input file (percolator out XML) for qvality')
+parser.add_argument('--target', dest='targetfn',
+        type=lambda x: parser_file_exists(parser, x),
+        required=True, help='Target input file for qvality')
 parser.add_argument('-f', dest='feattype', help='Feature type to use for '
                     'qvality. Can either be psm or peptide.')
 parser.add_argument('-o', dest='options', nargs='+',
-                    help='Extra options that may be passed to qvality.')
+                    help='Extra options that may be passed to qvality.'
+                    'Option form: -o ***flag value ***flag ***flag value')
 parser.add_argument('-q', dest='qvalityout', help='Qvality output file. '
                     'Required when using the reassign command.',
                     type=lambda x:parser_file_exists(parser, x))
@@ -81,9 +98,10 @@ args = parser.parse_args()
 commandmap = {
     'splittd'    : drivers.SplitDriver,
     'merge'      : drivers.MergeDriver,
-    'mergebest'  : drivers.MergeUniquePeptides,
-    'filterlen'  : drivers.FilterPeptideLengthDriver,
-    'filterknown': drivers.MergeUniqueAndFilterKnownPeptides,
+    'trypticlookup': drivers.CreateLookup,
+    'filteruni'  : drivers.FilterUniquePeptides,
+    'filterlen'  : drivers.FilterPeptideLength,
+    'filterknown': drivers.FilterKnownPeptides,
     'qvality'    : drivers.QvalityDriver,
     'reassign'   : drivers.ReassignmentDriver,
     }
