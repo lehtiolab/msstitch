@@ -7,13 +7,19 @@ from tempfile import mkdtemp
 
 class TestSplitTD(unittest.TestCase):
     command = 'splittd'
+    testdir = 'tests'
+    fixdir = os.path.join(testdir, 'fixtures')
+    outdir = os.path.join(testdir, 'test_output')
+    infilename = 'percolator_out.xml'
 
     def setUp(self):
-        self.infile = 'tests/fixtures/percolator_out.xml'
-        os.makedirs('tests/test_output', exist_ok=True)
-        self.workdir = mkdtemp(dir='tests/test_output')
-        self.target = os.path.basename(self.infile) + '_target.xml'
-        self.decoy = os.path.basename(self.infile) + '_decoy.xml'
+        self.infile = os.path.join(self.fixdir, self.infilename)
+        os.makedirs(self.outdir, exist_ok=True)
+        self.workdir = mkdtemp(dir=self.outdir)
+        self.target = os.path.join(self.workdir,
+                                   self.infilename + '_target.xml')
+        self.decoy = os.path.join(self.workdir,
+                                  self.infilename + '_decoy.xml')
 
     def tearDown(self):
         # remove self.workdir
