@@ -16,7 +16,7 @@ class BaseDriver(object):
         return os.path.join(self.outdir, outfn)
 
 
-class PycolatorDriver(object):
+class PycolatorDriver(BaseDriver):
     """Driver for pycolator functions"""
     def prepare_percolator_output(self, fn):
         """Returns namespace and static xml from percolator output file"""
