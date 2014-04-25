@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # FIXME docstring bad command format
 """
 pycolator -- Percolator output manipulation
