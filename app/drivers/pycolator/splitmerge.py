@@ -9,16 +9,13 @@ class SplitDriver(PycolatorDriver):
         self.targetsuffix = kwargs.get('targetsuffix', '_target.xml')
         self.decoysuffix = kwargs.get('decoysuffix', '_decoy.xml')
 
-    def prepare(self):
-        self.ns, self.static_xml = self.prepare_percolator_output(self.fn)
-
     def run(self):
         td = {'target': self.targetsuffix, 'decoy': self.decoysuffix}
         for filter_type in ['target', 'decoy']:
-            self.prepare()
+            self.prepare(self.fn)
             self.set_features(filter_type)
             self.outsuffix = td[filter_type]
-            self.write(filter_type)
+            self.write()
 
     def set_features(self, filter_type):
         """ Calls splitter to split percolator output into target/decoy elements.
