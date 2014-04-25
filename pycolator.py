@@ -77,7 +77,7 @@ parser.add_argument('--decoy', dest='decoyfn',
                     help='Decoy input file (percolator out XML) for qvality')
 parser.add_argument('--target', dest='targetfn',
         type=lambda x: parser_file_exists(parser, x),
-        required=True, help='Target input file for qvality')
+        help='Target input file for qvality')
 parser.add_argument('-f', dest='feattype', help='Feature type to use for '
                     'qvality. Can either be psm or peptide.')
 parser.add_argument('-o', dest='options', nargs='+',
