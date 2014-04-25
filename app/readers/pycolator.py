@@ -14,12 +14,12 @@ def get_namespace(fn):
 def get_percolator_static_xml(fn, ns):
     rootgen = etree.iterparse(fn, tag='{%s}percolator_output' % ns['xmlns'],
                               events=('start',))
-    root = rootgen.next()[1]
+    root = next(rootgen)[1]
     for child in root.getchildren():
         root.remove(child)
     process = etree.iterparse(fn, tag='{%s}process_info' % ns['xmlns'],
                               events=('start',))
-    root.append(process.next()[1])
+    root.append(next(process)[1])
     return root
 
 
