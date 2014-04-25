@@ -26,8 +26,13 @@ class TestSplitTD(unittest.TestCase):
         pass
 
     def md5_check(self, fn):
-        with open(fn):
-            m = hashlib.md5(fn.read())
+        m = hashlib.md5()
+        with open(fn) as fp:
+            while True:
+                data = fp.read(8192).encode('utf-8')
+                if not data:
+                    break
+                m.update(data)
         return m.hexdigest()
 
     def run_pycolator(self, command, *options):
