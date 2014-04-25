@@ -11,7 +11,10 @@ EXAMPLE:
 
 import argparse
 import os
-from app.drivers import pycolator as drivers
+from app.drivers.pycolator import splitmerge
+from app.drivers.pycolator import filters
+from app.drivers.pycolator import lookup
+from app.drivers.pycolator import stats
 
 
 def parser_file_exists(currentparser, fn):
@@ -95,14 +98,14 @@ parser.add_argument('-q', dest='qvalityout', help='Qvality output file. '
 args = parser.parse_args()
 
 commandmap = {
-    'splittd'    : drivers.splitmerge.SplitDriver,
-    'merge'      : drivers.splitmerge.MergeDriver,
-    'trypticlookup': drivers.lookup.CreateLookup,
-    'filteruni'  : drivers.filters.FilterUniquePeptides,
-    'filterlen'  : drivers.filters.FilterPeptideLength,
-    'filterknown': drivers.filters.FilterKnownPeptides,
-    'qvality'    : drivers.stats.QvalityDriver,
-    'reassign'   : drivers.stats.ReassignmentDriver,
+    'splittd'    : splitmerge.SplitDriver,
+    'merge'      : splitmerge.MergeDriver,
+    'trypticlookup': lookup.CreateLookup,
+    'filteruni'  : filters.FilterUniquePeptides,
+    'filterlen'  : filters.FilterPeptideLength,
+    'filterknown': filters.FilterKnownPeptides,
+    'qvality'    : stats.QvalityDriver,
+    'reassign'   : stats.ReassignmentDriver,
     }
 
 
