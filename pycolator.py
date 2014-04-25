@@ -45,7 +45,6 @@ parser.add_argument('-i', dest='infile',
         required=True, help='Input file')
 parser.add_argument('--multifiles', dest='multifile_input',
                     type=lambda x: parser_file_exists(parser, x),
-                    required=True,
                     help='Multiple input files for use in e.g. merging data.'
                     ' Features will be picked from these and e.g. merged in '
                     'the file specified with -i.')
