@@ -4,7 +4,7 @@ from app.lookups import sequences
 
 class TestTrypsinize(unittest.TestCase):
     def runtest(self, seq, expected, proline=False):
-        result = sequences.new_trypsinize(seq, proline)
+        result = sequences.trypsinize(seq, proline)
         self.assertCountEqual(result, expected)
 
     def test_single_lysine(self):
