@@ -12,10 +12,11 @@ def get_namespace(fn):
     ns = {}
     for prefix in root.nsmap:
         separator = ':'
+        nsprefix = prefix
         if prefix is None:
-            prefix = ''
+            nsprefix = ''
             separator = ''
-        ns['xmlns{0}{1}'.format(separator, prefix)] = root.nsmap[prefix]
+        ns['xmlns{0}{1}'.format(separator, nsprefix)] = root.nsmap[prefix]
     return ns
 
 
