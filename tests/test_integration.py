@@ -43,8 +43,8 @@ class TestSplitTD(unittest.TestCase):
 
     def test_split(self):
         self.run_pycolator(self.command)
-        target_expected = 'tests_fixtures/splittd_target_out.xml'
-        decoy_expected = 'tests_fixtures/splittd_decoy_out.xml'
+        target_expected = os.path.join(self.fixdir, 'splittd_target_out.xml')
+        decoy_expected = os.path.join(self.fixdir, 'splittd_decoy_out.xml')
         self.assertEqual(self.md5_check(self.target),
                          self.md5_check(target_expected))
         self.assertEqual(self.md5_check(self.decoy),
