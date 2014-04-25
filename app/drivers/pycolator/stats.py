@@ -4,7 +4,6 @@ from app.drivers.basedrivers import PycolatorDriver
 from app.readers import pycolator as readers
 from app.writers import pycolator as writers
 from app.preparation import pycolator as preparation
-from app import qvality
 
 
 class ReassignmentDriver(PycolatorDriver):
