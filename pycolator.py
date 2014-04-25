@@ -95,14 +95,14 @@ parser.add_argument('-q', dest='qvalityout', help='Qvality output file. '
 args = parser.parse_args()
 
 commandmap = {
-    'splittd'    : drivers.SplitDriver,
-    'merge'      : drivers.MergeDriver,
-    'trypticlookup': drivers.CreateLookup,
-    'filteruni'  : drivers.FilterUniquePeptides,
-    'filterlen'  : drivers.FilterPeptideLength,
-    'filterknown': drivers.FilterKnownPeptides,
-    'qvality'    : drivers.QvalityDriver,
-    'reassign'   : drivers.ReassignmentDriver,
+    'splittd'    : drivers.splitmerge.SplitDriver,
+    'merge'      : drivers.splitmerge.MergeDriver,
+    'trypticlookup': drivers.lookup.CreateLookup,
+    'filteruni'  : drivers.filters.FilterUniquePeptides,
+    'filterlen'  : drivers.filters.FilterPeptideLength,
+    'filterknown': drivers.filters.FilterKnownPeptides,
+    'qvality'    : drivers.stats.QvalityDriver,
+    'reassign'   : drivers.stats.ReassignmentDriver,
     }
 
 
