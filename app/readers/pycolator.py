@@ -2,21 +2,28 @@ from lxml import etree
 from . import basereader
 
 
+def get_root_el(fn):
+    rootgen = etree.iterparse(fn, events=('start',))
+    return next(rootgen)[1]
+
+
 def get_namespace(fn):
-    ns = {'xmlns': 'http://per-colator.com/percolator_out/14',
-          'xmlns:p': 'http://per-colator.com/percolator_out/14',
-          'xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
-          }
+    root = get_root_el(fn)
+    ns = {}
+    for prefix in root.nsmap:
+        separator = ':'
+        if prefix is None:
+            separator = None
+        ns['{0}{1}'.format(separator, prefix)] = root.nsmap[prefix]
     return ns
-    # FIXME lookup from file
 
 
 def get_percolator_static_xml(fn, ns):
-    rootgen = etree.iterparse(fn, tag='{%s}percolator_output' % ns['xmlns'],
-                              events=('start',))
-    root = next(rootgen)[1]
-    for child in root.getchildren():
-        root.remove(child)
+    #rootgen = etree.iterparse(fn, tag='{%s}percolator_output' % ns['xmlns'],
+    #                          events=('start',))
+    root = get_root_el(fn)
+    #for child in root.getchildren():
+    #    root.remove(child)
     process = etree.iterparse(fn, tag='{%s}process_info' % ns['xmlns'],
                               events=('start',))
     root.append(next(process)[1])
