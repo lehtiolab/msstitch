@@ -4,8 +4,10 @@ from . import basereader
 
 def get_root_el(fn):
     rootgen = etree.iterparse(fn, events=('start',))
-    return next(rootgen)[1]
-
+    root = next(rootgen)[1]
+    for child in root.getchildren():
+        root.remove(child)
+    return root
 
 def get_namespace(fn):
     root = get_root_el(fn)
@@ -24,8 +26,7 @@ def get_percolator_static_xml(fn, ns):
     #rootgen = etree.iterparse(fn, tag='{%s}percolator_output' % ns['xmlns'],
     #                          events=('start',))
     root = get_root_el(fn)
-    #for child in root.getchildren():
-    #    root.remove(child)
+
     process = etree.iterparse(fn, tag='{%s}process_info' % ns['xmlns'],
                               events=('start',))
     root.append(next(process)[1])
@@ -58,8 +59,7 @@ def generate_peptides_multiple_fractions(input_files, ns):
 
 
 def generate_psms(fn, ns):
-    return basereader.generate_tags_multiple_files(fn, 'psm',
-                                                   ['peptide', 'protein'], ns)
+    return basereader.generate_xmltags(fn, 'psm', ['peptide', 'protein'], ns)
 
 
 def generate_peptides(fn, ns):
