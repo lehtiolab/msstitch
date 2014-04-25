@@ -7,9 +7,10 @@ def write_percolator_xml(staticxml, feats, fn):
     psm_iterator}, this generates percolator out data into a file."""
 
     # First get xml until psms opening element is found.
-    etree.SubElement(staticxml, 'psms').text = '{$psms}'
+    etree.SubElement(staticxml, 'psms').text = '***psms***'
     root = etree.tostring(staticxml, pretty_print=True, xml_declaration=True)
-    root = root[:root.find('{$psms}')]
+    root = root.decode('utf-8')
+    root = root[:root.find('***psms***')]
 
     # Write opening xml
     with open(fn, 'w') as fp:
