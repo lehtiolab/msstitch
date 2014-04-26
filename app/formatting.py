@@ -6,7 +6,7 @@ def string_and_clear(el, ns):
     return str_el
 
 def stringify_strip_namespace_declaration(el, ns):
-    strxml = etree.tostring(el).decode('utf-8')
+    strxml = etree.tostring(el, encoding='utf-8').decode('utf-8')
     strxml = strxml.replace('xmlns="{0}" '.format(ns['xmlns']), '')
     strxml = strxml.replace('xmlns:p="{0}" '.format(ns['xmlns:p']), '')
     strxml = strxml.replace('xmlns:xsi="{0}" '.format(ns['xmlns:xsi']), '')
