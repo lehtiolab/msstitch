@@ -41,7 +41,7 @@ class BaseTestPycolator(unittest.TestCase):
             ns['xmlns{0}{1}'.format(separator, nsprefix)] = root.nsmap[prefix]
         return ns
 
-    def run_pycolator(self, command, options):
+    def run_pycolator(self, command, options=[]):
         cmd = ['./pycolator.py', '-c', command, '-i', self.infile,
                '-d', self.workdir]
         cmd.extend(options)
