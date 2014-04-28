@@ -8,7 +8,6 @@ class BaseDriver(object):
     def __init__(self, **kwargs):
         self.fn = kwargs['infile']
         self.outdir = kwargs['outdir']
-        self.outsuffix = kwargs.get('outsuffix', '.xml')
 
     def create_outfilepath(self, fn, suffix=None):
         basefn = os.path.basename(fn)
@@ -38,7 +37,7 @@ class PycolatorDriver(BaseDriver):
     def run(self):
         self.prepare(self.fn)
         self.set_features()
-        self.write(self.fn)
+        self.write()
 
     def write(self):
         outfn = self.create_outfilepath(self.fn, self.outsuffix)

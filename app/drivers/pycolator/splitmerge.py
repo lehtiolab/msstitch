@@ -40,8 +40,8 @@ class MergeDriver(PycolatorDriver):
         self.mergefiles = [self.fn]
         self.mergefiles.extend(kwargs.get('multifile_input', None))
 
-    def prepare(self):
-        self.ns, self.static_xml = self.prepare_percolator_output(self.fn)
+    def prepare(self, fn):
+        self.ns, self.static_xml = self.prepare_percolator_output(fn)
 
     def set_features(self):
         """"Merge all psms and peptides"""
