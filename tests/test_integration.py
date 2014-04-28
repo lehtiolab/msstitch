@@ -132,3 +132,29 @@ class TestMerge(BaseTestPycolator):
                                                    expected['ns']),
                               self.get_element_ids(result['peptides'],
                                                    'peptide_id', result['ns']))
+
+
+class TestFilterUnique(BaseTestPycolator):
+    command = 'filteruni'
+    infilename = 'percolator_out.xml'
+    # FIXME other scores than svm
+    # FIXME illegal scores handling
+    # FIXME PSM peptide reffing
+
+    def setUp(self):
+        super().setUp()
+        self.resultfn = os.path.join(self.workdir,
+                                     self.infilename + '_filtuniq.xml')
+
+    def test_filter_uniques(self):
+        """Checks if resultpeps gets uniques, and also that input peptides
+        were not unique to start with."""
+        self.run_pycolator(self.command, ['-s', 'svm'])
+        result = self.read_percolator_out(self.resultfn)
+        origin = self.read_percolator_out(self.infilename)
+        resultpeps = self.get_element_ids(result['peptides'],
+                                          'peptide_id', result['ns'])
+        originpeps = self.get_element_ids(origin['peptides'],
+                                          'peptide_id', origin['ns'])
+        self.assertEqual(len({x for x in resultpeps}), len(resultpeps))
+        self.assertNotEqual(len({x for x in originpeps}), len(originpeps))
