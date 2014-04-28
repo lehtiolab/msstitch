@@ -2,3 +2,5 @@
 *.swp
 
 .ropeproject/
+
+tests/test_output/
