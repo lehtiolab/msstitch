@@ -98,3 +98,22 @@ class TestSplitTD(BaseTestPycolator):
                 self.assertEqual(el.attrib['{%s}decoy' % target_contents['ns']], 'false')
             for el in decoy_contents[feat]:
                 self.assertEqual(el.attrib['{%s}decoy' % decoy_contents['ns']], 'true')
+
+
+class TestMerge(BaseTestPycolator):
+    command = 'merge'
+    infilename = 'splittd_target_out.xml'
+
+    def setUp(self):
+        super().setUp()
+        self.multifiles = [os.path.join(self.fixdir, 'splittd_decoy_out.xml')]
+        self.resultfn = os.path.join(self.workdir, self.infilename,
+                                     '_merged.xml')
+
+    def test_merge(self):
+        options = ['--multifiles']
+        options.extend(self.multifiles)
+        self.run_pycolator(self.command, options)
+        expected = self.read_percolator_out(os.path.join(self.fixdir,
+                                                         'percolator_out.xml'))
+        result = self.read_percolator_out(self.resultfn)
