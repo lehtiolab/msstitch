@@ -41,7 +41,7 @@ class BaseTestPycolator(unittest.TestCase):
             ns['xmlns{0}{1}'.format(separator, nsprefix)] = root.nsmap[prefix]
         return ns
 
-    def run_pycolator(self, command, *options):
+    def run_pycolator(self, command, options):
         cmd = ['./pycolator.py', '-c', command, '-i', self.infile,
                '-d', self.workdir]
         cmd.extend(options)
@@ -109,8 +109,8 @@ class TestMerge(BaseTestPycolator):
     def setUp(self):
         super().setUp()
         self.multifiles = [os.path.join(self.fixdir, 'splittd_decoy_out.xml')]
-        self.resultfn = os.path.join(self.workdir, self.infilename,
-                                     '_merged.xml')
+        self.resultfn = os.path.join(self.workdir,
+                                     self.infilename + '_merged.xml')
 
     def test_merge(self):
         options = ['--multifiles']
