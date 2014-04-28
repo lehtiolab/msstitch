@@ -3,6 +3,7 @@ import subprocess
 import os
 import hashlib
 from tempfile import mkdtemp
+from lxml import etree
 
 
 class TestSplitTD(unittest.TestCase):
@@ -24,8 +25,39 @@ class TestSplitTD(unittest.TestCase):
     def tearDown(self):
         # remove self.workdir
         pass
+    
+    def read_percolator_out(self, fn):
+        ns = self.get_namespace(fn)['xmlns']      
+        contents = {'ns': ns, 'psms': [], 'peptides': []}
+        xml = etree.iterparse(fn)
+        for ac, el in xml:
+            if el.tag == '{%s}psm' % ns:
+                contents['psms'].append(el)
+            elif el.tag == '{%s}peptide' % ns: 
+                contents['peptides'].append(el)
+        return contents
+
+    def get_root_el(self, fn):
+        rootgen = etree.iterparse(fn, events=('start',))
+        root = next(rootgen)[1]
+        for child in root.getchildren():
+            root.remove(child)
+        return root
+
+    def get_namespace(self, fn):
+        root = self.get_root_el(fn)
+        ns = {}
+        for prefix in root.nsmap:
+            separator = ':'
+            nsprefix = prefix
+            if prefix is None:
+                nsprefix = ''
+                separator = ''
+            ns['xmlns{0}{1}'.format(separator, nsprefix)] = root.nsmap[prefix]
+        return ns
 
     def md5_check(self, fn):
+	# DEPRECATE? XML too many formatting issues
         m = hashlib.md5()
         with open(fn) as fp:
             while True:
@@ -42,10 +74,21 @@ class TestSplitTD(unittest.TestCase):
         subprocess.call(cmd)
 
     def test_split(self):
+        """Tests that splitted files contain equal amount of PSMS
+        when compared with expected output, and checks that each psm/peptide
+        has correct 'decoy' attribute."""
         self.run_pycolator(self.command)
         target_expected = os.path.join(self.fixdir, 'splittd_target_out.xml')
         decoy_expected = os.path.join(self.fixdir, 'splittd_decoy_out.xml')
-        self.assertEqual(self.md5_check(self.target),
-                         self.md5_check(target_expected))
-        self.assertEqual(self.md5_check(self.decoy),
-                         self.md5_check(decoy_expected))
+        target_exp_contents = self.read_percolator_out(target_expected)
+        decoy_exp_contents = self.read_percolator_out(decoy_expected)
+        target_contents = self.read_percolator_out(self.target)
+        decoy_contents = self.read_percolator_out(self.decoy)
+ 
+        self.assertCountEqual(target_contents, target_exp_contents)
+        self.assertCountEqual(decoy_contents, decoy_exp_contents)
+        for feat in ['psms', 'peptides']:
+            for el in target_contents[feat]:
+                self.assertEqual(el.attrib['{%s}decoy' % target_contents['ns']], 'false')
+            for el in decoy_contents[feat]:
+                self.assertEqual(el.attrib['{%s}decoy' % decoy_contents['ns']], 'true')
