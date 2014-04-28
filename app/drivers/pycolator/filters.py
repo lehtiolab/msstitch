@@ -1,5 +1,6 @@
 from app.drivers.basedrivers import PycolatorDriver
 from app.preparation import pycolator as preparation
+from app.readers import pycolator as readers
 
 
 class FilterPeptideLength(PycolatorDriver):
@@ -33,12 +34,16 @@ class FilterUniquePeptides(PycolatorDriver):
         if self.score is None:
             self.score = 'svm'
 
+    def get_all_psms(self):
+        """Override parent method so it returns strings instead"""
+        return readers.generate_psms_multiple_fractions_strings([self.fn],
+                                                                self.ns)
+
     def set_features(self):
         uniquepeps = preparation.filter_unique_peptides(self.allpeps,
                                                         self.score,
                                                         self.ns)
-        # FIXME stringify psms
-        self.features = {'psm': self.allpsms_str, 'peptide': uniquepeps}
+        self.features = {'psm': self.allpsms, 'peptide': uniquepeps}
 
 
 class FilterKnownPeptides(PycolatorDriver):
