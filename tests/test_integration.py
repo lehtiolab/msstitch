@@ -112,6 +112,9 @@ class TestMerge(BaseTestPycolator):
         self.resultfn = os.path.join(self.workdir,
                                      self.infilename + '_merged.xml')
 
+    def get_element_ids(self, elements, id_attrib, ns):
+        return [x.attrib['{%s}%s' % (ns, id_attrib)] for x in elements]
+
     def test_merge(self):
         options = ['--multifiles']
         options.extend(self.multifiles)
@@ -119,3 +122,13 @@ class TestMerge(BaseTestPycolator):
         expected = self.read_percolator_out(os.path.join(self.fixdir,
                                                          'percolator_out.xml'))
         result = self.read_percolator_out(self.resultfn)
+        self.assertEqual(len(result['psms']), len(result['peptides']))
+        self.assertCountEqual(self.get_element_ids(expected['psms'], 'psm_id',
+                                                   expected['ns']),
+                              self.get_element_ids(result['psms'], 'psm_id',
+                                                   result['ns']))
+        self.assertCountEqual(self.get_element_ids(expected['peptides'],
+                                                   'peptide_id',
+                                                   expected['ns']),
+                              self.get_element_ids(result['peptides'],
+                                                   'peptide_id', result['ns']))
