@@ -22,6 +22,9 @@ class BaseTestPycolator(unittest.TestCase):
                 contents['peptides'].append(el)
         return contents
 
+    def get_element_ids(self, elements, id_attrib, ns):
+        return [x.attrib['{%s}%s' % (ns, id_attrib)] for x in elements]
+
     def get_root_el(self, fn):
         rootgen = etree.iterparse(fn, events=('start',))
         root = next(rootgen)[1]
@@ -112,9 +115,6 @@ class TestMerge(BaseTestPycolator):
         self.resultfn = os.path.join(self.workdir,
                                      self.infilename + '_merged.xml')
 
-    def get_element_ids(self, elements, id_attrib, ns):
-        return [x.attrib['{%s}%s' % (ns, id_attrib)] for x in elements]
-
     def test_merge(self):
         options = ['--multifiles']
         options.extend(self.multifiles)
@@ -151,7 +151,7 @@ class TestFilterUnique(BaseTestPycolator):
         were not unique to start with."""
         self.run_pycolator(self.command, ['-s', 'svm'])
         result = self.read_percolator_out(self.resultfn)
-        origin = self.read_percolator_out(self.infilename)
+        origin = self.read_percolator_out(self.infile)
         resultpeps = self.get_element_ids(result['peptides'],
                                           'peptide_id', result['ns'])
         originpeps = self.get_element_ids(origin['peptides'],
