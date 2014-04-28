@@ -85,8 +85,8 @@ class TestSplitTD(unittest.TestCase):
         target_contents = self.read_percolator_out(self.target)
         decoy_contents = self.read_percolator_out(self.decoy)
  
-        self.assertCountEqual(target_contents, target_exp_contents)
-        self.assertCountEqual(decoy_contents, decoy_exp_contents)
+        self.assertEqual(len(target_contents['psms']), len(target_exp_contents['psms']))
+        self.assertEqual(len(decoy_contents['peptides']), len(decoy_exp_contents['psms']))
         for feat in ['psms', 'peptides']:
             for el in target_contents[feat]:
                 self.assertEqual(el.attrib['{%s}decoy' % target_contents['ns']], 'false')
