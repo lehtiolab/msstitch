@@ -1,4 +1,5 @@
 from lxml import etree
+import itertools
 from app import formatting
 
 
@@ -11,9 +12,8 @@ def generate_tags_multiple_files(input_files, tag, ignore_tags, ns=None):
     """
     Calls xmltag generator for multiple files.
     """
-    # Deprecate?
-    for fn in input_files:
-        return generate_xmltags(fn, tag, ignore_tags, ns)
+    return itertools.chain.from_iterable([generate_xmltags(
+        fn, tag, ignore_tags, ns) for fn in input_files])
 
 
 def generate_tags_multiple_files_strings(input_files, ns, tag, ignore_tags):
