@@ -92,7 +92,9 @@ class TestSplitTD(BaseTestPycolator):
         decoy_contents = self.read_percolator_out(self.decoy)
 
         self.assertEqual(len(target_contents['psms']), len(target_exp_contents['psms']))
-        self.assertEqual(len(decoy_contents['peptides']), len(decoy_exp_contents['psms']))
+        self.assertEqual(len(target_contents['peptides']), len(target_exp_contents['peptides']))
+        self.assertEqual(len(decoy_contents['psms']), len(decoy_exp_contents['psms']))
+        self.assertEqual(len(decoy_contents['peptides']), len(decoy_exp_contents['peptides']))
         for feat in ['psms', 'peptides']:
             for el in target_contents[feat]:
                 self.assertEqual(el.attrib['{%s}decoy' % target_contents['ns']], 'false')
