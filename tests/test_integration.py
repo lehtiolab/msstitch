@@ -6,34 +6,19 @@ from tempfile import mkdtemp
 from lxml import etree
 
 
-class TestSplitTD(unittest.TestCase):
-    command = 'splittd'
+class BaseTestPycolator(unittest.TestCase):
     testdir = 'tests'
     fixdir = os.path.join(testdir, 'fixtures')
     outdir = os.path.join(testdir, 'test_output')
-    infilename = 'percolator_out.xml'
 
-    def setUp(self):
-        self.infile = os.path.join(self.fixdir, self.infilename)
-        os.makedirs(self.outdir, exist_ok=True)
-        self.workdir = mkdtemp(dir=self.outdir)
-        self.target = os.path.join(self.workdir,
-                                   self.infilename + '_target.xml')
-        self.decoy = os.path.join(self.workdir,
-                                  self.infilename + '_decoy.xml')
-
-    def tearDown(self):
-        # remove self.workdir
-        pass
-    
     def read_percolator_out(self, fn):
-        ns = self.get_namespace(fn)['xmlns']      
+        ns = self.get_namespace(fn)['xmlns']
         contents = {'ns': ns, 'psms': [], 'peptides': []}
         xml = etree.iterparse(fn)
         for ac, el in xml:
             if el.tag == '{%s}psm' % ns:
                 contents['psms'].append(el)
-            elif el.tag == '{%s}peptide' % ns: 
+            elif el.tag == '{%s}peptide' % ns:
                 contents['peptides'].append(el)
         return contents
 
@@ -56,8 +41,35 @@ class TestSplitTD(unittest.TestCase):
             ns['xmlns{0}{1}'.format(separator, nsprefix)] = root.nsmap[prefix]
         return ns
 
+    def run_pycolator(self, command, *options):
+        cmd = ['./pycolator.py', '-c', command, '-i', self.infile,
+               '-d', self.workdir]
+        cmd.extend(options)
+        subprocess.call(cmd)
+
+    def setUp(self):
+        self.infile = os.path.join(self.fixdir, self.infilename)
+        os.makedirs(self.outdir, exist_ok=True)
+        self.workdir = mkdtemp(dir=self.outdir)
+
+
+class TestSplitTD(BaseTestPycolator):
+    command = 'splittd'
+    infilename = 'percolator_out.xml'
+
+    def setUp(self):
+        super().setUp()
+        self.target = os.path.join(self.workdir,
+                                   self.infilename + '_target.xml')
+        self.decoy = os.path.join(self.workdir,
+                                  self.infilename + '_decoy.xml')
+
+    def tearDown(self):
+        # remove self.workdir
+        pass
+
     def md5_check(self, fn):
-	# DEPRECATE? XML too many formatting issues
+        # DEPRECATE? XML too many formatting issues
         m = hashlib.md5()
         with open(fn) as fp:
             while True:
@@ -66,12 +78,6 @@ class TestSplitTD(unittest.TestCase):
                     break
                 m.update(data)
         return m.hexdigest()
-
-    def run_pycolator(self, command, *options):
-        cmd = ['./pycolator.py', '-c', command, '-i', self.infile,
-               '-d', self.workdir]
-        cmd.extend(options)
-        subprocess.call(cmd)
 
     def test_split(self):
         """Tests that splitted files contain equal amount of PSMS
@@ -84,7 +90,7 @@ class TestSplitTD(unittest.TestCase):
         decoy_exp_contents = self.read_percolator_out(decoy_expected)
         target_contents = self.read_percolator_out(self.target)
         decoy_contents = self.read_percolator_out(self.decoy)
- 
+
         self.assertCountEqual(target_contents, target_exp_contents)
         self.assertCountEqual(decoy_contents, decoy_exp_contents)
         for feat in ['psms', 'peptides']:
