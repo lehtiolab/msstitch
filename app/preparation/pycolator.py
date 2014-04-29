@@ -32,10 +32,13 @@ def get_score(elements, ns, scoretype='svm_score'):
 
 
 def filter_peptide_length(peptides, ns, minlen=0, maxlen=None):
+    minlen = int(minlen)
     if maxlen is None:
         maxlen = float('inf')
+    else:
+        maxlen = int(maxlen)
     for pep in peptides:
-        seq = pep.attrib['{%s}peptide_id']
+        seq = pep.attrib['{%s}peptide_id' % ns['xmlns']]
         if len(seq) > minlen and len(seq) < maxlen:
             yield pep
         else:
