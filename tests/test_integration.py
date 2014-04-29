@@ -185,3 +185,8 @@ class TestFilterLength(BaseTestPycolator):
             self.assertLessEqual(len(seq), maxlen)
 
         # test if origin peptides in result, except ones with wrong length
+        for pep in origin['peptide_ids']:
+            seq = strip_modifications(pep)
+            if seq < minlen or seq > maxlen:
+                continue
+            self.assertIn(pep, result['peptide_ids'])
