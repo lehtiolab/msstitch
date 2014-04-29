@@ -38,11 +38,16 @@ def filter_peptide_length(peptides, ns, minlen=0, maxlen=None):
     else:
         maxlen = int(maxlen)
     for pep in peptides:
-        seq = pep.attrib['{%s}peptide_id' % ns['xmlns']]
+        seq = get_peptide_seq(pep, ns)
+        seq = strip_modifications(seq)
         if len(seq) > minlen and len(seq) < maxlen:
             yield pep
         else:
             formatting.clear_el(pep)
+
+
+def strip_modifications(seq):
+    return re.sub('\[UNIMOD:\d*\]', '', seq)
 
 
 def filter_known_searchspace(peptides, searchspace, ns, ntermwildcards):
@@ -53,12 +58,11 @@ def filter_known_searchspace(peptides, searchspace, ns, ntermwildcards):
 
     for peptide in peptides:
         seq = get_peptide_seq(peptide, ns)
+        seq = strip_modifications(seq)
         # Exchange leucines for isoleucines since MS can't differ and we
         # don't want to find 'novel' peptides which only have a difference
         # in this amino acid
         seq = seq.replace('L', 'I')
-        # Loose modifications
-        seq = re.sub('\[UNIMOD:\d*\]', '', seq)
         if not lookup.check_seq_exists(seq, ntermwildcards):
             yield peptide
         else:
