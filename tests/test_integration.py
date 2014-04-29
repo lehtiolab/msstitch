@@ -19,7 +19,9 @@ class BaseTestPycolator(unittest.TestCase):
                                                 'psm_id', contents['ns']),
                 'peptide_ids': self.get_element_ids(contents['peptides'],
                                                     'peptide_id',
-                                                    contents['ns'])
+                                                    contents['ns']),
+                'psm_seqs': self.get_psm_seqs(contents['psms'],
+                                              contents['ns'])
                 }
 
     def read_percolator_out(self, fn):
@@ -35,6 +37,9 @@ class BaseTestPycolator(unittest.TestCase):
 
     def get_element_ids(self, elements, id_attrib, ns):
         return [x.attrib['{%s}%s' % (ns, id_attrib)] for x in elements]
+
+    def get_psm_seqs(self, psms, ns):
+        return [psm.find('{%s}peptide_seq' % ns).attrib['seq'] for psm in psms]
 
     def get_root_el(self, fn):
         rootgen = etree.iterparse(fn, events=('start',))
@@ -168,9 +173,23 @@ class TestFilterLength(BaseTestPycolator):
     suffix = '_filt_len.xml'
     # FIXME need to check maxlen minlen input?
 
+    def strip_modifications(self, pep):
+        return re.sub('\[UNIMOD:\d*\]', '', pep)
+
+    def length_correct(self, seqs, minlen, maxlen):
+        for seq in seqs:
+            seq = self.strip_modifications(seq)
+            self.assertGreaterEqual(len(seq), minlen)
+            self.assertLessEqual(len(seq), maxlen)
+
+    def all_peps_in_output(self, original_seqs, minlen, maxlen, testresult):
+        for feat in original_seqs:
+            seq = self.strip_modifications(feat)
+            if len(seq) < minlen or len(seq) > maxlen:
+                continue
+            self.assertIn(feat, testresult)
+
     def test_filterlen(self):
-        def strip_modifications(pep):
-            return re.sub('\[UNIMOD:\d*\]', '', pep)
 
         maxlen = 20
         minlen = 10
@@ -178,15 +197,9 @@ class TestFilterLength(BaseTestPycolator):
         result = self.get_psm_pep_ids_from_file(self.resultfn)
         origin = self.get_psm_pep_ids_from_file(self.infile)
 
-        # test if result peptides have correct length
-        for pep in result['peptide_ids']:
-            seq = strip_modifications(pep)
-            self.assertGreaterEqual(len(seq), minlen)
-            self.assertLessEqual(len(seq), maxlen)
-
-        # test if origin peptides in result, except ones with wrong length
-        for pep in origin['peptide_ids']:
-            seq = strip_modifications(pep)
-            if len(seq) < minlen or len(seq) > maxlen:
-                continue
-            self.assertIn(pep, result['peptide_ids'])
+        self.length_correct(result['peptide_ids'], minlen, maxlen)
+        self.length_correct(result['psm_seqs'], minlen, maxlen)
+        self.all_peps_in_output(origin['peptide_ids'], minlen, maxlen,
+                                result['peptide_ids'])
+        self.all_peps_in_output(origin['psm_seqs'], minlen, maxlen,
+                                result['psm_seqs'])
