@@ -165,7 +165,7 @@ class TestFilterUnique(BaseTestPycolator):
 class TestFilterLength(BaseTestPycolator):
     command = 'filterlen'
     infilename = 'percolator_out.xml'
-    suffix = 'filt_len.xml'
+    suffix = '_filt_len.xml'
     # FIXME need to check maxlen minlen input?
 
     def test_filterlen(self):
@@ -187,6 +187,6 @@ class TestFilterLength(BaseTestPycolator):
         # test if origin peptides in result, except ones with wrong length
         for pep in origin['peptide_ids']:
             seq = strip_modifications(pep)
-            if seq < minlen or seq > maxlen:
+            if len(seq) < minlen or len(seq) > maxlen:
                 continue
             self.assertIn(pep, result['peptide_ids'])
