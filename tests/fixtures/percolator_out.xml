@@ -90,6 +90,18 @@ p:majorVersion="2" p:minorVersion="07" p:percolator_version="Percolator version 
       <protein_id>decoy_sequence4</protein_id>
       <p_value>1.637e-04</p_value>
     </psm>
+    <psm p:psm_id="dataset_608_SII_4266_1_4266_2_1" p:decoy="true">
+      <svm_score>-41.070</svm_score>
+      <q_value>2.780e-01</q_value>
+      <pep>1.000e+00</pep>
+      <exp_mass>567.8200</exp_mass>
+      <calc_mass>567.320</calc_mass>
+      <peptide_seq n="K" c="A" seq="CEEKRRKK"/>
+      <protein_id>random_seq_10206</protein_id>
+      <protein_id>random_seq_10207</protein_id>
+      <protein_id>random_seq_10208</protein_id>
+      <p_value>1.000e+00</p_value>
+    </psm>
   </psms>
   <peptides>
     <peptide p:peptide_id="[UNIMOD:730]ENPSEEAQNLVEFTDEEGYGR" p:decoy="false">
@@ -184,6 +196,20 @@ p:majorVersion="2" p:minorVersion="07" p:percolator_version="Percolator version 
       <psm_ids>
         <psm_id>task_2_dataset_40_SII_4747_1_4747_3_1</psm_id>
         <psm_id>task_2_dataset_40_SII_4742_1_4742_3_1</psm_id>
+      </psm_ids>
+    </peptide>
+    <peptide p:peptide_id="CEEKRRKK" p:decoy="true">
+      <svm_score>-41.070</svm_score>
+      <q_value>3.917e-01</q_value>
+      <pep>1.000e+00</pep>
+      <exp_mass>567.8200</exp_mass>
+      <calc_mass>567.320</calc_mass>
+      <protein_id>random_seq_10206</protein_id>
+      <protein_id>random_seq_10207</protein_id>
+      <protein_id>random_seq_10208</protein_id>
+      <p_value>1.000e+00</p_value>
+      <psm_ids>
+        <psm_id>dataset_608_SII_4266_1_4266_2_1</psm_id>
       </psm_ids>
     </peptide>
   </peptides>
