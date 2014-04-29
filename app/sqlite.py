@@ -15,8 +15,8 @@ class DatabaseConnection(object):
         """
         if outfn is None:
             fd, outfn = mkstemp(prefix='msstitcher_tmp_')
+            os.close(fd)
 
-        os.close(fd)
         self.connect(outfn)
         for table in tables:
             columns = tables[table]
