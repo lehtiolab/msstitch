@@ -45,8 +45,8 @@ class BaseTestPycolator(unittest.TestCase):
             ns['xmlns{0}{1}'.format(separator, nsprefix)] = root.nsmap[prefix]
         return ns
 
-    def run_pycolator(self, command, options=[]):
-        cmd = ['./pycolator.py', '-c', command, '-i', self.infile,
+    def run_pycolator(self, options=[]):
+        cmd = ['./pycolator.py', '-c', self.command, '-i', self.infile,
                '-d', self.workdir]
         cmd.extend(options)
         subprocess.call(cmd)
@@ -55,6 +55,8 @@ class BaseTestPycolator(unittest.TestCase):
         self.infile = os.path.join(self.fixdir, self.infilename)
         os.makedirs(self.outdir, exist_ok=True)
         self.workdir = mkdtemp(dir=self.outdir)
+        self.resultfn = os.path.join(self.workdir,
+                                     self.infilename + self.suffix)
 
     def tearDown(self):
         shutil.rmtree(self.workdir)
@@ -63,13 +65,6 @@ class BaseTestPycolator(unittest.TestCase):
 class TestSplitTD(BaseTestPycolator):
     command = 'splittd'
     infilename = 'percolator_out.xml'
-
-    def setUp(self):
-        super().setUp()
-        self.target = os.path.join(self.workdir,
-                                   self.infilename + '_target.xml')
-        self.decoy = os.path.join(self.workdir,
-                                  self.infilename + '_decoy.xml')
 
     def md5_check(self, fn):
         # DEPRECATE? XML too many formatting issues
@@ -86,7 +81,11 @@ class TestSplitTD(BaseTestPycolator):
         """Tests that splitted files contain equal amount of PSMS
         when compared with expected output, and checks that each psm/peptide
         has correct 'decoy' attribute."""
-        self.run_pycolator(self.command)
+        self.target = os.path.join(self.workdir,
+                                   self.infilename + '_target.xml')
+        self.decoy = os.path.join(self.workdir,
+                                  self.infilename + '_decoy.xml')
+        self.run_pycolator()
         target_expected = os.path.join(self.fixdir, 'splittd_target_out.xml')
         decoy_expected = os.path.join(self.fixdir, 'splittd_decoy_out.xml')
         target_exp_contents = self.read_percolator_out(target_expected)
@@ -108,17 +107,13 @@ class TestSplitTD(BaseTestPycolator):
 class TestMerge(BaseTestPycolator):
     command = 'merge'
     infilename = 'splittd_target_out.xml'
-
-    def setUp(self):
-        super().setUp()
-        self.multifiles = [os.path.join(self.fixdir, 'splittd_decoy_out.xml')]
-        self.resultfn = os.path.join(self.workdir,
-                                     self.infilename + '_merged.xml')
+    suffix = '_merged.xml'
 
     def test_merge(self):
+        self.multifiles = [os.path.join(self.fixdir, 'splittd_decoy_out.xml')]
         options = ['--multifiles']
         options.extend(self.multifiles)
-        self.run_pycolator(self.command, options)
+        self.run_pycolator(options)
         expected = self.read_percolator_out(os.path.join(self.fixdir,
                                                          'percolator_out.xml'))
         result = self.read_percolator_out(self.resultfn)
@@ -137,19 +132,15 @@ class TestMerge(BaseTestPycolator):
 class TestFilterUnique(BaseTestPycolator):
     command = 'filteruni'
     infilename = 'percolator_out.xml'
+    suffix = '_filtuniq.xml'
     # FIXME other scores than svm
     # FIXME illegal scores handling
     # FIXME PSM peptide reffing
 
-    def setUp(self):
-        super().setUp()
-        self.resultfn = os.path.join(self.workdir,
-                                     self.infilename + '_filtuniq.xml')
-
     def test_filter_uniques(self):
         """Checks if resultpeps gets uniques, and also that input peptides
         were not unique to start with."""
-        self.run_pycolator(self.command, ['-s', 'svm'])
+        self.run_pycolator(['-s', 'svm'])
         result = self.read_percolator_out(self.resultfn)
         origin = self.read_percolator_out(self.infile)
         resultpeps = self.get_element_ids(result['peptides'],
