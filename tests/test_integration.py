@@ -1,6 +1,7 @@
 import unittest
 import subprocess
 import os
+import shutil
 import hashlib
 from tempfile import mkdtemp
 from lxml import etree
@@ -55,6 +56,9 @@ class BaseTestPycolator(unittest.TestCase):
         os.makedirs(self.outdir, exist_ok=True)
         self.workdir = mkdtemp(dir=self.outdir)
 
+    def tearDown(self):
+        shutil.rmtree(self.workdir)
+
 
 class TestSplitTD(BaseTestPycolator):
     command = 'splittd'
@@ -66,10 +70,6 @@ class TestSplitTD(BaseTestPycolator):
                                    self.infilename + '_target.xml')
         self.decoy = os.path.join(self.workdir,
                                   self.infilename + '_decoy.xml')
-
-    def tearDown(self):
-        # remove self.workdir
-        pass
 
     def md5_check(self, fn):
         # DEPRECATE? XML too many formatting issues
