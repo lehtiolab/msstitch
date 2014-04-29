@@ -75,7 +75,7 @@ class BaseTestPycolator(unittest.TestCase):
 class TestSplitTD(BaseTestPycolator):
     command = 'splittd'
     infilename = 'percolator_out.xml'
-    suffix = None
+    suffix = ''
 
     def md5_check(self, fn):
         # DEPRECATE? XML too many formatting issues
