@@ -41,7 +41,7 @@ def filter_peptide_length(peptides, ns, minlen=0, maxlen=None):
         seq = get_peptide_seq(pep, ns)
         seq = strip_modifications(seq)
         if len(seq) > minlen and len(seq) < maxlen:
-            yield pep
+            yield formatting.string_and_clear(pep, ns)
         else:
             formatting.clear_el(pep)
 
