@@ -75,6 +75,7 @@ class BaseTestPycolator(unittest.TestCase):
 class TestSplitTD(BaseTestPycolator):
     command = 'splittd'
     infilename = 'percolator_out.xml'
+    suffix = None
 
     def md5_check(self, fn):
         # DEPRECATE? XML too many formatting issues
@@ -170,7 +171,7 @@ class TestFilterLength(BaseTestPycolator):
     def test_filterlen(self):
         maxlen = 20
         minlen = 10
-        self.run_pycolator(['--maxlen', 10])
+        self.run_pycolator(['--maxlen', str(maxlen), '--minlen', str(minlen)])
         result = self.get_psm_pep_ids_from_file(self.resultfn)
         origin = self.get_psm_pep_ids_from_file(self.infile)
 
