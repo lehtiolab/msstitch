@@ -3,6 +3,7 @@ import subprocess
 import os
 import shutil
 import hashlib
+import re
 from tempfile import mkdtemp
 from lxml import etree
 
@@ -11,6 +12,15 @@ class BaseTestPycolator(unittest.TestCase):
     testdir = 'tests'
     fixdir = os.path.join(testdir, 'fixtures')
     outdir = os.path.join(testdir, 'test_output')
+
+    def get_psm_pep_ids_from_file(self, fn):
+        contents = self.read_percolator_out(fn)
+        return {'psm_ids': self.get_element_ids(contents['psms'],
+                                                'psm_id', contents['ns']),
+                'peptide_ids': self.get_element_ids(contents['peptides'],
+                                                    'peptide_id',
+                                                    contents['ns'])
+                }
 
     def read_percolator_out(self, fn):
         ns = self.get_namespace(fn)['xmlns']
@@ -149,3 +159,26 @@ class TestFilterUnique(BaseTestPycolator):
                                           'peptide_id', origin['ns'])
         self.assertEqual(len({x for x in resultpeps}), len(resultpeps))
         self.assertNotEqual(len({x for x in originpeps}), len(originpeps))
+
+
+class TestFilterLength(BaseTestPycolator):
+    command = 'filterlen'
+    infilename = 'percolator_out.xml'
+    suffix = 'filt_len.xml'
+    # FIXME need to check maxlen minlen input?
+
+    def test_filterlen(self):
+        maxlen = 20
+        minlen = 10
+        self.run_pycolator(['--maxlen', 10])
+        result = self.get_psm_pep_ids_from_file(self.resultfn)
+        origin = self.get_psm_pep_ids_from_file(self.infile)
+
+        # test if result peptides have correct length
+        for pep in result['peptide_ids']:
+            # strip mod, then check length
+            seq = re.sub('\[UNIMOD:\d*\]', '', pep)
+            self.assertGreaterEqual(len(seq), minlen)
+            self.assertLessEqual(len(seq), maxlen)
+
+        # test if origin peptides in result, except ones with wrong length
