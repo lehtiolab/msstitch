@@ -125,3 +125,37 @@ class TestFilterLength(basetest.BaseTestPycolator):
                                 result['peptide_ids'])
         self.all_peps_in_output(origin['psm_seqs'], minlen, maxlen,
                                 result['psm_seqs'])
+
+
+class TestTrypticLookup(basetest.BaseTestPycolator):
+    command = 'trypticlookup'
+    infilename = 'proteins.fasta'
+    suffix = '_lookup.sqlite'
+
+    def all_seqs_in_db(self, dbfn, sequences):
+        db = sqlite3.connect(dbfn)
+        seqs_in_db = set()
+        for seq in sequences:
+            sql = ('SELECT EXISTS(SELECT seqs FROM known_searchspace WHERE '
+                   'seqs=? LIMIT 1)')
+            seqs_in_db.add(db.execute(sql, (seq,)).fetchone()[0] == 1)
+        db.close()
+        return seqs_in_db == set([True])
+
+    def do_test(self, options=None, seqtype=None):
+        with open(os.path.join(self.fixdir, 'peptides_trypsinized.yml')) as fp:
+            tryp_sequences = yaml.load(fp)
+        sequences = tryp_sequences['fully_tryptic']
+        if seqtype is not None:
+            sequences.append(tryp_sequences[seqtype])
+        self.run_pycolator(options)
+        self.assertTrue(self.all_seqs_in_db(self.resultfn, sequences))
+
+    def test_cutproline(self):
+        self.do_test(['--cutproline'], 'proline_cuts')
+
+    def test_ntermwildcards(self):
+        self.do_test(['--ntermwildcards'], 'ntermfalloff')
+
+    def test_noflags(self):
+        self.do_test()

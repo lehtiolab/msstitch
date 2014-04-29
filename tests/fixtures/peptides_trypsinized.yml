@@ -1,0 +1,24 @@
+---
+# Contains lists of peptides resulting from proteins.fasta, digested in different manners
+
+fully_tryptic:
+- MTGAGISTESGIPDYRPSEK
+- VGLYAR
+- TDR
+- R
+- IQHGDF
+- TDRR
+- RIQHGDF
+- MGTALVYHEDMTATR
+- LLWDDPECEIERPER
+- LTAALD
+
+proline_cuts:
+- MTGAGISTESGIPDYR
+- PSEK
+- LLWDDPECEIER
+- PER
+
+ntermfalloff:
+- AGISTESGIPDYRPSEK
+- DPECEIER
