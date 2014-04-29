@@ -169,6 +169,9 @@ class TestFilterLength(BaseTestPycolator):
     # FIXME need to check maxlen minlen input?
 
     def test_filterlen(self):
+        def strip_modifications(pep):
+            return re.sub('\[UNIMOD:\d*\]', '', pep)
+
         maxlen = 20
         minlen = 10
         self.run_pycolator(['--maxlen', str(maxlen), '--minlen', str(minlen)])
@@ -177,8 +180,7 @@ class TestFilterLength(BaseTestPycolator):
 
         # test if result peptides have correct length
         for pep in result['peptide_ids']:
-            # strip mod, then check length
-            seq = re.sub('\[UNIMOD:\d*\]', '', pep)
+            seq = strip_modifications(pep)
             self.assertGreaterEqual(len(seq), minlen)
             self.assertLessEqual(len(seq), maxlen)
 
