@@ -136,6 +136,7 @@ class TestTrypticLookup(basetest.BaseTestPycolator):
         db = sqlite3.connect(dbfn)
         seqs_in_db = set()
         for seq in sequences:
+            seq = seq.replace('L', 'I')
             sql = ('SELECT EXISTS(SELECT seqs FROM known_searchspace WHERE '
                    'seqs=? LIMIT 1)')
             seqs_in_db.add(db.execute(sql, (seq,)).fetchone()[0] == 1)
