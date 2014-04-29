@@ -142,20 +142,20 @@ class TestTrypticLookup(basetest.BaseTestPycolator):
         db.close()
         return seqs_in_db == set([True])
 
-    def do_test(self, options=None, seqtype=None):
+    def query_db_assert(self, options=[], seqtype=None):
         with open(os.path.join(self.fixdir, 'peptides_trypsinized.yml')) as fp:
             tryp_sequences = yaml.load(fp)
         sequences = tryp_sequences['fully_tryptic']
         if seqtype is not None:
-            sequences.append(tryp_sequences[seqtype])
+            sequences.extend(tryp_sequences[seqtype])
         self.run_pycolator(options)
         self.assertTrue(self.all_seqs_in_db(self.resultfn, sequences))
 
     def test_cutproline(self):
-        self.do_test(['--cutproline'], 'proline_cuts')
+        self.query_db_assert(['--cutproline'], 'proline_cuts')
 
     def test_ntermwildcards(self):
-        self.do_test(['--ntermwildcards'], 'ntermfalloff')
+        self.query_db_assert(['--ntermwildcards'], 'ntermfalloff')
 
     def test_noflags(self):
-        self.do_test()
+        self.query_db_assert()
