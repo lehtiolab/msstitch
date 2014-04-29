@@ -16,11 +16,12 @@ class FilterPeptideLength(PycolatorDriver):
 
     def set_features(self):
         # FIXME psm filter len too!
-        self.features = {'psm': [],
-                         'peptide': preparation.filter_peptide_length(
-                             self.allpeps, self.ns,
-                             self.minlength, self.maxlength)
-                         }
+        self.features = {
+            'psm': preparation.filter_peptide_length(
+                self.allpsms, 'psm', self.ns, self.minlength, self.maxlength),
+            'peptide': preparation.filter_peptide_length(
+                self.allpeps, 'pep', self.ns, self.minlength, self.maxlength)
+        }
 
 
 class FilterUniquePeptides(PycolatorDriver):

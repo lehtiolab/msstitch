@@ -7,6 +7,9 @@ def get_peptide_seq(peptide, ns):
     return peptide.attrib['{%s}peptide_id' % ns['xmlns']]
 
 
+def get_psm_seq(psm, ns):
+    return psm.find('{%s}peptide_seq' % ns['xmlns']).attrib['seq']
+
 def target_decoy_generator(element_generator, decoy, ns):
     for el in element_generator:
         if el.attrib['{%s}decoy' % ns['xmlns']] == decoy:
@@ -31,19 +34,22 @@ def get_score(elements, ns, scoretype='svm_score'):
         yield score
 
 
-def filter_peptide_length(peptides, ns, minlen=0, maxlen=None):
+def filter_peptide_length(features, elementtype, ns, minlen=0, maxlen=None):
+    get_seq_map = {'psm': get_psm_seq,
+                   'pep': get_peptide_seq,
+                   }
     minlen = int(minlen)
     if maxlen is None:
         maxlen = float('inf')
     else:
         maxlen = int(maxlen)
-    for pep in peptides:
-        seq = get_peptide_seq(pep, ns)
+    for feat in features:
+        seq = get_seq_map[elementtype](feat, ns)
         seq = strip_modifications(seq)
         if len(seq) > minlen and len(seq) < maxlen:
-            yield formatting.string_and_clear(pep, ns)
+            yield formatting.string_and_clear(feat, ns)
         else:
-            formatting.clear_el(pep)
+            formatting.clear_el(feat)
 
 
 def strip_modifications(seq):
