@@ -59,8 +59,15 @@ class FilterKnownPeptides(PycolatorDriver):
         self.falloff = kwargs.get('falloff')
 
     def set_features(self):
-        novelpeps = preparation.filter_known_searchspace(self.allpeps,
-                                                         self.db,
-                                                         self.ns,
-                                                         self.falloff)
-        self.features = {'psm': [], 'peptide': novelpeps}
+        self.features = {
+            'peptide': preparation.filter_known_searchspace(self.allpeps,
+                                                            'pep',
+                                                            self.db,
+                                                            self.ns,
+                                                            self.falloff),
+            'psm': preparation.filter_known_searchspace(self.allpsms,
+                                                        'psm',
+                                                        self.db,
+                                                        self.ns,
+                                                        self.falloff),
+        }
