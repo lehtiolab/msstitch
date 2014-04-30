@@ -3,6 +3,7 @@ import subprocess
 import os
 import shutil
 import sqlite3
+import re
 from lxml import etree
 from tempfile import mkdtemp
 
@@ -58,6 +59,9 @@ class BaseTestPycolator(unittest.TestCase):
                 separator = ''
             ns['xmlns{0}{1}'.format(separator, nsprefix)] = root.nsmap[prefix]
         return ns
+
+    def strip_modifications(self, pep):
+        return re.sub('\[UNIMOD:\d*\]', '', pep)
 
     def run_pycolator(self, options=[]):
         cmd = ['./pycolator.py', '-c', self.command, '-i', self.infile,

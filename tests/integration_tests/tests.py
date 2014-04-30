@@ -1,4 +1,3 @@
-import re
 import os
 import basetest
 import sqlite3
@@ -97,9 +96,6 @@ class TestFilterLength(basetest.BaseTestPycolator):
     suffix = '_filt_len.xml'
     # FIXME need to check maxlen minlen input?
 
-    def strip_modifications(self, pep):
-        return re.sub('\[UNIMOD:\d*\]', '', pep)
-
     def length_correct(self, seqs, minlen, maxlen):
         for seq in seqs:
             seq = self.strip_modifications(seq)
@@ -128,7 +124,7 @@ class TestFilterLength(basetest.BaseTestPycolator):
                                 result['psm_seqs'])
 
 
-class TestFilterNovel(basetest.LookupTestsPycolator):
+class TestFilterKnown(basetest.LookupTestsPycolator):
     command = 'filterknown'
     infilename = 'percolator_out.xml'
     suffix = '_filtknown.xml'
@@ -146,7 +142,8 @@ class TestFilterNovel(basetest.LookupTestsPycolator):
         """Does the actual testing"""
         db = sqlite3.connect(self.dbpath)
         for oriseq in original_seqs:
-            if self.seq_in_db(db, oriseq, '='):
+            seq_dbcheck = self.strip_modifications(oriseq)
+            if self.seq_in_db(db, seq_dbcheck, '='):
                 self.assertNotIn(oriseq, result_seqs)
             else:
                 self.assertIn(oriseq, result_seqs)
