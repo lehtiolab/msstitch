@@ -70,7 +70,7 @@ def filter_known_searchspace(peptides, searchspace, ns, ntermwildcards):
         # in this amino acid
         seq = seq.replace('L', 'I')
         if not lookup.check_seq_exists(seq, ntermwildcards):
-            yield peptide
+            yield formatting.string_and_clear(peptide, ns)
         else:
             formatting.clear_el(peptide)
     lookup.close_connection()

@@ -59,9 +59,9 @@ parser.add_argument('--maxlen', dest='maxlength', help='Maximum length of '
 parser.add_argument('--minlen', dest='minlength', help='Minimum length of '
                     'peptide to be included in filtered data.', default=None)
 
-parser.add_argument('-b', dest='database', help='Database file(s). Make sure'
+parser.add_argument('-b', dest='database', help='Database file. Make sure'
 ' they are included when filterknown command is used, since they will be'
-' used to exclude peptides from.', nargs='+',
+' used to exclude peptides from.',
                      type=lambda x:parser_file_exists(parser, x))
 parser.add_argument('--cutproline', dest='proline', help='With flag, trypsin is '
                     'considered to cut before a proline residue. The filter '
