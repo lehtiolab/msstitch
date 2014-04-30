@@ -132,6 +132,7 @@ class TestFilterNovel(basetest.LookupTestsPycolator):
     command = 'filterknown'
     infilename = 'percolator_out.xml'
     suffix = '_filtknown.xml'
+    dbfn = 'known_peptide_lookup.sqlite'
 
     def test_noflags(self):
         self.dbpath = os.path.join(self.fixdir, self.dbfn)
@@ -141,7 +142,7 @@ class TestFilterNovel(basetest.LookupTestsPycolator):
         self.assert_seqs_correct(origin['peptide_ids'], result['peptide_ids'])
         self.assert_seqs_correct(origin['psm_seqs'], result['psm_seqs'])
 
-    def assert_peps_correct(self, original_seqs, result_seqs):
+    def assert_seqs_correct(self, original_seqs, result_seqs):
         """Does the actual testing"""
         db = sqlite3.connect(self.dbpath)
         for oriseq in original_seqs:
