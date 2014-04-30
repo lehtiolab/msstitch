@@ -4,6 +4,7 @@ import basetest
 import sqlite3
 import yaml
 
+
 class TestSplitTD(basetest.BaseTestPycolator):
     command = 'splittd'
     infilename = 'percolator_out.xml'
@@ -127,7 +128,7 @@ class TestFilterLength(basetest.BaseTestPycolator):
                                 result['psm_seqs'])
 
 
-class TestFilterNovel(basetest.BaseTestPycolator):
+class TestFilterNovel(basetest.LookupTestsPycolator):
     command = 'filterknown'
     infilename = 'percolator_out.xml'
     suffix = '_filtknown.xml'
@@ -151,30 +152,14 @@ class TestFilterNovel(basetest.BaseTestPycolator):
 
     def test_ntermwildcards(self):
         self.dbpath = os.path.join(self.fixdir, self.dbfn)
-        self.run_pycolator(['-b',
-                            os.path.join(self.fixdir, 'lookup.sqlite'),
-                            '--ntermwildcards'])
+        self.run_pycolator(['-b', self.dbpath, '--ntermwildcards'])
         assert 1 == 2
 
 
-class TestTrypticLookup(basetest.BaseTestPycolator):
+class TestTrypticLookup(basetest.LookupTestsPycolator):
     command = 'trypticlookup'
     infilename = 'proteins.fasta'
     suffix = '_lookup.sqlite'
-
-    def seq_in_db(self, dbconn, seq, comparator):
-        seq = seq.replace('L', 'I')
-        sql = ('SELECT EXISTS(SELECT seqs FROM known_searchspace WHERE '
-               'seqs{0}? LIMIT 1)'.format(comparator))
-        return dbconn.execute(sql, (seq,)).fetchone()[0] == 1
-
-    def all_seqs_in_db(self, dbfn, sequences, comparator):
-        db = sqlite3.connect(dbfn)
-        seqs_in_db = set()
-        for seq in sequences:
-            seqs_in_db.add(self.seq_in_db(db, seq, comparator))
-        db.close()
-        return seqs_in_db == set([True])
 
     def query_db_assert(self, options=[], seqtype=None):
         with open(os.path.join(self.fixdir, 'peptides_trypsinized.yml')) as fp:

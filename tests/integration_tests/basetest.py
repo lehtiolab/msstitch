@@ -2,6 +2,7 @@ import unittest
 import subprocess
 import os
 import shutil
+import sqlite3
 from lxml import etree
 from tempfile import mkdtemp
 
@@ -75,3 +76,17 @@ class BaseTestPycolator(unittest.TestCase):
         shutil.rmtree(self.workdir)
 
 
+class LookupTestsPycolator(BaseTestPycolator):
+    def seq_in_db(self, dbconn, seq, comparator):
+        seq = seq.replace('L', 'I')
+        sql = ('SELECT EXISTS(SELECT seqs FROM known_searchspace WHERE '
+               'seqs{0}? LIMIT 1)'.format(comparator))
+        return dbconn.execute(sql, (seq,)).fetchone()[0] == 1
+
+    def all_seqs_in_db(self, dbfn, sequences, comparator):
+        db = sqlite3.connect(dbfn)
+        seqs_in_db = set()
+        for seq in sequences:
+            seqs_in_db.add(self.seq_in_db(db, seq, comparator))
+        db.close()
+        return seqs_in_db == set([True])
