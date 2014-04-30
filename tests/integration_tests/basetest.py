@@ -81,16 +81,20 @@ class BaseTestPycolator(unittest.TestCase):
 
 
 class LookupTestsPycolator(BaseTestPycolator):
-    def seq_in_db(self, dbconn, seq, comparator):
+    def seq_in_db(self, dbconn, seq, seqtype):
+        comparator = '='
+        if seqtype == 'ntermfalloff':
+            comparator = ' LIKE '
+            seq = '{0}%'.format(seq[::-1])
         seq = seq.replace('L', 'I')
         sql = ('SELECT EXISTS(SELECT seqs FROM known_searchspace WHERE '
                'seqs{0}? LIMIT 1)'.format(comparator))
         return dbconn.execute(sql, (seq,)).fetchone()[0] == 1
 
-    def all_seqs_in_db(self, dbfn, sequences, comparator):
+    def all_seqs_in_db(self, dbfn, sequences, seqtype):
         db = sqlite3.connect(dbfn)
         seqs_in_db = set()
         for seq in sequences:
-            seqs_in_db.add(self.seq_in_db(db, seq, comparator))
+            seqs_in_db.add(self.seq_in_db(db, seq, seqtype))
         db.close()
         return seqs_in_db == set([True])

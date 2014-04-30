@@ -138,12 +138,12 @@ class TestFilterKnown(basetest.LookupTestsPycolator):
         self.assert_seqs_correct(origin['peptide_ids'], result['peptide_ids'])
         self.assert_seqs_correct(origin['psm_seqs'], result['psm_seqs'])
 
-    def assert_seqs_correct(self, original_seqs, result_seqs):
+    def assert_seqs_correct(self, original_seqs, result_seqs, seqtype):
         """Does the actual testing"""
         db = sqlite3.connect(self.dbpath)
         for oriseq in original_seqs:
             seq_dbcheck = self.strip_modifications(oriseq)
-            if self.seq_in_db(db, seq_dbcheck, '='):
+            if self.seq_in_db(db, seq_dbcheck, seqtype):
                 self.assertNotIn(oriseq, result_seqs)
             else:
                 self.assertIn(oriseq, result_seqs)
@@ -163,17 +163,11 @@ class TestTrypticLookup(basetest.LookupTestsPycolator):
         with open(os.path.join(self.fixdir, 'peptides_trypsinized.yml')) as fp:
             tryp_sequences = yaml.load(fp)
         sequences = tryp_sequences['fully_tryptic']
-        comparator = '='
-        if seqtype == 'ntermfalloff':
-            comparator = ' LIKE '
-            sequences.extend(
-                ['%{0}'.format(x) for x in tryp_sequences[seqtype]])
-            sequences = [x[::-1] for x in sequences]
-        elif seqtype is not None:
+        if seqtype is not None:
             sequences.extend(tryp_sequences[seqtype])
         self.run_pycolator(options)
         self.assertTrue(self.all_seqs_in_db(self.resultfn,
-                                            sequences, comparator))
+                                            sequences, seqtype))
 
     def test_cutproline(self):
         self.query_db_assert(['--cutproline'], 'proline_cuts')
