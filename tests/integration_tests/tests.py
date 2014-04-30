@@ -132,13 +132,13 @@ class TestTrypticLookup(basetest.BaseTestPycolator):
     infilename = 'proteins.fasta'
     suffix = '_lookup.sqlite'
 
-    def all_seqs_in_db(self, dbfn, sequences):
+    def all_seqs_in_db(self, dbfn, sequences, comparator):
         db = sqlite3.connect(dbfn)
         seqs_in_db = set()
         for seq in sequences:
             seq = seq.replace('L', 'I')
             sql = ('SELECT EXISTS(SELECT seqs FROM known_searchspace WHERE '
-                   'seqs=? LIMIT 1)')
+                   'seqs{0}? LIMIT 1)'.format(comparator))
             seqs_in_db.add(db.execute(sql, (seq,)).fetchone()[0] == 1)
         db.close()
         return seqs_in_db == set([True])
@@ -147,10 +147,17 @@ class TestTrypticLookup(basetest.BaseTestPycolator):
         with open(os.path.join(self.fixdir, 'peptides_trypsinized.yml')) as fp:
             tryp_sequences = yaml.load(fp)
         sequences = tryp_sequences['fully_tryptic']
-        if seqtype is not None:
+        comparator = '='
+        if seqtype == 'ntermfalloff':
+            comparator = ' LIKE '
+            sequences.extend(
+                ['%{0}'.format(x) for x in tryp_sequences[seqtype]])
+            sequences = [x[::-1] for x in sequences]
+        elif seqtype is not None:
             sequences.extend(tryp_sequences[seqtype])
         self.run_pycolator(options)
-        self.assertTrue(self.all_seqs_in_db(self.resultfn, sequences))
+        self.assertTrue(self.all_seqs_in_db(self.resultfn,
+                                            sequences, comparator))
 
     def test_cutproline(self):
         self.query_db_assert(['--cutproline'], 'proline_cuts')
