@@ -131,28 +131,29 @@ class TestFilterKnown(basetest.LookupTestsPycolator):
     dbfn = 'known_peptide_lookup.sqlite'
 
     def test_noflags(self):
-        self.dbpath = os.path.join(self.fixdir, self.dbfn)
-        self.run_pycolator(['-b', self.dbpath])
-        result = self.get_psm_pep_ids_from_file(self.resultfn)
-        origin = self.get_psm_pep_ids_from_file(self.infile)
-        self.assert_seqs_correct(origin['peptide_ids'], result['peptide_ids'],
-                                 None)
-        self.assert_seqs_correct(origin['psm_seqs'], result['psm_seqs'], None)
-
-    def assert_seqs_correct(self, original_seqs, result_seqs, seqtype):
-        """Does the actual testing"""
-        db = sqlite3.connect(self.dbpath)
-        for oriseq in original_seqs:
-            seq_dbcheck = self.strip_modifications(oriseq)
-            if self.seq_in_db(db, seq_dbcheck, seqtype):
-                self.assertNotIn(oriseq, result_seqs)
-            else:
-                self.assertIn(oriseq, result_seqs)
+        self.assert_seqs_correct()
 
     def test_ntermwildcards(self):
+        self.assert_seqs_correct('--ntermwildcards', 'ntermfalloff')
+
+    def assert_seqs_correct(self, flags=[], seqtype=None):
+        """Does the actual testing"""
         self.dbpath = os.path.join(self.fixdir, self.dbfn)
-        self.run_pycolator(['-b', self.dbpath, '--ntermwildcards'])
-        assert 1 == 2
+        options = ['-b', self.dbpath]
+        options.extend(flags)
+        self.run_pycolator(options)
+        result = self.get_psm_pep_ids_from_file(self.resultfn)
+        origin = self.get_psm_pep_ids_from_file(self.infile)
+        for feattype in ['peptide_ids', 'psm_seqs']:
+            original_seqs = origin[feattype]
+            result_seqs = result[feattype]
+            db = sqlite3.connect(self.dbpath)
+            for oriseq in original_seqs:
+                seq_dbcheck = self.strip_modifications(oriseq)
+                if self.seq_in_db(db, seq_dbcheck, seqtype):
+                    self.assertNotIn(oriseq, result_seqs)
+                else:
+                    self.assertIn(oriseq, result_seqs)
 
 
 class TestTrypticLookup(basetest.LookupTestsPycolator):
