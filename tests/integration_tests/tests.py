@@ -135,8 +135,9 @@ class TestFilterKnown(basetest.LookupTestsPycolator):
         self.run_pycolator(['-b', self.dbpath])
         result = self.get_psm_pep_ids_from_file(self.resultfn)
         origin = self.get_psm_pep_ids_from_file(self.infile)
-        self.assert_seqs_correct(origin['peptide_ids'], result['peptide_ids'])
-        self.assert_seqs_correct(origin['psm_seqs'], result['psm_seqs'])
+        self.assert_seqs_correct(origin['peptide_ids'], result['peptide_ids'],
+                                 None)
+        self.assert_seqs_correct(origin['psm_seqs'], result['psm_seqs'], None)
 
     def assert_seqs_correct(self, original_seqs, result_seqs, seqtype):
         """Does the actual testing"""
