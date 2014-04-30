@@ -129,16 +129,18 @@ class TestFilterKnown(basetest.LookupTestsPycolator):
     infilename = 'percolator_out.xml'
     suffix = '_filtknown.xml'
     dbfn = 'known_peptide_lookup.sqlite'
+    reversed_dbfn = 'rev_known_peptide_lookup.sqlite'
 
     def test_noflags(self):
+        self.dbpath = os.path.join(self.fixdir, self.dbfn)
         self.assert_seqs_correct()
 
     def test_ntermwildcards(self):
-        self.assert_seqs_correct('--ntermwildcards', 'ntermfalloff')
+        self.dbpath = os.path.join(self.fixdir, self.reversed_dbfn)
+        self.assert_seqs_correct(['--ntermwildcards'], 'ntermfalloff')
 
     def assert_seqs_correct(self, flags=[], seqtype=None):
         """Does the actual testing"""
-        self.dbpath = os.path.join(self.fixdir, self.dbfn)
         options = ['-b', self.dbpath]
         options.extend(flags)
         self.run_pycolator(options)
