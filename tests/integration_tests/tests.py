@@ -127,6 +127,36 @@ class TestFilterLength(basetest.BaseTestPycolator):
                                 result['psm_seqs'])
 
 
+class TestFilterNovel(basetest.BaseTestPycolator):
+    command = 'filterknown'
+    infilename = 'percolator_out.xml'
+    suffix = '_filtknown.xml'
+
+    def test_noflags(self):
+        self.dbpath = os.path.join(self.fixdir, self.dbfn)
+        self.run_pycolator(['-b', self.dbpath])
+        result = self.get_psm_pep_ids_from_file(self.resultfn)
+        origin = self.get_psm_pep_ids_from_file(self.infile)
+        self.assert_seqs_correct(origin['peptide_ids'], result['peptide_ids'])
+        self.assert_seqs_correct(origin['psm_seqs'], result['psm_seqs'])
+
+    def assert_peps_correct(self, original_seqs, result_seqs):
+        """Does the actual testing"""
+        db = sqlite3.connect(self.dbpath)
+        for oriseq in original_seqs:
+            if self.seq_in_db(db, oriseq, '='):
+                self.assertNotIn(oriseq, result_seqs)
+            else:
+                self.assertIn(oriseq, result_seqs)
+
+    def test_ntermwildcards(self):
+        self.dbpath = os.path.join(self.fixdir, self.dbfn)
+        self.run_pycolator(['-b',
+                            os.path.join(self.fixdir, 'lookup.sqlite'),
+                            '--ntermwildcards'])
+        assert 1 == 2
+
+
 class TestTrypticLookup(basetest.BaseTestPycolator):
     command = 'trypticlookup'
     infilename = 'proteins.fasta'
