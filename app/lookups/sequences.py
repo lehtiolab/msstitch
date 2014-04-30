@@ -19,7 +19,7 @@ def create_searchspace(dbfn, outfile, proline_cut=False, reverse_seqs=True):
             lookup.write_peps(allpeps, reverse_seqs)
             allpeps = []
     # write remaining peps to sqlite
-    lookup.write_peps(allpeps)
+    lookup.write_peps(allpeps, reverse_seqs)
     lookup.index_peps()
     lookup.close_connection()
 

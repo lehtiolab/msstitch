@@ -35,13 +35,13 @@ class SearchSpaceDB(DatabaseConnection):
     def create_searchspacedb(self, outfn):
         self.create_db({'known_searchspace': ['seqs TEXT']}, outfn)
 
-    def write_peps(self, peps, reverse_seqs=True):
+    def write_peps(self, peps, reverse_seqs):
         """Writes peps to db. We can reverse to be able to look up
         peptides that have some amino acids missing at the N-terminal.
         This way we can still use the index.
         """
         if reverse_seqs:
-            peps = [x[::-1] for x in peps]
+            peps = [(x[0][::-1],) for x in peps]
         self.conn.executemany(
             'INSERT INTO known_searchspace(seqs) VALUES (?)', peps)
         self.conn.commit()
