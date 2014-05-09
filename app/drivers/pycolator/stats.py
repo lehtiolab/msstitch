@@ -4,6 +4,7 @@ from app.drivers.basedrivers import PycolatorDriver
 from app.readers import pycolator as readers
 from app.writers import pycolator as writers
 from app.preparation import pycolator as preparation
+from app import modifiers
 
 
 class ReassignmentDriver(PycolatorDriver):
@@ -15,8 +16,8 @@ class ReassignmentDriver(PycolatorDriver):
         self.qvalityout = kwargs['qvalityout']
 
     def set_features(self):
-        stats = qvality.parse_qvality_output(self.qvalityout)
-        self.features = {'peptide': qvality.reassign_elements(self.allpeps,
+        stats = modifiers.parse_qvality_output(self.qvalityout)
+        self.features = {'peptide': modifiers.reassign_elements(self.allpeps,
                                                               stats,
                                                               self.ns),
                          'psm': []
@@ -48,12 +49,6 @@ class QvalityDriver(PycolatorDriver):
         # FIXME write method, use Splittd driver
         pass
 
-    def prepare(self):
-        """Qvality running does not need allpsms or static xml, we do all
-        of that in set_features instead.
-        """
-        pass
-
     def set_features(self):
         """Creates scorefiles for qvality's target and decoy distributions"""
         features_for_qvality = {'target': {}, 'decoy': {}}
@@ -63,8 +58,8 @@ class QvalityDriver(PycolatorDriver):
         self.scorefiles = {}
         for t_or_d, fn in zip(['target', 'decoy'], [self.target, self.decoy]):
             ns, static_xml = self.prepare_percolator_output(fn)
-            features_for_qvality[t_or_d] = featextractors[self.feattype](fn,
-                                                                         ns)
+            features_for_qvality[t_or_d] = featextractors[self.featuretype](fn,
+                                                                            ns)
             self.scorefiles[t_or_d] = self.create_outfilepath(t_or_d,
                                                               self.outsuffix)
             scores = preparation.get_score(features_for_qvality[t_or_d], ns)
