@@ -39,6 +39,8 @@ def trypsinize(proseq, proline_cut=False):
         noncutters.add('P')
     for i, aa in enumerate(proseq):
         currentpeps = ['{0}{1}'.format(x, aa) for x in currentpeps]
+        if i == len(proseq) - 1:
+            continue
         if aa in trypres and proseq[i + 1] not in noncutters:
             outpeps.extend(currentpeps)  # do actual cut by storing peptides
             if proseq[i + 1] in trypres.union('P'):
