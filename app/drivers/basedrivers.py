@@ -10,8 +10,8 @@ class BaseDriver(object):
         self.outdir = kwargs['outdir']
 
     def create_outfilepath(self, fn, suffix=None):
-        basefn = os.path.basename(fn)
-        outfn = basefn + suffix
+        basefn, ext = os.path.splitext(os.path.basename(fn))
+        outfn = basefn + suffix + ext
         return os.path.join(self.outdir, outfn)
 
 
@@ -42,3 +42,7 @@ class PycolatorDriver(BaseDriver):
     def write(self):
         outfn = self.create_outfilepath(self.fn, self.outsuffix)
         writers.write_percolator_xml(self.static_xml, self.features, outfn)
+
+
+class OpenMzDriver(BaseDriver):
+    """Driver for OpenMz functions"""

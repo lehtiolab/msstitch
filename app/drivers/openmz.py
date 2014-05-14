@@ -1,22 +1,12 @@
 import os
-
+from app.drivers import OpenMzDriver
 from app.lookups import quant as lookups
 from app.readers import openmz as readers
 from app.preparation import openmz as preparation
 from app.writers import tsv as writers
 
 
-class BaseDriver(object):
-    def __init__(self, **kwargs):
-        self.outdir = kwargs['outdir']
-
-    def create_outfilepath(self, fn, suffix=None):
-        basefn, ext = os.path.splitext(os.path.basename(fn))
-        outfn = basefn + suffix + ext
-        return os.path.join(self.outdir, outfn)
-
-
-class TSVQuantDriver(BaseDriver):
+class TSVQuantDriver(OpenMzDriver):
     def __init__(self, **kwargs):
         super(TSVQuantDriver, self).__init__(**kwargs)
         self.spectrafns = kwargs.get('spectra', None)
