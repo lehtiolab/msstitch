@@ -1,15 +1,17 @@
-def peptide_to_tsv(feature, ns):
-    line = percolator_feature_to_tsv(feature, ns, 'peptide')
-    line['psm_ids'] = '; '.join([x.text for x in feature.xpath('xmlns:psm_id',
-                                                               namespaces=ns)])
-    return line
+def peptide_to_tsv(features, ns):
+    for feature in features:
+        line = percolator_feature_to_tsv(feature, ns, 'peptide')
+        line['psm_ids'] = '; '.join([x.text for x in feature.xpath('xmlns:psm_id',
+                                                                   namespaces=ns)])
+        yield line
 
 
-def psm_to_tsv(feature, ns):
-    line = percolator_feature_to_tsv(feature, ns, 'psm')
-    line['pepseq'] = feature.xpath(
-        'xmlns:peptide_seq', namespaces=ns)[0].attrib['seq']
-    return line
+def psm_to_tsv(features, ns):
+    for feature in features:
+        line = percolator_feature_to_tsv(feature, ns, 'psm')
+        line['pepseq'] = feature.xpath(
+            'xmlns:peptide_seq', namespaces=ns)[0].attrib['seq']
+        yield line
 
 
 def percolator_feature_to_tsv(feature, ns, feattype):

@@ -11,7 +11,7 @@ class Pout2TSVDriver(base.PycolatorDriver):
         self.featuretype = kwargs.get('feattype')
         if self.featuretype is None:
             self.featuretype = ['peptide', 'psm']
-        elif self.feattype not in ['peptide', 'psm']:
+        elif self.featuretype not in ['peptide', 'psm']:
             raise Exception('Featuretype (-f) should be peptide or psm')
         else:
             self.featuretype = [self.featuretype]
