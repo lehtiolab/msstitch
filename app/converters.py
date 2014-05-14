@@ -3,7 +3,6 @@ def peptide_to_tsv(feature, ns):
     line['psm_ids'] = '; '.join([x.text for x in feature.xpath('xmlns:psm_id',
                                                                namespaces=ns)])
     return line
-#    line['psm_ids'] = '\t'.join([p_id, score, q, PEP, psm_ids, proteins]))
 
 
 def psm_to_tsv(feature, ns):
@@ -11,7 +10,6 @@ def psm_to_tsv(feature, ns):
     line['pepseq'] = feature.xpath(
         'xmlns:peptide_seq', namespaces=ns)[0].attrib['seq']
     return line
-#    fp.write('\t'.join([p_id, score, q, PEP, pepseq, proteins]))
 
 
 def percolator_feature_to_tsv(feature, ns, feattype):

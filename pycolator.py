@@ -37,9 +37,13 @@ parser.add_argument('-c', dest='command', type=str, help='How to manipulate the 
 'filterlen      - Filters out peptides that exceed --maxlen and --minlen\n'
 'qvality        - Runs qvality on an inputfile: target and decoy data.\n'
 '                 When using separate files for target and decoy, \n'
-'                 use --decoy to specify the decoy input file\n'
-'reassign - Reassigns statistics from a qvality output file onto a single'
-'           percolator input file. Needs -q flag.',
+'                 use --decoy to specify the decoy input file, and -f\n'
+'                 to specify feature type (psm or peptide)\n'
+'reassign       - Reassigns statistics from a qvality output file onto a single'
+'                 percolator input file. Needs -q flag.\n'
+'pout2tsv       - Converts a percolator output file to tab separated format\n'
+'                 Use -f to specify feature type (psm or peptide), otherwise\n'
+'                 both psm and peptide tsv files are written.',
 required=True
 )
 
@@ -82,7 +86,7 @@ parser.add_argument('--target', dest='targetfn',
         type=lambda x: parser_file_exists(parser, x),
         help='Target input file for qvality')
 parser.add_argument('-f', dest='feattype', help='Feature type to use for '
-                    'qvality. Can either be psm or peptide.')
+                    'qvality or pout2tsv. Can either be psm or peptide.')
 parser.add_argument('-o', dest='options', nargs='+',
                     help='Extra options that may be passed to qvality.'
                     'Option form: -o ***flag value ***flag ***flag value')
