@@ -15,6 +15,7 @@ from app.drivers.pycolator import splitmerge
 from app.drivers.pycolator import filters
 from app.drivers.pycolator import lookup
 from app.drivers.pycolator import stats
+from app.drivers.pycolator import converters
 
 
 def parser_file_exists(currentparser, fn):
@@ -110,6 +111,7 @@ commandmap = {
     'filterknown': filters.FilterKnownPeptides,
     'qvality'    : stats.QvalityDriver,
     'reassign'   : stats.ReassignmentDriver,
+    'pout2tsv'   : converters.Pout2TSVDriver,
     }
 
 
