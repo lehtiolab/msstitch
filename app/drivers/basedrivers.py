@@ -10,8 +10,8 @@ class BaseDriver(object):
         self.outdir = kwargs['outdir']
 
     def create_outfilepath(self, fn, suffix=None):
-        basefn, ext = os.path.splitext(os.path.basename(fn))
-        outfn = basefn + suffix + ext
+        basefn = os.path.basename(fn)
+        outfn = basefn + suffix
         return os.path.join(self.outdir, outfn)
 
 
