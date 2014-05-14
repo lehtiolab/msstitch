@@ -1,9 +1,9 @@
-from app.drivers.basedrivers import PycolatorDriver
+from app.drivers.pycolator import base
 from app.preparation import pycolator as preparation
 from app.readers import pycolator as readers
 
 
-class FilterPeptideLength(PycolatorDriver):
+class FilterPeptideLength(base.PycolatorDriver):
     """Filters on peptide length, to be specified in calling. Outputs to
     multiple files if multiple file input is given. No PSMs will be
     outputted."""
@@ -24,7 +24,7 @@ class FilterPeptideLength(PycolatorDriver):
         }
 
 
-class FilterUniquePeptides(PycolatorDriver):
+class FilterUniquePeptides(base.PycolatorDriver):
     """This class processes multiple percolator runs from fractions and
     filters out the best scoring peptides."""
     outsuffix = '_filtuniq.xml'
@@ -47,7 +47,7 @@ class FilterUniquePeptides(PycolatorDriver):
         self.features = {'psm': self.allpsms, 'peptide': uniquepeps}
 
 
-class FilterKnownPeptides(PycolatorDriver):
+class FilterKnownPeptides(base.PycolatorDriver):
     """This class processes multiple percolator runs from fractions and
     filters out first peptides that are found in a specified searchspace. Then
     it keeps the remaining best scoring unique peptides."""

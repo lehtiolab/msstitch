@@ -1,13 +1,13 @@
 import subprocess
 
-from app.drivers.basedrivers import PycolatorDriver
+from app.drivers.pycolator import base
 from app.readers import pycolator as readers
 from app.writers import pycolator as writers
 from app.preparation import pycolator as preparation
 from app import modifiers
 
 
-class ReassignmentDriver(PycolatorDriver):
+class ReassignmentDriver(base.PycolatorDriver):
     """Reassigns statistics from qvality output on a percolator output file"""
     outsuffix = '_reassigned.xml'
 
@@ -18,13 +18,13 @@ class ReassignmentDriver(PycolatorDriver):
     def set_features(self):
         stats = modifiers.parse_qvality_output(self.qvalityout)
         self.features = {'peptide': modifiers.reassign_elements(self.allpeps,
-                                                              stats,
-                                                              self.ns),
+                                                                stats,
+                                                                self.ns),
                          'psm': []
                          }
 
 
-class QvalityDriver(PycolatorDriver):
+class QvalityDriver(base.PycolatorDriver):
     """Runs qvality from two Percolator XML files. One containing target
     PSMs or peptides, and the other containing decoys."""
     outsuffix = '_qvalityout.txt'

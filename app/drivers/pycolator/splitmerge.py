@@ -1,9 +1,9 @@
-from app.drivers.basedrivers import PycolatorDriver
+from app.drivers.pycolator import base
 from app.preparation import pycolator as preparation
 from app.readers import pycolator as readers
 
 
-class SplitDriver(PycolatorDriver):
+class SplitDriver(base.PycolatorDriver):
     def __init__(self, **kwargs):
         super(SplitDriver, self).__init__(**kwargs)
         self.targetsuffix = kwargs.get('targetsuffix', '_target.xml')
@@ -28,7 +28,7 @@ class SplitDriver(PycolatorDriver):
                                                        self.ns, filter_type)
 
 
-class MergeDriver(PycolatorDriver):
+class MergeDriver(base.PycolatorDriver):
     """Base class for merging multiple percolator fractions under different
     sorts of filtering. It writes a single percolator out xml from multiple fractions.
     Namespace and static xml come from first percolator file.

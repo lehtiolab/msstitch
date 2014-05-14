@@ -1,8 +1,8 @@
-from app.drivers.basedrivers import PycolatorDriver
+from app.drivers.pycolator import base
 from app.lookups import sequences
 
 
-class CreateLookup(PycolatorDriver):
+class CreateLookup(base.PycolatorDriver):
     """Creates an SQLite lookup DB from a FASTA file. Sequences are
     trypsinized and stored. It's possible to store sequences reversed
     for N-terminal falloff indexing, and it can be specified to cut
