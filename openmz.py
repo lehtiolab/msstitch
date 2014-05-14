@@ -30,13 +30,13 @@ parser.add_argument('-c', dest='command', type=str,
                     'files to correlate retention time to scan nrs.',
                     required=True
                     )
+parser.add_argument('-i', dest='infile',
+                    type=lambda x: parser_file_exists(parser, x),
+                    required=True, help='OpenMS result file')
 parser.add_argument('-d', dest='outdir', required=True,
                     help='Directory to output in',
                     type=lambda x: parser_file_exists(parser, x))
 parser.add_argument('--mzidtsv', dest='mzidtsv', help='TSV table of mzIdentML',
-                    type=lambda x: parser_file_exists(parser, x))
-parser.add_argument('--quant', dest='quants', help='Quant data in '
-                    'consensusXML format',
                     type=lambda x: parser_file_exists(parser, x))
 parser.add_argument('--spectra', dest='spectra', help='mzML files', nargs='+',
                     type=lambda x: parser_file_exists(parser, x))
