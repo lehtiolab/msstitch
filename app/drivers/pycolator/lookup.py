@@ -11,7 +11,7 @@ class CreateLookup(base.PycolatorDriver):
     outsuffix = '_lookup.sqlite'
 
     def __init__(self, **kwargs):
-        super(PycolatorDriver, self).__init__(**kwargs)
+        super(CreateLookup, self).__init__(**kwargs)
         self.falloff = kwargs.get('falloff')
         self.proline = kwargs.get('proline')
 
