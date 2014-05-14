@@ -54,7 +54,7 @@ class FilterKnownPeptides(base.PycolatorDriver):
     outsuffix = '_filtknown.xml'
 
     def __init__(self, **kwargs):
-        super(PycolatorDriver, self).__init__(**kwargs)
+        super(FilterKnownPeptides, self).__init__(**kwargs)
         self.db = kwargs.get('database')
         self.falloff = kwargs.get('falloff')
 
