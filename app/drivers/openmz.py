@@ -23,7 +23,7 @@ class TSVQuantDriver(base.OpenMzDriver):
         Returns sqlite file name.
         """
         fn_spectra = readers.mzml_generator(self.spectrafns)
-        consensus_quants = readers.quant_generator(self.quantfn)
+        consensus_quants = readers.quant_generator(self.quantfn, self.ns)
         return lookups.create_quant_lookup(fn_spectra, consensus_quants)
 
     def generate_tsv_content(self, quantdb):

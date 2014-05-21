@@ -4,22 +4,25 @@ from . import ml
 
 def mzml_generator(mzmlfiles):
     for fn in mzmlfiles:
+        ns = basereader.get_namespace(fn)
         spectra = basereader.generate_xmltags(
             fn,
             'spectrum',
             ['indexedmzML',
              'mzML',
              'run',
-             'spectrumList'])
+             'spectrumList'],
+            ns)
         for spectrum in spectra:
             yield fn, spectrum
 
 
-def quant_generator(consfile):
-    return basereader.generate_tags_multiple_files(
+def quant_generator(consfile, ns):
+    return basereader.generate_xmltags(
         [consfile],
         'consensusElement',
-        ['consensusXML', 'consensusElementList'])
+        ['consensusXML', 'consensusElementList'],
+        ns)
 
 
 def get_consxml_rt(cons_el):
