@@ -14,15 +14,15 @@ def mzml_generator(mzmlfiles):
              'spectrumList'],
             ns)
         for spectrum in spectra:
-            yield fn, spectrum
+            yield fn, spectrum, ns
 
 
-def quant_generator(consfile, ns):
+def quant_generator(consfile):
     return basereader.generate_xmltags(
-        [consfile],
+        consfile,
         'consensusElement',
         ['consensusXML', 'consensusElementList'],
-        ns)
+        )
 
 
 def get_consxml_rt(cons_el):
@@ -31,13 +31,13 @@ def get_consxml_rt(cons_el):
     return float(rt) / 60
 
 
-def get_mzml_rt(spectrum):
+def get_mzml_rt(spectrum, ns):
     """Return RT from mzml spectrum element, in minutes"""
-    scan = spectrum.find('.//scan')
-    for cvparam in scan.findall('cvParam'):
+    scan = spectrum.find('.//{%s}scan' % ns['xmlns'])
+    for cvparam in scan.findall('{%s}cvParam' % ns['xmlns']):
         try:
             if cvparam.attrib['name'] == 'scan start time':
-                return int(cvparam['value'])
+                return float(cvparam.attrib['value'])
         except KeyError:
             pass
 

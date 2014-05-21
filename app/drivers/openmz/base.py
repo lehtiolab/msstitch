@@ -1,6 +1,6 @@
 from app.drivers import base
 from app.readers import basereader
-from app.writers import openmz as writers
+from app.writers import tsv as writers
 
 
 class OpenMzDriver(base.BaseDriver):

@@ -15,8 +15,8 @@ def create_quant_lookup(fn_spectra, consensus_els):
     for consensus_el in consensus_els:
         count += 1
         rt = readers.get_consxml_rt(consensus_el)
-        for fn, spectrum in fn_spectra:
-            if rt == readers.get_mzml_rt(spectrum):
+        for fn, spectrum, ns in fn_spectra:
+            if rt == readers.get_mzml_rt(spectrum, ns):
                 spec_scan_nr = readers.get_spec_scan_nr(spectrum)
                 break
         qdata = get_quant_data(consensus_el)
