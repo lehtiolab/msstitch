@@ -15,10 +15,7 @@ def create_quant_lookup(fn_spectra, consensus_els):
     for consensus_el in consensus_els:
         count += 1
         rt = readers.get_consxml_rt(consensus_el)
-        for fn, spectrum, ns in fn_spectra:
-            if rt == readers.get_mzml_rt(spectrum, ns):
-                spec_scan_nr = readers.get_spec_scan_nr(spectrum)
-                break
+        fn, spec_scan_nr = get_spec_scan_nr(fn_spectra, rt)
         qdata = get_quant_data(consensus_el)
         try:
             quants[fn][spec_scan_nr] = qdata
@@ -30,9 +27,18 @@ def create_quant_lookup(fn_spectra, consensus_els):
             count = 0
             quants = {}
         formatting.clear_el(consensus_el)
-        formatting.clear_el(spectrum)
     store_quants(quants, quantdb)
     return quantdb.fn
+
+
+def get_spec_scan_nr(fn_spectra, cons_rt):
+    rt = round(cons_rt, 8)
+    for fn, spectrum, ns in fn_spectra:
+        if rt == round(readers.get_mzml_rt(spectrum, ns), 8):
+            scan_nr = readers.get_spec_scan_nr(spectrum)
+            return fn, scan_nr
+        formatting.clear_el(spectrum)
+    return False
 
 
 def get_quant_data(cons_el):
