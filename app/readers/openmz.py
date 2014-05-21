@@ -4,7 +4,7 @@ from . import ml
 
 def mzml_generator(mzmlfiles):
     for fn in mzmlfiles:
-        spectra = basereader.generate_tags_multiple_files(
+        spectra = basereader.generate_xmltags(
             fn,
             'spectrum',
             ['indexedmzML',
@@ -25,7 +25,7 @@ def quant_generator(consfile):
 def get_consxml_rt(cons_el):
     """Returns consensusXML in minutes"""
     rt = cons_el.find('centroid').attrib['rt']
-    return int(rt) / 60
+    return float(rt) / 60
 
 
 def get_mzml_rt(spectrum):

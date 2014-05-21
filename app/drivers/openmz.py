@@ -1,17 +1,29 @@
 import os
-from app.drivers import OpenMzDriver
 from app.lookups import quant as lookups
 from app.readers import openmz as readers
 from app.preparation import openmz as preparation
 from app.writers import tsv as writers
+
+from app.drivers import base
+
+class OpenMzDriver(base.BaseDriver):
+    """Driver for openMz functions"""
+    def run(self):
+        self.prepare(self.fn)
+        self.set_features()
+        self.write()
+
+    def write(self):
+        outfn = self.create_outfilepath(self.fn, self.outsuffix)
+        writers.write_percolator_xml(self.static_xml, self.features, outfn)
 
 
 class TSVQuantDriver(OpenMzDriver):
     def __init__(self, **kwargs):
         super(TSVQuantDriver, self).__init__(**kwargs)
         self.spectrafns = kwargs.get('spectra', None)
-        self.quantfn = kwargs.get('quants', None)
-        self.tsvfn = kwargs.get('tsv', None)
+        self.quantfn = kwargs.get('infile', None)
+        self.tsvfn = kwargs.get('mzidtsv', None)
 
     def run(self):
         quantdb = self.create_quantlookup()
@@ -38,5 +50,5 @@ class TSVQuantDriver(OpenMzDriver):
                                                       quantheader)
 
     def write(self):
-        outfn = self.create_outfilepath(self.tsvm, 'quants')
+        outfn = self.create_outfilepath(self.tsvfn, self.outsuffix)
         writers.write_quantpsm_tsv(self.header, self.psms, outfn)
