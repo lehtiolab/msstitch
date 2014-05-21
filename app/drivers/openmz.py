@@ -2,20 +2,20 @@ from app.drivers.openmz import base
 from app.lookups import quant as lookups
 from app.readers import openmz as readers
 from app.preparation import openmz as preparation
-from app.writers import tsv as writers
 
 
 class TSVQuantDriver(base.OpenMzDriver):
+    outsuffix = '_quant.tsv'
+
     def __init__(self, **kwargs):
         super(TSVQuantDriver, self).__init__(**kwargs)
         self.spectrafns = kwargs.get('spectra', None)
         self.quantfn = kwargs.get('infile', None)
         self.tsvfn = kwargs.get('mzidtsv', None)
 
-    def run(self):
+    def set_features(self):
         quantdb = self.create_quantlookup()
         self.generate_psms(quantdb)
-        self.write()
 
     def create_quantlookup(self):
         """Creates sqlite file containing quantification data and
@@ -35,7 +35,3 @@ class TSVQuantDriver(base.OpenMzDriver):
         self.psms = preparation.generate_psms_quanted(quantdb,
                                                       self.tsvfn,
                                                       quantheader)
-
-    def write(self):
-        outfn = self.create_outfilepath(self.tsvfn, self.outsuffix)
-        writers.write_quantpsm_tsv(self.header, self.psms, outfn)

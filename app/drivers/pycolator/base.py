@@ -18,13 +18,13 @@ class PycolatorDriver(base.BaseDriver):
     def get_all_psms(self):
         return readers.generate_psms(self.fn, self.ns)
 
-    def prepare(self, fn):
-        self.ns, self.static_xml = self.prepare_percolator_output(fn)
+    def prepare(self):
+        self.ns, self.static_xml = self.prepare_percolator_output(self.fn)
         self.allpeps = self.get_all_peptides()
         self.allpsms = self.get_all_psms()
 
     def run(self):
-        self.prepare(self.fn)
+        self.prepare()
         self.set_features()
         self.write()
 

@@ -12,7 +12,7 @@ class SplitDriver(base.PycolatorDriver):
     def run(self):
         td = {'target': self.targetsuffix, 'decoy': self.decoysuffix}
         for filter_type in ['target', 'decoy']:
-            self.prepare(self.fn)
+            self.prepare()
             self.set_features(filter_type)
             self.outsuffix = td[filter_type]
             self.write()
@@ -40,8 +40,8 @@ class MergeDriver(base.PycolatorDriver):
         self.mergefiles = [self.fn]
         self.mergefiles.extend(kwargs.get('multifile_input', None))
 
-    def prepare(self, fn):
-        self.ns, self.static_xml = self.prepare_percolator_output(fn)
+    def prepare(self):
+        self.ns, self.static_xml = self.prepare_percolator_output(self.fn)
 
     def set_features(self):
         """"Merge all psms and peptides"""
