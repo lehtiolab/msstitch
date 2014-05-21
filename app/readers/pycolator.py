@@ -2,31 +2,8 @@ from lxml import etree
 from . import basereader
 
 
-def get_root_el(fn):
-    rootgen = etree.iterparse(fn, events=('start',))
-    root = next(rootgen)[1]
-    for child in root.getchildren():
-        root.remove(child)
-    return root
-
-def get_namespace(fn):
-    root = get_root_el(fn)
-    ns = {}
-    for prefix in root.nsmap:
-        separator = ':'
-        nsprefix = prefix
-        if prefix is None:
-            nsprefix = ''
-            separator = ''
-        ns['xmlns{0}{1}'.format(separator, nsprefix)] = root.nsmap[prefix]
-    return ns
-
-
 def get_percolator_static_xml(fn, ns):
-    #rootgen = etree.iterparse(fn, tag='{%s}percolator_output' % ns['xmlns'],
-    #                          events=('start',))
-    root = get_root_el(fn)
-
+    root = basereader.get_root_el(fn)
     process = etree.iterparse(fn, tag='{%s}process_info' % ns['xmlns'],
                               events=('start',))
     root.append(next(process)[1])
