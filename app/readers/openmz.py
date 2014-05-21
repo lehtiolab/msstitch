@@ -8,9 +8,7 @@ def mzml_generator(mzmlfiles):
         spectra = basereader.generate_xmltags(
             fn,
             'spectrum',
-            ['indexedmzML',
-             'mzML',
-             'run',
+            ['run',
              'spectrumList'],
             ns)
         for spectrum in spectra:
@@ -21,7 +19,7 @@ def quant_generator(consfile):
     return basereader.generate_xmltags(
         consfile,
         'consensusElement',
-        ['consensusXML', 'consensusElementList'],
+        ['consensusElementList'],
         )
 
 

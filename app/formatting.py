@@ -14,6 +14,6 @@ def stringify_strip_namespace_declaration(el, ns):
 
 def clear_el(el):
     el.clear()
-    if el.getprevious() is not None:
+    while el.getprevious() is not None:
         del(el.getparent()[0])
 
