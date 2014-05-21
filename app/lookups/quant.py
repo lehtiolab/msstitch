@@ -44,7 +44,7 @@ def get_spec_scan_nr(fn_spectra, cons_rt):
 def get_quant_data(cons_el):
     """Gets quant data from consensusXML element"""
     quant_out = {}
-    for reporter in cons_el.findall('element'):
+    for reporter in cons_el.findall('.//element'):
         quant_out[reporter.attrib['map']] = reporter.attrib['it']
     return quant_out
 
@@ -52,7 +52,7 @@ def get_quant_data(cons_el):
 def store_quants(quants, quantdb):
     sql_quants = []
     for specfn in quants:
-        for scannr, quantdata in list(quants.items()):
+        for scannr, quantdata in quants[specfn].items():
             for quantmap in sorted(quantdata.keys()):
                 sql_quants.append((specfn, scannr,
                                    quantmap, quantdata[quantmap]))
