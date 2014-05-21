@@ -11,7 +11,7 @@ EXAMPLE:
 
 import argparse
 import os
-from app.drivers import openmz as drivers
+from app.drivers.openmz import openmz as drivers
 
 
 def parser_file_exists(currentparser, fn):
