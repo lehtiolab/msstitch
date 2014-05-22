@@ -4,7 +4,7 @@ from app.preparation import openmz
 
 
 def mock_quantmaps(self):
-    return ('116', '117', '118')
+    return (('116',), ('117',), ('118',))
 
 
 def mock_findquants(self, fn, scannr):
@@ -43,22 +43,22 @@ class TestQuantDBLookups(unittest.TestCase):
     def test_generate_mzidtsv_quanted(self):
         with patch('app.preparation.openmz.sqlite.QuantDB', self.mockdb), patch('app.preparation.openmz.readers', self.mockreader):
             psms = openmz.generate_psms_quanted('fn', 'tsvfn',
-                                                list(mock_quantmaps(self)))
+                                                list([x[0] for x in mock_quantmaps(self)]))
             result = next(psms)
         line = next(mock_specscanlines('test'))[0] + [
-            x[1] for x in mock_findquants(self, 'test', '1234')]
+            str(x[1]) for x in mock_findquants(self, 'test', '1234')]
 
         self.assertEqual(result, line)
 
 
-class Test(unittest.TestCase):
+class TestQuantLines(unittest.TestCase):
     def test_convert_quantdict(self):
         qdata = {'116': 1024, '117': 2048}
         allin = openmz.convert_quantdata_to_line(qdata, ['116', '117'])
-        self.assertEqual(allin, [1024, 2048])
+        self.assertEqual(allin, ['1024', '2048'])
         notfound = openmz.convert_quantdata_to_line(qdata,
                                                     ['116', '117', '118'])
-        self.assertEqual(notfound, [1024, 2048, 'NA'])
+        self.assertEqual(notfound, ['1024', '2048', 'NA'])
 
     def create_tsv_header(self):
         qhead = list(mock_quantmaps(self))

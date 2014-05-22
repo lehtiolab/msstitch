@@ -16,12 +16,12 @@ def generate_psms_quanted(quantdbfn, tsvfn, quantheader):
 def get_quant_header(quantdbfn):
     quantdb = sqlite.QuantDB(quantdbfn)
     quantmap = quantdb.get_all_quantmaps()
-    return sorted(quantmap)
+    return sorted([x[0] for x in quantmap])
 
 
 def create_tsv_header_quant(tsvfn, quantheader):
     """Returns tsvheader split list with quant header appended"""
-    return next(readers.get_tsv_header(tsvfn)) + quantheader
+    return readers.get_tsv_header(tsvfn) + [str(x[0]) for x in quantheader]
 
 
 def convert_quantdata_to_line(quantdata, quantheader):
@@ -31,7 +31,7 @@ def convert_quantdata_to_line(quantdata, quantheader):
     line = []
     for qkey in quantheader:
         try:
-            line.append(quantdata[qkey])
+            line.append(str(quantdata[qkey]))
         except KeyError:
             line.append('NA')
     return line

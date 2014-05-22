@@ -79,6 +79,7 @@ class QuantDB(DatabaseConnection):
             'INSERT INTO quant(spectra_filename, scan_nr, quantmap, intensity)'
             ' VALUES (?, ?, ?, ?)',
             quants)
+        self.conn.commit()
 
     def lookup_quant(self, spectrafile, scannr):
         cur = self.conn.execute(
