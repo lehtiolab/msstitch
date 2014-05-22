@@ -1,3 +1,4 @@
+import os
 from . import basereader
 from . import ml
 
@@ -12,7 +13,7 @@ def mzml_generator(mzmlfiles):
              'spectrumList'],
             ns)
         for spectrum in spectra:
-            yield fn, spectrum, ns
+            yield os.path.basename(fn), spectrum, ns
 
 
 def quant_generator(consfile):
