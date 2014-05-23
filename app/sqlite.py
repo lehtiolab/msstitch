@@ -16,7 +16,7 @@ class DatabaseConnection(object):
         if outfn is None:
             fd, outfn = mkstemp(prefix='msstitcher_tmp_')
             os.close(fd)
-
+        self.fn = outfn
         self.connect(outfn)
         for table in tables:
             columns = tables[table]
@@ -79,6 +79,7 @@ class QuantDB(DatabaseConnection):
             'INSERT INTO quant(spectra_filename, scan_nr, quantmap, intensity)'
             ' VALUES (?, ?, ?, ?)',
             quants)
+        self.conn.commit()
 
     def lookup_quant(self, spectrafile, scannr):
         cur = self.conn.execute(

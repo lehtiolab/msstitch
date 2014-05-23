@@ -15,7 +15,7 @@ class TSVQuantDriver(base.OpenMzDriver):
 
     def set_features(self):
         quantdb = self.create_quantlookup()
-        self.generate_psms(quantdb)
+        self.generate_tsv_content(quantdb)
 
     def create_quantlookup(self):
         """Creates sqlite file containing quantification data and

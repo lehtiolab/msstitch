@@ -18,5 +18,5 @@ def write_tsv_line_from_list(linelist, outfp):
     outfp.write('\n')
 
 
-def write_quantpsm_tsv(header, psms):
-    write_tsv(header, psms)
+def write_quantpsm_tsv(header, psms, outfn):
+    write_tsv(header, psms, outfn)
