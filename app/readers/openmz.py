@@ -15,12 +15,12 @@ def mzml_generator(mzmlfiles):
             yield fn, spectrum, ns
 
 
-def quant_generator(consfile):
-    return basereader.generate_xmltags(
-        consfile,
+def quant_generator(consfiles):
+    return basereader.generate_tags_multiple_files(
+        consfiles,
         'consensusElement',
         ['consensusElementList'],
-        )
+    )
 
 
 def get_consxml_rt(cons_el):

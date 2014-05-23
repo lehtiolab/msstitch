@@ -10,8 +10,8 @@ class TSVQuantDriver(base.OpenMzDriver):
     def __init__(self, **kwargs):
         super(TSVQuantDriver, self).__init__(**kwargs)
         self.spectrafns = kwargs.get('spectra', None)
-        self.quantfn = kwargs.get('infile', None)
-        self.tsvfn = kwargs.get('mzidtsv', None)
+        self.quantfns = kwargs.get('quants', None)
+        self.tsvfn = kwargs.get('infile', None)
 
     def set_features(self):
         quantdb = self.create_quantlookup()
@@ -23,7 +23,7 @@ class TSVQuantDriver(base.OpenMzDriver):
         Returns sqlite file name.
         """
         fn_spectra = readers.mzml_generator(self.spectrafns)
-        consensus_quants = readers.quant_generator(self.quantfn)
+        consensus_quants = readers.quant_generator(self.quantfns)
         return lookups.create_quant_lookup(fn_spectra, consensus_quants)
 
     def generate_tsv_content(self, quantdb):

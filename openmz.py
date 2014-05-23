@@ -32,11 +32,12 @@ parser.add_argument('-c', dest='command', type=str,
                     )
 parser.add_argument('-i', dest='infile',
                     type=lambda x: parser_file_exists(parser, x),
-                    required=True, help='OpenMS result file')
+                    required=True, help='Mzid TSV file')
 parser.add_argument('-d', dest='outdir', required=True,
                     help='Directory to output in',
                     type=lambda x: parser_file_exists(parser, x))
-parser.add_argument('--mzidtsv', dest='mzidtsv', help='TSV table of mzIdentML',
+parser.add_argument('--quants', dest='quants', help='Quants from OpenMS in '
+                    'consXML format', nargs='+',
                     type=lambda x: parser_file_exists(parser, x))
 parser.add_argument('--spectra', dest='spectra', help='mzML files', nargs='+',
                     type=lambda x: parser_file_exists(parser, x))

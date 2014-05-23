@@ -32,6 +32,10 @@ def create_quant_lookup(fn_spectra, consensus_els):
 
 
 def get_spec_scan_nr(fn_spectra, cons_rt):
+    """Returns mzML filename and scan nr of a spectrum that belongs to the
+    retention time in cons_rt, when given a generator of multiple
+    spectra files in fn_spectra.
+    The generator is a tuple of fn, spectrum, namespace."""
     rt = round(cons_rt, 8)
     for fn, spectrum, ns in fn_spectra:
         if rt == round(readers.get_mzml_rt(spectrum, ns), 8):
