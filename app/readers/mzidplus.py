@@ -60,13 +60,12 @@ def get_specidentitem_percolator_data(item, namespace):
     dict containing percolator data"""
     xmlns = '{%s}' % namespace['xmlns']
     percomap = {'{0}userParam'.format(xmlns):
-                {'svm-score': 'svm',
-                 'peptide-level-PEP': 'peppep'
-                 },
-                '{0}cvParam'.format(xmlns):
-                {'MS-GF:QValue': 'psmq',
-                 'MS-GF:PepQValue': 'pepq',
-                 'MS-GF:PEP': 'psmpep',
+                {'percolator:score': 'svm',
+                 'percolator:psm_p_value': 'PSM P-Value',
+                 'percolator:psm_q_value': 'PSM q-Value',
+                 'percolator:psm_pep': 'PSM PEP',
+                 'percolator:peptide_q_value': 'peptide q-Value',
+                 'percolator:peptide_pep': 'peptide PEP',
                  },
                 }
     percodata = {}
