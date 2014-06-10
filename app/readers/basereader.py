@@ -60,3 +60,15 @@ def generate_xmltags(fn, tag, ignore_tags, ns=None):
         elif el.tag in ['{0}{1}'.format(xmlns, x) for x in
                         ignore_tags]:
             formatting.clear_el(el)
+
+
+def generate_tsv_lines_multifile(fns):
+    return itertools.chain.from_iterable([generate_tsv_lines(fn)
+                                          for fn in fns])
+
+
+def generate_tsv_lines(fn):
+    with open(fn) as fp:
+        header = next(fp)
+        for line in fp:
+            yield line

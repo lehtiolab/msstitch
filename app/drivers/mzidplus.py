@@ -1,7 +1,7 @@
 from app.drivers import base
 from app.preparation import mzidplus as prep
 from app.writers import mzidplus as writers
-
+from app.readers import basereader
 
 class MzidPlusDriver(base.BaseDriver):
     def run(self):
@@ -11,6 +11,20 @@ class MzidPlusDriver(base.BaseDriver):
     def write(self):
         outfn = self.create_outfilepath(self.fn, self.outsuffix)
         writers.write_mzid_tsv(self.header, self.psms, outfn)
+
+
+class MzidTSVConcatenateDriver(MzidPlusDriver):
+    """Concatenates TSVs"""
+    outsuffix = '_concat.tsv'
+
+    def __init__(self, **kwargs):
+        super(MzidTSVConcatenateDriver, self).__init__(**kwargs)
+        self.allinfiles = [self.fn]
+        self.allinfiles.extend(kwargs.get('multifile_input', None))
+
+    def get_psms(self):
+        self.header = prep.get_header_from_mzidtsv(self.fn)
+        self.psms = basereader.generate_tsv_lines_multifile(self.allinfiles)
 
 
 class MzidPercoTSVDriver(MzidPlusDriver):
