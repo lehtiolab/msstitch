@@ -29,12 +29,13 @@ parser.add_argument('-c', dest='command', type=str,
                     'This includes Percolator-generated data from pout2mzid.',
                     required=True
                     )
+parser.add_argument('-i', dest='mzidtsv', help='TSV table of mzIdentML',
+                    type=lambda x: parser_file_exists(parser, x),
+                    required=True)
 parser.add_argument('-d', dest='outdir', required=True,
                     help='Directory to output in',
                     type=lambda x: parser_file_exists(parser, x))
 parser.add_argument('--mzid', dest='mzid', help='mzIdentML file',
-                    type=lambda x: parser_file_exists(parser, x))
-parser.add_argument('--mzidtsv', dest='mzidtsv', help='TSV table of mzIdentML',
                     type=lambda x: parser_file_exists(parser, x))
 
 # not supported yet
