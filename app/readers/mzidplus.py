@@ -3,6 +3,16 @@
 from . import basereader
 from . import ml
 
+P_SVM = ('percolator:score', 'percolator svm-score')
+P_PSMP = ('percolator:psm_p_value', 'PSM p-value')
+P_PSMQ = ('percolator:psm_q_value', 'PSM q-value')
+P_PSMPEP = ('percolator:psm_psep', 'PSM-PEP')
+P_PEPTIDEQ = ('percolator:peptide_q_value', 'peptide q-value')
+P_PEPTIDEPEP = ('percolator:peptide_pep', 'peptide PEP')
+
+PERCO_ORDER = [P_SVM, P_PSMP, P_PSMQ, P_PSMPEP, P_PEPTIDEQ, P_PEPTIDEPEP]
+PERCO_HEADER = [x[1] for x in PERCO_ORDER]
+PERCO_HEADERMAP = {x[0]: x[1] for x in PERCO_ORDER}
 
 def get_mzid_namespace(mzidfile):
     return basereader.get_namespace_from_top(mzidfile, None)
@@ -59,15 +69,7 @@ def get_specidentitem_percolator_data(item, namespace):
     percolator data by matching to a dict lookup. Return a
     dict containing percolator data"""
     xmlns = '{%s}' % namespace['xmlns']
-    percomap = {'{0}userParam'.format(xmlns):
-                {'percolator:score': 'svm',
-                 'percolator:psm_p_value': 'PSM P-Value',
-                 'percolator:psm_q_value': 'PSM q-Value',
-                 'percolator:psm_pep': 'PSM PEP',
-                 'percolator:peptide_q_value': 'peptide q-Value',
-                 'percolator:peptide_pep': 'peptide PEP',
-                 },
-                }
+    percomap = {'{0}userParam'.format(xmlns): PERCO_HEADERMAP, }
     percodata = {}
     for child in item:
         try:

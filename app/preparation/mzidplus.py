@@ -21,8 +21,7 @@ def get_percoline(specresult, namespace, line, multipsm, seqdb):
             specresult.find('{0}SpectrumIdentificationItem'.format(xmlns)),
             namespace)
 
-    percoline.extend([perco['svm'], perco['psmq'], perco['psmpep'],
-                      perco['pepq'], perco['peppep']])
+    percoline.extend([perco[x] for x in readers.PERCO_HEADER])
     out['line'] = line + percoline
     return out
 
@@ -83,6 +82,5 @@ def get_header_from_mzidtsv(fn, multipsm):
         # FIXME should this be here???
         # Maybe define perco header in a global.
         line.append('rank')
-    line.extend(['svm score', 'q-value', 'PEP', 'peptide-level q-value',
-                 'peptide-level PEP'])
+    line.extend(readers.PERCO_HEADER)
     return line
