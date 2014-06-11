@@ -74,13 +74,16 @@ def add_percolator_to_mzidtsv(mzidfn, tsvfn, multipsm, seqdb=None):
         yield writelines
 
 
-def get_header_from_mzidtsv(fn, multipsm):
-    with open(fn) as fp:
-        line = next(fp)
-    line = line.split('\t')
+def get_header_with_percolator(fn, multipsm=False):
+    header = get_header_from_mzidtsv(fn)
     if multipsm is True:
         # FIXME should this be here???
-        # Maybe define perco header in a global.
-        line.append('rank')
-    line.extend(readers.PERCO_HEADER)
-    return line
+        header.append('rank')
+    header.extend(readers.PERCO_HEADER)
+    return header
+
+
+def get_header_from_mzidtsv(fn):
+    with open(fn) as fp:
+        line = next(fp)
+    return line.split('\t')

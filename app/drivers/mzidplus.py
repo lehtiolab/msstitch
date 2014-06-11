@@ -3,6 +3,7 @@ from app.preparation import mzidplus as prep
 from app.writers import mzidplus as writers
 from app.readers import basereader
 
+
 class MzidPlusDriver(base.BaseDriver):
     def run(self):
         self.get_psms()
@@ -47,8 +48,8 @@ class MzidPercoTSVDriver(MzidPlusDriver):
         else:
             seqlookup = None
 
-        self.header = prep.get_header_from_mzidtsv(self.fn,
-                                                   self.multipsm_per_scan)
+        self.header = prep.get_header_with_percolator(self.fn,
+                                                      self.multipsm_per_scan)
         self.psms = prep.add_percolator_to_mzidtsv(self.idfn,
                                                    self.fn,
                                                    self.multipsm_per_scan,
