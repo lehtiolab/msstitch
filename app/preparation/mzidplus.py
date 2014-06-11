@@ -49,13 +49,13 @@ def add_percolator_to_mzidtsv(mzidfn, tsvfn, multipsm, header, seqdb=None):
     specresults = readers.mzid_spec_result_generator(mzidfn, namespace)
     with open(tsvfn) as mzidfp:
         # skip header
-        oldheader = next(mzidfp)
+        oldheader = next(mzidfp).strip().split('\t')
         # multiple lines can belong to one specresult, so we use a nested
         # for/while-true-break construction.
         writelines = []
         specresult, specdata = get_specresult_data(specresults, specfnids)
         for line in mzidfp:
-            line = {x: y for x, y in zip(oldheader, line.split('\t'))}
+            line = {x: y for x, y in zip(oldheader, line.strip().split('\t'))}
             while True:
                 if writelines and not multipsm:
                     # Only keep best ranking psm
