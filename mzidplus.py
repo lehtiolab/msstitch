@@ -30,7 +30,7 @@ parser.add_argument('-c', dest='command', type=str,
                     'output. Make sure headers are same in all files.\n',
                     required=True
                     )
-parser.add_argument('-i', dest='mzidtsv', help='TSV table of mzIdentML',
+parser.add_argument('-i', dest='infile', help='TSV table of mzIdentML',
                     type=lambda x: parser_file_exists(parser, x),
                     required=True)
 parser.add_argument('--multifiles', dest='multifile_input', nargs='+',
