@@ -53,4 +53,5 @@ class MzidPercoTSVDriver(MzidPlusDriver):
         self.psms = prep.add_percolator_to_mzidtsv(self.idfn,
                                                    self.fn,
                                                    self.multipsm_per_scan,
+                                                   self.header,
                                                    seqlookup)

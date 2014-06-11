@@ -2,9 +2,9 @@ from app.readers import mzidplus as readers
 
 
 def get_percoline(specresult, namespace, line, multipsm, seqdb):
-    # FIXME MS-GF:etc elements may get different name
     """Extracts percolator data from specresult and returns a dict"""
-    out = {'line': line, 'rank': None}
+    out = line
+    out.update({'rank': None})
     try:
         xmlns = '{%s}' % namespace['xmlns']
     except TypeError:
@@ -16,13 +16,10 @@ def get_percoline(specresult, namespace, line, multipsm, seqdb):
         # get percodata,
         # percoline = [line-with-correct-rank]
     else:  # only the first element
-        percoline = []
         perco = readers.get_specidentitem_percolator_data(
             specresult.find('{0}SpectrumIdentificationItem'.format(xmlns)),
             namespace)
-
-    percoline.extend([perco[x] for x in readers.PERCO_HEADER])
-    out['line'] = line + percoline
+    out.update(perco)
     return out
 
 
@@ -33,7 +30,7 @@ def get_specresult_data(specresults, id_fnlookup):
     return specresult, {'scan': scannr, 'fn': id_fnlookup[mzmlid]}
 
 
-def add_percolator_to_mzidtsv(mzidfn, tsvfn, multipsm, seqdb=None):
+def add_percolator_to_mzidtsv(mzidfn, tsvfn, multipsm, header, seqdb=None):
     """Takes a MSGF+ tsv and corresponding mzId, adds percolatordata
     to tsv lines. Generator yields the lines. Multiple PSMs per scan
     can be delivered, in which case rank is also reported.
@@ -43,13 +40,13 @@ def add_percolator_to_mzidtsv(mzidfn, tsvfn, multipsm, seqdb=None):
     specresults = readers.mzid_spec_result_generator(mzidfn, namespace)
     with open(tsvfn) as mzidfp:
         # skip header
-        next(mzidfp)
+        oldheader = next(mzidfp)
         # multiple lines can belong to one specresult, so we use a nested
         # for/while-true-break construction.
         writelines = []
         specresult, specdata = get_specresult_data(specresults, specfnids)
         for line in mzidfp:
-            line = line.split('\t')
+            line = {x: y for x, y in zip(oldheader, line.split('\t'))}
             while True:
                 if writelines and not multipsm:
                     # Only keep best ranking psm
@@ -58,8 +55,9 @@ def add_percolator_to_mzidtsv(mzidfn, tsvfn, multipsm, seqdb=None):
                     yield writelines
                     writelines = []
                     break
-                if line[2] == specdata['scan'] \
-                   and line[0] == specdata['fn']:
+                # FIXME get header names instead of positions!
+                if line[oldheader[2]] == specdata['scan'] \
+                   and line[oldheader[0]] == specdata['fn']:
                     # add percolator stuff to line
                     outline = get_percoline(specresult, namespace, line,
                                             multipsm, seqdb)

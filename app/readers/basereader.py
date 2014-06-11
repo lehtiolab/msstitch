@@ -63,12 +63,13 @@ def generate_xmltags(fn, tag, ignore_tags, ns=None):
 
 
 def generate_tsv_lines_multifile(fns):
-    return itertools.chain.from_iterable([generate_tsv_lines(fn)
+    return itertools.chain.from_iterable([generate_tsv_psms(fn)
                                           for fn in fns])
 
 
-def generate_tsv_lines(fn):
+def generate_tsv_psms(fn):
+    """Returns dicts with header-keys and psm statistic values"""
     with open(fn) as fp:
         header = next(fp)
         for line in fp:
-            yield line
+            yield {x: line.strip().split('\t')[x] for x in header}

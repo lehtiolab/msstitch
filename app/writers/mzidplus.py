@@ -11,9 +11,5 @@ def write_mzid_tsv(header, scanresults, outfn):
         tsv.write_tsv_line_from_list(header, fp)
         for scanresult in scanresults:
             for psm in scanresult:
-                if psm['rank'] is not None:
-                    line = [psm['rank']]
-                else:
-                    line = []
-                line.extend(psm['line'])
+                line = [psm[x] for x in header]
                 tsv.write_tsv_line_from_list(line, fp)
