@@ -25,7 +25,7 @@ class MzidTSVConcatenateDriver(MzidPlusDriver):
 
     def get_psms(self):
         self.header = prep.get_header_from_mzidtsv(self.fn)
-        self.psms = basereader.generate_tsv_lines_multifile(self.allinfiles)
+        self.psms = prep.merge_mzidtsvs(self.allinfiles, self.header)
 
 
 class MzidPercoTSVDriver(MzidPlusDriver):
