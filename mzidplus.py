@@ -23,15 +23,21 @@ def parser_file_exists(currentparser, fn):
 parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
 parser.add_argument('-c', dest='command', type=str,
                     help='How to manipulate the input:\n'
-                    'percotsv       - Convert MSGF+ output (in mzIdentML '
-                    'format) to a tab separated file with '
-                    'PSMs, their statistics and their quantification data. '
-                    'This includes Percolator-generated data from pout2mzid.',
+                    'percotsv       - Add percolator data to a  TSV with \n'
+                    'MSGF+ output. Specify TSV file with -i, mzid file with \n'
+                    '--mzid.\n'
+                    'mergetsv       - Merges multiple TSV tables of MSGF+ \n'
+                    'output. Make sure headers are same in all files.\n',
                     required=True
                     )
 parser.add_argument('-i', dest='mzidtsv', help='TSV table of mzIdentML',
                     type=lambda x: parser_file_exists(parser, x),
                     required=True)
+parser.add_argument('--multifiles', dest='multifile_input', nargs='+',
+                    type=lambda x: parser_file_exists(parser, x),
+                    help='Multiple input files for use in e.g. merging data.'
+                    ' PSMs will be picked from these and e.g. merged in '
+                    'the file specified with -i.')
 parser.add_argument('-d', dest='outdir', required=True,
                     help='Directory to output in',
                     type=lambda x: parser_file_exists(parser, x))
@@ -47,6 +53,7 @@ args = parser.parse_args()
 
 commandmap = {
     'percotsv': drivers.MzidPercoTSVDriver,
+    'mergetsv': drivers.MzidTSVConcatenateDriver,
 }
 
 command = commandmap[args.command](**vars(args))
