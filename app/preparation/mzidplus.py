@@ -82,15 +82,9 @@ def add_percolator_to_mzidtsv(mzidfn, tsvfn, multipsm, header, seqdb=None):
 
 
 def get_header_with_percolator(fn, multipsm=False):
-    header = get_header_from_mzidtsv(fn)
+    header = tsvreader.get_header_from_mzidtsv(fn)
     if multipsm is True:
         # FIXME should this be here???
         header.append('rank')
     header.extend(readers.PERCO_HEADER)
     return header
-
-
-def get_header_from_mzidtsv(fn):
-    with open(fn) as fp:
-        line = next(fp)
-    return line.split('\t')
