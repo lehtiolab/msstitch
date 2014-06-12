@@ -7,7 +7,8 @@ def merge_mzidtsvs(fns, header):
         if header != tsvreader.get_tsv_header(fn):
             raise RuntimeError('Headers of TSV files to concatenate are '
                                'not identical')
-    return readers.generate_tsv_lines_multifile(fns)
+    for psm in readers.generate_tsv_lines_multifile(fns, header):
+        yield [psm]
 
 
 def get_percoline(specresult, namespace, line, multipsm, seqdb):
@@ -82,7 +83,7 @@ def add_percolator_to_mzidtsv(mzidfn, tsvfn, multipsm, header, seqdb=None):
 
 
 def get_header_with_percolator(fn, multipsm=False):
-    header = tsvreader.get_header_from_mzidtsv(fn)
+    header = tsvreader.get_tsv_header(fn)
     if multipsm is True:
         # FIXME should this be here???
         header.append('rank')

@@ -89,14 +89,14 @@ def get_specidentitem_percolator_data(item, namespace):
     return percodata
 
 
-def generate_tsv_lines_multifile(fns):
-    return itertools.chain.from_iterable([generate_tsv_psms(fn)
+def generate_tsv_lines_multifile(fns, header):
+    return itertools.chain.from_iterable([generate_tsv_psms(fn, header)
                                           for fn in fns])
 
 
-def generate_tsv_psms(fn):
+def generate_tsv_psms(fn, header):
     """Returns dicts with header-keys and psm statistic values"""
     with open(fn) as fp:
-        header = next(fp)
+        next(fp) # skip header
         for line in fp:
-            yield {x: line.strip().split('\t')[x] for x in header}
+            yield {x: y for (x,y) in zip(header, line.strip().split('\t'))}

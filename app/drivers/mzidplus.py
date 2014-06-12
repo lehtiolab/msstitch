@@ -2,6 +2,7 @@ from app.drivers import base
 from app.preparation import mzidplus as prep
 from app.writers import mzidplus as writers
 from app.readers import basereader
+from app.readers import tsv as tsvreader
 
 
 class MzidPlusDriver(base.BaseDriver):
@@ -24,7 +25,7 @@ class MzidTSVConcatenateDriver(MzidPlusDriver):
         self.allinfiles.extend(kwargs.get('multifile_input', None))
 
     def get_psms(self):
-        self.header = prep.get_header_from_mzidtsv(self.fn)
+        self.header = tsvreader.get_tsv_header(self.fn)
         self.psms = prep.merge_mzidtsvs(self.allinfiles, self.header)
 
 
