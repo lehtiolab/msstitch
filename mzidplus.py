@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # FIXME docstring wrong
 """
 mzidplus -- Modifying MSGF+ mzIdentML output
