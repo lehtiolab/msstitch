@@ -62,7 +62,7 @@ def add_percolator_to_mzidtsv(mzidfn, tsvfn, multipsm, header, seqdb=None):
                     # Only keep best ranking psm
                     # FIXME we assume best ranking is first line. Fix this in
                     # future
-                    yield writelines
+                    yield writelines[0]
                     writelines = []
                     break
                 # FIXME get header names instead of positions!
@@ -71,15 +71,17 @@ def add_percolator_to_mzidtsv(mzidfn, tsvfn, multipsm, header, seqdb=None):
                     # add percolator stuff to line
                     outline = get_percoline(specresult, namespace, line,
                                             multipsm, seqdb)
-                    writelines.append(outline)
+                    writelines.append([outline[x] for x in header])
                     break  # goes to next line in tsv
                 else:
-                    yield writelines
+                    for outline in writelines:
+                        yield outline
                     writelines = []
                     specresult, specdata = get_specresult_data(specresults,
                                                                specfnids)
-        # write last line
-        yield writelines
+        # write last lines
+        for outline in writelines:
+            yield outline
 
 
 def get_header_with_percolator(fn, multipsm=False):
