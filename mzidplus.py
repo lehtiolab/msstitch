@@ -27,7 +27,12 @@ parser.add_argument('-c', dest='command', type=str,
                     'MSGF+ output. Specify TSV file with -i, mzid file with \n'
                     '--mzid.\n'
                     'mergetsv       - Merges multiple TSV tables of MSGF+ \n'
-                    'output. Make sure headers are same in all files.\n',
+                    'output. Make sure headers are same in all files.\n'
+                    'quanttsv       - Add quantitative data from openMS\n'
+                    'consensusXML to a tab separated file with\n'
+                    'PSMs, their statistics and their quantification data.\n'
+                    'Needs except these also the corresponding mzML spectra\n'
+                    'files to correlate retention time to scan nrs.\n',
                     required=True
                     )
 parser.add_argument('-i', dest='infile', help='TSV table of mzIdentML',
@@ -43,6 +48,11 @@ parser.add_argument('-d', dest='outdir', required=True,
                     type=lambda x: parser_file_exists(parser, x))
 parser.add_argument('--mzid', dest='mzid', help='mzIdentML file',
                     type=lambda x: parser_file_exists(parser, x))
+parser.add_argument('--quants', dest='quants', help='Quants from OpenMS in '
+                    'consXML format', nargs='+',
+                    type=lambda x: parser_file_exists(parser, x))
+parser.add_argument('--spectra', dest='spectra', help='mzML files', nargs='+',
+                    type=lambda x: parser_file_exists(parser, x))
 
 # not supported yet
 #parser.add_argument('--allpsms', dest='allpsms', action='store_true',
@@ -54,6 +64,7 @@ args = parser.parse_args()
 commandmap = {
     'percotsv': drivers.MzidPercoTSVDriver,
     'mergetsv': drivers.MzidTSVConcatenateDriver,
+    'quanttsv': drivers.TSVQuantDriver,
 }
 
 command = commandmap[args.command](**vars(args))

@@ -16,7 +16,3 @@ def write_tsv_line_from_list(linelist, outfp):
     line = '\t'.join(linelist)
     outfp.write(line)
     outfp.write('\n')
-
-
-def write_quantpsm_tsv(header, psms, outfn):
-    write_tsv(header, psms, outfn)

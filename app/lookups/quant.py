@@ -1,6 +1,6 @@
 from app import sqlite
 from app import formatting
-from app.readers import openmz as readers
+from app.readers import openms as readers
 
 
 def create_quant_lookup(fn_spectra, consensus_els):

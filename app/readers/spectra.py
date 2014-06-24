@@ -16,20 +16,6 @@ def mzml_generator(mzmlfiles):
             yield os.path.basename(fn), spectrum, ns
 
 
-def quant_generator(consfiles):
-    return basereader.generate_tags_multiple_files(
-        consfiles,
-        'consensusElement',
-        ['consensusElementList'],
-    )
-
-
-def get_consxml_rt(cons_el):
-    """Returns consensusXML in minutes"""
-    rt = cons_el.find('centroid').attrib['rt']
-    return float(rt) / 60
-
-
 def get_mzml_rt(spectrum, ns):
     """Return RT from mzml spectrum element, in minutes"""
     scan = spectrum.find('.//{%s}scan' % ns['xmlns'])
