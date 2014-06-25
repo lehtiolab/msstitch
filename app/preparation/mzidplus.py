@@ -49,36 +49,34 @@ def add_percolator_to_mzidtsv(mzidfn, tsvfn, multipsm, header, seqdb=None):
     specfnids = readers.get_mzid_specfile_ids(mzidfn, namespace)
     specresults = readers.mzid_spec_result_generator(mzidfn, namespace)
     with open(tsvfn) as mzidfp:
-        # skip header
         oldheader = next(mzidfp).strip().split('\t')
-        # multiple lines can belong to one specresult, so we use a nested
-        # for/while-true-break construction.
-        writelines = []
-        specresult, specdata = get_specresult_data(specresults, specfnids)
-        for line in mzidfp:
-            line = {x: y for x, y in zip(oldheader, line.strip().split('\t'))}
-            while True:
-                if writelines and not multipsm:
-                    # Only keep best ranking psm
-                    # FIXME we assume best ranking is first line. Fix this in
-                    # future
-                    yield writelines[0]
-                    writelines = []
-                    break
-                # FIXME get header names instead of positions!
-                if line[oldheader[2]] == specdata['scan'] \
-                   and line[oldheader[0]] == specdata['fn']:
-                    # add percolator stuff to line
-                    outline = get_percoline(specresult, namespace, line,
-                                            multipsm, seqdb)
-                    writelines.append([outline[x] for x in header])
-                    break  # goes to next line in tsv
-                else:
-                    for outline in writelines:
-                        yield outline
-                    writelines = []
-                    specresult, specdata = get_specresult_data(specresults,
-                                                               specfnids)
+    # multiple lines can belong to one specresult, so we use a nested
+    # for/while-true-break construction.
+    writelines = []
+    specresult, specdata = get_specresult_data(specresults, specfnids)
+    for line in readers.generate_tsv_psms(tsvfn, oldheader):
+        while True:
+            if writelines and not multipsm:
+                # Only keep best ranking psm
+                # FIXME we assume best ranking is first line. Fix this in
+                # future
+                yield writelines[0]
+                writelines = []
+                break
+            # FIXME get header names instead of positions!
+            if line[oldheader[2]] == specdata['scan'] \
+               and line[oldheader[0]] == specdata['fn']:
+                # add percolator stuff to line
+                outline = get_percoline(specresult, namespace, line,
+                                        multipsm, seqdb)
+                writelines.append([outline[x] for x in header])
+                break  # goes to next line in tsv
+            else:
+                for outline in writelines:
+                    yield outline
+                writelines = []
+                specresult, specdata = get_specresult_data(specresults,
+                                                           specfnids)
         # write last lines
         for outline in writelines:
             yield outline
