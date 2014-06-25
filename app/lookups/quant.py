@@ -1,6 +1,7 @@
 from app import sqlite
 from app import formatting
-from app.readers import openms as readers
+from app.readers import openms as openmsreader
+from app.readers import spectra as specreader
 
 
 def create_quant_lookup(fn_spectra, consensus_els):
@@ -14,7 +15,7 @@ def create_quant_lookup(fn_spectra, consensus_els):
     count = 0
     for consensus_el in consensus_els:
         count += 1
-        rt = readers.get_consxml_rt(consensus_el)
+        rt = openmsreader.get_consxml_rt(consensus_el)
         fn, spec_scan_nr = get_spec_scan_nr(fn_spectra, rt)
         qdata = get_quant_data(consensus_el)
         try:
@@ -38,8 +39,8 @@ def get_spec_scan_nr(fn_spectra, cons_rt):
     The generator is a tuple of fn, spectrum, namespace."""
     rt = round(cons_rt, 8)
     for fn, spectrum, ns in fn_spectra:
-        if rt == round(readers.get_mzml_rt(spectrum, ns), 8):
-            scan_nr = readers.get_spec_scan_nr(spectrum)
+        if rt == round(specreader.get_mzml_rt(spectrum, ns), 8):
+            scan_nr = specreader.get_spec_scan_nr(spectrum)
             return fn, scan_nr
         formatting.clear_el(spectrum)
     return False
