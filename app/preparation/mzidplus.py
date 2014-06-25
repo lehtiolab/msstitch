@@ -8,7 +8,7 @@ def merge_mzidtsvs(fns, header):
             raise RuntimeError('Headers of TSV files to concatenate are '
                                'not identical')
     for psm in readers.generate_tsv_lines_multifile(fns, header):
-        yield [psm]
+        yield [psm[x] for x in header]
 
 
 def get_percoline(specresult, namespace, line, multipsm, seqdb):
