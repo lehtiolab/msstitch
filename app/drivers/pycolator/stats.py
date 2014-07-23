@@ -20,7 +20,7 @@ class ReassignmentDriver(base.PycolatorDriver):
         self.features = {'peptide': modifiers.reassign_elements(self.allpeps,
                                                                 stats,
                                                                 self.ns),
-                         'psm': []
+                         'psm': self.allpsms,
                          }
 
 

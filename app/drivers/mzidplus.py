@@ -60,7 +60,6 @@ class MzidPercoTSVDriver(MzidPlusDriver):
                                                    self.header,
                                                    seqlookup)
 
-
 class TSVQuantDriver(MzidPlusDriver):
     outsuffix = '_quant.tsv'
 

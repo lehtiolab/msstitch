@@ -41,6 +41,3 @@ def lookup_quant(spectrafile, psm_scan_nr, quantdb):
     """Outputs dict with keys == quantname, values == quantintensity."""
     dbquants = quantdb.lookup_quant(spectrafile, psm_scan_nr)
     return {x[0]: x[1] for x in dbquants}
-
-
-
