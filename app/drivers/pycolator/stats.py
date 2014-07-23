@@ -17,7 +17,7 @@ class ReassignmentDriver(base.PycolatorDriver):
 
     def get_all_psms(self):
         """Override parent method so it returns strings instead"""
-        self.get_all_psms_strings()
+        return self.get_all_psms_strings()
 
     def set_features(self):
         stats = modifiers.parse_qvality_output(self.qvalityout)
