@@ -18,6 +18,10 @@ class PycolatorDriver(base.BaseDriver):
     def get_all_psms(self):
         return readers.generate_psms(self.fn, self.ns)
 
+    def get_all_psms_strings(self):
+        return readers.generate_psms_multiple_fractions_strings([self.fn],
+                                                                self.ns)
+
     def prepare(self):
         self.ns, self.static_xml = self.prepare_percolator_output(self.fn)
         self.allpeps = self.get_all_peptides()

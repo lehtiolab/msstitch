@@ -15,6 +15,10 @@ class ReassignmentDriver(base.PycolatorDriver):
         super(ReassignmentDriver, self).__init__(**kwargs)
         self.qvalityout = kwargs['qvalityout']
 
+    def get_all_psms(self):
+        """Override parent method so it returns strings instead"""
+        self.get_all_psms_strings()
+
     def set_features(self):
         stats = modifiers.parse_qvality_output(self.qvalityout)
         self.features = {'peptide': modifiers.reassign_elements(self.allpeps,

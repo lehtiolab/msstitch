@@ -1,6 +1,5 @@
 from app.drivers.pycolator import base
 from app.preparation import pycolator as preparation
-from app.readers import pycolator as readers
 
 
 class FilterPeptideLength(base.PycolatorDriver):
@@ -37,8 +36,7 @@ class FilterUniquePeptides(base.PycolatorDriver):
 
     def get_all_psms(self):
         """Override parent method so it returns strings instead"""
-        return readers.generate_psms_multiple_fractions_strings([self.fn],
-                                                                self.ns)
+        self.get_all_psms_strings()
 
     def set_features(self):
         uniquepeps = preparation.filter_unique_peptides(self.allpeps,
