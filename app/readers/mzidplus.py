@@ -8,7 +8,7 @@ from . import ml
 P_SVM = ('percolator:score', 'percolator svm-score')
 P_PSMP = ('percolator:psm_p_value', 'PSM p-value')
 P_PSMQ = ('percolator:psm_q_value', 'PSM q-value')
-P_PSMPEP = ('percolator:psm_psep', 'PSM-PEP')
+P_PSMPEP = ('percolator:psm_pep', 'PSM-PEP')
 P_PEPTIDEQ = ('percolator:peptide_q_value', 'peptide q-value')
 P_PEPTIDEPEP = ('percolator:peptide_pep', 'peptide PEP')
 
