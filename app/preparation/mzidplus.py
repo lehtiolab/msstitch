@@ -57,7 +57,7 @@ def add_percolator_to_mzidtsv(mzidfn, tsvfn, multipsm, header, seqdb=None):
     for line in readers.generate_tsv_psms(tsvfn, oldheader):
         while True:
             if writelines and not multipsm:
-                # Only keep best ranking psm
+                # Only keep best ranking psm for a single spectrum
                 # FIXME we assume best ranking is first line. Fix this in
                 # future
                 yield writelines[0]
@@ -77,9 +77,9 @@ def add_percolator_to_mzidtsv(mzidfn, tsvfn, multipsm, header, seqdb=None):
                 writelines = []
                 specresult, specdata = get_specresult_data(specresults,
                                                            specfnids)
-        # write last lines
-        for outline in writelines:
-            yield outline
+    # write last lines
+    for outline in writelines:
+        yield outline
 
 
 def get_header_with_percolator(fn, multipsm=False):
