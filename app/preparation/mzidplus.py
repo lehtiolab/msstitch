@@ -52,31 +52,26 @@ def add_percolator_to_mzidtsv(mzidfn, tsvfn, multipsm, header, seqdb=None):
         oldheader = next(mzidfp).strip().split('\t')
     # multiple lines can belong to one specresult, so we use a nested
     # for/while-true-break construction.
-    writelines = []
+    # FIXME we assume best ranking is first line. Fix this in
+    # FIXME get header names instead of positions!
+    # FIXME we should count amounts of specresult/line and throw error if
+    # they do not match. Also error at not found lines.
     specresult, specdata = get_specresult_data(specresults, specfnids)
+    writelines = []
     for line in readers.generate_tsv_psms(tsvfn, oldheader):
         while True:
-            if writelines and not multipsm:
-                # Only keep best ranking psm for a single spectrum
-                # FIXME we assume best ranking is first line. Fix this in
-                # future
-                yield writelines[0]
-                writelines = []
-                break
-            # FIXME get header names instead of positions!
-            if line[oldheader[2]] == specdata['scan'] \
-               and line[oldheader[0]] == specdata['fn']:
-                # add percolator stuff to line
+            if line[oldheader[2]] == specdata['scan'] and \
+              line[oldheader[0]] == specdata['fn']:
                 outline = get_percoline(specresult, namespace, line,
                                         multipsm, seqdb)
                 writelines.append([outline[x] for x in header])
-                break  # goes to next line in tsv
+                break
             else:
-                for outline in writelines:
-                    yield outline
-                writelines = []
                 specresult, specdata = get_specresult_data(specresults,
                                                            specfnids)
+        for outline in writelines:
+            yield outline
+        writelines = []
     # write last lines
     for outline in writelines:
         yield outline
