@@ -12,4 +12,4 @@ def quant_generator(consfiles):
 def get_consxml_rt(cons_el):
     """Returns consensusXML in minutes"""
     rt = cons_el.find('centroid').attrib['rt']
-    return float(rt) / 60
+    return float(rt)

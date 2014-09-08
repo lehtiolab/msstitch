@@ -1,3 +1,5 @@
+from decimal import Decimal, getcontext
+
 from app import sqlite
 from app import formatting
 from app.readers import openms as openmsreader
@@ -37,9 +39,11 @@ def get_spec_scan_nr(fn_spectra, cons_rt):
     retention time in cons_rt, when given a generator of multiple
     spectra files in fn_spectra.
     The generator is a tuple of fn, spectrum, namespace."""
-    rt = round(cons_rt, 8)
+    getcontext().prec = 8  # sets decimal point precision
+    cons_rt_dec = Decimal(cons_rt)
     for fn, spectrum, ns in fn_spectra:
-        if rt == round(specreader.get_mzml_rt(spectrum, ns), 8):
+        mzml_rt = Decimal(specreader.get_mzml_rt(spectrum, ns))
+        if float(cons_rt_dec/60) == float(mzml_rt):
             scan_nr = specreader.get_spec_scan_nr(spectrum)
             return fn, scan_nr
         formatting.clear_el(spectrum)
