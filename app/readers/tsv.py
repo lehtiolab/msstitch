@@ -1,6 +1,22 @@
+import itertools
+
+
 def get_tsv_header(tsvfn):
     with open(tsvfn) as fp:
         return next(fp).strip().split('\t')
+
+
+def generate_tsv_lines_multifile(fns, header):
+    return itertools.chain.from_iterable([generate_tsv_psms(fn, header)
+                                          for fn in fns])
+
+
+def generate_tsv_psms(fn, header):
+    """Returns dicts with header-keys and psm statistic values"""
+    with open(fn) as fp:
+        next(fp)  # skip header
+        for line in fp:
+            yield {x: y for (x, y) in zip(header, line.strip().split('\t'))}
 
 
 def get_header_index(header, index_options):

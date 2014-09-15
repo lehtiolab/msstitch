@@ -7,7 +7,7 @@ def merge_mzidtsvs(fns, header):
         if header != tsvreader.get_tsv_header(fn):
             raise RuntimeError('Headers of TSV files to concatenate are '
                                'not identical')
-    for psm in readers.generate_tsv_lines_multifile(fns, header):
+    for psm in tsvreader.generate_tsv_lines_multifile(fns, header):
         yield [psm[x] for x in header]
 
 
@@ -58,7 +58,7 @@ def add_percolator_to_mzidtsv(mzidfn, tsvfn, multipsm, header, seqdb=None):
     # they do not match. Also error at not found lines.
     specresult, specdata = get_specresult_data(specresults, specfnids)
     writelines = []
-    for line in readers.generate_tsv_psms(tsvfn, oldheader):
+    for line in tsvreader.generate_tsv_psms(tsvfn, oldheader):
         while True:
             if line[oldheader[2]] == specdata['scan'] and \
               line[oldheader[0]] == specdata['fn']:
