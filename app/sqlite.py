@@ -81,6 +81,11 @@ class QuantDB(DatabaseConnection):
             quants)
         self.conn.commit()
 
+    def index_quants(self):
+        self.conn.execute('CREATE INDEX spec_index ON quant(spectra_filename)')
+        self.conn.execute('CREATE INDEX scan_index ON quant(scan_nr)')
+        self.conn.commit()
+
     def lookup_quant(self, spectrafile, scannr):
         cur = self.conn.execute(
             'SELECT quantmap, intensity FROM quant WHERE '

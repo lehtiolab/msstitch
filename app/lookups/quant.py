@@ -31,6 +31,7 @@ def create_quant_lookup(fn_spectra, consensus_els):
             quants = {}
         formatting.clear_el(consensus_el)
     store_quants(quants, quantdb)
+    quantdb.index_quants()
     return quantdb.fn
 
 
