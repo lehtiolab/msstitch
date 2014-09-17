@@ -107,3 +107,33 @@ class QuantDB(DatabaseConnection):
 
 class PeptideFilterDB(DatabaseConnection):
     pass
+
+
+class ProteinPeptideDB(DatabaseConnection):
+    def create_pgdb(self):
+        self.create_db({'peptides': ['peptide_id TEXT PRIMARY KEY NOT NULL',
+                                     'scan_nr INTEGER', 'spectra_file TEXT'],
+                        'protein_peptide': ['protein_acc TEXT',
+                                            'peptide_id TEXT, FOREIGN KEY'
+                                            '(peptide_id) REFERENCES '
+                                            'peptides(peptide_id)']
+                        }, foreign_keys=True)
+
+    def store_peptide_proteins(self, ppmap):
+        def generate_proteins(pepprots):
+            for pep_id, pepvals in pepprots.items():
+                for protein in pepvals['proteins']:
+                    yield protein, pep_id
+        peptides = ((k, v['scan_nr'], v['specfn']) for k, v in ppmap.items())
+        self.cursor.executemany(
+            'INSERT INTO peptides(peptide_id, scan_nr, spectra_file) '
+            'VALUES(?, ?, ?)', peptides)
+        self.cursor.executemany(
+            'INSERT INTO protein_peptide(protein_acc, peptide_id) VALUES '
+            '(?, ?)', generate_proteins(ppmap))
+        self.conn.commit()
+
+    def index(self):
+        self.index_column('spec_index', 'peptides', 'spectra_file')
+        self.index_column('scan_index', 'peptides', 'scan_nr')
+        self.index_column('peptide_id_index', 'protein_peptide', 'peptide_id')
