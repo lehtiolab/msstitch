@@ -29,33 +29,34 @@ class TestCreateLookup(unittest.TestCase):
 class TestCreateLookupLineParsing(TestCreateLookup):
     def scanfn_generator(self, lines):
         for line in lines:
-            scan_nr = line[2]
-            yield line, (scan_nr, self.specfn)
+            yield line, (line['scannr'], self.specfn)
+    
+    def pepprot_generator(self, line, *args):
+        return line['pepid'], line['seq'], line['proteins']
 
     def get_lines_and_expected(self, unroll):
-        def get_line(scannr, pepseq, protein):
-            line = ['f{0}'.format(x) for x in range(30)]
-            line[2] = scannr
-            if type(protein) is list:
-                line[9] = pepseq
-                line[10] = ';'.join(['{0}(pre=R,post=S)'.format(x)
-                                     for x in proteins])
+        def get_line(scannr, pepseq, protein, pepid):
+            line = {'pepid': pepid,
+                    'scannr': scannr,
+                    'seq': pepseq,
+                   }
+            if type(protein) is str:
+                 line['proteins'] = [protein]
             else:
-                line[9] = 'R.{0}.S'.format(pepseq)
-                line[10] = protein
+                 line['proteins'] = protein
             return line
         
         lines = []
         expected = {}
         scannr = 1234
         for pepseq, proteins in self.pepprots.items():
-            if unroll:
-                for protein in proteins:
-                    lines.append(get_line(scannr, pepseq, protein))
-            else:
-                lines.append(get_line(scannr, pepseq, proteins))
             pepid = md5('{0}{1}'.format(self.specfn, scannr)
                         .encode('utf-8')).hexdigest()
+            if unroll:
+                for protein in proteins:
+                    lines.append(get_line(scannr, pepseq, protein, pepid))
+            else:
+                lines.append(get_line(scannr, pepseq, proteins, pepid))
             expected[pepid] = {'scan_nr': scannr, 'specfn': self.specfn,
                                'seq': pepseq, 'proteins': proteins}
             scannr += 1
@@ -70,6 +71,8 @@ class TestCreateLookupLineParsing(TestCreateLookup):
             'app.lookups.protein_peptides.tsvreader.'
             'get_mzidtsv_lines_scannr_specfn',
             return_value=self.scanfn_generator(lines)), patch(
+                'app.lookups.protein_peptides.tsvreader.'
+                'get_peptide_proteins', self.pepprot_generator), patch(
                 'app.lookups.protein_peptides.sqlite.ProteinPeptideDB',
                 self.mockdb):
             lookup.create_protein_pep_lookup('nofn', unroll)
