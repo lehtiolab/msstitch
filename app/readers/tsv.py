@@ -1,4 +1,5 @@
 import itertools
+from hashlib import md5
 
 
 def get_tsv_header(tsvfn):
@@ -20,8 +21,10 @@ def generate_tsv_psms(fn, header):
 
 
 def get_header_index(header, index_options):
-    """Returns index position in list header of the first found
-    in the list index_options. If not found throws a ValueError"""
+    """Module internal function.
+    Loops index_options, for each option this function returns the
+    index of the first found match in the header.
+    If not found throws a ValueError"""
     for option in index_options:
         try:
             index = header.index(option)
@@ -46,3 +49,22 @@ def get_mzidtsv_lines_scannr_specfn(fn):
         for line in fp:
             line = line.strip().split('\t')
             yield line, (line[fn_ix], line[scan_ix])
+
+
+def get_peptide_proteins(line, specfn, scannr, unroll=False):
+    """From a line, generate a peptide_id (MD5 of specfile and scannr).
+    Returns that id with the peptide sequence and protein accessions.
+    Return values:
+        peptide_id      -   str
+        peptideseq      -   str
+        proteins        -   list of str
+    """
+    peptideseq = line[9]
+    peptide_id = md5('{0}{1}'.format(specfn, scannr)).hexdigest()
+    if unroll:
+        peptideseq = peptideseq.split('.')[1]
+        proteins = [line[10]]
+    else:
+        proteins = line[10].split(';')
+        proteins = [x[:x.index('(')].strip() for x in proteins]
+    return peptide_id, peptideseq, proteins
