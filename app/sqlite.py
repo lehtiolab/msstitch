@@ -4,12 +4,12 @@ from tempfile import mkstemp
 
 
 class DatabaseConnection(object):
-    def __init__(self, fn=None):
+    def __init__(self, fn=None, foreign_keys=False):
         self.fn = fn
         if self.fn is not None:
-            self.connect(self.fn)
+            self.cursor = self.connect(self.fn)
 
-    def create_db(self, tables, outfn=None):
+    def create_db(self, tables, outfn=None, foreign_keys=False):
         """Creates a sqlite db file.
         tables is a dict with keys=table names, values=lists of cols.
         """
@@ -17,18 +17,27 @@ class DatabaseConnection(object):
             fd, outfn = mkstemp(prefix='msstitcher_tmp_')
             os.close(fd)
         self.fn = outfn
-        self.connect(outfn)
+        self.cursor = self.connect(outfn, foreign_keys)
         for table in tables:
             columns = tables[table]
-            self.conn.execute('CREATE TABLE {0}({1})'.format(
+            self.cursor.execute('CREATE TABLE {0}({1})'.format(
                 table, ', '.join(columns)))
         self.conn.commit()
 
-    def connect(self, fn):
+    def connect(self, fn, foreign_keys=False):
         self.conn = sqlite3.connect(fn)
+        cur = self.conn.cursor()
+        if foreign_keys:
+            cur.execute('PRAGMA FOREIGN_KEYS=ON')
+        return cur
 
     def close_connection(self):
         self.conn.close()
+
+    def index_column(self, index_name, table, column):
+        self.cursor.execute(
+            'CREATE INDEX {0} on {1}({2})'.format(index_name, table, column))
+        self.conn.commit()
 
 
 class SearchSpaceDB(DatabaseConnection):
@@ -42,13 +51,12 @@ class SearchSpaceDB(DatabaseConnection):
         """
         if reverse_seqs:
             peps = [(x[0][::-1],) for x in peps]
-        self.conn.executemany(
+        self.cursor.executemany(
             'INSERT INTO known_searchspace(seqs) VALUES (?)', peps)
         self.conn.commit()
 
     def index_peps(self):
-        self.conn.execute('CREATE INDEX seqs_index ON known_searchspace(seqs)')
-        self.conn.commit()
+        self.index_column('seqs_index', 'known_searchspace', 'seqs')
 
     def check_seq_exists(self, seq, ntermwildcards=False):
         """Look up sequence in sqlite DB. Returns True or False if it
@@ -65,8 +73,8 @@ class SearchSpaceDB(DatabaseConnection):
         sql = ('select exists(select seqs from known_searchspace '
                'where seqs{0}? limit 1)'.format(comparator))
         seq = '{0}{1}'.format(seq, seqmod)
-        cur = self.conn.execute(sql, (seq, ))
-        return cur.fetchone()[0] == 1
+        self.cursor.execute(sql, (seq, ))
+        return self.cursor.fetchone()[0] == 1
 
 
 class QuantDB(DatabaseConnection):
@@ -75,27 +83,27 @@ class QuantDB(DatabaseConnection):
                                   'quantmap TEXT', 'intensity REAL']})
 
     def store_quants(self, quants):
-        self.conn.executemany(
+        self.cursor.executemany(
             'INSERT INTO quant(spectra_filename, scan_nr, quantmap, intensity)'
             ' VALUES (?, ?, ?, ?)',
             quants)
         self.conn.commit()
 
     def index_quants(self):
-        self.conn.execute('CREATE INDEX spec_index ON quant(spectra_filename)')
-        self.conn.execute('CREATE INDEX scan_index ON quant(scan_nr)')
-        self.conn.commit()
+        self.index_column('spec_index', 'quant', 'spectra_filename')
+        self.index_column('scan_index', 'quant', 'scan_nr')
 
     def lookup_quant(self, spectrafile, scannr):
-        cur = self.conn.execute(
+        self.cursor.execute(
             'SELECT quantmap, intensity FROM quant WHERE '
             'spectra_filename=? AND scan_nr=?', (spectrafile, scannr))
-        return cur.fetchall()
+        return self.cursor.fetchall()
 
     def get_all_quantmaps(self):
-        cur = self.conn.execute(
+        self.cursor.execute(
             'SELECT DISTINCT quantmap FROM quant')
-        return cur.fetchall()
+        return self.cursor.fetchall()
+
 
 class PeptideFilterDB(DatabaseConnection):
     pass
