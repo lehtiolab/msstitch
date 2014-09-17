@@ -134,6 +134,5 @@ class ProteinPeptideDB(DatabaseConnection):
         self.conn.commit()
 
     def index(self):
-        self.index_column('spec_index', 'peptides', 'spectra_file')
-        self.index_column('scan_index', 'peptides', 'scan_nr')
-        self.index_column('peptide_id_index', 'protein_peptide', 'peptide_id')
+        self.index_column('scan_index', 'peptides', 'spectra_file, scan_nr')
+        self.index_column('pepid_index', 'peptides', 'peptide_id')
