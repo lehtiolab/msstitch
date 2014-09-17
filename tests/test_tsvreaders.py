@@ -12,7 +12,8 @@ class TestGetPeptideProteins(unittest.TestCase):
         self.proteins = ['ENS12345', 'ENS6789']
 
     def do_asserts(self, line, unroll, proteins):
-        exp_pepid = md5('{0}{1}'.format(self.specfn, self.scannr).encode('utf-8')).hexdigest()
+        exp_pepid = md5('{0}{1}'.format(self.specfn, self.scannr)
+                        .encode('utf-8')).hexdigest()
         res_pepid, res_pepseq, res_proteins = reader.get_peptide_proteins(
             line, self.specfn, self.scannr, unroll)
         self.assertEqual(exp_pepid, res_pepid)
