@@ -44,7 +44,7 @@ def get_spec_scan_nr(fn_spectra, cons_rt):
     cons_rt_dec = Decimal(cons_rt)
     for fn, spectrum, ns in fn_spectra:
         mzml_rt = Decimal(specreader.get_mzml_rt(spectrum, ns))
-        if float(cons_rt_dec/60) == float(mzml_rt):
+        if float(cons_rt_dec / 60) == float(mzml_rt):
             scan_nr = specreader.get_spec_scan_nr(spectrum)
             return fn, scan_nr
         formatting.clear_el(spectrum)

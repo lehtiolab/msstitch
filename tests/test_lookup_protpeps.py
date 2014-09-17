@@ -30,7 +30,7 @@ class TestCreateLookupLineParsing(TestCreateLookup):
     def scanfn_generator(self, lines):
         for line in lines:
             yield line, (line['scannr'], self.specfn)
-    
+
     def pepprot_generator(self, line, *args):
         return line['pepid'], line['seq'], line['proteins']
 
@@ -45,7 +45,7 @@ class TestCreateLookupLineParsing(TestCreateLookup):
             else:
                  line['proteins'] = protein
             return line
-        
+
         lines = []
         expected = {}
         scannr = 1234
@@ -76,7 +76,7 @@ class TestCreateLookupLineParsing(TestCreateLookup):
                 'app.lookups.protein_peptides.sqlite.ProteinPeptideDB',
                 self.mockdb):
             lookup.create_protein_pep_lookup('nofn', unroll)
-        for expected_entry in expected:	
+        for expected_entry in expected:
             self.mockdb.store_peptides_proteins.assert_any_call(expected_entry)
 
     def test_multiprotein_lines(self):

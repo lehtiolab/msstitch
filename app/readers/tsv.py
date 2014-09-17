@@ -60,7 +60,8 @@ def get_peptide_proteins(line, specfn, scannr, unroll=False):
         proteins        -   list of str
     """
     peptideseq = line[9]
-    peptide_id = md5('{0}{1}'.format(specfn, scannr).encode('utf-8')).hexdigest()
+    peptide_id = md5('{0}{1}'.format(specfn, scannr)
+                     .encode('utf-8')).hexdigest()
     if unroll:
         peptideseq = peptideseq.split('.')[1]
         proteins = [line[10]]
