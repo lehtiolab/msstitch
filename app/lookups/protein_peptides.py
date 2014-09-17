@@ -1,12 +1,14 @@
 MZIDTSV_PEP_COL = 9
 MZIDTSV_PROT_COL = 10
+DB_STORE_CHUNK = 10000
+
 from app import sqlite
 from app.readers import tsv as tsvreader
 
 
 def create_protein_pep_lookup(fn, unroll=False):
     """Reads PSMs from file, extracts their proteins and peptides and passes
-    them to a database backend in chunks on at least 10000 PSMs.
+    them to a database backend in chunked PSMs.
     """
     ppdb = sqlite.ProteinPeptideDB()
     ppdb.create_ppdb()
@@ -16,7 +18,7 @@ def create_protein_pep_lookup(fn, unroll=False):
         count += 1
         pep_id, seq, prots = tsvreader.get_peptide_proteins(line, specfn,
                                                             scan, unroll)
-        if count >= 10000 and pep_id != last_id:
+        if count >= DB_STORE_CHUNK and pep_id != last_id:
             ppdb.store_peptides_proteins(peptides_proteins)
             peptides_proteins = {}
         try:

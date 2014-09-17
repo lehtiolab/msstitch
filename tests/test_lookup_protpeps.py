@@ -15,31 +15,54 @@ class TestCreateLookup(unittest.TestCase):
                          'TRYIDENTIFYME': ['ENS9101112']}
 
     def test_calls_sqlite(self):
-        with patch('app.lookups.protein_peptides.tsvreader.get_mzidtsv_lines_scannr_specfn',
-                   return_value=[]), patch('app.lookups.protein_peptides.sqlite.ProteinPeptideDB',
-                                           self.mockdb):
+        with patch('app.lookups.protein_peptides.tsvreader.'
+                   'get_mzidtsv_lines_scannr_specfn', return_value=[]
+                   ), patch('app.lookups.protein_peptides.sqlite.'
+                            'ProteinPeptideDB', self.mockdb):
             lookup.create_protein_pep_lookup('testfn')
         self.mockdb.create_ppdb.assert_called_with()
         self.mockdb.store_peptides_proteins.assert_called_once_with({})
         self.mockdb.index.assert_called_once_with()
 
-    def test_multiprotein_lines(self):
+
+class TestCreateLookupLineParsing(TestCreateLookup):
+    def scanfn_generator(self, lines):
+        for line in lines:
+            scan_nr = line[2]
+            yield line, (scan_nr, self.specfn)
+
+    def get_lines_and_expected(self, unroll):
+        def get_line(scannr, pepseq, protein):
+            line = ['f{0}'.format(x) for x in range(30)]
+            line[2] = scannr
+            if type(protein) is list:
+                line[9] = pepseq
+                line[10] = ';'.join(['{0}(pre=R,post=S)'.format(x)
+                                     for x in proteins])
+            else:
+                line[9] = 'R.{0}.S'.format(pepseq)
+                line[10] = protein
+
         lines = []
         expected = {}
         scannr = 1234
         for pepseq, proteins in self.pepprots.items():
-            line = ['f{0}'.format(x) for x in range(30)]
-            line[2] = scannr
-            line[9] = pepseq
-            line[10] = ';'.join(['{0}(pre=R,post=S)'.format(x)
-                                 for x in proteins])
-            lines.append(line)
-            pepid = md5('{0}{1}'.format(self.specfn, scannr).encode('utf-8')).hexdigest()
-            expected[pepid] = {'scan_nr': scannr, 'specfn': self.specfn, 'seq': pepseq,
-                               'proteins': proteins}
+            if unroll:
+                for protein in proteins:
+                    lines.append(get_line(scannr, pepseq, protein))
+            else:
+                lines.append(get_line(scannr, pepseq, proteins))
+            pepid = md5('{0}{1}'.format(self.specfn, scannr)
+                        .encode('utf-8')).hexdigest()
+            expected[pepid] = {'scan_nr': scannr, 'specfn': self.specfn,
+                               'seq': pepseq, 'proteins': proteins}
             scannr += 1
+        return lines, expected
 
+    def do_asserts(self, unroll):
+        lines, expected = self.get_lines_and_expected(unroll)
         with patch(
+            'app.lookups.protein_peptides.DB_STORE_CHUNK', 2), patch(
             'app.lookups.protein_peptides.tsvreader.'
             'get_mzidtsv_lines_scannr_specfn',
             return_value=self.scanfn_generator(lines)), patch(
@@ -48,11 +71,9 @@ class TestCreateLookup(unittest.TestCase):
             lookup.create_protein_pep_lookup('nofn')
 
         self.mockdb.store_peptides_proteins.assert_called_with(expected)
-    
-    def scanfn_generator(self, lines):
-        for line in lines:
-            scan_nr = line[2]
-            yield line, (scan_nr, self.specfn)
+
+    def test_multiprotein_lines(self):
+        self.do_asserts(unroll=False)
 
     def test_unrolled_singleprotein_lines(self):
-        assert 1 == 2
+        self.do_asserts(unroll=True)
