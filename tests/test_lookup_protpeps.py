@@ -1,4 +1,5 @@
 import unittest
+from hashlib import md5
 from unittest.mock import Mock, patch
 from app.lookups import protein_peptides as lookup
 
@@ -24,14 +25,18 @@ class TestCreateLookup(unittest.TestCase):
 
     def test_multiprotein_lines(self):
         lines = []
+        expected = {}
         scannr = 1234
-        for pepseq, proteins in self.pepprots:
+        for pepseq, proteins in self.pepprots.items():
             line = ['f{0}'.format(x) for x in range(30)]
             line[2] = scannr
             line[9] = pepseq
             line[10] = ';'.join(['{0}(pre=R,post=S)'.format(x)
                                  for x in proteins])
             lines.append(line)
+            pepid = md5('{0}{1}'.format(self.specfn, scannr).encode('utf-8')).hexdigest()
+            expected[pepid] = {'scan_nr': scannr, 'specfn': self.specfn, 'seq': pepseq,
+                               'proteins': proteins}
             scannr += 1
 
         with patch(
@@ -42,8 +47,8 @@ class TestCreateLookup(unittest.TestCase):
                 self.mockdb):
             lookup.create_protein_pep_lookup('nofn')
 
-        self.mockdb.store_peptides_proteins.assert_called_with()
-
+        self.mockdb.store_peptides_proteins.assert_called_with(expected)
+    
     def scanfn_generator(self, lines):
         for line in lines:
             scan_nr = line[2]
