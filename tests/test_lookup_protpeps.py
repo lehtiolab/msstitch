@@ -2,6 +2,7 @@ import unittest
 from hashlib import md5
 from unittest.mock import Mock, patch
 from app.lookups import protein_peptides as lookup
+DB_STORE_CHUNK = lookup.DB_STORE_CHUNK
 
 
 class TestCreateLookup(unittest.TestCase):
@@ -42,7 +43,8 @@ class TestCreateLookupLineParsing(TestCreateLookup):
             else:
                 line[9] = 'R.{0}.S'.format(pepseq)
                 line[10] = protein
-
+            return line
+        
         lines = []
         expected = {}
         scannr = 1234
@@ -57,23 +59,28 @@ class TestCreateLookupLineParsing(TestCreateLookup):
             expected[pepid] = {'scan_nr': scannr, 'specfn': self.specfn,
                                'seq': pepseq, 'proteins': proteins}
             scannr += 1
-        return lines, expected
+        return lines, [expected]
 
-    def do_asserts(self, unroll):
+    def do_asserts(self, unroll, chunk_size=DB_STORE_CHUNK):
         lines, expected = self.get_lines_and_expected(unroll)
+        if chunk_size != DB_STORE_CHUNK:
+            expected = [{k: v} for k, v in expected[0].items()]
         with patch(
-            'app.lookups.protein_peptides.DB_STORE_CHUNK', 2), patch(
+            'app.lookups.protein_peptides.DB_STORE_CHUNK', chunk_size), patch(
             'app.lookups.protein_peptides.tsvreader.'
             'get_mzidtsv_lines_scannr_specfn',
             return_value=self.scanfn_generator(lines)), patch(
                 'app.lookups.protein_peptides.sqlite.ProteinPeptideDB',
                 self.mockdb):
-            lookup.create_protein_pep_lookup('nofn')
-
-        self.mockdb.store_peptides_proteins.assert_called_with(expected)
+            lookup.create_protein_pep_lookup('nofn', unroll)
+        for expected_entry in expected:	
+            self.mockdb.store_peptides_proteins.assert_any_call(expected_entry)
 
     def test_multiprotein_lines(self):
         self.do_asserts(unroll=False)
 
     def test_unrolled_singleprotein_lines(self):
         self.do_asserts(unroll=True)
+
+    def test_unrolled_singleprotein_small_chunk(self):
+        self.do_asserts(unroll=True, chunk_size=1)

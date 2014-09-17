@@ -22,7 +22,7 @@ def create_protein_pep_lookup(fn, unroll=False):
             ppdb.store_peptides_proteins(peptides_proteins)
             peptides_proteins = {}
         try:
-            peptides_proteins[pep_id]['proteins'].append(prots)
+            peptides_proteins[pep_id]['proteins'].extend(prots)
         except KeyError:
             peptides_proteins[pep_id] = {'scan_nr': scan, 'specfn': specfn,
                                          'seq': seq, 'proteins': prots}
