@@ -1,5 +1,9 @@
 import itertools
 from hashlib import md5
+TSV_SPECFN_COL = 1
+TSV_SCAN_COL = 2
+TSV_PEPTIDE_COL = 8
+TSV_PROTEIN_COL = 9
 
 
 def get_tsv_header(tsvfn):
@@ -25,46 +29,31 @@ def generate_tsv_psms_line(fn):
             yield line
 
 
-def get_header_index(header, index_options):
-    """Module internal function.
-    Loops index_options, for each option this function returns the
-    index of the first found match in the header.
-    If not found throws a ValueError"""
-    for option in index_options:
-        try:
-            index = header.index(option)
-        except ValueError:
-            continue
-        else:
-            return index
-    raise ValueError('Cannot find any of proposed header indices [ {0} ] in'
-                     ' MzIdentML tsv header'.format(', '.join(index_options)))
-
-
 def get_mzidtsv_lines_scannr_specfn(fn):
     """Returns generator of lines of tsv, skipping header, as split lists,
     and a tuple containing (spectra file, scan nr)."""
     header = get_tsv_header(fn)
-    scan_ix = get_header_index(header, ['ScanNum', 'scannr',
-                                        'scan_nr', 'Scan number'])
-    fn_ix = get_header_index(header, ['#SpecFile', 'spectra_file',
-                                      'specfile'])
+    assert header[TSV_SCAN_COL] in ['ScanNum', 'scannr', 'scan_nr',
+                                    'Scan number']
+    assert header[TSV_SPECFN_COL] in ['#SpecFile', 'spectra_file', 'specfile']
     for line in generate_tsv_psms_line(fn):
         line = line.strip().split('\t')
-        yield line, (line[fn_ix], line[scan_ix])
+        yield line, (line[TSV_SPECFN_COL], line[TSV_SCAN_COL])
 
 
 def get_multiple_proteins(line):
     """From a line, return list of proteins reported by Mzid2TSV. The line
     should not be unrolled."""
-    proteins = line[10].split(';')
+    proteins = line[TSV_PROTEIN_COL].split(';')
     return [x[:x.index('(')].strip() for x in proteins]
 
 
 def get_unrolled_proteins(line):
     """From a line, return the protein reported by Mzid2TSV as a list. This
     function applies to tsvs that have one protein per line (unrolled)"""
-    return [line[10]]
+    return [line[TSV_PROTEIN_COL]]
+
+
 
 
 def get_peptide_proteins(line, specfn, scannr, unroll=False):
@@ -75,13 +64,12 @@ def get_peptide_proteins(line, specfn, scannr, unroll=False):
         peptideseq      -   str
         proteins        -   list of str
     """
-    peptideseq = line[9]
+    peptideseq = line[TSV_PEPTIDE_COL]
     peptide_id = md5('{0}{1}'.format(specfn, scannr)
                      .encode('utf-8')).hexdigest()
     if unroll:
         peptideseq = peptideseq.split('.')[1]
         proteins = get_unrolled_proteins(line)
     else:
-        proteins = line[10].split(';')
         proteins = get_multiple_proteins(line)
     return peptide_id, peptideseq, proteins
