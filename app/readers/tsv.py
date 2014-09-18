@@ -53,9 +53,18 @@ def get_mzidtsv_lines_scannr_specfn(fn):
         line = line.strip().split('\t')
         yield line, (line[fn_ix], line[scan_ix])
 
-        for line in fp:
-            line = line.strip().split('\t')
-            yield line, (line[fn_ix], line[scan_ix])
+
+def get_multiple_proteins(line):
+    """From a line, return list of proteins reported by Mzid2TSV. The line
+    should not be unrolled."""
+    proteins = line[10].split(';')
+    return [x[:x.index('(')].strip() for x in proteins]
+
+
+def get_unrolled_proteins(line):
+    """From a line, return the protein reported by Mzid2TSV as a list. This
+    function applies to tsvs that have one protein per line (unrolled)"""
+    return [line[10]]
 
 
 def get_peptide_proteins(line, specfn, scannr, unroll=False):
@@ -71,8 +80,8 @@ def get_peptide_proteins(line, specfn, scannr, unroll=False):
                      .encode('utf-8')).hexdigest()
     if unroll:
         peptideseq = peptideseq.split('.')[1]
-        proteins = [line[10]]
+        proteins = get_unrolled_proteins(line)
     else:
         proteins = line[10].split(';')
-        proteins = [x[:x.index('(')].strip() for x in proteins]
+        proteins = get_multiple_proteins(line)
     return peptide_id, peptideseq, proteins
