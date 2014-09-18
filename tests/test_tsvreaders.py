@@ -21,12 +21,12 @@ class TestGetPeptideProteins(unittest.TestCase):
         self.assertEqual(self.pepseq, res_pepseq)
 
     def test_unroll(self):
-        self.line[9] = 'K.{0}.T'.format(self.pepseq)
-        self.line[10] = self.proteins[0]
+        self.line[reader.TSV_PEPTIDE_COL] = 'K.{0}.T'.format(self.pepseq)
+        self.line[reader.TSV_PROTEIN_COL] = self.proteins[0]
         self.do_asserts(self.line, True, [self.proteins[0]])
 
     def test_non_unroll(self):
-        self.line[9] = self.pepseq
-        self.line[10] = '{0}(pre=K, post=T);{1}(pre=R, post=S)'.format(
+        self.line[reader.TSV_PEPTIDE_COL] = self.pepseq
+        self.line[reader.TSV_PROTEIN_COL] = '{0}(pre=K, post=T);{1}(pre=R, post=S)'.format(
             self.proteins[0], self.proteins[1])
         self.do_asserts(self.line, False, self.proteins)
