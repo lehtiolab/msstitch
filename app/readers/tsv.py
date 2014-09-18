@@ -14,10 +14,15 @@ def generate_tsv_lines_multifile(fns, header):
 
 def generate_tsv_psms(fn, header):
     """Returns dicts with header-keys and psm statistic values"""
+    for line in generate_tsv_psms_line(fn):
+        yield {x: y for (x, y) in zip(header, line.strip().split('\t'))}
+
+
+def generate_tsv_psms_line(fn):
     with open(fn) as fp:
         next(fp)  # skip header
         for line in fp:
-            yield {x: y for (x, y) in zip(header, line.strip().split('\t'))}
+            yield line
 
 
 def get_header_index(header, index_options):
@@ -39,12 +44,14 @@ def get_header_index(header, index_options):
 def get_mzidtsv_lines_scannr_specfn(fn):
     """Returns generator of lines of tsv, skipping header, as split lists,
     and a tuple containing (spectra file, scan nr)."""
-    with open(fn) as fp:
-        header = next(fp).strip().split('\t')
-        scan_ix = get_header_index(header, ['ScanNum', 'scannr',
-                                            'scan_nr', 'Scan number'])
-        fn_ix = get_header_index(header, ['#SpecFile', 'spectra_file',
-                                          'specfile'])
+    header = get_tsv_header(fn)
+    scan_ix = get_header_index(header, ['ScanNum', 'scannr',
+                                        'scan_nr', 'Scan number'])
+    fn_ix = get_header_index(header, ['#SpecFile', 'spectra_file',
+                                      'specfile'])
+    for line in generate_tsv_psms_line(fn):
+        line = line.strip().split('\t')
+        yield line, (line[fn_ix], line[scan_ix])
 
         for line in fp:
             line = line.strip().split('\t')
