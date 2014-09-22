@@ -10,6 +10,7 @@ from app.lookups import quant as lookups
 
 class MzidPlusDriver(base.BaseDriver):
     def run(self):
+        self.oldheader = tsvreader.get_tsv_header(self.fn)
         self.get_psms()
         self.write()
 
@@ -28,8 +29,8 @@ class MzidTSVConcatenateDriver(MzidPlusDriver):
         self.allinfiles.extend(kwargs.get('multifile_input', None))
 
     def get_psms(self):
-        self.header = tsvreader.get_tsv_header(self.fn)
-        self.psms = prep.merge_mzidtsvs(self.allinfiles, self.header)
+        self.header = self.oldheader
+        self.psms = prep.merge_mzidtsvs(self.allinfiles, self.oldheader)
 
 
 class MzidPercoTSVDriver(MzidPlusDriver):
@@ -52,13 +53,12 @@ class MzidPercoTSVDriver(MzidPlusDriver):
         else:
             seqlookup = None
 
-        oldheader = tsvreader.get_tsv_header(self.fn)
-        self.header = prep.get_header_with_percolator(oldheader,
+        self.header = prep.get_header_with_percolator(self.oldheader,
                                                       self.multipsm_per_scan)
         self.psms = prep.add_percolator_to_mzidtsv(self.idfn,
                                                    self.fn,
                                                    self.multipsm_per_scan,
-                                                   oldheader,
+                                                   self.oldheader,
                                                    self.header,
                                                    seqlookup)
 
@@ -75,11 +75,10 @@ class TSVQuantDriver(MzidPlusDriver):
         """Creates iterator to write to new tsv. Contains input tsv
         lines plus quant data for these."""
         quantdb = self.create_quantlookup()
-        oldheader = tsvreader.get_tsv_header(self.fn)
-        self.header, qheader = quantprep.get_full_and_quant_headers(oldheader,
-                                                                    quantdb)
+        self.header, qheader = quantprep.get_full_and_quant_headers(
+            self.oldheader, quantdb)
         self.psms = quantprep.generate_psms_quanted(quantdb, self.fn,
-                                                    qheader, oldheader)
+                                                    qheader, self.oldheader)
 
     def create_quantlookup(self):
         """Creates sqlite file containing quantification data and
