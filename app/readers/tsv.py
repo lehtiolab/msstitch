@@ -1,9 +1,6 @@
 import itertools
 from hashlib import md5
-TSV_SPECFN_COL = 1
-TSV_SCAN_COL = 2
-TSV_PEPTIDE_COL = 8
-TSV_PROTEIN_COL = 9
+from app.datatypes import mzidtsv as mzidtsvdata
 
 
 def get_tsv_header(tsvfn):
@@ -29,47 +26,37 @@ def generate_tsv_psms_line(fn):
             yield line
 
 
-def get_mzidtsv_lines_scannr_specfn(fn):
-    """Returns generator of lines of tsv, skipping header, as split lists,
-    and a tuple containing (spectra file, scan nr)."""
-    header = get_tsv_header(fn)
-    assert header[TSV_SCAN_COL] in ['ScanNum', 'scannr', 'scan_nr',
-                                    'Scan number']
-    assert header[TSV_SPECFN_COL] in ['#SpecFile', 'spectra_file', 'specfile']
-    for line in generate_tsv_psms_line(fn):
-        line = line.strip().split('\t')
-        yield line, (line[TSV_SPECFN_COL], line[TSV_SCAN_COL])
-
-
-def get_multiple_proteins(line):
+def get_proteins_from_psm(line):
     """From a line, return list of proteins reported by Mzid2TSV. The line
     should not be unrolled."""
-    proteins = line[TSV_PROTEIN_COL].split(';')
-    return [x[:x.index('(')].strip() for x in proteins]
+    proteins = line[mzidtsvdata.HEADER_PROTEIN].split(';')
+    outproteins = []
+    for protein in proteins:
+        try:
+            outproteins.append(protein[:protein.index('(')].strip())
+        except ValueError:
+            outproteins.append(protein)
 
 
-def get_unrolled_proteins(line):
-    """From a line, return the protein reported by Mzid2TSV as a list. This
-    function applies to tsvs that have one protein per line (unrolled)"""
-    return [line[TSV_PROTEIN_COL]]
+def get_peptide_id_from_line(line):
+    return md5('{0}{1}'.format(line[mzidtsvdata.HEADER_SPECFILE],
+                               line[mzidtsvdata.HEADER_SCANNR])
+               .encode('utf-8')).hexdigest()
 
 
-
-
-def get_peptide_proteins(line, specfn, scannr, unroll=False):
+def get_pepproteins(line, unroll=False):
     """From a line, generate a peptide_id (MD5 of specfile and scannr).
     Returns that id with the peptide sequence and protein accessions.
     Return values:
+        specfn          -   str
+        scan            -   str
         peptide_id      -   str
         peptideseq      -   str
         proteins        -   list of str
     """
-    peptideseq = line[TSV_PEPTIDE_COL]
-    peptide_id = md5('{0}{1}'.format(specfn, scannr)
-                     .encode('utf-8')).hexdigest()
+    peptide_id = get_peptide_id_from_line(line)
+    peptideseq = line[mzidtsvdata.HEADER_PEPTIDE]
     if unroll:
         peptideseq = peptideseq.split('.')[1]
-        proteins = get_unrolled_proteins(line)
-    else:
-        proteins = get_multiple_proteins(line)
+    proteins = get_proteins_from_psm(line)
     return peptide_id, peptideseq, proteins

@@ -1,18 +1,19 @@
 from app import sqlite
 from app.readers import tsv as readers
+from app.dataformats import mzidtsv as mzidtsvdata
 
 
 def generate_psms_quanted(quantdbfn, tsvfn, quantheader, oldheader):
     """Takes dbfn and connects, gets quants for each line in tsvfn, sorts
     them in line by using keys in quantheader list."""
     quantdb = sqlite.QuantDB(quantdbfn)
-    for line, (specfile,
-               scannr) in readers.get_mzidtsv_lines_scannr_specfn(tsvfn):
-        outlinedict = {k: v for k, v in zip(oldheader, line)}
+    for psm in readers.generate_tsv_psms(tsvfn, oldheader):
+        outpsm = {x: y for x, y in psm.items()}
+        specfile = outpsm[mzidtsvdata.HEADER_SPECFILE]
+        scannr = outpsm[mzidtsvdata.HEADER_SCANNR]
         quantdata = lookup_quant(specfile, scannr, quantdb)
-        quantlinedict = get_quant_NAs(quantdata, quantheader)
-        outlinedict.update(quantlinedict)
-        yield outlinedict
+        outpsm.update(get_quant_NAs(quantdata, quantheader))
+        yield outpsm
 
 
 def get_quant_header(oldheader, quantdbfn):

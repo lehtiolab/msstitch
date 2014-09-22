@@ -1,14 +1,6 @@
 from app.readers import mzidplus as readers
 from app.readers import tsv as tsvreader
-HEADER_SPECFILE = '#SpecFile'
-HEADER_SCANNR = 'ScanNum'
-HEADER_PROTEIN = 'Protein'  # protein column as specified by Mzid2TSV
-HEADER_MASTER_PROT = 'Master protein(s)'
-HEADER_PG_CONTENT = 'Protein group(s) content'
-HEADER_PG_AMOUNT_PROTEIN_HITS = 'Amount of matching proteins in group(s)'
-HEADER_PG = [HEADER_MASTER_PROT, HEADER_PG_CONTENT,
-             HEADER_PG_AMOUNT_PROTEIN_HITS]
-HEADER_PEPQVAL = 'PepQValue'
+from app.dataformats import mzidtsv as mzidtsvdata
 
 
 def merge_mzidtsvs(fns, header):
@@ -68,8 +60,8 @@ def add_percolator_to_mzidtsv(mzidfn, tsvfn, multipsm,
     writelines = []
     for line in tsvreader.generate_tsv_psms(tsvfn, oldheader):
         while True:
-            if line[HEADER_SCANNR] == specdata['scan'] and \
-               line[HEADER_SPECFILE] == specdata['fn']:
+            if line[mzidtsvdata.HEADER_SCANNR] == specdata['scan'] and \
+               line[mzidtsvdata.HEADER_SPECFILE] == specdata['fn']:
                 outline = get_percoline(specresult, namespace, line,
                                         multipsm, seqdb)
                 writelines.append(outline)
