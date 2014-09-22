@@ -52,13 +52,16 @@ class MzidPercoTSVDriver(MzidPlusDriver):
         else:
             seqlookup = None
 
-        self.header = prep.get_header_with_percolator(self.fn,
+        oldheader = tsvreader.get_tsv_header(self.fn)
+        self.header = prep.get_header_with_percolator(oldheader,
                                                       self.multipsm_per_scan)
         self.psms = prep.add_percolator_to_mzidtsv(self.idfn,
                                                    self.fn,
                                                    self.multipsm_per_scan,
+                                                   oldheader,
                                                    self.header,
                                                    seqlookup)
+
 
 class TSVQuantDriver(MzidPlusDriver):
     outsuffix = '_quant.tsv'
@@ -72,12 +75,11 @@ class TSVQuantDriver(MzidPlusDriver):
         """Creates iterator to write to new tsv. Contains input tsv
         lines plus quant data for these."""
         quantdb = self.create_quantlookup()
-        quantheader = quantprep.get_quant_header(quantdb)
-        self.header = quantprep.create_tsv_header_quant(self.fn,
-                                                        quantheader)
-        self.psms = quantprep.generate_psms_quanted(quantdb,
-                                                    self.fn,
-                                                    quantheader)
+        oldheader = tsvreader.get_tsv_header(self.fn)
+        self.header, qheader = quantprep.get_full_and_quant_headers(oldheader,
+                                                                    quantdb)
+        self.psms = quantprep.generate_psms_quanted(quantdb, self.fn,
+                                                    qheader, oldheader)
 
     def create_quantlookup(self):
         """Creates sqlite file containing quantification data and

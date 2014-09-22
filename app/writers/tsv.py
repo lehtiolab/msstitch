@@ -8,7 +8,8 @@ def write_tsv(headerfields, features, outfn):
     with open(outfn, 'w') as fp:
         write_tsv_line_from_list(headerfields, fp)
         for line in features:
-            write_tsv_line_from_list(line, fp)
+            write_tsv_line_from_list([line[field] for field in headerfields],
+                                     fp)
 
 
 def write_tsv_line_from_list(linelist, outfp):

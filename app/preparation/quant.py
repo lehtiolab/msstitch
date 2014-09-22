@@ -2,21 +2,23 @@ from app import sqlite
 from app.readers import tsv as readers
 
 
-def generate_psms_quanted(quantdbfn, tsvfn, quantheader):
+def generate_psms_quanted(quantdbfn, tsvfn, quantheader, oldheader):
     """Takes dbfn and connects, gets quants for each line in tsvfn, sorts
     them in line by using keys in quantheader list."""
     quantdb = sqlite.QuantDB(quantdbfn)
     for line, (specfile,
                scannr) in readers.get_mzidtsv_lines_scannr_specfn(tsvfn):
+        outlinedict = {k: v for k, v in zip(oldheader, line)}
         quantdata = lookup_quant(specfile, scannr, quantdb)
-        quantline = convert_quantdata_to_line(quantdata, quantheader)
-        yield line + quantline
+        quantlinedict = get_quant_NAs(quantdata, quantheader)
+        outlinedict.update(quantlinedict)
+        yield outlinedict
 
 
-def get_quant_header(quantdbfn):
+def get_quant_header(oldheader, quantdbfn):
     quantdb = sqlite.QuantDB(quantdbfn)
     quantmap = quantdb.get_all_quantmaps()
-    return sorted([x[0] for x in quantmap])
+    return oldheader + sorted([x[0] for x in quantmap])
 
 
 def create_tsv_header_quant(tsvfn, quantheader):
@@ -24,17 +26,14 @@ def create_tsv_header_quant(tsvfn, quantheader):
     return readers.get_tsv_header(tsvfn) + [str(x[0]) for x in quantheader]
 
 
-def convert_quantdata_to_line(quantdata, quantheader):
+def get_quant_NAs(quantdata, quantheader):
     """Takes quantdata in a dict and header with quantkeys
-    (eg iTRAQ isotopes). Returns list of quant intensities from dict.
-    NA if quantheader item was not a key in the quantdata dict."""
-    line = []
+    (eg iTRAQ isotopes). Returns dict of quant intensities
+    with missing keys set to NA."""
+    out = {}
     for qkey in quantheader:
-        try:
-            line.append(str(quantdata[qkey]))
-        except KeyError:
-            line.append('NA')
-    return line
+        out[qkey] = quantdata.get(qkey, 'NA')
+    return out
 
 
 def lookup_quant(spectrafile, psm_scan_nr, quantdb):
