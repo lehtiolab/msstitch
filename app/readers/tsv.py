@@ -1,6 +1,6 @@
 import itertools
 from hashlib import md5
-from app.datatypes import mzidtsv as mzidtsvdata
+from app.dataformats import mzidtsv as mzidtsvdata
 
 
 def get_tsv_header(tsvfn):
@@ -36,6 +36,7 @@ def get_proteins_from_psm(line):
             outproteins.append(protein[:protein.index('(')].strip())
         except ValueError:
             outproteins.append(protein)
+    return outproteins
 
 
 def get_peptide_id_from_line(line):
@@ -54,9 +55,11 @@ def get_pepproteins(line, unroll=False):
         peptideseq      -   str
         proteins        -   list of str
     """
+    specfn = line[mzidtsvdata.HEADER_SPECFILE]
+    scan = line[mzidtsvdata.HEADER_SCANNR]
     peptide_id = get_peptide_id_from_line(line)
     peptideseq = line[mzidtsvdata.HEADER_PEPTIDE]
     if unroll:
         peptideseq = peptideseq.split('.')[1]
     proteins = get_proteins_from_psm(line)
-    return peptide_id, peptideseq, proteins
+    return specfn, scan, peptide_id, peptideseq, proteins

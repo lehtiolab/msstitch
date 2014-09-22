@@ -2,6 +2,7 @@ import unittest
 from hashlib import md5
 from unittest.mock import Mock, patch
 from app.lookups import protein_peptides as lookup
+
 DB_STORE_CHUNK = lookup.DB_STORE_CHUNK
 
 
@@ -16,23 +17,16 @@ class TestCreateLookup(unittest.TestCase):
                          'TRYIDENTIFYME': ['ENS9101112']}
 
     def test_calls_sqlite(self):
-        with patch('app.lookups.protein_peptides.tsvreader.'
-                   'get_mzidtsv_lines_scannr_specfn', return_value=[]
-                   ), patch('app.lookups.protein_peptides.sqlite.'
-                            'ProteinPeptideDB', self.mockdb):
-            lookup.create_protein_pep_lookup('testfn')
+        with patch('app.lookups.protein_peptides.sqlite.ProteinPeptideDB', self.mockdb), patch('app.lookups.protein_peptides.tsvreader.generate_tsv_psms', return_value=[]):
+            lookup.create_protein_pep_lookup('testfn', [])
         self.mockdb.create_ppdb.assert_called_with()
         self.mockdb.store_peptides_proteins.assert_called_once_with({})
         self.mockdb.index.assert_called_once_with()
 
 
 class TestCreateLookupLineParsing(TestCreateLookup):
-    def scanfn_generator(self, lines):
-        for line in lines:
-            yield line, (line['scannr'], self.specfn)
-
     def pepprot_generator(self, line, *args):
-        return line['pepid'], line['seq'], line['proteins']
+        return self.specfn, line['scannr'], line['pepid'], line['seq'], line['proteins']
 
     def get_lines_and_expected(self, unroll):
         def get_line(scannr, pepseq, protein, pepid):
@@ -68,13 +62,10 @@ class TestCreateLookupLineParsing(TestCreateLookup):
             expected = [{k: v} for k, v in expected[0].items()]
         with patch(
             'app.lookups.protein_peptides.DB_STORE_CHUNK', chunk_size), patch(
-            'app.lookups.protein_peptides.tsvreader.'
-            'get_mzidtsv_lines_scannr_specfn',
-            return_value=self.scanfn_generator(lines)), patch(
                 'app.lookups.protein_peptides.tsvreader.'
-                'get_peptide_proteins', self.pepprot_generator), patch(
+                'get_pepproteins', self.pepprot_generator), patch(
                 'app.lookups.protein_peptides.sqlite.ProteinPeptideDB',
-                self.mockdb):
+                self.mockdb), patch('app.lookups.protein_peptides.tsvreader.generate_tsv_psms', return_value=lines):
             lookup.create_protein_pep_lookup('nofn', unroll)
         for expected_entry in expected:
             self.mockdb.store_peptides_proteins.assert_any_call(expected_entry)

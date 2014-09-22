@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch, Mock
 from app.preparation import quant as prep
-
+from app.dataformats import mzidtsv
 
 def mock_quantmaps(self):
     return (('116',), ('117',), ('118',))
@@ -15,8 +15,12 @@ def mock_tsv_header(fn):
     yield 'this\tis\ta\ttest\theader'.split('\t')
 
 
-def mock_specscanlines(fn):
-    yield ['this', 'is', 'a', 'line'], ('specfile', '1234')
+def mock_tsv_psms(fn, header):
+    yield {k: 0 for k in [mzidtsv.HEADER_SPECFILE,
+                          mzidtsv.HEADER_SCANNR,
+                          mzidtsv.HEADER_PEPTIDE,
+                          mzidtsv.HEADER_PROTEIN,]
+                          }
 
 
 class TestQuantDBLookups(unittest.TestCase):
@@ -25,7 +29,7 @@ class TestQuantDBLookups(unittest.TestCase):
         self.mockdb.lookup_quant = mock_findquants
         self.mockdb.get_all_quantmaps = mock_quantmaps
         self.mockreader = Mock
-        self.mockreader.get_mzidtsv_lines_scannr_specfn = mock_specscanlines
+        self.mockreader.generate_tsv_psms = mock_tsv_psms
 
     def test_get_quantheader(self):
         fn = 'test'
@@ -47,9 +51,8 @@ class TestQuantDBLookups(unittest.TestCase):
                                                     mock_quantmaps(self)]),
                                               next(mock_tsv_header('fn')))
             result = next(psms)
-        line = next(mock_specscanlines('test'))[0] + [
-            str(x[1]) for x in mock_findquants(self, 'test', '1234')]
-        line = {
+        line = next(mock_tsv_psms('test', 'fakeheader'))
+        line.update({k: v for k, v in mock_findquants('test', 'test', 'test')})
         self.assertEqual(result, line)
 
 
