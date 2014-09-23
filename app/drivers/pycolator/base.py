@@ -1,6 +1,6 @@
 from app.drivers import base
 from app.readers import pycolator as readers
-from app.readers import basereader
+from app.readers import xml
 from app.writers import pycolator as writers
 
 
@@ -8,7 +8,7 @@ class PycolatorDriver(base.BaseDriver):
     """Driver for pycolator functions"""
     def prepare_percolator_output(self, fn):
         """Returns namespace and static xml from percolator output file"""
-        ns = basereader.get_namespace(fn)
+        ns = xml.get_namespace(fn)
         static = readers.get_percolator_static_xml(fn, ns)
         return ns, static
 

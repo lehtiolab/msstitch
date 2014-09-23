@@ -1,6 +1,6 @@
 import os
-from . import basereader
-from . import ml
+import app.readers.xml as basereader
+import app.readers.ml as ml
 
 
 def mzml_generator(mzmlfiles):

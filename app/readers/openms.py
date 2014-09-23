@@ -1,4 +1,4 @@
-from . import basereader
+import app.readers.xml as basereader
 
 
 def quant_generator(consfiles):

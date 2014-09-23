@@ -1,5 +1,5 @@
 from lxml import etree
-from . import basereader
+import app.readers.xml as basereader
 
 
 def get_percolator_static_xml(fn, ns):
