@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import patch, Mock
-from app.preparation import quant as prep
+from app.preparation.mzidtsv import quant as prep
 from app.dataformats import mzidtsv
 
 def mock_quantmaps(self):
@@ -33,7 +33,7 @@ class TestQuantDBLookups(unittest.TestCase):
 
     def test_get_quantheader(self):
         fn = 'test'
-        with patch('app.preparation.quant.sqlite.QuantDB', self.mockdb):
+        with patch('app.preparation.mzidtsv.quant.sqlite.QuantDB', self.mockdb):
             gqh = prep.get_quant_header
             assert gqh([], fn) == ['116', '117', '118']
 
@@ -45,7 +45,7 @@ class TestQuantDBLookups(unittest.TestCase):
                           }
 
     def test_generate_mzidtsv_quanted(self):
-        with patch('app.preparation.quant.sqlite.QuantDB', self.mockdb), patch('app.preparation.quant.readers', self.mockreader):
+        with patch('app.preparation.mzidtsv.quant.sqlite.QuantDB', self.mockdb), patch('app.preparation.mzidtsv.quant.readers', self.mockreader):
             psms = prep.generate_psms_quanted('fn', 'tsvfn',
                                               list([x[0] for x in
                                                     mock_quantmaps(self)]),
@@ -68,7 +68,7 @@ class TestQuantLines(unittest.TestCase):
 
     def create_tsv_header(self):
         qhead = list(mock_quantmaps(self))
-        with patch('app.preparation.quant.readers.get_tsv_header',
+        with patch('app.preparation.mzidtsv.quant.readers.get_tsv_header',
                    mock_tsv_header):
             result = prep.create_tsv_header_quant('test', qhead)
         desired = next(mock_tsv_header()) + qhead
