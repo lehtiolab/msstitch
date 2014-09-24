@@ -39,6 +39,14 @@ class DatabaseConnection(object):
             'CREATE INDEX {0} on {1}({2})'.format(index_name, table, column))
         self.conn.commit()
 
+    def get_inclause(self, inlist):
+        return 'IN ({1})'.format(', '.join('?' * len(inlist)))
+
+    def get_sql_select(self, columns, table, distinct=False):
+        sql = 'SELECT {0} {1} FROM {2}'
+        dist = {True: 'DISTINCT', False: ''}[distinct]
+        return sql.format(dist, ', '.join(columns), table)
+
 
 class SearchSpaceDB(DatabaseConnection):
     def create_searchspacedb(self, outfn):
@@ -136,3 +144,49 @@ class ProteinPeptideDB(DatabaseConnection):
     def index(self):
         self.index_column('scan_index', 'peptides', 'spectra_file, scan_nr')
         self.index_column('pepid_index', 'peptides', 'peptide_id')
+
+    def get_proteins_from_peptide(self, peptide_id):
+        """Returns list of proteins for a passed peptide_id"""
+        protsql = self.get_sql_select(['protein_acc'], 'protein_peptide')
+        protsql = '{0} WHERE peptide_id=?'.format(protsql)
+        proteins = self.cursor.execute(protsql, peptide_id).fetchall()
+        return [x[0] for x in proteins]
+
+    def get_peptides_from_proteins(self, proteins):
+        pepsql = self.get_sql_select(['peptide_id'], 'protein_peptide',
+                                     distinct=True)
+        pepsql = '{0} WHERE protein_acc {1}'.format(
+            pepsql, self.get_inclause(proteins))
+        peptides = self.cursor.execute(pepsql, proteins).fetchall()
+        return [x[0] for x in peptides]
+
+    def get_proteins_peptides_from_peptides(self, peptides):
+        """Returns dict of proteins and lists of corresponding peptides
+        from db. DB call gets all rows where peptide_id is in peptides.
+        """
+        protsql = self.get_sql_select(['protein_acc', 'peptide_id'],
+                                      'protein_peptide')
+        protsql = '{0} WHERE peptide_id {1}'.format(
+            protsql, self.get_inclause(peptides))
+        proteins_peptides = self.cursor.execute(protsql, peptides).fetchall()
+        ppmap = {}
+        for pp in proteins_peptides:
+            try:
+                ppmap[pp[0]].append(pp[1])
+            except KeyError:
+                ppmap[pp[0]] = [pp[1]]
+        return ppmap
+
+    def filter_proteins_with_missing_peptides(self, proteins, peptides):
+        """Returns proteins of passed list that have peptides not in
+        peptide list.
+        """
+        not_in_sql = self.get_sql_select(['protein_acc'], 'protein_peptide',
+                                         distinct=True)
+        not_in_sql = '{0} WHERE protein_acc {1} AND peptide_id NOT {2}'.format(
+            not_in_sql,
+            self.get_inclause(proteins),
+            self.get_inclause(peptides))
+        proteins_not_in_group = self.cursor.execute(not_in_sql,
+                                                    proteins + peptides)
+        return [x[0] for x in proteins_not_in_group]
