@@ -15,7 +15,7 @@ def generate_psms_with_proteingroups(fn, oldheader, pgdbfn, unroll=False):
         else:
             lineproteins = tsvreader.get_proteins_from_psm(line)
         pgroups = group_proteins(lineproteins, pgdb)
-        pgcontents = pgroups.values()
+        pgcontents = [[master] + slaves for master, slaves in zip(pgroups.keys(), pgroups.values())]
         psm = {mzidtsvdata.HEADER_MASTER_PROT: ';'.join(pgroups.keys()),
                mzidtsvdata.HEADER_PG_CONTENT: ';'.join(
                    [','.join([str(y) for y in x]) for x in pgcontents]),
