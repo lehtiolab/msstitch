@@ -11,8 +11,10 @@ EXAMPLE:
 
 import argparse
 import os
-from app.drivers import mzidplus as drivers
-
+import app.drivers.mzidtsv.percolator as percodrivers
+import app.drivers.mzidtsv.proteingrouping as pgdrivers
+import app.drivers.mzidtsv.quant as quantdrivers
+import app.drivers.mzidtsv.merge as mergedrivers
 
 def parser_file_exists(currentparser, fn):
     if not os.path.exists(fn):
@@ -20,6 +22,14 @@ def parser_file_exists(currentparser, fn):
     else:
         return fn
 
+
+def parser_value_in_list(currentparser, value, valuelist):
+    if not value in valuelist:
+        currentparser.error('Value {0} should be one of {1}'.format(
+            value,
+            ', '.join(valuelist)))
+    else:
+        return value
 parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
 parser.add_argument('-c', dest='command', type=str,
                     help='How to manipulate the input:\n'
@@ -32,7 +42,12 @@ parser.add_argument('-c', dest='command', type=str,
                     'consensusXML to a tab separated file with\n'
                     'PSMs, their statistics and their quantification data.\n'
                     'Needs except these also the corresponding mzML spectra\n'
-                    'files to correlate retention time to scan nrs.\n',
+                    'files to correlate retention time to scan nrs.\n'
+                    'proteingroup   - Groups proteins from of mzid2tsv\n'
+                    'output. With flags --confidence-lvl, --confidence-col,\n'
+                    '--confidence-rank\n',
+#                    'conf_filter - Filter out all rows of tsv with \n'
+#                    'confidence value better than the specified one.\n'
                     required=True
                     )
 parser.add_argument('-i', dest='infile', help='TSV table of mzIdentML',
@@ -53,7 +68,23 @@ parser.add_argument('--quants', dest='quants', help='Quants from OpenMS in '
                     type=lambda x: parser_file_exists(parser, x))
 parser.add_argument('--spectra', dest='spectra', help='mzML files', nargs='+',
                     type=lambda x: parser_file_exists(parser, x))
-
+parser.add_argument('--confidence-col', dest='confcol', help='Confidence '
+                    'column number or name in the tsv file. First column has'
+                    ' number 1.')
+parser.add_argument('--confidence-lvl', dest='conflvl', help='Confidence '
+                    'cutoff level as a floating point number', type=float)
+parser.add_argument('--confidence-better', dest='conftype', help='Confidence '
+                    'type to define if higher or lower score is better. One '
+                    'of [higher, lower]',
+                    type=lambda x: parser_value_in_list(parser, x, ['higher',
+                                                                    'lower']))
+parser.add_argument('--unroll', dest='unroll', help='Flag. The tsv input file '
+                    'from Mzid2TSV contains either one PSM per line with all '
+                    'the proteins of that shared peptide on the same line (not'
+                    ' unrolled, default), or one PSM/protein match per line '
+                    'where each protein from that shared peptide gets its own '
+                    'line (unrolled).',
+                    action='store_const', const=True, default=False)
 # not supported yet
 #parser.add_argument('--allpsms', dest='allpsms', action='store_true',
 #                    help='All PSMs from a single scan should be included, '
@@ -62,9 +93,10 @@ parser.add_argument('--spectra', dest='spectra', help='mzML files', nargs='+',
 args = parser.parse_args()
 
 commandmap = {
-    'percotsv': drivers.MzidPercoTSVDriver,
-    'mergetsv': drivers.MzidTSVConcatenateDriver,
-    'quanttsv': drivers.TSVQuantDriver,
+    'percotsv': percodrivers.MzidPercoTSVDriver,
+    'mergetsv': mergedrivers.MzidTSVConcatenateDriver,
+    'quanttsv': quantdrivers.TSVQuantDriver,
+    'proteingroup': pgdrivers.ProteinGroupDriver,
 }
 
 command = commandmap[args.command](**vars(args))
