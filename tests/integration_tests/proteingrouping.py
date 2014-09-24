@@ -64,7 +64,7 @@ class TestProteinGroupingConfidenceLevel(ProteinGroupTest):
         self.run_and_analyze(options)
 
     def test_conflevel_lower_better(self):
-        options = ['--confidence-col', '15', '--confidence-lvl', '2',
+        options = ['--confidence-col', '15', '--confidence-lvl', '3',
                    '--confidence-better', 'higher']
         self.run_and_analyze(options)
 

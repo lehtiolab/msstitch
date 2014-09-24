@@ -10,11 +10,12 @@ class ProteinGroupDriver(MzidTSVDriver):
         super().__init__(**kwargs)
         self.confcol = kwargs.get('confcol', None)
         self.conflvl = kwargs.get('conflvl', None)
-        self.lowerbetter = kwargs.get('conftype', None)
+        self.lowerbetter = kwargs.get('conftype', None) == 'lower'
         self.unroll = kwargs.get('unroll', False)
 
     def get_psms(self):
-        confkey = self.oldheader[self.conflvl]
+        confkey = self.oldheader[int(self.confcol) - 1]
+        print(confkey)
         protgroupdb = lookups.create_protein_pep_lookup(self.fn,
                                                         self.oldheader,
                                                         confkey,
