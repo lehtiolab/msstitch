@@ -1,12 +1,11 @@
 import os
-import basetest
+import basetests
 import sqlite3
 import yaml
 
 
-class TestSplitTD(basetest.BaseTestPycolator):
+class TestSplitTD(basetests.BaseTestPycolator):
     command = 'splittd'
-    infilename = 'percolator_out.xml'
     suffix = ''
 
     def test_split(self):
@@ -17,7 +16,7 @@ class TestSplitTD(basetest.BaseTestPycolator):
                                    self.infilename + '_target.xml')
         self.decoy = os.path.join(self.workdir,
                                   self.infilename + '_decoy.xml')
-        self.run_pycolator()
+        self.run_command()
         target_expected = os.path.join(self.fixdir, 'splittd_target_out.xml')
         decoy_expected = os.path.join(self.fixdir, 'splittd_decoy_out.xml')
         target_exp_contents = self.read_percolator_out(target_expected)
@@ -42,7 +41,7 @@ class TestSplitTD(basetest.BaseTestPycolator):
                     el.attrib['{%s}decoy' % decoy_contents['ns']], 'true')
 
 
-class TestMerge(basetest.BaseTestPycolator):
+class TestMerge(basetests.BaseTestPycolator):
     command = 'merge'
     infilename = 'splittd_target_out.xml'
     suffix = '_merged.xml'
@@ -51,7 +50,7 @@ class TestMerge(basetest.BaseTestPycolator):
         self.multifiles = [os.path.join(self.fixdir, 'splittd_decoy_out.xml')]
         options = ['--multifiles']
         options.extend(self.multifiles)
-        self.run_pycolator(options)
+        self.run_command(options)
         expected = self.read_percolator_out(os.path.join(self.fixdir,
                                                          'percolator_out.xml'))
         result = self.read_percolator_out(self.resultfn)
@@ -67,9 +66,8 @@ class TestMerge(basetest.BaseTestPycolator):
                                                    'peptide_id', result['ns']))
 
 
-class TestFilterUnique(basetest.BaseTestPycolator):
+class TestFilterUnique(basetests.BaseTestPycolator):
     command = 'filteruni'
-    infilename = 'percolator_out.xml'
     suffix = '_filtuniq.xml'
     # FIXME other scores than svm
     # FIXME make sure BEST psm is retained, not worst.
@@ -79,7 +77,7 @@ class TestFilterUnique(basetest.BaseTestPycolator):
     def test_filter_uniques(self):
         """Checks if resultpeps gets uniques, and also that input peptides
         were not unique to start with."""
-        self.run_pycolator(['-s', 'svm'])
+        self.run_command(['-s', 'svm'])
         result = self.read_percolator_out(self.resultfn)
         origin = self.read_percolator_out(self.infile)
         resultpeps = self.get_element_ids(result['peptides'],
@@ -90,9 +88,8 @@ class TestFilterUnique(basetest.BaseTestPycolator):
         self.assertNotEqual(len({x for x in originpeps}), len(originpeps))
 
 
-class TestFilterLength(basetest.BaseTestPycolator):
+class TestFilterLength(basetests.BaseTestPycolator):
     command = 'filterlen'
-    infilename = 'percolator_out.xml'
     suffix = '_filt_len.xml'
     # FIXME need to check maxlen minlen input?
 
@@ -112,7 +109,7 @@ class TestFilterLength(basetest.BaseTestPycolator):
     def test_filterlen(self):
         maxlen = 20
         minlen = 10
-        self.run_pycolator(['--maxlen', str(maxlen), '--minlen', str(minlen)])
+        self.run_command(['--maxlen', str(maxlen), '--minlen', str(minlen)])
         result = self.get_psm_pep_ids_from_file(self.resultfn)
         origin = self.get_psm_pep_ids_from_file(self.infile)
 
@@ -124,9 +121,8 @@ class TestFilterLength(basetest.BaseTestPycolator):
                                 result['psm_seqs'])
 
 
-class TestFilterKnown(basetest.LookupTestsPycolator):
+class TestFilterKnown(basetests.LookupTestsPycolator):
     command = 'filterknown'
-    infilename = 'percolator_out.xml'
     suffix = '_filtknown.xml'
     dbfn = 'known_peptide_lookup.sqlite'
     reversed_dbfn = 'rev_known_peptide_lookup.sqlite'
@@ -143,7 +139,7 @@ class TestFilterKnown(basetest.LookupTestsPycolator):
         """Does the actual testing"""
         options = ['-b', self.dbpath]
         options.extend(flags)
-        self.run_pycolator(options)
+        self.run_command(options)
         result = self.get_psm_pep_ids_from_file(self.resultfn)
         origin = self.get_psm_pep_ids_from_file(self.infile)
         for feattype in ['peptide_ids', 'psm_seqs']:
@@ -158,7 +154,7 @@ class TestFilterKnown(basetest.LookupTestsPycolator):
                     self.assertIn(oriseq, result_seqs)
 
 
-class TestTrypticLookup(basetest.LookupTestsPycolator):
+class TestTrypticLookup(basetests.LookupTestsPycolator):
     command = 'trypticlookup'
     infilename = 'proteins.fasta'
     suffix = '_lookup.sqlite'
@@ -169,7 +165,7 @@ class TestTrypticLookup(basetest.LookupTestsPycolator):
         sequences = tryp_sequences['fully_tryptic']
         if seqtype is not None:
             sequences.extend(tryp_sequences[seqtype])
-        self.run_pycolator(options)
+        self.run_command(options)
         self.assertTrue(self.all_seqs_in_db(self.resultfn,
                                             sequences, seqtype))
 

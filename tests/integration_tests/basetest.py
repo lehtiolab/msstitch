@@ -8,10 +8,31 @@ from lxml import etree
 from tempfile import mkdtemp
 
 
-class BaseTestPycolator(unittest.TestCase):
+class BaseTest(unittest.TestCase):
     testdir = 'tests'
     fixdir = os.path.join(testdir, 'fixtures')
     outdir = os.path.join(testdir, 'test_output')
+
+    def setUp(self):
+        self.infile = os.path.join(self.fixdir, self.infilename)
+        os.makedirs(self.outdir, exist_ok=True)
+        self.workdir = mkdtemp(dir=self.outdir)
+        self.resultfn = os.path.join(self.workdir,
+                                     self.infilename + self.suffix)
+
+    def tearDown(self):
+        shutil.rmtree(self.workdir)
+
+    def run_command(self, options=[]):
+        cmd = ['./{0}'.format(self.executable), '-c', self.command,
+               '-i', self.infile, '-d', self.workdir]
+        cmd.extend(options)
+        subprocess.call(cmd)
+
+
+class BaseTestPycolator(BaseTest):
+    executable = 'pycolator.py'
+    infilename = 'percolator_out.xml'
 
     def get_psm_pep_ids_from_file(self, fn):
         contents = self.read_percolator_out(fn)
@@ -63,22 +84,6 @@ class BaseTestPycolator(unittest.TestCase):
     def strip_modifications(self, pep):
         return re.sub('\[UNIMOD:\d*\]', '', pep)
 
-    def run_pycolator(self, options=[]):
-        cmd = ['./pycolator.py', '-c', self.command, '-i', self.infile,
-               '-d', self.workdir]
-        cmd.extend(options)
-        subprocess.call(cmd)
-
-    def setUp(self):
-        self.infile = os.path.join(self.fixdir, self.infilename)
-        os.makedirs(self.outdir, exist_ok=True)
-        self.workdir = mkdtemp(dir=self.outdir)
-        self.resultfn = os.path.join(self.workdir,
-                                     self.infilename + self.suffix)
-
-    def tearDown(self):
-        shutil.rmtree(self.workdir)
-
 
 class LookupTestsPycolator(BaseTestPycolator):
     def seq_in_db(self, dbconn, seq, seqtype):
@@ -98,3 +103,7 @@ class LookupTestsPycolator(BaseTestPycolator):
             seqs_in_db.add(self.seq_in_db(db, seq, seqtype))
         db.close()
         return seqs_in_db == set([True])
+
+
+class MzidTSVBaseTest(BaseTest):
+    executable = 'mzidtsv.py'
