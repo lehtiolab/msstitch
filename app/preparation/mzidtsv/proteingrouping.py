@@ -77,7 +77,7 @@ def sort_proteingroup_ranked(proteins, ppgraph):
         except KeyError:
             amount_psms[len(ppgraph[protein])] = [protein]
     proteins_sorted = []
-    for amount in sorted(amount_psms.keys()):
+    for amount in sorted(amount_psms.keys(), reverse=True):
         proteins_sorted.extend(amount_psms[amount])
     return proteins_sorted
 
