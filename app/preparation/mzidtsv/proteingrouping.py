@@ -1,15 +1,20 @@
 from app.readers import tsv as tsvreader
 from app.dataformats import mzidtsv as mzidtsvdata
 from app.sqlite import ProteinPeptideDB
+from app.preparation.mzidtsv import confidencefilters as conffilt
+
 
 def get_header_with_proteingroups(header):
     ix = header.index(mzidtsvdata.HEADER_PROTEIN) + 1
     return header[:ix] + mzidtsvdata.HEADER_PG + header[ix:]
 
 
-def generate_psms_with_proteingroups(fn, oldheader, pgdbfn, unroll=False):
+def generate_psms_with_proteingroups(fn, oldheader, pgdbfn, confkey, conflvl,
+                                     lower_is_better, unroll=False):
     pgdb = ProteinPeptideDB(pgdbfn)
     for line in tsvreader.generate_tsv_psms(fn, oldheader):
+        if not conffilt.passes_filter(line, conflvl, confkey, lower_is_better):
+            continue
         if unroll:
             lineproteins = get_all_proteins_from_unrolled_psm(line, pgdb)
         else:

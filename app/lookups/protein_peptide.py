@@ -4,10 +4,11 @@ DB_STORE_CHUNK = 10000
 
 from app import sqlite
 from app.readers import tsv as tsvreader
-from app.dataformats import mzidtsv as mzidtsvdata
+from app.preparation.mzidtsv import confidencefilters as conffilt
 
 
-def create_protein_pep_lookup(fn, header, unroll=False):
+def create_protein_pep_lookup(fn, header, confkey, conflvl, lower_is_better,
+                              unroll=False):
     """Reads PSMs from file, extracts their proteins and peptides and passes
     them to a database backend in chunked PSMs.
     """
@@ -15,6 +16,8 @@ def create_protein_pep_lookup(fn, header, unroll=False):
     ppdb.create_ppdb()
     count, last_id, peptides_proteins = 0, None, {}
     for psm in tsvreader.generate_tsv_psms(fn, header):
+        if not conffilt.passes_filter(psm, conflvl, confkey, lower_is_better):
+            continue
         count += 1
         specfn, scan, pep_id, seq, prots = tsvreader.get_pepproteins(
             psm, unroll)

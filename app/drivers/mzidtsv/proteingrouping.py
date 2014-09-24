@@ -14,10 +14,17 @@ class ProteinGroupDriver(MzidTSVDriver):
         self.unroll = kwargs.get('unroll', False)
 
     def get_psms(self):
+        confkey = self.oldheader[self.conflvl]
         protgroupdb = lookups.create_protein_pep_lookup(self.fn,
-                                                        self.oldheader)
+                                                        self.oldheader,
+                                                        confkey,
+                                                        self.conflvl,
+                                                        self.lowerbetter)
         self.header = prep.get_header_with_proteingroups(self.oldheader)
         self.psms = prep.generate_psms_with_proteingroups(self.fn,
                                                           self.oldheader,
                                                           protgroupdb,
+                                                          confkey,
+                                                          self.conflvl,
+                                                          self.lowerbetter,
                                                           self.unroll)
