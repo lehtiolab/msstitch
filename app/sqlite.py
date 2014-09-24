@@ -14,7 +14,7 @@ class DatabaseConnection(object):
         tables is a dict with keys=table names, values=lists of cols.
         """
         if outfn is None:
-            fd, outfn = mkstemp(prefix='msstitcher_tmp_')
+            fd, outfn = mkstemp(prefix='msstitcher_tmp_', dir=os.getcwd())
             os.close(fd)
         self.fn = outfn
         self.cursor = self.connect(outfn, foreign_keys)
@@ -40,7 +40,7 @@ class DatabaseConnection(object):
         self.conn.commit()
 
     def get_inclause(self, inlist):
-        return 'IN ({1})'.format(', '.join('?' * len(inlist)))
+        return 'IN ({0})'.format(', '.join('?' * len(inlist)))
 
     def get_sql_select(self, columns, table, distinct=False):
         sql = 'SELECT {0} {1} FROM {2}'
@@ -118,7 +118,7 @@ class PeptideFilterDB(DatabaseConnection):
 
 
 class ProteinPeptideDB(DatabaseConnection):
-    def create_pgdb(self):
+    def create_ppdb(self):
         self.create_db({'peptides': ['peptide_id TEXT PRIMARY KEY NOT NULL',
                                      'scan_nr INTEGER', 'spectra_file TEXT'],
                         'protein_peptide': ['protein_acc TEXT',
@@ -127,7 +127,7 @@ class ProteinPeptideDB(DatabaseConnection):
                                             'peptides(peptide_id)']
                         }, foreign_keys=True)
 
-    def store_peptide_proteins(self, ppmap):
+    def store_peptides_proteins(self, ppmap):
         def generate_proteins(pepprots):
             for pep_id, pepvals in pepprots.items():
                 for protein in pepvals['proteins']:
@@ -145,7 +145,7 @@ class ProteinPeptideDB(DatabaseConnection):
         self.index_column('scan_index', 'peptides', 'spectra_file, scan_nr')
         self.index_column('pepid_index', 'peptides', 'peptide_id')
 
-    def get_proteins_from_peptide(self, peptide_id):
+    def get_proteins_for_peptide(self, peptide_id):
         """Returns list of proteins for a passed peptide_id"""
         protsql = self.get_sql_select(['protein_acc'], 'protein_peptide')
         protsql = '{0} WHERE peptide_id=?'.format(protsql)

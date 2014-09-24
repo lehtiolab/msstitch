@@ -2,10 +2,10 @@ import basetests
 from app.dataformats import mzidtsv as constants
 
 
-class ProteinGroupTest(basetests.BaseTest):
+class ProteinGroupTest(basetests.MzidTSVBaseTest):
     command = 'proteingroup'
     infilename = 'mzidtsv.txt'
-    suffix = '_proteingrouped.txt'
+    suffix = '_protgroups.txt'
     dbfn = 'proteingroup_lookup.sqlite'
 
     def run_and_analyze(self, options):
@@ -20,20 +20,19 @@ class ProteinGroupTest(basetests.BaseTest):
             master_ix = header.index(constants.HEADER_MASTER_PROT)
             pgcontent_ix = header.index(constants.HEADER_PG_CONTENT)
             pgamount_ix = header.index(constants.HEADER_PG_AMOUNT_PROTEIN_HITS)
-            out = []
             for line in fp:
-                out.append({'peptide': line[pep_ix],
-                            'master': line[master_ix],
-                            'content': line[pgcontent_ix],
-                            'amount': line[pgamount_ix],
-                            })
-            return out
+                print(line)
+                yield {'peptide': line[pep_ix],
+                       'master': line[master_ix],
+                       'content': line[pgcontent_ix],
+                       'amount': line[pgamount_ix],
+                       }
 
     def do_asserting(self, result, expected, unrolled=False):
         pgkeys = ['peptide', 'master', 'content', 'amount']
         for line in expected:
             exp = {}
-            for key, value in zip(pgkeys, line[-1]):
+            for key, value in zip(pgkeys, line[:-1]):
                 exp[key] = value
             if unrolled:
                 exp['unroll'] = line[-1]
@@ -41,9 +40,9 @@ class ProteinGroupTest(basetests.BaseTest):
                 exp['unroll'] = 1
             for pepline in range(exp['unroll']):
                 res = next(result)
-                for psm in result.items():
-                    for key in pgkeys:
-                        self.assertEqual(res[key], exp[key])
+                print(res)
+                for key in pgkeys:
+                    self.assertEqual(res[key], exp[key])
 
 
 class TestProteinGroupingConfidenceLevel(ProteinGroupTest):
@@ -58,12 +57,12 @@ class TestProteinGroupingConfidenceLevel(ProteinGroupTest):
                 ]
 
     def test_conflevel_higher_better(self):
-        options = ['--confidence-col', '19', '--confidence-level', '0.01',
+        options = ['--confidence-col', '19', '--confidence-lvl', '0.01',
                    '--confidence-better', 'lower']
         self.run_and_analyze(options)
 
     def test_conflevel_lower_better(self):
-        options = ['--confidence-col', '15', '--confidence-level', '2',
+        options = ['--confidence-col', '15', '--confidence-lvl', '2',
                    '--confidence-better', 'higher']
         self.run_and_analyze(options)
 
@@ -72,6 +71,6 @@ class TestProteinGroupingUnrolled(ProteinGroupTest):
     infilename = 'mzidtsv_unrolled.txt'
 
     def test_unrolled(self):
-        options = ['--confidence-col', '19', '--confidence-level', '0.01',
+        options = ['--confidence-col', '19', '--confidence-lvl', '0.01',
                    '--confidence-better', 'lower', '--unroll']
         self.run_and_analyze(options)

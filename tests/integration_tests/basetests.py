@@ -106,4 +106,4 @@ class LookupTestsPycolator(BaseTestPycolator):
 
 
 class MzidTSVBaseTest(BaseTest):
-    executable = 'mzidtsv.py'
+    executable = 'mzidplus.py'

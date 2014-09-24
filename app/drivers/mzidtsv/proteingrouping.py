@@ -4,7 +4,7 @@ from app.drivers.mzidtsv import MzidTSVDriver
 
 
 class ProteinGroupDriver(MzidTSVDriver):
-    outsuffix = '_protgroups.tsv'
+    outsuffix = '_protgroups.txt'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -14,7 +14,8 @@ class ProteinGroupDriver(MzidTSVDriver):
         self.unroll = kwargs.get('unroll', False)
 
     def get_psms(self):
-        protgroupdb = lookups.create_protein_pep_lookup(self.fn)
+        protgroupdb = lookups.create_protein_pep_lookup(self.fn,
+                                                        self.oldheader)
         self.header = prep.get_header_with_proteingroups(self.oldheader)
         self.psms = prep.generate_psms_with_proteingroups(self.fn,
                                                           self.oldheader,

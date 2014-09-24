@@ -1,9 +1,15 @@
 from app.readers import tsv as tsvreader
 from app.dataformats import mzidtsv as mzidtsvdata
+from app.sqlite import ProteinPeptideDB
+
+def get_header_with_proteingroups(header):
+    ix = header.index(mzidtsvdata.HEADER_PROTEIN) + 1
+    return header[:ix] + mzidtsvdata.HEADER_PG + header[ix:]
 
 
-def generate_psms_with_proteingroups(fn, oldheader, pgdb, unroll=False):
-    for line in tsvreader.generate_tsv_psms_line(fn):
+def generate_psms_with_proteingroups(fn, oldheader, pgdbfn, unroll=False):
+    pgdb = ProteinPeptideDB(pgdbfn)
+    for line in tsvreader.generate_tsv_psms(fn, oldheader):
         if unroll:
             lineproteins = get_all_proteins_from_unrolled_psm(line, pgdb)
         else:
@@ -26,7 +32,7 @@ def count_protein_group_hits(proteins, pgcontents):
     proteins = set(proteins)
     hit_counts = []
     for pgroup in pgcontents:
-        hit_counts.append(len(proteins.intersection(pgroup)))
+        hit_counts.append(str(len(proteins.intersection(pgroup))))
     return ';'.join(hit_counts)
 
 
@@ -41,7 +47,7 @@ def group_proteins(proteins, pgdb):
 
 def get_all_proteins_from_unrolled_psm(psm, pgdb):
     pep_id = tsvreader.get_peptide_id_from_line(psm)
-    return pgdb.get_proteins_for_peptide(pep_id)
+    return pgdb.get_proteins_for_peptide([pep_id])
 
 
 def get_protpep_graph(proteins, pgdb):
@@ -54,7 +60,7 @@ def get_protpep_graph(proteins, pgdb):
     peptides = pgdb.get_peptides_from_proteins(proteins)
     proteingraph = pgdb.get_proteins_peptides_from_peptides(peptides)
     proteins_not_in_group = pgdb.filter_proteins_with_missing_peptides(
-        proteingraph.keys(), peptides)
+        list(proteingraph.keys()), peptides)
     return {k: v for k, v in proteingraph.items()
             if k not in proteins_not_in_group}
 
@@ -65,8 +71,8 @@ def get_slave_proteins(protein, graph):
     for subprotein, peps in graph.items():
         if subprotein == protein:
             continue
-        elif graph[protein].issubset(peps):
+        elif set(graph[protein]).issubset(peps):
             return []
-        elif peps.issubset(graph[protein]):
+        elif set(peps).issubset(graph[protein]):
             slave_proteins.append(subprotein)
     return slave_proteins

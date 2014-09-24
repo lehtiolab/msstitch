@@ -75,8 +75,3 @@ def get_header_with_percolator(oldheader, multipsm=False):
         percoheader.append('rank')
     ix = oldheader.index(mzidtsvdata.HEADER_PEPQVAL) + 1
     return oldheader[:ix] + percoheader + oldheader[ix:]
-
-
-def get_header_with_proteingroups(header):
-    ix = header.index(mzidtsvdata.HEADER_PROTEIN) + 1
-    return header[:ix] + mzidtsvdata.HEADER_PG + header[ix:]
