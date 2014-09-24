@@ -24,7 +24,7 @@ def generate_psms_with_proteingroups(fn, oldheader, pgdbfn, unroll=False):
                    lineproteins,
                    pgcontents),
                }
-        psm.update({head: value for head, value in zip(oldheader, line)})
+        psm.update({head: line[head] for head in oldheader})
         yield psm
 
 
