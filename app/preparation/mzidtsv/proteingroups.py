@@ -5,10 +5,10 @@ from app.dataformats import mzidtsv as mzidtsvdata
 def generate_psms_with_proteingroups(fn, oldheader, pgdb, unroll=False):
     for line in tsvreader.generate_tsv_psms_line(fn):
         if unroll:
-            lineproteins = tsvreader.get_unrolled_protein(line)
+            lineproteins = get_all_proteins_from_unrolled_psm(line, pgdb)
         else:
-            lineproteins = tsvreader.get_multiple_proteins(line)
-        pgroups = group_proteins(lineproteins, pgdb, unroll)
+            lineproteins = tsvreader.get_proteins_from_psm(line)
+        pgroups = group_proteins(lineproteins, pgdb)
         pgcontents = pgroups.values()
         psm = {mzidtsvdata.HEADER_MASTER_PROT: ';'.join(pgroups.keys()),
                mzidtsvdata.HEADER_PG_CONTENT: ';'.join(
@@ -30,13 +30,18 @@ def count_protein_group_hits(proteins, pgcontents):
     return ';'.join(hit_counts)
 
 
-def group_proteins(proteins, pgdb, unroll=False):
+def group_proteins(proteins, pgdb):
     """Generates protein groups per PSM."""
     pp_graph = get_protpep_graph(proteins, pgdb)
     protein_groups = {x: False for x in pp_graph}
     for protein in pp_graph:
         protein_groups[protein] = get_slave_proteins(protein, pp_graph)
     return {k: v for k, v in protein_groups.items() if v}
+
+
+def get_all_proteins_from_unrolled_psm(psm, pgdb):
+    pep_id = tsvreader.get_peptide_id_from_line(psm)
+    return pgdb.get_proteins_for_peptide(pep_id)
 
 
 def get_protpep_graph(proteins, pgdb):
