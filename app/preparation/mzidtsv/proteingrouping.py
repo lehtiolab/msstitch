@@ -15,7 +15,8 @@ def generate_psms_with_proteingroups(fn, oldheader, pgdbfn, unroll=False):
         else:
             lineproteins = tsvreader.get_proteins_from_psm(line)
         pgroups = group_proteins(lineproteins, pgdb)
-        pgcontents = [[master] + slaves for master, slaves in zip(pgroups.keys(), pgroups.values())]
+        pgcontents = [[master] + x for master, x in zip(pgroups.keys(),
+                                                        pgroups.values())]
         psm = {mzidtsvdata.HEADER_MASTER_PROT: ';'.join(pgroups.keys()),
                mzidtsvdata.HEADER_PG_CONTENT: ';'.join(
                    [','.join([str(y) for y in x]) for x in pgcontents]),
@@ -42,7 +43,8 @@ def group_proteins(proteins, pgdb):
     protein_groups = {x: False for x in pp_graph}
     for protein in pp_graph:
         protein_groups[protein] = get_slave_proteins(protein, pp_graph)
-    return {k: v for k, v in protein_groups.items() if v}
+    return {k: sort_proteingroup_ranked(v, pp_graph)
+            for k, v in protein_groups.items() if v}
 
 
 def get_all_proteins_from_unrolled_psm(psm, pgdb):
@@ -63,6 +65,21 @@ def get_protpep_graph(proteins, pgdb):
         list(proteingraph.keys()), peptides)
     return {k: v for k, v in proteingraph.items()
             if k not in proteins_not_in_group}
+
+
+def sort_proteingroup_ranked(proteins, ppgraph):
+    # FIXME ties, add more sort layers
+    # try different faster sorting (quicksort)?
+    amount_psms = {}
+    for protein in proteins:
+        try:
+            amount_psms[len(ppgraph[protein])].append(protein)
+        except KeyError:
+            amount_psms[len(ppgraph[protein])] = [protein]
+    proteins_sorted = []
+    for amount in sorted(amount_psms.keys()):
+        proteins_sorted.extend(amount_psms[amount])
+    return proteins_sorted
 
 
 def get_slave_proteins(protein, graph):
