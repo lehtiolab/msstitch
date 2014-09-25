@@ -22,7 +22,6 @@ class ProteinGroupTest(basetests.MzidTSVBaseTest):
             pgamount_ix = header.index(constants.HEADER_PG_AMOUNT_PROTEIN_HITS)
             for line in fp:
                 line = line.strip().split('\t')
-                print(line)
                 yield {'peptide': line[pep_ix],
                        'master': line[master_ix],
                        'content': line[pgcontent_ix],
@@ -36,8 +35,6 @@ class ProteinGroupTest(basetests.MzidTSVBaseTest):
             for key, value in zip(pgkeys, line):
                 exp[key] = value
             res = next(result)
-            print(res)
-            print(exp)
             self.assertEqual(res['peptide'], exp['peptide'])
             self.assertEqual(set(res['master'].split(';')),
                              set(exp['master'].split(';')))
@@ -75,8 +72,8 @@ class TestProteinGroupingUnrolled(ProteinGroupTest):
                 ['ABCD', 'PB', 'PB,PA,PC', '2'],
                 ['ABCD', 'PB', 'PB,PA,PC', '2'],
                 ['HIJKL', 'PB;PD', 'PB,PA,PC;PD,PC,PE', '2;2'],
-                ['HIJKL', 'PB;PD', 'PB,PA,PC;PD,PE,PC', '2;2'],
-                ['HIJKL', 'PB;PD', 'PB,PA,PC;PD,PE,PC', '2;2'],
+                ['HIJKL', 'PB;PD', 'PB,PA,PC;PD,PC,PE', '2;2'],
+                ['HIJKL', 'PB;PD', 'PB,PA,PC;PD,PC,PE', '2;2'],
                 ['.MNOP.', 'PD', 'PD,PC,PE', '1'],
                 ['QRST', 'PD;PF', 'PD,PC,PE;PF,PG,PE', '2;2'],
                 ['QRST', 'PD;PF', 'PD,PC,PE;PF,PG,PE', '2;2'],

@@ -15,7 +15,6 @@ class ProteinGroupDriver(MzidTSVDriver):
 
     def get_psms(self):
         confkey = self.oldheader[int(self.confcol) - 1]
-        print(confkey)
         protgroupdb = lookups.create_protein_pep_lookup(self.fn,
                                                         self.oldheader,
                                                         confkey,
