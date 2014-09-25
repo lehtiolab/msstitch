@@ -49,7 +49,7 @@ def group_proteins(proteins, pgdb):
     for protein in pp_graph:
         protein_groups[protein] = get_slave_proteins(protein, pp_graph)
     return {k: sort_proteingroup_ranked(v, pp_graph)
-            for k, v in protein_groups.items() if v}
+            for k, v in protein_groups.items() if v is not False}
 
 
 def get_all_proteins_from_unrolled_psm(psm, pgdb):
@@ -95,7 +95,7 @@ def get_slave_proteins(protein, graph):
         if subprotein == protein:
             continue
         elif set(graph[protein]).issubset(peps):
-            return []
+            return False
         elif set(peps).issubset(graph[protein]):
             slave_proteins.append(subprotein)
     return slave_proteins
