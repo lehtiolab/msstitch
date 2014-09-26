@@ -174,9 +174,12 @@ class ProteinPeptideDB(DatabaseConnection):
         ppmap = {}
         for pp in proteins_peptides:
             try:
-                ppmap[pp[0]][pp[1]] = pp[2]
+                ppmap[pp[0]][pp[1]].append(pp[2])
             except KeyError:
-                ppmap[pp[0]] = {pp[1]: pp[2]}
+                try:
+                    ppmap[pp[0]][pp[1]] = [pp[2]]
+                except KeyError:
+                    ppmap[pp[0]] = {pp[1]: [pp[2]]}
         return ppmap
 
     def filter_proteins_with_missing_peptides(self, proteins, peptides):

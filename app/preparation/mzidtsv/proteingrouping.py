@@ -52,11 +52,11 @@ def group_proteins(proteins, pgdb):
                 sort_pgroup_coverage,
                 ]
     pp_graph = get_protpep_graph(proteins, pgdb)
-    protein_groups = {x: False for x in pp_graph}
+    protein_groups = {}
     for protein in pp_graph:
-        protein_groups[protein] = [get_slave_proteins(protein, pp_graph)]
-    protein_groups = {k: v for k, v in protein_groups.items()
-                      if v is not False}
+        slaves = get_slave_proteins(protein, pp_graph)
+        if slaves is not False:
+            protein_groups[protein] = slaves
     for protein, pgroup in protein_groups.items():
         protein_groups[protein] = sort_proteingroup(sortfnxs, 0,
                                                     pgroup, pp_graph)
@@ -68,10 +68,11 @@ def sort_proteingroup(sortfunctions, sortfunc_index, pgroup, ppgraph):
     functions."""
     pgroup_out = []
     subgroups = sortfunctions[sortfunc_index](pgroup, ppgraph)
+    sortfunc_index += 1
     for subgroup in subgroups:
-        if len(subgroup) > 1:
+        if len(subgroup) > 1 and sortfunc_index < len(sortfunctions):
             pgroup_out.extend(sort_proteingroup(sortfunctions,
-                                                sortfunc_index + 1,
+                                                sortfunc_index,
                                                 subgroup, ppgraph))
         else:
             pgroup_out.extend(subgroup)
@@ -113,20 +114,20 @@ def sort_amounts(proteins, ppgraph, innerlookup=False):
         if not innerlookup:
             amount_x_for_protein = len(ppgraph[protein])
         else:
-            amount_x_for_protein = len(ppgraph[protein].values())
+            amount_x_for_protein = len([x for y in ppgraph[protein].values() for x in y])
         try:
             amounts[amount_x_for_protein].append(protein)
         except KeyError:
             amounts[amount_x_for_protein] = [protein]
-    return [x[0] for x in sorted(amounts.items(), reversed=True)]
+    return [v for k,v in sorted(amounts.items(), reverse=True)]
 
 
 def sort_pgroup_score(proteins, ppgraph):
-    pass
+    return [proteins]
 
 
-def sort_pgroup_coverage():
-    pass
+def sort_pgroup_coverage(proteins, ppgraph):
+    return [proteins]
 
 # FIXME sequence coverage, we need database for that
 
