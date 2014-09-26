@@ -59,7 +59,7 @@ def get_pepproteins(line, unroll=False):
     scan = line[mzidtsvdata.HEADER_SCANNR]
     psm_id = get_psm_id_from_line(line)
     peptideseq = line[mzidtsvdata.HEADER_PEPTIDE]
-    if unroll:
+    if unroll and '.' in peptideseq:
         peptideseq = peptideseq.split('.')[1]
     proteins = get_proteins_from_psm(line)
     return specfn, scan, psm_id, peptideseq, proteins
