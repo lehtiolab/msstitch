@@ -120,26 +120,27 @@ class PeptideFilterDB(DatabaseConnection):
 class ProteinPeptideDB(DatabaseConnection):
     def create_ppdb(self):
         self.create_db({'peptides': ['psm_id TEXT PRIMARY KEY NOT NULL',
-                                     'scan_nr INTEGER', 'spectra_file TEXT',],
+                                     'scan_nr INTEGER', 'spectra_file TEXT', ],
                         'protein_peptide': ['protein_acc TEXT',
                                             'sequence TEXT',
+                                            'score TEXT',
                                             'psm_id TEXT, FOREIGN KEY'
                                             '(psm_id) REFERENCES '
-                                            'peptides(psm_id)',]
+                                            'peptides(psm_id)', ]
                         }, foreign_keys=True)
 
     def store_peptides_proteins(self, ppmap):
         def generate_proteins(pepprots):
             for psm_id, pepvals in pepprots.items():
                 for protein in pepvals['proteins']:
-                    yield protein, pepvals['seq'], psm_id
+                    yield protein, pepvals['seq'], pepvals['score'], psm_id
         peptides = ((k, v['scan_nr'], v['specfn']) for k, v in ppmap.items())
         self.cursor.executemany(
             'INSERT INTO peptides(psm_id, scan_nr, spectra_file)'
             ' VALUES(?, ?, ?)', peptides)
         self.cursor.executemany(
-            'INSERT INTO protein_peptide(protein_acc, sequence, psm_id) '
-            'VALUES (?, ?, ?)', generate_proteins(ppmap))
+            'INSERT INTO protein_peptide(protein_acc, sequence, score, psm_id)'
+            ' VALUES (?, ?, ?)', generate_proteins(ppmap))
         self.conn.commit()
 
     def index(self):
@@ -166,20 +167,20 @@ class ProteinPeptideDB(DatabaseConnection):
         from db. DB call gets all rows where psm_id is in peptides.
         """
         protsql = self.get_sql_select(['protein_acc', 'sequence',
-                                       'psm_id',],
+                                       'score', 'psm_id'],
                                       'protein_peptide')
         protsql = '{0} WHERE psm_id {1}'.format(
             protsql, self.get_inclause(peptides))
         proteins_peptides = self.cursor.execute(protsql, peptides).fetchall()
         ppmap = {}
-        for pp in proteins_peptides:
+        for protein, pepseq, score, psm_id in proteins_peptides:
             try:
-                ppmap[pp[0]][pp[1]].append(pp[2])
+                ppmap[protein][pepseq].append((psm_id, score))
             except KeyError:
                 try:
-                    ppmap[pp[0]][pp[1]] = [pp[2]]
+                    ppmap[protein][pepseq] = [(psm_id, score)]
                 except KeyError:
-                    ppmap[pp[0]] = {pp[1]: [pp[2]]}
+                    ppmap[protein] = {pepseq: [(psm_id, score)]}
         return ppmap
 
     def filter_proteins_with_missing_peptides(self, proteins, peptides):
