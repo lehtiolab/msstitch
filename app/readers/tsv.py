@@ -39,27 +39,27 @@ def get_proteins_from_psm(line):
     return outproteins
 
 
-def get_peptide_id_from_line(line):
+def get_psm_id_from_line(line):
     return md5('{0}{1}'.format(line[mzidtsvdata.HEADER_SPECFILE],
                                line[mzidtsvdata.HEADER_SCANNR])
                .encode('utf-8')).hexdigest()
 
 
 def get_pepproteins(line, unroll=False):
-    """From a line, generate a peptide_id (MD5 of specfile and scannr).
+    """From a line, generate a psm_id (MD5 of specfile and scannr).
     Returns that id with the peptide sequence and protein accessions.
     Return values:
         specfn          -   str
         scan            -   str
-        peptide_id      -   str
+        psm_id          -   str
         peptideseq      -   str
         proteins        -   list of str
     """
     specfn = line[mzidtsvdata.HEADER_SPECFILE]
     scan = line[mzidtsvdata.HEADER_SCANNR]
-    peptide_id = get_peptide_id_from_line(line)
+    psm_id = get_psm_id_from_line(line)
     peptideseq = line[mzidtsvdata.HEADER_PEPTIDE]
     if unroll:
         peptideseq = peptideseq.split('.')[1]
     proteins = get_proteins_from_psm(line)
-    return specfn, scan, peptide_id, peptideseq, proteins
+    return specfn, scan, psm_id, peptideseq, proteins

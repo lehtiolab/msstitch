@@ -19,17 +19,17 @@ def create_protein_pep_lookup(fn, header, confkey, conflvl, lower_is_better,
         if not conffilt.passes_filter(psm, conflvl, confkey, lower_is_better):
             continue
         count += 1
-        specfn, scan, pep_id, seq, prots = tsvreader.get_pepproteins(
+        specfn, scan, psm_id, seq, prots = tsvreader.get_pepproteins(
             psm, unroll)
-        if count >= DB_STORE_CHUNK and pep_id != last_id:
+        if count >= DB_STORE_CHUNK and psm_id != last_id:
             ppdb.store_peptides_proteins(peptides_proteins)
             peptides_proteins = {}
         try:
-            peptides_proteins[pep_id]['proteins'].extend(prots)
+            peptides_proteins[psm_id]['proteins'].extend(prots)
         except KeyError:
-            peptides_proteins[pep_id] = {'scan_nr': scan, 'specfn': specfn,
+            peptides_proteins[psm_id] = {'scan_nr': scan, 'specfn': specfn,
                                          'seq': seq, 'proteins': prots}
-        last_id = pep_id
+        last_id = psm_id
     ppdb.store_peptides_proteins(peptides_proteins)
     ppdb.index()
     return ppdb.fn

@@ -53,8 +53,8 @@ def group_proteins(proteins, pgdb):
 
 
 def get_all_proteins_from_unrolled_psm(psm, pgdb):
-    pep_id = tsvreader.get_peptide_id_from_line(psm)
-    return pgdb.get_proteins_for_peptide([pep_id])
+    psm_id = tsvreader.get_psm_id_from_line(psm)
+    return pgdb.get_proteins_for_peptide([psm_id])
 
 
 def get_protpep_graph(proteins, pgdb):
