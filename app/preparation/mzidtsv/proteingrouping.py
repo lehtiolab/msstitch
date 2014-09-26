@@ -43,13 +43,39 @@ def count_protein_group_hits(proteins, pgcontents):
 
 
 def group_proteins(proteins, pgdb):
-    """Generates protein groups per PSM."""
+    """Generates protein groups per PSM. First calls get_slave_proteins to
+    determine which of a graph is the master protein. Then calls a sorting
+    function to sort the rest of the group."""
+    sortfnxs = [sort_pgroup_peptides,
+                sort_pgroup_psms,
+                sort_pgroup_score,
+                sort_pgroup_coverage,
+                ]
     pp_graph = get_protpep_graph(proteins, pgdb)
     protein_groups = {x: False for x in pp_graph}
     for protein in pp_graph:
-        protein_groups[protein] = get_slave_proteins(protein, pp_graph)
-    return {k: sort_proteingroup_ranked(v, pp_graph)
-            for k, v in protein_groups.items() if v is not False}
+        protein_groups[protein] = [get_slave_proteins(protein, pp_graph)]
+    protein_groups = {k: v for k, v in protein_groups.items()
+                      if v is not False}
+    for protein, pgroup in protein_groups.items():
+        protein_groups[protein] = sort_proteingroup(sortfnxs, 0,
+                                                    pgroup, pp_graph)
+    return protein_groups
+
+
+def sort_proteingroup(sortfunctions, sortfunc_index, pgroup, ppgraph):
+    """Recursive function that sorts protein group by a number of sorting
+    functions."""
+    pgroup_out = []
+    subgroups = sortfunctions[sortfunc_index](pgroup, ppgraph)
+    for subgroup in subgroups:
+        if len(subgroup) > 1:
+            pgroup_out.extend(sort_proteingroup(sortfunctions,
+                                                sortfunc_index + 1,
+                                                subgroup, ppgraph))
+        else:
+            pgroup_out.extend(subgroup)
+    return pgroup_out
 
 
 def get_all_proteins_from_unrolled_psm(psm, pgdb):
@@ -72,20 +98,37 @@ def get_protpep_graph(proteins, pgdb):
             if k not in proteins_not_in_group}
 
 
-def sort_proteingroup_ranked(proteins, ppgraph):
-    # FIXME ties, add more sort layers
-    # try different faster sorting (quicksort)?
-    amount_psms = {}
+def sort_pgroup_peptides(proteins, ppgraph):
+    return sort_amounts(proteins, ppgraph)
+
+
+def sort_pgroup_psms(proteins, ppgraph):
+    return sort_amounts(proteins, ppgraph, innerlookup=True)
+
+
+def sort_amounts(proteins, ppgraph, innerlookup=False):
+    """Generic function for sorting peptides and psms"""
+    amounts = {}
     for protein in proteins:
+        if not innerlookup:
+            amount_x_for_protein = len(ppgraph[protein])
+        else:
+            amount_x_for_protein = len(ppgraph[protein].values())
         try:
-            amount_psms[len(ppgraph[protein])].append(protein)
+            amounts[amount_x_for_protein].append(protein)
         except KeyError:
-            amount_psms[len(ppgraph[protein])] = [protein]
-    proteins_sorted = []
-    for amount in sorted(amount_psms.keys(), reverse=True):
-        proteins_tied = sorted(amount_psms[amount])
-        proteins_sorted.extend(proteins_tied)
-    return proteins_sorted
+            amounts[amount_x_for_protein] = [protein]
+    return [x[0] for x in sorted(amounts.items(), reversed=True)]
+
+
+def sort_pgroup_score(proteins, ppgraph):
+    pass
+
+
+def sort_pgroup_coverage():
+    pass
+
+# FIXME sequence coverage, we need database for that
 
 
 def get_slave_proteins(protein, graph):
