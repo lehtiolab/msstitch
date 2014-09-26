@@ -87,7 +87,7 @@ def get_all_proteins_from_unrolled_psm(psm, pgdb):
 
 def get_protpep_graph(proteins, pgdb):
     """Returns graph as a dict:
-        {protein: set([peptide1, peptide2]),}
+        {protein: {peptide1: [(psm_id, score), (psm_id, score)],}}
         This methods calls the db 3 times to get protein groups of the
         proteins passed.
         # TODO See if there is a faster implementation.
@@ -101,11 +101,11 @@ def get_protpep_graph(proteins, pgdb):
 
 
 def sort_pgroup_peptides(proteins, ppgraph):
-    return sort_amounts(proteins, ppgraph)
+    return sort_evaluator(sort_amounts(proteins, ppgraph))
 
 
 def sort_pgroup_psms(proteins, ppgraph):
-    return sort_amounts(proteins, ppgraph, innerlookup=True)
+    return sort_evaluator(sort_amounts(proteins, ppgraph, innerlookup=True))
 
 
 def sort_amounts(proteins, ppgraph, innerlookup=False):
@@ -115,16 +115,28 @@ def sort_amounts(proteins, ppgraph, innerlookup=False):
         if not innerlookup:
             amount_x_for_protein = len(ppgraph[protein])
         else:
-            amount_x_for_protein = len([x for y in ppgraph[protein].values() for x in y])
+            amount_x_for_protein = len([x for y in ppgraph[protein].values()
+                                        for x in y])
         try:
             amounts[amount_x_for_protein].append(protein)
         except KeyError:
             amounts[amount_x_for_protein] = [protein]
-    return [v for k,v in sorted(amounts.items(), reverse=True)]
+    return amounts
 
 
 def sort_pgroup_score(proteins, ppgraph):
-    return [proteins]
+    scores = {}
+    for protein in proteins:
+        protein_score = sum([x[1] for x in ppgraph[protein].values()])
+        try:
+            scores[protein_score].append(protein)
+        except KeyError:
+            scores[protein_score] = [protein]
+    return sort_evaluator(scores)
+
+
+def sort_evaluator(sort_dict):
+    return [v for k, v in sorted(sort_dict.items(), reverse=True)]
 
 
 def sort_pgroup_coverage(proteins, ppgraph):
