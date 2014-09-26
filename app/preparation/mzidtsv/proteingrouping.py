@@ -50,6 +50,7 @@ def group_proteins(proteins, pgdb):
                 sort_pgroup_psms,
                 sort_pgroup_score,
                 sort_pgroup_coverage,
+                sort_alphabet,
                 ]
     pp_graph = get_protpep_graph(proteins, pgdb)
     protein_groups = {}
@@ -129,6 +130,9 @@ def sort_pgroup_score(proteins, ppgraph):
 def sort_pgroup_coverage(proteins, ppgraph):
     return [proteins]
 
+
+def sort_alphabet(proteins, ppgraph):
+    return [sorted(proteins)]
 # FIXME sequence coverage, we need database for that
 
 
