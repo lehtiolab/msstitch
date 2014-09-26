@@ -140,7 +140,7 @@ class ProteinPeptideDB(DatabaseConnection):
             ' VALUES(?, ?, ?)', peptides)
         self.cursor.executemany(
             'INSERT INTO protein_peptide(protein_acc, sequence, score, psm_id)'
-            ' VALUES (?, ?, ?)', generate_proteins(ppmap))
+            ' VALUES (?, ?, ?, ?)', generate_proteins(ppmap))
         self.conn.commit()
 
     def index(self):
