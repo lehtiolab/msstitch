@@ -120,25 +120,25 @@ class PeptideFilterDB(DatabaseConnection):
 class ProteinPeptideDB(DatabaseConnection):
     def create_ppdb(self):
         self.create_db({'peptides': ['psm_id TEXT PRIMARY KEY NOT NULL',
-                                     'scan_nr INTEGER', 'spectra_file TEXT',
-                                     'sequence TEXT'],
+                                     'scan_nr INTEGER', 'spectra_file TEXT',],
                         'protein_peptide': ['protein_acc TEXT',
+                                            'sequence TEXT',
                                             'psm_id TEXT, FOREIGN KEY'
                                             '(psm_id) REFERENCES '
-                                            'peptides(psm_id)']
+                                            'peptides(psm_id)',]
                         }, foreign_keys=True)
 
     def store_peptides_proteins(self, ppmap):
         def generate_proteins(pepprots):
             for psm_id, pepvals in pepprots.items():
                 for protein in pepvals['proteins']:
-                    yield protein, psm_id, pepvals['seq']
+                    yield protein, pepvals['seq'], psm_id
         peptides = ((k, v['scan_nr'], v['specfn']) for k, v in ppmap.items())
         self.cursor.executemany(
             'INSERT INTO peptides(psm_id, scan_nr, spectra_file)'
             ' VALUES(?, ?, ?)', peptides)
         self.cursor.executemany(
-            'INSERT INTO protein_peptide(protein_acc, psm_id, sequence) '
+            'INSERT INTO protein_peptide(protein_acc, sequence, psm_id) '
             'VALUES (?, ?, ?)', generate_proteins(ppmap))
         self.conn.commit()
 
@@ -165,8 +165,8 @@ class ProteinPeptideDB(DatabaseConnection):
         """Returns dict of proteins and lists of corresponding peptides
         from db. DB call gets all rows where psm_id is in peptides.
         """
-        protsql = self.get_sql_select(['protein_acc', 'psm_id',
-                                       'sequence'],
+        protsql = self.get_sql_select(['protein_acc', 'sequence',
+                                       'psm_id',],
                                       'protein_peptide')
         protsql = '{0} WHERE psm_id {1}'.format(
             protsql, self.get_inclause(peptides))
