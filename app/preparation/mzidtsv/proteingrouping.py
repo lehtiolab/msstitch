@@ -127,7 +127,7 @@ def sort_amounts(proteins, ppgraph, innerlookup=False):
 def sort_pgroup_score(proteins, ppgraph):
     scores = {}
     for protein in proteins:
-        protein_score = sum([x[1] for x in ppgraph[protein].values()])
+        protein_score = sum([int(x[1]) for y in ppgraph[protein].values() for x in y])
         try:
             scores[protein_score].append(protein)
         except KeyError:
