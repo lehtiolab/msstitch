@@ -1,37 +1,77 @@
+from hashlib import md5
 from app.readers import tsv as tsvreader
 from app.dataformats import mzidtsv as mzidtsvdata
-from app.sqlite import ProteinPeptideDB
+import app.sqlite as lookups
 from app.preparation.mzidtsv import confidencefilters as conffilt
 
+
+# FIXME slow performance: around 6 min for 80000 psms of kalamari set. Means
+# it will be around 1h for whole set. Which is not great.
+# Maybe we can: hit protein group db for quick check if pg exists
+# How to check multiple pgs? wildcards?
 
 def get_header_with_proteingroups(header):
     ix = header.index(mzidtsvdata.HEADER_PROTEIN) + 1
     return header[:ix] + mzidtsvdata.HEADER_PG + header[ix:]
 
 
-def generate_psms_with_proteingroups(fn, oldheader, pgdbfn, confkey, conflvl,
+def generate_psms_with_proteingroups(fn, oldheader, ppdbfn, confkey, conflvl,
                                      lower_is_better, unroll=False):
-    pgdb = ProteinPeptideDB(pgdbfn)
+    ppdb = lookups.ProteinPeptideDB(ppdbfn)
+    pgdb = lookups.ProteinGroupDB()
+    pgdb.create_pgdb()
+
+    build_master_db(fn, oldheader, ppdb, confkey, conflvl, lower_is_better,
+                    unroll)
+    ####
+    newheader = [mzidtsvdata.HEADER_MASTER_PROT, mzidtsvdata.HEADER_PG_CONTENT,
+                 mzidtsvdata.HEADER_PG_AMOUNT_PROTEIN_HITS]
+    for i in range(10):
+        yield {x: 'speedtest' for x in oldheader + newheader}
+    #for line in tsvreader.generate_tsv_psms(fn, oldheader):
+    #    pgcontents = [[master] + x for master, x in zip(pgroups.keys(),
+    #                                                    pgroups.values())]
+    #    psm = {mzidtsvdata.HEADER_MASTER_PROT: ';'.join(pgroups.keys()),
+    #           mzidtsvdata.HEADER_PG_CONTENT: ';'.join(
+    #               [','.join([str(y) for y in x]) for x in pgcontents]),
+    #           mzidtsvdata.HEADER_PG_AMOUNT_PROTEIN_HITS:
+    #           count_protein_group_hits(
+    #               lineproteins,
+    #               pgcontents),
+    #           }
+    #    psm.update({head: line[head] for head in oldheader})
+    #    yield psm
+
+
+def build_master_db(fn, oldheader, ppdb, confkey, conflvl, lower_is_better,
+                    unroll):
+    allmasters = {}
     for line in tsvreader.generate_tsv_psms(fn, oldheader):
         if not conffilt.passes_filter(line, conflvl, confkey, lower_is_better):
             continue
         if unroll:
-            lineproteins = get_all_proteins_from_unrolled_psm(line, pgdb)
+            lineproteins = get_all_proteins_from_unrolled_psm(line, ppdb)
         else:
             lineproteins = tsvreader.get_proteins_from_psm(line)
-        pgroups = group_proteins(lineproteins, pgdb)
-        pgcontents = [[master] + x for master, x in zip(pgroups.keys(),
-                                                        pgroups.values())]
-        psm = {mzidtsvdata.HEADER_MASTER_PROT: ';'.join(pgroups.keys()),
-               mzidtsvdata.HEADER_PG_CONTENT: ';'.join(
-                   [','.join([str(y) for y in x]) for x in pgcontents]),
-               mzidtsvdata.HEADER_PG_AMOUNT_PROTEIN_HITS:
-               count_protein_group_hits(
-                   lineproteins,
-                   pgcontents),
-               }
-        psm.update({head: line[head] for head in oldheader})
-        yield psm
+        pepprotmap = ppdb.get_protpepmap_from_proteins(lineproteins)
+        allmasters.update({x: 1 for x in get_masters(pepprotmap)})
+    return allmasters
+
+
+def get_masters(ppgraph):
+    masters = []
+    for protein, peps in ppgraph:
+        ismaster = True
+        peps = set(peps)
+        for subprotein, subpeps in ppgraph:
+            if protein == subprotein:
+                continue
+            if peps.issubset(subpeps):
+                ismaster = False
+                break
+        if ismaster:
+            masters.append(protein)
+    return masters
 
 
 def count_protein_group_hits(proteins, pgcontents):
@@ -78,7 +118,6 @@ def sort_proteingroup(sortfunctions, sortfunc_index, pgroup, ppgraph):
         else:
             pgroup_out.extend(subgroup)
     return pgroup_out
-
 
 def get_all_proteins_from_unrolled_psm(psm, pgdb):
     psm_id = tsvreader.get_psm_id_from_line(psm)
@@ -127,7 +166,8 @@ def sort_amounts(proteins, ppgraph, innerlookup=False):
 def sort_pgroup_score(proteins, ppgraph):
     scores = {}
     for protein in proteins:
-        protein_score = sum([int(x[1]) for y in ppgraph[protein].values() for x in y])
+        protein_score = sum([int(x[1]) for y in ppgraph[protein].values()
+                             for x in y])
         try:
             scores[protein_score].append(protein)
         except KeyError:

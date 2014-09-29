@@ -113,8 +113,25 @@ class QuantDB(DatabaseConnection):
         return self.cursor.fetchall()
 
 
-class PeptideFilterDB(DatabaseConnection):
-    pass
+class ProteinGroupDB(DatabaseConnection):
+    def create_pgdb(self):
+        self.create_db({'protein_group_master': ['master TEXT'],
+                        'protein_group_content': ['protein_acc TEXT',
+                                                  'master TEXT, FOREIGN KEY'
+                                                  '(master) REFERENCES '
+                                                  'protein_group_master'
+                                                  '(master)'
+                                                  ],
+                        'psm_protein_groups': ['psm_id TEXT',
+                                               'master TEXT, FOREIGN KEY'
+                                               '(master) REFERENCES '
+                                               'protein_group_master(master)']
+                        }, foreign_keys=True)
+
+    def insert_protein_groups(self, pgroup):
+        self.cursor.execute
+
+    def index_psm_groups(self):
 
 
 class ProteinPeptideDB(DatabaseConnection):
@@ -153,6 +170,21 @@ class ProteinPeptideDB(DatabaseConnection):
         protsql = '{0} WHERE psm_id=?'.format(protsql)
         proteins = self.cursor.execute(protsql, psm_id).fetchall()
         return [x[0] for x in proteins]
+
+    def get_protpepmap_from_proteins(self, proteins):
+        pepsql = self.get_sql_select(['protein_acc', 'psm_id'],
+                                     'protein_peptide',
+                                     distinct=True)
+        pepsql = '{0} WHERE protein_acc {1}'.format(
+            pepsql, self.get_inclause(proteins))
+        protpeps = self.cursor.execute(pepsql, proteins).fetchall()
+        outmap = {}
+        for protein, peptide in protpeps:
+            try:
+                outmap[protein].append(peptide)
+            except KeyError:
+                outmap[protein] = [peptide]
+        return outmap
 
     def get_peptides_from_proteins(self, proteins):
         pepsql = self.get_sql_select(['psm_id'], 'protein_peptide',
