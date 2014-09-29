@@ -62,6 +62,17 @@ def build_master_db(fn, oldheader, pgdb, confkey, conflvl, lower_is_better,
     return allmasters
 
 
+def build_content_db(pgdb):
+    protein_groups = [] 
+    for master in pgdb.get_all_masters():
+        master = master[0]
+       	pgroup = get_protein_group_content(master, pgdb) 
+        protein_groups.extend([(master, protein) for protein in pgroup 
+                                if protein != master])
+    print(protein_groups[-1])
+    pgdb.store_protein_group_content(protein_groups)
+        
+
 def get_masters(ppgraph):
     masters = []
     for protein, peps in ppgraph.items():
@@ -128,19 +139,18 @@ def get_all_proteins_from_unrolled_psm(psm, pgdb):
     return pgdb.get_proteins_for_peptide([psm_id])
 
 
-def get_protpep_graph(proteins, pgdb):
+def get_protein_group_content(protein, pgdb):
     """Returns graph as a dict:
         {protein: {peptide1: [(psm_id, score), (psm_id, score)],}}
         This methods calls the db 3 times to get protein groups of the
         proteins passed.
         # TODO See if there is a faster implementation.
     """
-    peptides = pgdb.get_peptides_from_proteins(proteins)
-    proteingraph = pgdb.get_proteins_peptides_from_peptides(peptides)
+    psms = pgdb.get_peptides_from_protein(protein)
+    protein_group_plus = pgdb.get_proteins_from_psms(psms)
     proteins_not_in_group = pgdb.filter_proteins_with_missing_peptides(
-        list(proteingraph.keys()), peptides)
-    return {k: v for k, v in proteingraph.items()
-            if k not in proteins_not_in_group}
+        protein_group_plus, psms)
+    return [x for x in protein_group_plus if x not in proteins_not_in_group]
 
 
 def sort_pgroup_peptides(proteins, ppgraph):

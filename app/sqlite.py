@@ -190,13 +190,20 @@ class ProteinGroupDB(DatabaseConnection):
                 outmap[protein] = [peptide]
         return outmap
 
-    def get_peptides_from_proteins(self, proteins):
-        pepsql = self.get_sql_select(['psm_id'], 'protein_peptide',
+    def get_peptides_from_protein(self, protein):
+        pepsql = self.get_sql_select(['psm_id'], 'protein_psm',
                                      distinct=True)
-        pepsql = '{0} WHERE protein_acc {1}'.format(
-            pepsql, self.get_inclause(proteins))
-        peptides = self.cursor.execute(pepsql, proteins).fetchall()
+        pepsql = '{0} WHERE protein_acc=?'.format(
+            pepsql)
+        peptides = self.cursor.execute(pepsql, (protein,)).fetchall()
         return [x[0] for x in peptides]
+
+    def get_proteins_from_psms(self, psms):
+        protsql = self.get_sql_select(['protein_acc'], 
+                                       'protein_psm', distinct=True)
+        protsql = '{0} WHERE psm_id {1}'.format(
+            protsql, self.get_inclause(psms))
+        return [x[0] for x in self.cursor.execute(protsql, psms).fetchall()]
 
     def get_proteins_peptides_from_peptides(self, peptides):
         """Returns dict of proteins and lists of corresponding peptides
