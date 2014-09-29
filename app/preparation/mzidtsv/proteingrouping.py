@@ -66,11 +66,39 @@ def build_content_db(pgdb):
     protein_groups = [] 
     for master in pgdb.get_all_masters():
         master = master[0]
-       	pgroup = get_protein_group_content(master, pgdb) 
-        protein_groups.extend([(protein, master) for protein in pgroup 
-                                if protein != master])
+       	protein_groups.extend(get_protein_group_content(master, pgdb))
     pgdb.store_protein_group_content(protein_groups)
         
+
+def get_protein_group_content(master, pgdb):
+    """Returns graph as a dict:
+        {protein: {peptide1: [(psm_id, score), (psm_id, score)],}}
+        This methods calls the db 3 times to get protein groups of the
+        proteins passed.
+        # TODO See if there is a faster implementation.
+    """
+    psms = pgdb.get_peptides_from_protein(master)
+    protein_group_plus = pgdb.get_proteins_peptides_from_psms(psms)
+    proteins_not_in_group = pgdb.filter_proteins_with_missing_peptides(
+        [x[0] for x in protein_group_plus], psms)
+    pgmap = {}
+    for protein, pepseq, score, psm_id in protein_group_plus:
+        if protein == master or protein in proteins_not_in_group:
+            continue
+        score = int(score)  # MZIDSCORE is INTEGER
+        try:
+            pgmap[protein][pepseq].append((psm_id, score))
+        except KeyError:
+            try:
+                pgmap[protein][pepseq] = [(psm_id, score)]
+            except KeyError:
+                pgmap[protein] = {pepseq: [(psm_id, score)]}
+    pgmap = [[protein, master, len(peptides), len([psm for psms in peptides.values()
+                                           for psm in psms]),
+                       sum([psm[1] for psms in peptides.values() for psm in psms])]
+             for protein, peptides in pgmap.items()]
+    return pgmap
+     
 
 def get_masters(ppgraph):
     masters = []
@@ -136,20 +164,6 @@ def sort_proteingroup(sortfunctions, sortfunc_index, pgroup, ppgraph):
 def get_all_proteins_from_unrolled_psm(psm, pgdb):
     psm_id = tsvreader.get_psm_id_from_line(psm)
     return pgdb.get_proteins_for_peptide([psm_id])
-
-
-def get_protein_group_content(protein, pgdb):
-    """Returns graph as a dict:
-        {protein: {peptide1: [(psm_id, score), (psm_id, score)],}}
-        This methods calls the db 3 times to get protein groups of the
-        proteins passed.
-        # TODO See if there is a faster implementation.
-    """
-    psms = pgdb.get_peptides_from_protein(protein)
-    protein_group_plus = pgdb.get_proteins_from_psms(psms)
-    proteins_not_in_group = pgdb.filter_proteins_with_missing_peptides(
-        protein_group_plus, psms)
-    return [x for x in protein_group_plus if x not in proteins_not_in_group]
 
 
 def sort_pgroup_peptides(proteins, ppgraph):

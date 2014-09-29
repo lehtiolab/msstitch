@@ -125,6 +125,9 @@ class ProteinGroupDB(DatabaseConnection):
                         'protein_group_master': ['master TEXT PRIMARY KEY NOT NULL'],
                         'protein_group_content': ['protein_acc TEXT',
                                                   'master TEXT',
+                                                  'peptide_count INTEGER',
+                                                  'psm_count INTEGER',
+                                                  'protein_score REAL',
                                                   'FOREIGN KEY(master) REFERENCES '
                                                   'protein_group_master(master)'
                                                   ],
@@ -165,7 +168,8 @@ class ProteinGroupDB(DatabaseConnection):
         self.conn.commit()
     
     def store_protein_group_content(self, protein_groups):
-        self.cursor.executemany('INSERT INTO protein_group_content(protein_acc, master) VALUES(?, ?)', protein_groups)
+        self.cursor.executemany('INSERT INTO protein_group_content(protein_acc, master, peptide_count, psm_count, protein_score) VALUES(?, ?, ?, ?, ?)', protein_groups)
+        self.conn.commit()
 
     def get_all_masters(self):
         sql = self.get_sql_select(['master'], 'protein_group_master')
