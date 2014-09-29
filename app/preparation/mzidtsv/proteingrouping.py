@@ -60,10 +60,10 @@ def build_master_db(fn, oldheader, ppdb, confkey, conflvl, lower_is_better,
 
 def get_masters(ppgraph):
     masters = []
-    for protein, peps in ppgraph:
+    for protein, peps in ppgraph.items():
         ismaster = True
         peps = set(peps)
-        for subprotein, subpeps in ppgraph:
+        for subprotein, subpeps in ppgraph.items():
             if protein == subprotein:
                 continue
             if peps.issubset(subpeps):

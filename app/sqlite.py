@@ -132,7 +132,7 @@ class ProteinGroupDB(DatabaseConnection):
         self.cursor.execute
 
     def index_psm_groups(self):
-
+        pass
 
 class ProteinPeptideDB(DatabaseConnection):
     def create_ppdb(self):
