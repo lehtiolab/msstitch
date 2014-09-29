@@ -155,19 +155,20 @@ class ProteinGroupDB(DatabaseConnection):
                                  'sequence TEXT', 
                                  'score TEXT'],
                         'protein_psm': ['protein_acc TEXT',
-                                        'psm_id INTEGER, FOREIGN KEY'
-                                        '(psm_id) REFERENCES '
-                                        'psms(psm_id)', ],
+                                        'psm_id INTEGER', 
+                                        'FOREIGN KEY(psm_id) '
+                                        'REFERENCES psms(psm_id)'],
                         'protein_group_master': ['master TEXT PRIMARY KEY NOT NULL'],
                         'protein_group_content': ['protein_acc TEXT',
-                                                  'master TEXT, FOREIGN KEY'
-                                                  '(master) REFERENCES '
-                                                  'protein_group_master'
-                                                  '(master)'
+                                                  'master TEXT',
+                                                  'FOREIGN KEY(master) REFERENCES '
+                                                  'protein_group_master(master)'
                                                   ],
-                        'psm_protein_groups': ['psm_id TEXT',
-                                               'master TEXT, FOREIGN KEY'
-                                               '(master) REFERENCES '
+                        'psm_protein_groups': ['psm_id INTEGER',
+                                               'master TEXT',
+                                               'FOREIGN KEY(psm_id) REFERENCES'
+                                               ' psms(psm_id)',
+                                               'FOREIGN KEY(master) REFERENCES '
                                                'protein_group_master(master)']
                         }, foreign_keys=True)
 
