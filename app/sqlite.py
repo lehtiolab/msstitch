@@ -163,6 +163,9 @@ class ProteinGroupDB(DatabaseConnection):
             'INSERT INTO psm_protein_groups(psm_id, master) '
             'VALUES(?, ?)', psms)
         self.conn.commit()
+    
+    def store_protein_group_content(self, protein_groups):
+        self.cursor.executemany('INSERT INTO protein_group_content(protein_acc, master) VALUES(?, ?)', protein_groups)
 
     def get_all_masters(self):
         sql = self.get_sql_select(['master'], 'protein_group_master')

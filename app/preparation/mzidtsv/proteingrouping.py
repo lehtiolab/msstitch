@@ -67,9 +67,8 @@ def build_content_db(pgdb):
     for master in pgdb.get_all_masters():
         master = master[0]
        	pgroup = get_protein_group_content(master, pgdb) 
-        protein_groups.extend([(master, protein) for protein in pgroup 
+        protein_groups.extend([(protein, master) for protein in pgroup 
                                 if protein != master])
-    print(protein_groups[-1])
     pgdb.store_protein_group_content(protein_groups)
         
 
