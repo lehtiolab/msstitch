@@ -40,18 +40,25 @@ def generate_psms_with_proteingroups(fn, oldheader, pgdb, confkey, conflvl,
     #    yield psm
 
 
-def build_master_db(fn, oldheader, ppdb, confkey, conflvl, lower_is_better,
+def build_master_db(fn, oldheader, pgdb, confkey, conflvl, lower_is_better,
                     unroll):
+    psm_masters = []
     allmasters = {}
+    rownr = 0
     for line in tsvreader.generate_tsv_psms(fn, oldheader):
         if not conffilt.passes_filter(line, conflvl, confkey, lower_is_better):
+            rownr += 1
             continue
         if unroll:
-            lineproteins = get_all_proteins_from_unrolled_psm(line, ppdb)
+            lineproteins = get_all_proteins_from_unrolled_psm(line, pgdb)
         else:
             lineproteins = tsvreader.get_proteins_from_psm(line)
-        pepprotmap = ppdb.get_protpepmap_from_proteins(lineproteins)
-        allmasters.update({x: 1 for x in get_masters(pepprotmap)})
+        pepprotmap = pgdb.get_protpepmap_from_proteins(lineproteins)
+        masters = get_masters(pepprotmap)
+        psm_masters.extend([(rownr, x) for x in masters])
+        allmasters.update({x: 1 for x in masters})
+        rownr += 1
+    pgdb.store_masters(allmasters, psm_masters)
     return allmasters
 
 
