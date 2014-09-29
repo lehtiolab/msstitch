@@ -131,37 +131,62 @@ class ProteinGroupDB(DatabaseConnection):
     def insert_protein_groups(self, pgroup):
         self.cursor.execute
 
+    def store_masters(self, allmasters, psms):
+        print('Storing {0} masters for {1} PSMs'.format(len(allmasters), len(psms)))
+        allmasters = ((x,) for x in allmasters)
+        self.cursor.executemany(
+            'INSERT INTO protein_group_master(master) VALUES(?)',
+            allmasters)
+        self.cursor.executemany(
+            'INSERT INTO psm_protein_groups(psm_id, master) '
+            'VALUES(?, ?)', psms)
+
+    def get_all_masters(self):
+        self.get_sql_select(['master'], 'protein_group_master')
+        return self.cursor.execute(sql).fetchall()
+
     def index_psm_groups(self):
         pass
 
-class ProteinPeptideDB(DatabaseConnection):
+
+class ProteinGroupDB(DatabaseConnection):
     def create_ppdb(self):
-        self.create_db({'peptides': ['psm_id TEXT PRIMARY KEY NOT NULL',
-                                     'scan_nr INTEGER', 'spectra_file TEXT', ],
-                        'protein_peptide': ['protein_acc TEXT',
-                                            'sequence TEXT',
-                                            'score TEXT',
-                                            'psm_id TEXT, FOREIGN KEY'
-                                            '(psm_id) REFERENCES '
-                                            'peptides(psm_id)', ]
+        self.create_db({'psms': ['psm_id INTEGER PRIMARY KEY NOT NULL',
+                                 'sequence TEXT', 
+                                 'score TEXT'],
+                        'protein_psm': ['protein_acc TEXT',
+                                        'psm_id INTEGER, FOREIGN KEY'
+                                        '(psm_id) REFERENCES '
+                                        'psms(psm_id)', ],
+                        'protein_group_master': ['master TEXT PRIMARY KEY NOT NULL'],
+                        'protein_group_content': ['protein_acc TEXT',
+                                                  'master TEXT, FOREIGN KEY'
+                                                  '(master) REFERENCES '
+                                                  'protein_group_master'
+                                                  '(master)'
+                                                  ],
+                        'psm_protein_groups': ['psm_id TEXT',
+                                               'master TEXT, FOREIGN KEY'
+                                               '(master) REFERENCES '
+                                               'protein_group_master(master)']
                         }, foreign_keys=True)
 
     def store_peptides_proteins(self, ppmap):
         def generate_proteins(pepprots):
-            for psm_id, pepvals in pepprots.items():
-                for protein in pepvals['proteins']:
-                    yield protein, pepvals['seq'], pepvals['score'], psm_id
-        peptides = ((k, v['scan_nr'], v['specfn']) for k, v in ppmap.items())
+            for psm_id, psmvals in pepprots.items():
+                for protein in psmvals['proteins']:
+                    yield protein, psm_id
+        psms = ((k, v['seq'], v['score']) for k, v in ppmap.items())
         self.cursor.executemany(
-            'INSERT INTO peptides(psm_id, scan_nr, spectra_file)'
-            ' VALUES(?, ?, ?)', peptides)
+            'INSERT INTO psms(psm_id, sequence, score)'
+            ' VALUES(?, ?, ?)', psms)
         self.cursor.executemany(
-            'INSERT INTO protein_peptide(protein_acc, sequence, score, psm_id)'
-            ' VALUES (?, ?, ?, ?)', generate_proteins(ppmap))
+            'INSERT INTO protein_psm(protein_acc, psm_id)'
+            ' VALUES (?, ?)', generate_proteins(ppmap))
         self.conn.commit()
 
     def index(self):
-        self.index_column('scan_index', 'peptides', 'spectra_file, scan_nr')
+        return
         self.index_column('pepid_index', 'peptides', 'psm_id')
 
     def get_proteins_for_peptide(self, psm_id):
