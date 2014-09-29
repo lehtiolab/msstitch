@@ -115,42 +115,6 @@ class QuantDB(DatabaseConnection):
 
 class ProteinGroupDB(DatabaseConnection):
     def create_pgdb(self):
-        self.create_db({'protein_group_master': ['master TEXT'],
-                        'protein_group_content': ['protein_acc TEXT',
-                                                  'master TEXT, FOREIGN KEY'
-                                                  '(master) REFERENCES '
-                                                  'protein_group_master'
-                                                  '(master)'
-                                                  ],
-                        'psm_protein_groups': ['psm_id TEXT',
-                                               'master TEXT, FOREIGN KEY'
-                                               '(master) REFERENCES '
-                                               'protein_group_master(master)']
-                        }, foreign_keys=True)
-
-    def insert_protein_groups(self, pgroup):
-        self.cursor.execute
-
-    def store_masters(self, allmasters, psms):
-        print('Storing {0} masters for {1} PSMs'.format(len(allmasters), len(psms)))
-        allmasters = ((x,) for x in allmasters)
-        self.cursor.executemany(
-            'INSERT INTO protein_group_master(master) VALUES(?)',
-            allmasters)
-        self.cursor.executemany(
-            'INSERT INTO psm_protein_groups(psm_id, master) '
-            'VALUES(?, ?)', psms)
-
-    def get_all_masters(self):
-        self.get_sql_select(['master'], 'protein_group_master')
-        return self.cursor.execute(sql).fetchall()
-
-    def index_psm_groups(self):
-        pass
-
-
-class ProteinGroupDB(DatabaseConnection):
-    def create_ppdb(self):
         self.create_db({'psms': ['psm_id INTEGER PRIMARY KEY NOT NULL',
                                  'sequence TEXT', 
                                  'score TEXT'],
@@ -186,20 +150,34 @@ class ProteinGroupDB(DatabaseConnection):
             ' VALUES (?, ?)', generate_proteins(ppmap))
         self.conn.commit()
 
-    def index(self):
-        return
-        self.index_column('pepid_index', 'peptides', 'psm_id')
+    def index_protein_peptides(self):
+        self.index_column('protein_index', 'protein_psm', 'protein_acc')
+
+    def store_masters(self, allmasters, psms):
+        print('Storing {0} masters for {1} PSMs'.format(len(allmasters), len(psms)))
+        allmasters = ((x,) for x in allmasters)
+        self.cursor.executemany(
+            'INSERT INTO protein_group_master(master) VALUES(?)',
+            allmasters)
+        self.cursor.executemany(
+            'INSERT INTO psm_protein_groups(psm_id, master) '
+            'VALUES(?, ?)', psms)
+        self.conn.commit()
+
+    def get_all_masters(self):
+        sql = self.get_sql_select(['master'], 'protein_group_master')
+        return self.cursor.execute(sql).fetchall()
 
     def get_proteins_for_peptide(self, psm_id):
         """Returns list of proteins for a passed psm_id"""
-        protsql = self.get_sql_select(['protein_acc'], 'protein_peptide')
+        protsql = self.get_sql_select(['protein_acc'], 'protein_psm')
         protsql = '{0} WHERE psm_id=?'.format(protsql)
         proteins = self.cursor.execute(protsql, psm_id).fetchall()
         return [x[0] for x in proteins]
 
     def get_protpepmap_from_proteins(self, proteins):
         pepsql = self.get_sql_select(['protein_acc', 'psm_id'],
-                                     'protein_peptide',
+                                     'protein_psm',
                                      distinct=True)
         pepsql = '{0} WHERE protein_acc {1}'.format(
             pepsql, self.get_inclause(proteins))
@@ -226,7 +204,7 @@ class ProteinGroupDB(DatabaseConnection):
         """
         protsql = self.get_sql_select(['protein_acc', 'sequence',
                                        'score', 'psm_id'],
-                                      'protein_peptide')
+                                       'protein_psm')
         protsql = '{0} WHERE psm_id {1}'.format(
             protsql, self.get_inclause(peptides))
         proteins_peptides = self.cursor.execute(protsql, peptides).fetchall()
@@ -245,7 +223,7 @@ class ProteinGroupDB(DatabaseConnection):
         """Returns proteins of passed list that have peptides not in
         peptide list.
         """
-        not_in_sql = self.get_sql_select(['protein_acc'], 'protein_peptide',
+        not_in_sql = self.get_sql_select(['protein_acc'], 'protein_psm',
                                          distinct=True)
         not_in_sql = '{0} WHERE protein_acc {1} AND psm_id NOT {2}'.format(
             not_in_sql,

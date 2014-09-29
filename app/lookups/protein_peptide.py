@@ -12,8 +12,8 @@ def create_protein_pep_lookup(fn, header, confkey, conflvl, lower_is_better,
     """Reads PSMs from file, extracts their proteins and peptides and passes
     them to a database backend in chunked PSMs.
     """
-    ppdb = ProteinGroupDB()
-    ppdb.create_ppdb()
+    pgdb = ProteinGroupDB()
+    pgdb.create_pgdb()
     rownr, last_id, peptides_proteins = 0, None, {}
     for psm in tsvreader.generate_tsv_psms(fn, header):
         if not conffilt.passes_filter(psm, conflvl, confkey, lower_is_better):
@@ -22,7 +22,7 @@ def create_protein_pep_lookup(fn, header, confkey, conflvl, lower_is_better,
         specfn, scan, psm_id, seq, score, prots = tsvreader.get_pepproteins(
             psm, unroll)
         if rownr % DB_STORE_CHUNK == 0 and psm_id != last_id:
-            ppdb.store_peptides_proteins(peptides_proteins)
+            pgdb.store_peptides_proteins(peptides_proteins)
             peptides_proteins = {}
         try:
             peptides_proteins[rownr]['proteins'].extend(prots)
@@ -32,6 +32,6 @@ def create_protein_pep_lookup(fn, header, confkey, conflvl, lower_is_better,
                                         'score': score}
         last_id = psm_id
         rownr += 1
-    ppdb.store_peptides_proteins(peptides_proteins)
-    ppdb.index()
-    return ppdb.fn
+    pgdb.store_peptides_proteins(peptides_proteins)
+    pgdb.index_protein_peptides()
+    return pgdb

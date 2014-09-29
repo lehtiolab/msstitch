@@ -15,14 +15,11 @@ def get_header_with_proteingroups(header):
     return header[:ix] + mzidtsvdata.HEADER_PG + header[ix:]
 
 
-def generate_psms_with_proteingroups(fn, oldheader, ppdbfn, confkey, conflvl,
+def generate_psms_with_proteingroups(fn, oldheader, pgdb, confkey, conflvl,
                                      lower_is_better, unroll=False):
-    ppdb = lookups.ProteinPeptideDB(ppdbfn)
-    pgdb = lookups.ProteinGroupDB()
-    pgdb.create_pgdb()
-
-    build_master_db(fn, oldheader, ppdb, confkey, conflvl, lower_is_better,
+    build_master_db(fn, oldheader, pgdb, confkey, conflvl, lower_is_better,
                     unroll)
+    build_content_db(pgdb) 
     ####
     newheader = [mzidtsvdata.HEADER_MASTER_PROT, mzidtsvdata.HEADER_PG_CONTENT,
                  mzidtsvdata.HEADER_PG_AMOUNT_PROTEIN_HITS]
