@@ -127,7 +127,7 @@ class ProteinGroupDB(DatabaseConnection):
                                                   'master TEXT',
                                                   'peptide_count INTEGER',
                                                   'psm_count INTEGER',
-                                                  'protein_score REAL',
+                                                  'protein_score INTEGER',
                                                   'FOREIGN KEY(master) REFERENCES '
                                                   'protein_group_master(master)'
                                                   ],
