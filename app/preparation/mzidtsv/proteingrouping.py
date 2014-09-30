@@ -71,11 +71,11 @@ def build_content_db(pgdb):
         
 
 def get_protein_group_content(master, pgdb):
-    """Returns graph as a dict:
-        {protein: {peptide1: [(psm_id, score), (psm_id, score)],}}
-        This methods calls the db 3 times to get protein groups of the
-        proteins passed.
-        # TODO See if there is a faster implementation.
+    """For each master protein, we generate the protein group proteins
+    complete with sequences, psm_ids and scores.
+    
+    Returns a list of [protein, master, pep_hits, psm_hits, protein_score],
+    which is ready to enter the DB table.
     """
     psms = pgdb.get_peptides_from_protein(master)
     protein_group_plus = pgdb.get_proteins_peptides_from_psms(psms)
