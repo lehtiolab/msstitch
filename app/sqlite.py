@@ -211,6 +211,14 @@ class ProteinGroupDB(DatabaseConnection):
         protsql = '{0} WHERE psm_id {1}'.format(
             protsql, self.get_inclause(psms))
         return [x[0] for x in self.cursor.execute(protsql, psms).fetchall()]
+    
+    def get_all_psms_proteingroups(self):
+        sql = ('SELECT p.psm_id, ppg.master, pgc.protein_acc, pgc.peptide_count, '
+               'pgc.psm_count, pgc.protein_score '
+               'FROM psm_protein_groups AS ppg '
+               'JOIN psms AS p USING(psm_id) '
+               'JOIN protein_group_content AS pgc USING(master)')
+        return self.cursor.execute(sql)
 
     def get_proteins_peptides_from_peptides(self, peptides):
         """Returns dict of proteins and lists of corresponding peptides
