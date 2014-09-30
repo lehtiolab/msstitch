@@ -116,14 +116,6 @@ def get_masters(ppgraph):
     return masters
 
 
-def count_protein_group_hits(proteins, pgcontents):
-    proteins = set(proteins)
-    hit_counts = []
-    for pgroup in pgcontents:
-        hit_counts.append(str(len(proteins.intersection(pgroup))))
-    return ';'.join(hit_counts)
-
-
 def group_proteins(proteins, pgdb):
     """Generates protein groups per PSM. First calls get_slave_proteins to
     determine which of a graph is the master protein. Then calls a sorting
@@ -146,17 +138,17 @@ def group_proteins(proteins, pgdb):
     return protein_groups
 
 
-def sort_proteingroup(sortfunctions, sortfunc_index, pgroup, ppgraph):
+def sort_protein_group(pgroup, sortfunctions, sortfunc_index):
     """Recursive function that sorts protein group by a number of sorting
     functions."""
     pgroup_out = []
-    subgroups = sortfunctions[sortfunc_index](pgroup, ppgraph)
+    subgroups = sortfunctions[sortfunc_index](pgroup)
     sortfunc_index += 1
     for subgroup in subgroups:
         if len(subgroup) > 1 and sortfunc_index < len(sortfunctions):
-            pgroup_out.extend(sort_proteingroup(sortfunctions,
-                                                sortfunc_index,
-                                                subgroup, ppgraph))
+            pgroup_out.extend(sort_protein_group(subgroup,
+                                                sortfunctions,
+                                                sortfunc_index))
         else:
             pgroup_out.extend(subgroup)
     return pgroup_out
@@ -166,63 +158,33 @@ def get_all_proteins_from_unrolled_psm(psm, pgdb):
     return pgdb.get_proteins_for_peptide([psm_id])
 
 
-def sort_pgroup_peptides(proteins, ppgraph):
-    return sort_evaluator(sort_amounts(proteins, ppgraph))
+def sort_pgroup_peptides(proteins):
+    return sort_amounts(proteins, 3)
 
 
-def sort_pgroup_psms(proteins, ppgraph):
-    return sort_evaluator(sort_amounts(proteins, ppgraph, innerlookup=True))
+def sort_pgroup_psms(proteins):
+    return sort_amounts(proteins, 4)
 
 
-def sort_amounts(proteins, ppgraph, innerlookup=False):
+def sort_amounts(proteins, sort_index):
     """Generic function for sorting peptides and psms"""
     amounts = {}
     for protein in proteins:
-        if not innerlookup:
-            amount_x_for_protein = len(ppgraph[protein])
-        else:
-            amount_x_for_protein = len([x for y in ppgraph[protein].values()
-                                        for x in y])
+        amount_x_for_protein = protein[sort_index]
         try:
             amounts[amount_x_for_protein].append(protein)
         except KeyError:
             amounts[amount_x_for_protein] = [protein]
-    return amounts
+    return [v for k, v in sorted(amounts.items(), reverse=True)]
 
 
-def sort_pgroup_score(proteins, ppgraph):
-    scores = {}
-    for protein in proteins:
-        protein_score = sum([int(x[1]) for y in ppgraph[protein].values()
-                             for x in y])
-        try:
-            scores[protein_score].append(protein)
-        except KeyError:
-            scores[protein_score] = [protein]
-    return sort_evaluator(scores)
+def sort_pgroup_score(proteins):
+    return sort_amounts(proteins, 5)
 
 
-def sort_evaluator(sort_dict):
-    return [v for k, v in sorted(sort_dict.items(), reverse=True)]
-
-
-def sort_pgroup_coverage(proteins, ppgraph):
+def sort_pgroup_coverage(proteins):
     return [proteins]
 
 
-def sort_alphabet(proteins, ppgraph):
-    return [sorted(proteins)]
-# FIXME sequence coverage, we need database for that
-
-
-def get_slave_proteins(protein, graph):
-    # FIXME ties? other problems?
-    slave_proteins = []
-    for subprotein, peps in graph.items():
-        if subprotein == protein:
-            continue
-        elif set(graph[protein]).issubset(peps):
-            return False
-        elif set(peps).issubset(graph[protein]):
-            slave_proteins.append(subprotein)
-    return slave_proteins
+def sort_alphabet(proteins):
+    return [sorted(proteins, key=lambda x: x[2])]
