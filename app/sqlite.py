@@ -220,26 +220,16 @@ class ProteinGroupDB(DatabaseConnection):
                'JOIN protein_group_content AS pgc USING(master)')
         return self.cursor.execute(sql)
 
-    def get_proteins_peptides_from_peptides(self, peptides):
+    
+    def get_proteins_peptides_from_psms(self, psms):
         """Returns dict of proteins and lists of corresponding peptides
         from db. DB call gets all rows where psm_id is in peptides.
         """
-        protsql = self.get_sql_select(['protein_acc', 'sequence',
-                                       'score', 'psm_id'],
-                                       'protein_psm')
-        protsql = '{0} WHERE psm_id {1}'.format(
-            protsql, self.get_inclause(peptides))
-        proteins_peptides = self.cursor.execute(protsql, peptides).fetchall()
-        ppmap = {}
-        for protein, pepseq, score, psm_id in proteins_peptides:
-            try:
-                ppmap[protein][pepseq].append((psm_id, score))
-            except KeyError:
-                try:
-                    ppmap[protein][pepseq] = [(psm_id, score)]
-                except KeyError:
-                    ppmap[protein] = {pepseq: [(psm_id, score)]}
-        return ppmap
+        sql = ('SELECT protein_psm.protein_acc, psms.sequence, psms.score, psm_id '
+               'FROM psms '
+               'JOIN protein_psm USING(psm_id)')
+        sql = '{0} WHERE psm_id {1}'.format(sql, self.get_inclause(psms))
+        return self.cursor.execute(sql, psms).fetchall()
 
     def filter_proteins_with_missing_peptides(self, proteins, peptides):
         """Returns proteins of passed list that have peptides not in
