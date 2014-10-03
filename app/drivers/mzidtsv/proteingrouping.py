@@ -24,6 +24,7 @@ class ProteinGroupDriver(MzidTSVDriver):
         self.header = prep.get_header_with_proteingroups(self.oldheader)
         self.psms = prep.generate_psms_with_proteingroups(self.fn,
                                                           self.oldheader,
+                                                          self.header,
                                                           protgroupdb,
                                                           confkey,
                                                           self.conflvl,

@@ -5,17 +5,17 @@ import app.sqlite as lookups
 from app.preparation.mzidtsv import confidencefilters as conffilt
 
 
-# FIXME slow performance: around 6 min for 80000 psms of kalamari set. Means
-# it will be around 1h for whole set. Which is not great.
-# Maybe we can: hit protein group db for quick check if pg exists
-# How to check multiple pgs? wildcards?
-
 def get_header_with_proteingroups(header):
     ix = header.index(mzidtsvdata.HEADER_PROTEIN) + 1
     return header[:ix] + mzidtsvdata.HEADER_PG + header[ix:]
 
 
-def generate_psms_with_proteingroups(fn, oldheader, pgdb, confkey, conflvl,
+def get_all_proteins_from_unrolled_psm(psm, pgdb):
+    psm_id = tsvreader.get_psm_id_from_line(psm)
+    return pgdb.get_proteins_for_peptide([psm_id])
+
+
+def generate_psms_with_proteingroups(fn, oldheader, newheader, pgdb, confkey, conflvl,
                                      lower_is_better, unroll=False):
     build_master_db(fn, oldheader, pgdb, confkey, conflvl, lower_is_better,
                     unroll)
@@ -72,7 +72,8 @@ def build_content_db(pgdb):
 
 def get_protein_group_content(master, pgdb):
     """For each master protein, we generate the protein group proteins
-    complete with sequences, psm_ids and scores.
+    complete with sequences, psm_ids and scores. Master proteins are included
+    in this group.
     
     Returns a list of [protein, master, pep_hits, psm_hits, protein_score],
     which is ready to enter the DB table.
@@ -104,9 +105,9 @@ def get_masters(ppgraph):
     """From a protein-peptide graph dictionary (keys proteins,
     values peptides), return master proteins aka those which 
     have no proteins whose peptides are supersets of them.
-    If a shared master protein is found, report only the first,
-    we will sort later. In this case, the master reported here 
-    may be temporary."""
+    If shared master proteins are found, report only the first,
+    we will sort the whole proteingroup later anyway. In that
+    case, the master reported here may be temporary."""
     masters = {}
     for protein, peps in ppgraph.items():
         ismaster = True
@@ -172,11 +173,6 @@ def sort_protein_group(pgroup, sortfunctions, sortfunc_index):
             pgroup_out.extend(subgroup)
     return pgroup_out
 
-def get_all_proteins_from_unrolled_psm(psm, pgdb):
-    psm_id = tsvreader.get_psm_id_from_line(psm)
-    return pgdb.get_proteins_for_peptide([psm_id])
-
-
 def sort_pgroup_peptides(proteins):
     return sort_amounts(proteins, lookups.PEPTIDE_COUNT_INDEX)
 
@@ -198,7 +194,7 @@ def sort_amounts(proteins, sort_index):
 
 
 def sort_pgroup_score(proteins):
-    return sort_amounts(proteins, 5)
+    return sort_amounts(proteins, lookups.PROTEIN_SCORE_INDEX)
 
 
 def sort_pgroup_coverage(proteins):
