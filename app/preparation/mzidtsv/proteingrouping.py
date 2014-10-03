@@ -151,10 +151,8 @@ def count_protein_group_hits(lineproteins, groups):
     are found in lineproteins. Returns list of str amounts.
     """
     hits = []
-    print('all groups:', groups)
     for group in groups:
         hits.append(0)
-        print('line', lineproteins)
         for protein in lineproteins:
             if protein in group:
                 hits[-1] += 1
