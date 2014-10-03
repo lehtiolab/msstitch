@@ -12,6 +12,7 @@ class TestGetPeptideProteins(unittest.TestCase):
         self.line = {'f{0}'.format(x): 0 for x in range(30)}
         self.line[mzidtsvdata.HEADER_SPECFILE] = self.specfn
         self.line[mzidtsvdata.HEADER_SCANNR] = self.scannr
+        self.line[mzidtsvdata.HEADER_MSGFSCORE] = 123
 
     def do_asserts(self, line, unroll, proteins):
         exp_pepid = md5('{0}{1}'.format(self.specfn, self.scannr)

@@ -170,11 +170,11 @@ def get_all_proteins_from_unrolled_psm(psm, pgdb):
 
 
 def sort_pgroup_peptides(proteins):
-    return sort_amounts(proteins, 3)
+    return sort_amounts(proteins, lookups.PEPTIDE_COUNT_INDEX)
 
 
 def sort_pgroup_psms(proteins):
-    return sort_amounts(proteins, 4)
+    return sort_amounts(proteins, lookups.PSM_COUNT_INDEX)
 
 
 def sort_amounts(proteins, sort_index):

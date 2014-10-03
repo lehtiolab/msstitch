@@ -113,6 +113,12 @@ class QuantDB(DatabaseConnection):
         return self.cursor.fetchall()
 
 
+MASTER_INDEX = 1
+PROTEIN_ACC_INDEX = 2
+PEPTIDE_COUNT_INDEX = 3
+PSM_COUNT_INDEX = 4
+PROTEIN_SCORE_INDEX = 5
+
 class ProteinGroupDB(DatabaseConnection):
     def create_pgdb(self):
         self.create_db({'psms': ['psm_id INTEGER PRIMARY KEY NOT NULL',
