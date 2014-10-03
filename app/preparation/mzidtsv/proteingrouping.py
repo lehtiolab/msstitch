@@ -83,7 +83,7 @@ def get_protein_group_content(master, pgdb):
         [x[0] for x in protein_group_plus], psms)
     pgmap = {}
     for protein, pepseq, score, psm_id in protein_group_plus:
-        if protein == master or protein in proteins_not_in_group:
+        if protein in proteins_not_in_group:
             continue
         score = int(score)  # MZIDSCORE is INTEGER
         try:
@@ -101,18 +101,29 @@ def get_protein_group_content(master, pgdb):
      
 
 def get_masters(ppgraph):
-    masters = []
+    """From a protein-peptide graph dictionary (keys proteins,
+    values peptides), return master proteins aka those which 
+    have no proteins whose peptides are supersets of them.
+    If a shared master protein is found, report only the first,
+    we will sort later. In this case, the master reported here 
+    may be temporary."""
+    masters = {}
     for protein, peps in ppgraph.items():
         ismaster = True
         peps = set(peps)
+        multimaster = set()
         for subprotein, subpeps in ppgraph.items():
             if protein == subprotein:
                 continue
-            if peps.issubset(subpeps):
+            if peps.issubset(subpeps) and peps.union(subpeps) > peps:
                 ismaster = False
                 break
-        if ismaster:
-            masters.append(protein)
+            elif peps.issubset(subpeps) and peps.intersection(subpeps) == peps:
+                multimaster.update({protein, subprotein})
+        if ismaster and not multimaster:
+            masters[protein] = 1
+        elif ismaster and multimaster:
+            masters[sorted(list(multimaster))[0]] = 1
     return masters
 
 
