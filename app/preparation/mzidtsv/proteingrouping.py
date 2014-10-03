@@ -127,26 +127,34 @@ def get_masters(ppgraph):
     return masters
 
 
-def group_proteins(proteins, pgdb):
-    """Generates protein groups per PSM. First calls get_slave_proteins to
-    determine which of a graph is the master protein. Then calls a sorting
-    function to sort the rest of the group."""
+def count_protein_group_hits(lineproteins, groups):
+    """Takes a list of protein accessions and a list of protein groups
+    content from DB. Counts for each group in list how many proteins
+    are found in lineproteins. Returns list of str amounts.
+    """
+    hits = []
+    print('all groups:', groups)
+    for group in groups:
+        hits.append(0)
+        print('line', lineproteins)
+        for protein in lineproteins:
+            if protein in group:
+                hits[-1] += 1
+    return [str(x) for x in hits]
+
+
+def sort_protein_groups(pgroups):
     sortfnxs = [sort_pgroup_peptides,
                 sort_pgroup_psms,
                 sort_pgroup_score,
                 sort_pgroup_coverage,
                 sort_alphabet,
                 ]
-    pp_graph = get_protpep_graph(proteins, pgdb)
-    protein_groups = {}
-    for protein in pp_graph:
-        slaves = get_slave_proteins(protein, pp_graph)
-        if slaves is not False:
-            protein_groups[protein] = slaves
-    for protein, pgroup in protein_groups.items():
-        protein_groups[protein] = sort_proteingroup(sortfnxs, 0,
-                                                    pgroup, pp_graph)
-    return protein_groups
+    pgroups_out = {}
+    for pgroup in pgroups.values():
+        sorted_pgroup = sort_protein_group(pgroup, sortfnxs, 0)
+        pgroups_out[sorted_pgroup[0][lookups.MASTER_INDEX]] = sorted_pgroup
+    return pgroups_out
 
 
 def sort_protein_group(pgroup, sortfunctions, sortfunc_index):
