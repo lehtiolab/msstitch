@@ -217,6 +217,11 @@ def sort_pgroup_score(proteins):
 def sort_pgroup_coverage(proteins):
     return [proteins]
 
+def sort_evidence_score(proteins):
+    return [proteins]
+
+def sort_coin_toss(proteins):
+    return [proteins]
 
 def sort_alphabet(proteins):
     return [sorted(proteins, key=lambda x: x[2])]
