@@ -20,24 +20,41 @@ def generate_psms_with_proteingroups(fn, oldheader, newheader, pgdb, confkey, co
     build_master_db(fn, oldheader, pgdb, confkey, conflvl, lower_is_better,
                     unroll)
     build_content_db(pgdb) 
-    ####
-    newheader = [mzidtsvdata.HEADER_MASTER_PROT, mzidtsvdata.HEADER_PG_CONTENT,
-                 mzidtsvdata.HEADER_PG_AMOUNT_PROTEIN_HITS]
-    for i in range(10):
-        yield {x: 'speedtest' for x in oldheader + newheader}
-    #for line in tsvreader.generate_tsv_psms(fn, oldheader):
-    #    pgcontents = [[master] + x for master, x in zip(pgroups.keys(),
-    #                                                    pgroups.values())]
-    #    psm = {mzidtsvdata.HEADER_MASTER_PROT: ';'.join(pgroups.keys()),
-    #           mzidtsvdata.HEADER_PG_CONTENT: ';'.join(
-    #               [','.join([str(y) for y in x]) for x in pgcontents]),
-    #           mzidtsvdata.HEADER_PG_AMOUNT_PROTEIN_HITS:
-    #           count_protein_group_hits(
-    #               lineproteins,
-    #               pgcontents),
-    #           }
-    #    psm.update({head: line[head] for head in oldheader})
-    #    yield psm
+    rownr = 0
+    all_protein_group_content = pgdb.get_all_psms_proteingroups()
+    protein = next(all_protein_group_content)
+    for psm in tsvreader.generate_tsv_psms(fn, oldheader):
+        #if rownr % 10000 == 0 and rownr != 0:
+        #    break
+        if not conffilt.passes_filter(psm, conflvl, confkey, lower_is_better):
+            rownr += 1
+            continue
+        if unroll:
+            lineproteins = get_all_proteins_from_unrolled_psm(psm, pgdb)
+        else:
+            lineproteins = tsvreader.get_proteins_from_psm(psm)
+        proteins_in_groups = {}
+        while protein[0] == rownr:
+            try:
+                proteins_in_groups[protein[lookups.MASTER_INDEX]].append(protein)
+            except KeyError:
+                proteins_in_groups[protein[lookups.MASTER_INDEX]] = [protein]
+            protein = next(all_protein_group_content)
+        sorted_pgs = sort_protein_groups(proteins_in_groups)
+	
+        psm_masters = []
+        psm_pg_proteins = []
+        for master, group in sorted_pgs.items():
+            psm_masters.append(master)
+            psm_pg_proteins.append([protein[lookups.PROTEIN_ACC_INDEX] for protein in group])
+        outpsm = {mzidtsvdata.HEADER_MASTER_PROT: ';'.join(psm_masters),
+                  mzidtsvdata.HEADER_PG_CONTENT: ';'.join(
+                  [','.join([y for y in x]) for x in psm_pg_proteins]),
+                  mzidtsvdata.HEADER_PG_AMOUNT_PROTEIN_HITS: ';'.join(count_protein_group_hits(lineproteins, psm_pg_proteins))
+                  }
+        outpsm.update(psm)
+        rownr += 1
+        yield outpsm
 
 
 def build_master_db(fn, oldheader, pgdb, confkey, conflvl, lower_is_better,
