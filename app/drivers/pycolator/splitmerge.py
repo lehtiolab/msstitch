@@ -47,6 +47,5 @@ class MergeDriver(base.PycolatorDriver):
         """"Merge all psms and peptides"""
         allpsms_str = readers.generate_psms_multiple_fractions_strings(
             self.mergefiles, self.ns)
-        allpeps_str = readers.generate_peptides_multiple_fractions_strings(
-            self.mergefiles, self.ns)
-        self.features = {'psm': allpsms_str, 'peptide': allpeps_str}
+        allpeps = preparation.merge_peptides(self.mergefiles, self.ns)
+        self.features = {'psm': allpsms_str, 'peptide': allpeps}

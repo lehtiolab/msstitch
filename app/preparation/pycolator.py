@@ -1,6 +1,8 @@
 import re
+from lxml import etree
 from app import formatting
 from app import sqlite
+from app.readers import pycolator as reader
 
 
 def get_either_seq(seqtype, element, ns):
@@ -117,3 +119,39 @@ def filter_unique_peptides(peptides, score, ns):
 
     for pep in list(highest.values()):
         yield pep['pep_el']
+
+
+def merge_peptides(fns, ns):
+    """Loops peptides from multiple files, fetches PSMs from
+    sequence:PSM map, outputs correctly PSM mapped peptides"""
+    peptides_to_map = reader.generate_peptides_multiple_fractions(fns, ns)
+    psmmap = create_merge_psm_map(peptides_to_map, ns)
+    peptides = reader.generate_peptides_multiple_fractions(fns, ns)
+    for peptide in peptides:
+        seq = get_peptide_seq(peptide, ns)
+        psm_ids = get_psm_ids_from_peptide(peptide, ns)
+        # remove current psm ids, repopulate with stored ones
+        psm_ids.clear()
+        for new_psm_id in psmmap[seq]:
+            etree.SubElement(psm_ids, 'psm_id').text = new_psm_id
+        yield formatting.string_and_clear(peptide, ns)
+
+
+def create_merge_psm_map(peptides, ns):
+    """Loops through peptides, stores sequences mapped to PSM ids."""
+    psmmap = {}
+    for peptide in peptides:
+        seq = get_peptide_seq(peptide, ns)
+        psm_ids = get_psm_ids_from_peptide(peptide, ns)
+        for psm_id in psm_ids:
+            try:
+                psmmap[seq][psm_id.text] = 1
+            except KeyError:
+                psmmap[seq] = {psm_id.text: 2}
+    for seq, psm_id_dict in psmmap.items():
+        psmmap[seq] = [x for x in psm_id_dict]
+    return psmmap
+
+
+def get_psm_ids_from_peptide(peptide, ns):
+    return peptide.xpath('xmlns:psm_ids', namespace=ns)
