@@ -154,4 +154,4 @@ def create_merge_psm_map(peptides, ns):
 
 
 def get_psm_ids_from_peptide(peptide, ns):
-    return peptide.xpath('xmlns:psm_ids', namespace=ns)
+    return peptide.xpath('xmlns:psm_ids', namespaces=ns)[0]

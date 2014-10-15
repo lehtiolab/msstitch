@@ -73,5 +73,5 @@ def get_header_with_percolator(oldheader, multipsm=False):
     if multipsm is True:
         # FIXME should this be here???
         percoheader.append('rank')
-    ix = oldheader.index(mzidtsvdata.HEADER_PEPQVAL) + 1
+    ix = oldheader.index(mzidtsvdata.HEADER_EVALUE) + 1
     return oldheader[:ix] + percoheader + oldheader[ix:]
