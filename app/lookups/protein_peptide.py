@@ -14,24 +14,32 @@ def create_protein_pep_lookup(fn, header, confkey, conflvl, lower_is_better,
     """
     pgdb = ProteinGroupDB()
     pgdb.create_pgdb()
-    rownr, last_rownr, peptides_proteins = 0, None, {}
+    rownr, last_id, peptides_proteins = 0, None, {}
+    store_soon = False
     for psm in tsvreader.generate_tsv_psms(fn, header):
         if not conffilt.passes_filter(psm, conflvl, confkey, lower_is_better):
             rownr += 1
             continue
         specfn, scan, seq, score, prots = tsvreader.get_pepproteins(
             psm, unroll)
-        if rownr % DB_STORE_CHUNK == 0 and rownr != last_rownr:
+        psm_id = '{0}_{1}'.format(specfn, scan)
+        if peptides_proteins and len(peptides_proteins) % DB_STORE_CHUNK == 0:
+            store_soon = True
+        if store_soon and last_id != psm_id:
             pgdb.store_peptides_proteins(peptides_proteins)
+            store_soon = False
             peptides_proteins = {}
         try:
-            peptides_proteins[rownr]['proteins'].extend(prots)
+            peptides_proteins[psm_id]['proteins'].extend(prots)
+            peptides_proteins[psm_id]['rows'].append(rownr)
         except KeyError:
-            peptides_proteins[rownr] = {'seq': seq, 
+            peptides_proteins[psm_id] = {
+                                        'rows': [rownr],                                       
+                                        'seq': seq, 
                                         'proteins': prots,
                                         'score': score,
                                         }
-        last_rownr = rownr
+        last_id = psm_id
         rownr += 1
     pgdb.store_peptides_proteins(peptides_proteins)
     pgdb.index_protein_peptides()
