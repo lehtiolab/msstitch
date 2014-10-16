@@ -15,13 +15,15 @@ def get_all_proteins_from_unrolled_psm(psm, pgdb):
     return pgdb.get_proteins_for_peptide([psm_id])
 
 
-def generate_psms_with_proteingroups(fn, oldheader, newheader, pgdb, confkey, conflvl,
-                                     lower_is_better, unroll=False):
+def generate_psms_with_proteingroups(fn, oldheader, newheader, pgdb, confkey,
+                                     conflvl, lower_is_better, unroll=False,
+                                     coverage=False, evidence_levels=False):
     build_master_db(fn, oldheader, pgdb, confkey, conflvl, lower_is_better,
                     unroll)
-    build_content_db(pgdb) 
+    build_content_db(pgdb)
     rownr = 0
-    all_protein_group_content = pgdb.get_all_psms_proteingroups()
+    all_protein_group_content = pgdb.get_all_psms_proteingroups(
+        coverage, evidence_levels)
     protein = next(all_protein_group_content)
     for psm in tsvreader.generate_tsv_psms(fn, oldheader):
         #if rownr % 10000 == 0 and rownr != 0:

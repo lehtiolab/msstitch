@@ -8,7 +8,7 @@ from app.preparation.mzidtsv import confidencefilters as conffilt
 
 
 def create_protein_pep_lookup(fn, header, confkey, conflvl, lower_is_better,
-                              unroll=False):
+                              unroll=False, fastafn=None, evidence_lvl=False):
     """Reads PSMs from file, extracts their proteins and peptides and passes
     them to a database backend in chunked PSMs.
     """
