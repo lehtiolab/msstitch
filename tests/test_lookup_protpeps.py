@@ -1,5 +1,4 @@
 import unittest
-from hashlib import md5
 from unittest.mock import Mock, patch
 from app.lookups import protein_peptide as lookup
 
@@ -15,6 +14,7 @@ class TestCreateLookup(unittest.TestCase):
         self.specfn = 'testfn'
         self.pepprots = {'IAMAPEPTIDE': ['ENS1234', 'ENS5678'],
                          'TRYIDENTIFYME': ['ENS9101112']}
+        self.score = 1234
 
     def test_calls_sqlite(self):
         with patch('app.lookups.protein_peptide.sqlite.ProteinPeptideDB', self.mockdb), patch('app.lookups.protein_peptide.tsvreader.generate_tsv_psms', return_value=[]):
@@ -26,13 +26,13 @@ class TestCreateLookup(unittest.TestCase):
 
 class TestCreateLookupLineParsing(TestCreateLookup):
     def pepprot_generator(self, line, *args):
-        return self.specfn, line['scannr'], line['pepid'], line['seq'], line['proteins']
+        return self.specfn, line['scannr'], line['seq'], line['score'], line['proteins']
 
     def get_lines_and_expected(self, unroll):
-        def get_line(scannr, pepseq, protein, pepid):
-            line = {'pepid': pepid,
-                    'scannr': scannr,
+        def get_line(scannr, pepseq, protein):
+            line = {'scannr': scannr,
                     'seq': pepseq,
+                    'score': self.score,
                    }
             if type(protein) is str:
                  line['proteins'] = [protein]
@@ -43,16 +43,17 @@ class TestCreateLookupLineParsing(TestCreateLookup):
         lines = []
         expected = {}
         scannr = 1234
+        rownr = 0
         for pepseq, proteins in self.pepprots.items():
-            pepid = md5('{0}{1}'.format(self.specfn, scannr)
-                        .encode('utf-8')).hexdigest()
             if unroll:
                 for protein in proteins:
-                    lines.append(get_line(scannr, pepseq, protein, pepid))
+                    lines.append(get_line(scannr, pepseq, protein))
             else:
-                lines.append(get_line(scannr, pepseq, proteins, pepid))
-            expected[pepid] = {'scan_nr': scannr, 'specfn': self.specfn,
-                               'seq': pepseq, 'proteins': proteins}
+                lines.append(get_line(scannr, pepseq, proteins))
+            expected[rownr] = {
+                               'seq': pepseq, 'proteins': proteins,
+                               'score': self.score}
+            rownr += 1
             scannr += 1
         return lines, [expected]
 
@@ -64,9 +65,10 @@ class TestCreateLookupLineParsing(TestCreateLookup):
             'app.lookups.protein_peptide.DB_STORE_CHUNK', chunk_size), patch(
                 'app.lookups.protein_peptide.tsvreader.'
                 'get_pepproteins', self.pepprot_generator), patch(
-                'app.lookups.protein_peptide.sqlite.ProteinPeptideDB',
-                self.mockdb), patch('app.lookups.protein_peptide.tsvreader.generate_tsv_psms', return_value=lines):
-            lookup.create_protein_pep_lookup('nofn', unroll)
+                'app.lookups.protein_peptide.ProteinGroupDB',
+                self.mockdb), patch('app.lookups.protein_peptide.tsvreader.generate_tsv_psms', 
+                return_value=lines), patch('app.lookups.protein_peptide.conffilt.passes_filter', return_value=True):
+            lookup.create_protein_pep_lookup('nofn', ['header', 'header2'], 1, True, unroll)
         for expected_entry in expected:
             self.mockdb.store_peptides_proteins.assert_any_call(expected_entry)
 

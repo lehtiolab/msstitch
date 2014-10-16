@@ -14,14 +14,14 @@ def create_protein_pep_lookup(fn, header, confkey, conflvl, lower_is_better,
     """
     pgdb = ProteinGroupDB()
     pgdb.create_pgdb()
-    rownr, last_id, peptides_proteins = 0, None, {}
+    rownr, last_rownr, peptides_proteins = 0, None, {}
     for psm in tsvreader.generate_tsv_psms(fn, header):
         if not conffilt.passes_filter(psm, conflvl, confkey, lower_is_better):
             rownr += 1
             continue
-        specfn, scan, psm_id, seq, score, prots = tsvreader.get_pepproteins(
+        specfn, scan, seq, score, prots = tsvreader.get_pepproteins(
             psm, unroll)
-        if rownr % DB_STORE_CHUNK == 0 and psm_id != last_id:
+        if rownr % DB_STORE_CHUNK == 0 and rownr != last_rownr:
             pgdb.store_peptides_proteins(peptides_proteins)
             peptides_proteins = {}
         try:
@@ -29,8 +29,9 @@ def create_protein_pep_lookup(fn, header, confkey, conflvl, lower_is_better,
         except KeyError:
             peptides_proteins[rownr] = {'seq': seq, 
                                         'proteins': prots,
-                                        'score': score}
-        last_id = psm_id
+                                        'score': score,
+                                        }
+        last_rownr = rownr
         rownr += 1
     pgdb.store_peptides_proteins(peptides_proteins)
     pgdb.index_protein_peptides()
