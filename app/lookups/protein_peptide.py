@@ -22,7 +22,7 @@ def create_protein_pep_lookup(fn, header, confkey, conflvl, lower_is_better,
             continue
         specfn, scan, seq, score, prots = tsvreader.get_pepproteins(
             psm, unroll)
-        psm_id = '{0}_{1}'.format(specfn, scan)
+        psm_id = tsvreader.get_psm_id(psm)
         if peptides_proteins and len(peptides_proteins) % DB_STORE_CHUNK == 0:
             store_soon = True
         if store_soon and last_id != psm_id:
@@ -33,12 +33,11 @@ def create_protein_pep_lookup(fn, header, confkey, conflvl, lower_is_better,
             peptides_proteins[psm_id]['proteins'].extend(prots)
             peptides_proteins[psm_id]['rows'].append(rownr)
         except KeyError:
-            peptides_proteins[psm_id] = {
-                                        'rows': [rownr],                                       
-                                        'seq': seq, 
-                                        'proteins': prots,
-                                        'score': score,
-                                        }
+            peptides_proteins[psm_id] = {'rows': [rownr],
+                                         'seq': seq,
+                                         'proteins': prots,
+                                         'score': score,
+                                         }
         last_id = psm_id
         rownr += 1
     pgdb.store_peptides_proteins(peptides_proteins)

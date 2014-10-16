@@ -25,6 +25,11 @@ def generate_tsv_psms_line(fn):
             yield line
 
 
+def get_psm_id(line):
+    return '{0}_{1}'.format(line[mzidtsvdata.HEADER_SPECFILE,
+                                 mzidtsvdata.HEADER_SCANNR])
+
+
 def get_proteins_from_psm(line):
     """From a line, return list of proteins reported by Mzid2TSV. The line
     should not be unrolled."""

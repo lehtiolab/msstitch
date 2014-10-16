@@ -31,7 +31,8 @@ def generate_psms_with_proteingroups(fn, oldheader, newheader, pgdb, confkey,
             rownr += 1
             continue
         if unroll:
-            lineproteins = get_all_proteins_from_unrolled_psm(rownr, pgdb)
+            psm_id = tsvreader.get_psm_id(psm)
+            lineproteins = get_all_proteins_from_unrolled_psm(psm_id, pgdb)
         else:
             lineproteins = tsvreader.get_proteins_from_psm(psm)
         proteins_in_groups = {}
