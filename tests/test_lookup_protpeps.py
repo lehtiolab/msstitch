@@ -1,6 +1,8 @@
 import unittest
 from unittest.mock import Mock, patch
 from app.lookups import protein_peptide as lookup
+import app.dataformats.mzidtsv as mzidtsvdata
+
 
 DB_STORE_CHUNK = lookup.DB_STORE_CHUNK
 
@@ -28,11 +30,12 @@ class TestCreateLookupSqliteCalls(TestCreateLookup):
 
 class TestCreateLookupLineParsing(TestCreateLookup):
     def pepprot_generator(self, line, *args):
-        return self.specfn, line['scannr'], line['seq'], line['score'], line['proteins']
+        return self.specfn, line[mzidtsvdata.HEADER_SCANNR], line['seq'], line['score'], line['proteins']
 
     def get_lines_and_expected(self, unroll):
         def get_line(scannr, pepseq, protein):
-            line = {'scannr': scannr,
+            line = {mzidtsvdata.HEADER_SCANNR: scannr,
+                    mzidtsvdata.HEADER_SPECFILE: self.specfn,
                     'seq': pepseq,
                     'score': self.score,
                    }
