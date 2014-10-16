@@ -124,9 +124,13 @@ COVERAGE_INDEX = 7
 
 class ProteinGroupDB(DatabaseConnection):
     def create_pgdb(self):
-        self.create_db({'psms': ['psm_id INTEGER PRIMARY KEY NOT NULL',
+        self.create_db({'psms': ['psm_id TEXT PRIMARY KEY NOT NULL',
                                  'sequence TEXT',
                                  'score TEXT'],
+                        'psmrows': ['psm_id TEXT',
+                                    'rownr INTEGER',
+                                    'FOREIGN KEY(psm_id) '
+                                    'REFERENCES psms(psm_id)'],
                         'proteins': ['protein_acc TEXT'],
                         'protein_psm': ['protein_acc TEXT',
                                         'psm_id INTEGER',
@@ -174,10 +178,14 @@ class ProteinGroupDB(DatabaseConnection):
                     protein_out = {False: (protein, psm_id),
                                    True: (protein,)}[only_proteins]
                     yield protein_out
-        psms = ((k, v['seq'], v['score']) for k, v in ppmap.items())
+        psms = [(row, x['psm_id'], x['seq'], x['score'])
+                for row, x in ppmap.items()]
         self.cursor.executemany(
             'INSERT INTO psms(psm_id, sequence, score)'
-            ' VALUES(?, ?, ?)', psms)
+            ' VALUES(?, ?, ?)', ((x[1], x[2], x[3]) for x in psms))
+        self.cursor.executemany(
+            'INSERT INTO psmrows(psm_id, rownr) VALUES(?, ?)',
+            ((x[1], x[0]) for x in psms))
         self.cursor.executemany(
             'INSERT INTO proteins(protein_acc) VALUES(?)',
             generate_proteins(ppmap, True))
@@ -248,10 +256,11 @@ class ProteinGroupDB(DatabaseConnection):
             protsql, self.get_inclause(psms))
         return [x[0] for x in self.cursor.execute(protsql, psms).fetchall()]
 
-    def get_all_psms_proteingroups(self, evidence_levels, fasta):
-        fields = ['p.psm_id', 'ppg.master', 'pgc.protein_acc',
+    def get_all_psms_proteingroups(self, fasta, evidence_levels):
+        fields = ['pr.rownr', 'p.psm_id', 'ppg.master', 'pgc.protein_acc',
                   'pgc.peptide_count', 'pgc.psm_count', 'pgc.protein_score']
         joins = [('psms', 'p', 'psm_id'),
+                 ('psmrows', 'pr', 'psm_id'),
                  ('protein_group_content', 'pgc', 'master')]
         if evidence_levels:
             fields.append('pev.evidence_lvl')
