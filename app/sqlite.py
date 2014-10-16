@@ -118,42 +118,69 @@ PROTEIN_ACC_INDEX = 2
 PEPTIDE_COUNT_INDEX = 3
 PSM_COUNT_INDEX = 4
 PROTEIN_SCORE_INDEX = 5
+EVIDENCE_LVL_INDEX = 6
+COVERAGE_INDEX = 7
+
 
 class ProteinGroupDB(DatabaseConnection):
     def create_pgdb(self):
         self.create_db({'psms': ['psm_id INTEGER PRIMARY KEY NOT NULL',
-                                 'sequence TEXT', 
+                                 'sequence TEXT',
                                  'score TEXT'],
+                        'proteins': ['protein_acc TEXT'],
                         'protein_psm': ['protein_acc TEXT',
-                                        'psm_id INTEGER', 
+                                        'psm_id INTEGER',
+                                        'FOREIGN KEY(protein_acc) '
+                                        'REFERENCES proteins(protein_acc)',
                                         'FOREIGN KEY(psm_id) '
                                         'REFERENCES psms(psm_id)'],
-                        'protein_group_master': ['master TEXT PRIMARY KEY NOT NULL'],
+                        'protein_evidence': ['protein_acc TEXT ',
+                                             'evidence_lvl REAL '
+                                             'FOREIGN KEY(protein_acc) '
+                                             'REFERENCES '
+                                             'proteins(protein_acc)'],
+                        'protein_seq': ['protein_acc TEXT ',
+                                        'sequence TEXT '
+                                        'FOREIGN KEY(protein_acc) '
+                                        'REFERENCES '
+                                        'proteins(protein_acc)'],
+                        'protein_group_master': ['master '
+                                                 'TEXT PRIMARY KEY NOT NULL'],
                         'protein_group_content': ['protein_acc TEXT',
                                                   'master TEXT',
                                                   'peptide_count INTEGER',
                                                   'psm_count INTEGER',
                                                   'protein_score INTEGER',
-                                                  'FOREIGN KEY(master) REFERENCES '
-                                                  'protein_group_master(master)'
+                                                  'FOREIGN KEY(protein_acc) '
+                                                  'REFERENCES '
+                                                  'proteins(protein_acc) '
+                                                  'FOREIGN KEY(master) '
+                                                  'REFERENCES '
+                                                  'protein_group_master'
+                                                  '(master)'
                                                   ],
                         'psm_protein_groups': ['psm_id INTEGER',
                                                'master TEXT',
                                                'FOREIGN KEY(psm_id) REFERENCES'
                                                ' psms(psm_id)',
-                                               'FOREIGN KEY(master) REFERENCES '
-                                               'protein_group_master(master)']
+                                               'FOREIGN KEY(master) REFERENCES'
+                                               ' protein_group_master(master)']
                         }, foreign_keys=True)
 
     def store_peptides_proteins(self, ppmap):
-        def generate_proteins(pepprots):
+        def generate_proteins(pepprots, only_proteins=False):
             for psm_id, psmvals in pepprots.items():
                 for protein in psmvals['proteins']:
-                    yield protein, psm_id
+                    protein_out = {False: (protein, psm_id),
+                                   True: (protein,)}[only_proteins]
+                    yield protein_out
         psms = ((k, v['seq'], v['score']) for k, v in ppmap.items())
         self.cursor.executemany(
             'INSERT INTO psms(psm_id, sequence, score)'
             ' VALUES(?, ?, ?)', psms)
+        self.cursor.executemany(
+            'INSERT INTO proteins(protein_acc) VALUES(?)',
+            generate_proteins(ppmap, True))
         self.cursor.executemany(
             'INSERT INTO protein_psm(protein_acc, psm_id)'
             ' VALUES (?, ?)', generate_proteins(ppmap))
@@ -172,9 +199,12 @@ class ProteinGroupDB(DatabaseConnection):
             'INSERT INTO psm_protein_groups(psm_id, master) '
             'VALUES(?, ?)', psms)
         self.conn.commit()
-    
+
     def store_protein_group_content(self, protein_groups):
-        self.cursor.executemany('INSERT INTO protein_group_content(protein_acc, master, peptide_count, psm_count, protein_score) VALUES(?, ?, ?, ?, ?)', protein_groups)
+        self.cursor.executemany('INSERT INTO protein_group_content('
+                                'protein_acc, master, peptide_count, '
+                                'psm_count, protein_score) '
+                                'VALUES(?, ?, ?, ?, ?)', protein_groups)
         self.conn.commit()
 
     def get_all_masters(self):
@@ -212,27 +242,35 @@ class ProteinGroupDB(DatabaseConnection):
         return [x[0] for x in peptides]
 
     def get_proteins_from_psms(self, psms):
-        protsql = self.get_sql_select(['protein_acc'], 
-                                       'protein_psm', distinct=True)
+        protsql = self.get_sql_select(['protein_acc'],
+                                      'protein_psm', distinct=True)
         protsql = '{0} WHERE psm_id {1}'.format(
             protsql, self.get_inclause(psms))
         return [x[0] for x in self.cursor.execute(protsql, psms).fetchall()]
-    
-    def get_all_psms_proteingroups(self):
-        sql = ('SELECT p.psm_id, ppg.master, pgc.protein_acc, pgc.peptide_count, '
-               'pgc.psm_count, pgc.protein_score '
-               'FROM psm_protein_groups AS ppg '
-               'JOIN psms AS p USING(psm_id) '
-               'JOIN protein_group_content AS pgc USING(master)')
+
+    def get_all_psms_proteingroups(self, evidence_levels, fasta):
+        fields = ['p.psm_id', 'ppg.master', 'pgc.protein_acc',
+                  'pgc.peptide_count', 'pgc.psm_count', 'pgc.protein_score']
+        joins = [('psms', 'p', 'psm_id'),
+                 ('protein_group_content', 'pgc', 'master')]
+        if evidence_levels:
+            fields.append('pev.evidence_lvl')
+            joins.append(('protein_evidence', 'pev', 'protein_acc'))
+        if fasta:
+            fields.append('psq.sequence')
+            joins.append(('protein_seq', 'psq', 'protein_acc'))
+        join_sql = '\n'.join(['JOIN {0} AS {1} USING({2})'.format(
+            j[0], j[1], j[2]) for j in joins])
+        sql = 'SELECT {0} FROM psm_protein_groups AS ppg {1}'.format(
+            ', '.join(fields), join_sql)
         return self.cursor.execute(sql)
 
-    
     def get_proteins_peptides_from_psms(self, psms):
         """Returns dict of proteins and lists of corresponding peptides
         from db. DB call gets all rows where psm_id is in peptides.
         """
-        sql = ('SELECT protein_psm.protein_acc, psms.sequence, psms.score, psm_id '
-               'FROM psms '
+        sql = ('SELECT protein_psm.protein_acc, psms.sequence, psms.score, '
+               'psm_id FROM psms '
                'JOIN protein_psm USING(psm_id)')
         sql = '{0} WHERE psm_id {1}'.format(sql, self.get_inclause(psms))
         return self.cursor.execute(sql, psms).fetchall()
