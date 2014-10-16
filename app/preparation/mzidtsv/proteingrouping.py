@@ -10,9 +10,8 @@ def get_header_with_proteingroups(header):
     return header[:ix] + mzidtsvdata.HEADER_PG + header[ix:]
 
 
-def get_all_proteins_from_unrolled_psm(psm, pgdb):
-    psm_id = tsvreader.get_psm_id_from_line(psm)
-    return pgdb.get_proteins_for_peptide([psm_id])
+def get_all_proteins_from_unrolled_psm(rownr, pgdb):
+    return pgdb.get_proteins_for_peptide([rownr])
 
 
 def generate_psms_with_proteingroups(fn, oldheader, newheader, pgdb, confkey,
@@ -32,7 +31,7 @@ def generate_psms_with_proteingroups(fn, oldheader, newheader, pgdb, confkey,
             rownr += 1
             continue
         if unroll:
-            lineproteins = get_all_proteins_from_unrolled_psm(psm, pgdb)
+            lineproteins = get_all_proteins_from_unrolled_psm(rownr, pgdb)
         else:
             lineproteins = tsvreader.get_proteins_from_psm(psm)
         proteins_in_groups = {}
@@ -72,7 +71,7 @@ def build_master_db(fn, oldheader, pgdb, confkey, conflvl, lower_is_better,
             rownr += 1
             continue
         if unroll:
-            lineproteins = get_all_proteins_from_unrolled_psm(line, pgdb)
+            lineproteins = get_all_proteins_from_unrolled_psm(rownr, pgdb)
         else:
             lineproteins = tsvreader.get_proteins_from_psm(line)
         pepprotmap = pgdb.get_protpepmap_from_proteins(lineproteins)

@@ -9,18 +9,20 @@ class TestGetPeptideProteins(unittest.TestCase):
         self.scannr = '1234'
         self.pepseq = 'IAMAPEPTIDE'
         self.proteins = ['ENS12345', 'ENS6789']
+        self.score = 123
         self.line = {'f{0}'.format(x): 0 for x in range(30)}
         self.line[mzidtsvdata.HEADER_SPECFILE] = self.specfn
         self.line[mzidtsvdata.HEADER_SCANNR] = self.scannr
-        self.line[mzidtsvdata.HEADER_MSGFSCORE] = 123
+        self.line[mzidtsvdata.HEADER_MSGFSCORE] = self.score
 
     def do_asserts(self, line, unroll, proteins):
         exp_pepid = md5('{0}{1}'.format(self.specfn, self.scannr)
                         .encode('utf-8')).hexdigest()
-        res_specfn, res_scan, res_pepid, res_pepseq, res_proteins = \
-            reader.get_pepproteins(line, unroll)
+        (res_specfn, res_scan, res_pepid, res_pepseq, res_score, 
+	res_proteins) = reader.get_pepproteins(line, unroll)
         self.assertEqual(exp_pepid, res_pepid)
         self.assertEqual(proteins, res_proteins)
+        self.assertEqual(self.score, res_score)
         self.assertEqual(self.pepseq, res_pepseq)
 
     def test_unroll(self):

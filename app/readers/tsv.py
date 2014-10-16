@@ -1,5 +1,4 @@
 import itertools
-from hashlib import md5
 from app.dataformats import mzidtsv as mzidtsvdata
 
 
@@ -39,28 +38,21 @@ def get_proteins_from_psm(line):
     return outproteins
 
 
-def get_psm_id_from_line(line):
-    return md5('{0}{1}'.format(line[mzidtsvdata.HEADER_SPECFILE],
-                               line[mzidtsvdata.HEADER_SCANNR])
-               .encode('utf-8')).hexdigest()
-
-
 def get_pepproteins(line, unroll=False):
-    """From a line, generate a psm_id (MD5 of specfile and scannr).
-    Returns that id with the peptide sequence and protein accessions.
+    """Returns from a PSM line peptide sequence,
+    and other information about the PSM.
     Return values:
         specfn          -   str
         scan            -   str
-        psm_id          -   str
         peptideseq      -   str
+        score		-   str
         proteins        -   list of str
     """
     specfn = line[mzidtsvdata.HEADER_SPECFILE]
     scan = line[mzidtsvdata.HEADER_SCANNR]
     score = line[mzidtsvdata.HEADER_MSGFSCORE]
-    psm_id = get_psm_id_from_line(line)
     peptideseq = line[mzidtsvdata.HEADER_PEPTIDE]
     if unroll and '.' in peptideseq:
         peptideseq = peptideseq.split('.')[1]
     proteins = get_proteins_from_psm(line)
-    return specfn, scan, psm_id, peptideseq, score, proteins
+    return specfn, scan, peptideseq, score, proteins
