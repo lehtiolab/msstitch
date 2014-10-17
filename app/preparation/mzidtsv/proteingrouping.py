@@ -1,7 +1,9 @@
+from collections import OrderedDict
+
 from app.readers import tsv as tsvreader
 from app.dataformats import mzidtsv as mzidtsvdata
 import app.sqlite as lookups
-import app.preparation.proteingroup_sorters as sorters
+import app.preparation.mzidtsv.proteingroup_sorters as sorters
 from app.preparation.mzidtsv import confidencefilters as conffilt
 
 
@@ -42,9 +44,11 @@ def generate_psms_with_proteingroups(fn, oldheader, newheader, pgdb, confkey,
                     lookups.MASTER_INDEX]].append(protein)
             except KeyError:
                 proteins_in_groups[protein[lookups.MASTER_INDEX]] = [protein]
-            protein = next(all_protein_group_content)
-        sorted_pgs = sorters.sort_protein_groups(proteins_in_groups)
-
+            try:
+                protein = next(all_protein_group_content)
+            except StopIteration:
+                protein = [-1]
+        sorted_pgs = sorters.sort_protein_groups(proteins_in_groups, coverage, evidence_levels)
         psm_masters = []
         psm_pg_proteins = []
         for master, group in sorted_pgs.items():
@@ -64,20 +68,21 @@ def generate_psms_with_proteingroups(fn, oldheader, newheader, pgdb, confkey,
 
 def build_master_db(fn, oldheader, pgdb, confkey, conflvl, lower_is_better,
                     unroll):
-    psm_masters = []
+    psm_masters = OrderedDict()
     allmasters = {}
     rownr = 0
     for line in tsvreader.generate_tsv_psms(fn, oldheader):
         if not conffilt.passes_filter(line, conflvl, confkey, lower_is_better):
             rownr += 1
             continue
+        psm_id = tsvreader.get_psm_id(line)
         if unroll:
-            lineproteins = get_all_proteins_from_unrolled_psm(rownr, pgdb)
+            lineproteins = get_all_proteins_from_unrolled_psm(psm_id, pgdb)
         else:
             lineproteins = tsvreader.get_proteins_from_psm(line)
         pepprotmap = pgdb.get_protpepmap_from_proteins(lineproteins)
         masters = get_masters(pepprotmap)
-        psm_masters.extend([(rownr, x) for x in masters])
+        psm_masters[psm_id] = {x: 1 for x in masters}
         allmasters.update({x: 1 for x in masters})
         rownr += 1
     pgdb.store_masters(allmasters, psm_masters)
