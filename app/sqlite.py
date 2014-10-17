@@ -7,7 +7,7 @@ class DatabaseConnection(object):
     def __init__(self, fn=None, foreign_keys=False):
         self.fn = fn
         if self.fn is not None:
-            self.cursor = self.connect(self.fn)
+            self.connect(self.fn)
 
     def create_db(self, tables, outfn=None, foreign_keys=False):
         """Creates a sqlite db file.
@@ -17,25 +17,29 @@ class DatabaseConnection(object):
             fd, outfn = mkstemp(prefix='msstitcher_tmp_', dir=os.getcwd())
             os.close(fd)
         self.fn = outfn
-        self.cursor = self.connect(outfn, foreign_keys)
+        self.connect(outfn, foreign_keys)
+        cursor = self.get_cursor()
         for table in tables:
             columns = tables[table]
-            self.cursor.execute('CREATE TABLE {0}({1})'.format(
+            cursor.execute('CREATE TABLE {0}({1})'.format(
                 table, ', '.join(columns)))
         self.conn.commit()
 
     def connect(self, fn, foreign_keys=False):
         self.conn = sqlite3.connect(fn)
-        cur = self.conn.cursor()
+        cur = self.get_cursor()
         if foreign_keys:
             cur.execute('PRAGMA FOREIGN_KEYS=ON')
-        return cur
+
+    def get_cursor(self):
+        return self.conn.cursor()
 
     def close_connection(self):
         self.conn.close()
 
     def index_column(self, index_name, table, column):
-        self.cursor.execute(
+        cursor = self.get_cursor()
+        cursor.execute(
             'CREATE INDEX {0} on {1}({2})'.format(index_name, table, column))
         self.conn.commit()
 
@@ -59,7 +63,8 @@ class SearchSpaceDB(DatabaseConnection):
         """
         if reverse_seqs:
             peps = [(x[0][::-1],) for x in peps]
-        self.cursor.executemany(
+        cursor = self.get_cursor()
+        cursor.executemany(
             'INSERT INTO known_searchspace(seqs) VALUES (?)', peps)
         self.conn.commit()
 
@@ -81,8 +86,9 @@ class SearchSpaceDB(DatabaseConnection):
         sql = ('select exists(select seqs from known_searchspace '
                'where seqs{0}? limit 1)'.format(comparator))
         seq = '{0}{1}'.format(seq, seqmod)
-        self.cursor.execute(sql, (seq, ))
-        return self.cursor.fetchone()[0] == 1
+        cursor = self.get_cursor()
+        cursor.execute(sql, (seq, ))
+        return cursor.fetchone()[0] == 1
 
 
 class QuantDB(DatabaseConnection):
@@ -91,7 +97,8 @@ class QuantDB(DatabaseConnection):
                                   'quantmap TEXT', 'intensity REAL']})
 
     def store_quants(self, quants):
-        self.cursor.executemany(
+        cursor = self.get_cursor()
+        cursor.executemany(
             'INSERT INTO quant(spectra_filename, scan_nr, quantmap, intensity)'
             ' VALUES (?, ?, ?, ?)',
             quants)
@@ -102,15 +109,17 @@ class QuantDB(DatabaseConnection):
         self.index_column('scan_index', 'quant', 'scan_nr')
 
     def lookup_quant(self, spectrafile, scannr):
-        self.cursor.execute(
+        cursor = self.get_cursor()
+        cursor.execute(
             'SELECT quantmap, intensity FROM quant WHERE '
             'spectra_filename=? AND scan_nr=?', (spectrafile, scannr))
-        return self.cursor.fetchall()
+        return cursor.fetchall()
 
     def get_all_quantmaps(self):
-        self.cursor.execute(
+        cursor = self.get_cursor()
+        cursor.execute(
             'SELECT DISTINCT quantmap FROM quant')
-        return self.cursor.fetchall()
+        return cursor.fetchall()
 
 
 MASTER_INDEX = 1
@@ -182,14 +191,14 @@ class ProteinGroupDB(DatabaseConnection):
                 for row, x in ppmap.items()]
         self.cursor.executemany(
             'INSERT INTO psms(psm_id, sequence, score)'
-            ' VALUES(?, ?, ?)', ((x[1], x[2], x[3]) for x in psms))
-        self.cursor.executemany(
+            ' VALUES(?, ?, ?)', ((x[0], x[2], x[3]) for x in psms))
+        cursor.executemany(
             'INSERT INTO psmrows(psm_id, rownr) VALUES(?, ?)',
-            ((x[1], x[0]) for x in psms))
-        self.cursor.executemany(
+            ((psm[0], row) for psm in psms for row in psm[1]))
+        cursor.executemany(
             'INSERT INTO proteins(protein_acc) VALUES(?)',
-            generate_proteins(ppmap, True))
-        self.cursor.executemany(
+            generate_proteins(ppmap))
+        cursor.executemany(
             'INSERT INTO protein_psm(protein_acc, psm_id)'
             ' VALUES (?, ?)', generate_proteins(ppmap))
         self.conn.commit()
@@ -200,16 +209,18 @@ class ProteinGroupDB(DatabaseConnection):
     def store_masters(self, allmasters, psms):
         print('Storing {0} masters for {1} PSMs'.format(len(allmasters), len(psms)))
         allmasters = ((x,) for x in allmasters)
-        self.cursor.executemany(
+        cursor = self.get_cursor()
+        cursor.executemany(
             'INSERT INTO protein_group_master(master) VALUES(?)',
             allmasters)
-        self.cursor.executemany(
+        cursor.executemany(
             'INSERT INTO psm_protein_groups(psm_id, master) '
             'VALUES(?, ?)', psms)
         self.conn.commit()
 
     def store_protein_group_content(self, protein_groups):
-        self.cursor.executemany('INSERT INTO protein_group_content('
+        cursor = self.get_cursor()
+        cursor.executemany('INSERT INTO protein_group_content('
                                 'protein_acc, master, peptide_count, '
                                 'psm_count, protein_score) '
                                 'VALUES(?, ?, ?, ?, ?)', protein_groups)
@@ -217,13 +228,15 @@ class ProteinGroupDB(DatabaseConnection):
 
     def get_all_masters(self):
         sql = self.get_sql_select(['master'], 'protein_group_master')
-        return self.cursor.execute(sql).fetchall()
+        cursor = self.get_cursor()
+        return cursor.execute(sql).fetchall()
 
     def get_proteins_for_peptide(self, psm_id):
         """Returns list of proteins for a passed psm_id"""
         protsql = self.get_sql_select(['protein_acc'], 'protein_psm')
         protsql = '{0} WHERE psm_id=?'.format(protsql)
-        proteins = self.cursor.execute(protsql, psm_id).fetchall()
+        cursor = self.get_cursor()
+        proteins = cursor.execute(protsql, psm_id).fetchall()
         return [x[0] for x in proteins]
 
     def get_protpepmap_from_proteins(self, proteins):
@@ -232,7 +245,8 @@ class ProteinGroupDB(DatabaseConnection):
                                      distinct=True)
         pepsql = '{0} WHERE protein_acc {1}'.format(
             pepsql, self.get_inclause(proteins))
-        protpeps = self.cursor.execute(pepsql, proteins).fetchall()
+        cursor = self.get_cursor()
+        protpeps = cursor.execute(pepsql, proteins).fetchall()
         outmap = {}
         for protein, peptide in protpeps:
             try:
@@ -246,7 +260,8 @@ class ProteinGroupDB(DatabaseConnection):
                                      distinct=True)
         pepsql = '{0} WHERE protein_acc=?'.format(
             pepsql)
-        peptides = self.cursor.execute(pepsql, (protein,)).fetchall()
+        cursor = self.get_cursor()
+        peptides = cursor.execute(pepsql, (protein,)).fetchall()
         return [x[0] for x in peptides]
 
     def get_proteins_from_psms(self, psms):
@@ -254,7 +269,8 @@ class ProteinGroupDB(DatabaseConnection):
                                       'protein_psm', distinct=True)
         protsql = '{0} WHERE psm_id {1}'.format(
             protsql, self.get_inclause(psms))
-        return [x[0] for x in self.cursor.execute(protsql, psms).fetchall()]
+        cursor = self.get_cursor()
+        return [x[0] for x in cursor.execute(protsql, psms).fetchall()]
 
     def get_all_psms_proteingroups(self, fasta, evidence_levels):
         fields = ['pr.rownr', 'p.psm_id', 'ppg.master', 'pgc.protein_acc',
@@ -272,7 +288,8 @@ class ProteinGroupDB(DatabaseConnection):
             j[0], j[1], j[2]) for j in joins])
         sql = 'SELECT {0} FROM psm_protein_groups AS ppg {1}'.format(
             ', '.join(fields), join_sql)
-        return self.cursor.execute(sql)
+        cursor = self.get_cursor()
+        return cursor.execute(sql)
 
     def get_proteins_peptides_from_psms(self, psms):
         """Returns dict of proteins and lists of corresponding peptides
@@ -282,7 +299,8 @@ class ProteinGroupDB(DatabaseConnection):
                'psm_id FROM psms '
                'JOIN protein_psm USING(psm_id)')
         sql = '{0} WHERE psm_id {1}'.format(sql, self.get_inclause(psms))
-        return self.cursor.execute(sql, psms).fetchall()
+        cursor = self.get_cursor()
+        return cursor.execute(sql, psms).fetchall()
 
     def filter_proteins_with_missing_peptides(self, proteins, peptides):
         """Returns proteins of passed list that have peptides not in
@@ -294,6 +312,7 @@ class ProteinGroupDB(DatabaseConnection):
             not_in_sql,
             self.get_inclause(proteins),
             self.get_inclause(peptides))
-        proteins_not_in_group = self.cursor.execute(not_in_sql,
+        cursor = self.get_cursor()
+        proteins_not_in_group = cursor.execute(not_in_sql,
                                                     proteins + peptides)
         return [x[0] for x in proteins_not_in_group]
