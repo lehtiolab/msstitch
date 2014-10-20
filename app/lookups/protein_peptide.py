@@ -4,6 +4,7 @@ DB_STORE_CHUNK = 500000
 
 from app.sqlite import ProteinGroupDB
 from app.readers import tsv as tsvreader
+from app.readers import fasta as fastareader
 from app.preparation.mzidtsv import confidencefilters as conffilt
 
 
@@ -14,6 +15,14 @@ def create_protein_pep_lookup(fn, header, confkey, conflvl, lower_is_better,
     """
     pgdb = ProteinGroupDB()
     pgdb.create_pgdb()
+    evidences = None
+    proteins_stored = False
+    if fastafn is not None:
+        proteins, sequences, evidences = fastareader.get_proteins_seq_iter(
+            fastafn, evidence_lvl)
+        pgdb.store_proteins(proteins, evidences, sequences)
+        proteins_stored = True
+
     rownr, last_id, peptides_proteins = 0, None, {}
     store_soon = False
     for psm in tsvreader.generate_tsv_psms(fn, header):
@@ -26,7 +35,7 @@ def create_protein_pep_lookup(fn, header, confkey, conflvl, lower_is_better,
         if peptides_proteins and len(peptides_proteins) % DB_STORE_CHUNK == 0:
             store_soon = True
         if store_soon and last_id != psm_id:
-            pgdb.store_peptides_proteins(peptides_proteins)
+            pgdb.store_peptides_proteins(peptides_proteins, proteins_stored)
             store_soon = False
             peptides_proteins = {}
         try:
@@ -40,6 +49,6 @@ def create_protein_pep_lookup(fn, header, confkey, conflvl, lower_is_better,
                                          }
         last_id = psm_id
         rownr += 1
-    pgdb.store_peptides_proteins(peptides_proteins)
+    pgdb.store_peptides_proteins(peptides_proteins, proteins_stored)
     pgdb.index_protein_peptides()
     return pgdb
