@@ -24,6 +24,8 @@ class ProteinGroupDriver(MzidTSVDriver):
     def get_psms(self):
         if self.fasta:
             coverage = True
+        else:
+            coverage = False
         confkey = self.oldheader[int(self.confcol) - 1]
         protgroupdb = lookups.create_protein_pep_lookup(self.fn,
                                                         self.oldheader,

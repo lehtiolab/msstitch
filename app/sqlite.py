@@ -147,21 +147,21 @@ class ProteinGroupDB(DatabaseConnection):
                                         'REFERENCES proteins(protein_acc) '
                                         'FOREIGN KEY(psm_id) '
                                         'REFERENCES psms(psm_id)'],
-                        'protein_evidence': ['protein_acc TEXT ',
-                                             'evidence_lvl REAL ',
+                        'protein_evidence': ['protein_acc TEXT',
+                                             'evidence_lvl REAL',
                                              'FOREIGN KEY(protein_acc) '
                                              'REFERENCES '
                                              'proteins(protein_acc)'],
-                        'protein_seq': ['protein_acc TEXT ',
-                                        'sequence TEXT ',
+                        'protein_seq': ['protein_acc TEXT',
+                                        'sequence TEXT',
                                         'FOREIGN KEY(protein_acc) '
                                         'REFERENCES '
                                         'proteins(protein_acc)'],
-                        'protein_coverage': ['protein_acc TEXT ',
-                                             'coverage REAL ',
+                        'protein_coverage': ['protein_acc TEXT',
+                                             'coverage REAL',
                                              'FOREIGN KEY(protein_acc) '
                                              'REFERENCES '
-                                             'proteins(protein_acc))'],
+                                             'proteins(protein_acc)'],
                         'protein_group_master': ['master '
                                                  'TEXT PRIMARY KEY NOT NULL'],
                         'protein_group_content': ['protein_acc TEXT',
