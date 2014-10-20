@@ -22,6 +22,8 @@ class ProteinGroupDriver(MzidTSVDriver):
             self.evidence_levels = fasta.has_evidence_levels(self.fasta)
 
     def get_psms(self):
+        if self.fasta:
+            coverage = True
         confkey = self.oldheader[int(self.confcol) - 1]
         protgroupdb = lookups.create_protein_pep_lookup(self.fn,
                                                         self.oldheader,
@@ -40,5 +42,5 @@ class ProteinGroupDriver(MzidTSVDriver):
                                                           self.conflvl,
                                                           self.lowerbetter,
                                                           self.unroll,
-                                                          self.fasta,
+                                                          coverage,
                                                           self.evidence_levels)

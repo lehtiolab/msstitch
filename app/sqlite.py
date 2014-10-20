@@ -157,6 +157,11 @@ class ProteinGroupDB(DatabaseConnection):
                                         'FOREIGN KEY(protein_acc) '
                                         'REFERENCES '
                                         'proteins(protein_acc)'],
+                        'protein_coverage': ['protein_acc TEXT ',
+                                             'coverage REAL ',
+                                             'FOREIGN KEY(protein_acc) '
+                                             'REFERENCES '
+                                             'proteins(protein_acc))'],
                         'protein_group_master': ['master '
                                                  'TEXT PRIMARY KEY NOT NULL'],
                         'protein_group_content': ['protein_acc TEXT',
@@ -248,6 +253,12 @@ class ProteinGroupDB(DatabaseConnection):
             'VALUES(?, ?)', psms)
         self.conn.commit()
 
+    def store_coverage(self, coverage):
+        cursor = self.get_cursor()
+        sql = ('INSERT INTO protein_coverage(protein_acc, coverage) '
+               'VALUES(?, ?)')
+        cursor.executemany(sql, coverage)
+
     def store_protein_group_content(self, protein_groups):
         cursor = self.get_cursor()
         cursor.executemany('INSERT INTO protein_group_content('
@@ -302,7 +313,17 @@ class ProteinGroupDB(DatabaseConnection):
         cursor = self.get_cursor()
         return [x[0] for x in cursor.execute(protsql, psms).fetchall()]
 
-    def get_all_psms_proteingroups(self, fasta, evidence_levels):
+    def get_all_proteins_psms_seq(self):
+        sql = ('SELECT p.protein_acc, ps.protein_seq, pp.psm_id, psm.sequence '
+               'FROM proteins AS p '
+               'JOIN protein_seq AS ps USING(protein_acc) '
+               'JOIN protein_psm AS pp USING(protein_acc) '
+               'JOIN psm AS psm USING(psm_id)'
+               )
+        cursor = self.get_cursor()
+        return cursor.execute(sql)
+
+    def get_all_psms_proteingroups(self, coverage, evidence_levels):
         fields = ['pr.rownr', 'ppg.master', 'pgc.protein_acc',
                   'pgc.peptide_count', 'pgc.psm_count', 'pgc.protein_score']
         joins = [('psm_protein_groups', 'ppg', 'psm_id'),
@@ -310,7 +331,7 @@ class ProteinGroupDB(DatabaseConnection):
         if evidence_levels:
             fields.append('pev.evidence_lvl')
             joins.append(('protein_evidence', 'pev', 'protein_acc'))
-        if fasta:
+        if coverage:
             fields.append('psq.sequence')
             joins.append(('protein_seq', 'psq', 'protein_acc'))
         join_sql = '\n'.join(['JOIN {0} AS {1} USING({2})'.format(

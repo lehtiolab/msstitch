@@ -22,6 +22,8 @@ def generate_psms_with_proteingroups(fn, oldheader, newheader, pgdb, confkey,
     build_master_db(fn, oldheader, pgdb, confkey, conflvl, lower_is_better,
                     unroll)
     build_content_db(pgdb)
+    if coverage:
+        build_coverage(pgdb)
     rownr = 0
     all_protein_group_content = pgdb.get_all_psms_proteingroups(
         coverage, evidence_levels)
@@ -48,7 +50,8 @@ def generate_psms_with_proteingroups(fn, oldheader, newheader, pgdb, confkey,
                 protein = next(all_protein_group_content)
             except StopIteration:
                 protein = [-1]
-        sorted_pgs = sorters.sort_protein_groups(proteins_in_groups, coverage, evidence_levels)
+        sorted_pgs = sorters.sort_protein_groups(proteins_in_groups, coverage,
+                                                 evidence_levels)
         psm_masters = []
         psm_pg_proteins = []
         for master, group in sorted_pgs.items():
@@ -95,6 +98,32 @@ def build_content_db(pgdb):
         master = master[0]
         protein_groups.extend(get_protein_group_content(master, pgdb))
     pgdb.store_protein_group_content(protein_groups)
+
+
+def build_coverage(pgdb):
+    coverage = {}
+    for acc, seq, psm_id, psmseq in pgdb.get_all_proteins():
+        try:
+            coverage[acc]['seq'] = seq
+        except KeyError:
+            coverage[acc] = {'seq': seq, 'psms': []}
+        coverage[acc]['psms'].append(psmseq)
+    pgdb.store_coverage(generate_coverage(coverage))
+
+
+def generate_coverage(seqinfo):
+    """From a dict containing protein accessions and sequences/PSM sequences,
+    this function returns a generator that calculates coverages for each
+    protein and returns the accession and coverage percentage.
+    Coverage is done by finding peptides in the protein seq using seq.index
+    and marking the range. May be slow."""
+    for acc, protinfo in seqinfo.items():
+        coverage_aa_indices = set()
+        seq = protinfo['seq']
+        for psmseq in protinfo['psms']:
+            start = seq.index(psmseq)
+            coverage_aa_indices.update(range(start, start + len(psmseq)))
+        yield (acc, len(coverage_aa_indices) / len(seq))
 
 
 def get_protein_group_content(master, pgdb):
