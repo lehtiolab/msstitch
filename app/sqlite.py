@@ -189,7 +189,7 @@ class ProteinGroupDB(DatabaseConnection):
             cursor.executemany(
                 'INSERT INTO protein_evidence(protein_acc, evidence) '
                 'VALUES(?, ?)', evidence_lvls)
-        if sequences is not None:
+        if sequences:
             cursor.executemany(
                 'INSERT INTO protein_seq(protein_acc, sequence) '
                 'VALUES(?, ?)', sequences)
@@ -237,7 +237,8 @@ class ProteinGroupDB(DatabaseConnection):
 
     def store_masters(self, allmasters, psm_masters):
         allmasters = ((x,) for x in allmasters)
-        psms = ((psm_id, master) for psm_id, masters in psm_masters.items() for master in masters)
+        psms = ((psm_id, master) for psm_id, masters in psm_masters.items()
+                for master in masters)
         cursor = self.get_cursor()
         cursor.executemany(
             'INSERT INTO protein_group_master(master) VALUES(?)',
@@ -250,9 +251,9 @@ class ProteinGroupDB(DatabaseConnection):
     def store_protein_group_content(self, protein_groups):
         cursor = self.get_cursor()
         cursor.executemany('INSERT INTO protein_group_content('
-                                'protein_acc, master, peptide_count, '
-                                'psm_count, protein_score) '
-                                'VALUES(?, ?, ?, ?, ?)', protein_groups)
+                           'protein_acc, master, peptide_count, '
+                           'psm_count, protein_score) '
+                           'VALUES(?, ?, ?, ?, ?)', protein_groups)
         self.conn.commit()
 
     def get_all_masters(self):
@@ -304,7 +305,7 @@ class ProteinGroupDB(DatabaseConnection):
     def get_all_psms_proteingroups(self, fasta, evidence_levels):
         fields = ['pr.rownr', 'ppg.master', 'pgc.protein_acc',
                   'pgc.peptide_count', 'pgc.psm_count', 'pgc.protein_score']
-        joins = [('psm_protein_groups', 'ppg', 'psm_id'), 
+        joins = [('psm_protein_groups', 'ppg', 'psm_id'),
                  ('protein_group_content', 'pgc', 'master')]
         if evidence_levels:
             fields.append('pev.evidence_lvl')
@@ -342,5 +343,5 @@ class ProteinGroupDB(DatabaseConnection):
             self.get_inclause(peptides))
         cursor = self.get_cursor()
         proteins_not_in_group = cursor.execute(not_in_sql,
-                                                    proteins + peptides)
+                                               proteins + peptides)
         return [x[0] for x in proteins_not_in_group]

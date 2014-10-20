@@ -17,8 +17,8 @@ def create_protein_pep_lookup(fn, header, confkey, conflvl, lower_is_better,
     pgdb.create_pgdb()
     evidences = None
     proteins_stored = False
-    if fastafn is not None:
-        proteins, sequences, evidences = fastareader.get_proteins_seq_iter(
+    if fastafn:
+        proteins, sequences, evidences = fastareader.get_proteins_for_db(
             fastafn, evidence_lvl)
         pgdb.store_proteins(proteins, evidences, sequences)
         proteins_stored = True

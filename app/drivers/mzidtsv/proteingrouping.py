@@ -13,6 +13,7 @@ class ProteinGroupDriver(MzidTSVDriver):
         self.conflvl = kwargs.get('conflvl', None)
         self.lowerbetter = kwargs.get('conftype', None) == 'lower'
         self.unroll = kwargs.get('unroll', False)
+        self.evidence_levels = None
         self.fasta = kwargs.get('fasta', False)
 
     def parse_fasta(self):
