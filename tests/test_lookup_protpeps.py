@@ -24,7 +24,14 @@ class TestCreateLookupSqliteCalls(TestCreateLookup):
         with patch('app.lookups.protein_peptide.ProteinGroupDB', self.mockdb), patch('app.lookups.protein_peptide.tsvreader.generate_tsv_psms', return_value=[]):
             lookup.create_protein_pep_lookup('testfn', [], 1, 1, True)
         self.mockdb.create_pgdb.assert_called_with()
-        self.mockdb.store_peptides_proteins.assert_called_once_with({})
+        self.mockdb.store_peptides_proteins.assert_called_once_with({}, False)
+        self.mockdb.index_protein_peptides.assert_called_once_with()
+	
+    def test_calls_sqlite_with_fasta(self):
+        with patch('app.lookups.protein_peptide.ProteinGroupDB', self.mockdb), patch('app.lookups.protein_peptide.tsvreader.generate_tsv_psms', return_value=[]):
+            lookup.create_protein_pep_lookup('testfn', [], 1, 1, True, fastafn='testfasta')
+        self.mockdb.create_pgdb.assert_called_with()
+        self.mockdb.store_peptides_proteins.assert_called_once_with({}, True)
         self.mockdb.index_protein_peptides.assert_called_once_with()
 
 
@@ -66,7 +73,7 @@ class TestCreateLookupLineParsing(TestCreateLookup):
             scannr += 1
         return lines, [expected]
 
-    def do_asserts(self, unroll, chunk_size=DB_STORE_CHUNK):
+    def do_asserts(self, unroll, chunk_size=DB_STORE_CHUNK, coverage=False):
         lines, expected = self.get_lines_and_expected(unroll)
         if chunk_size != DB_STORE_CHUNK:
             expected = [{k: v} for k, v in expected[0].items()]
@@ -76,16 +83,27 @@ class TestCreateLookupLineParsing(TestCreateLookup):
                 'get_pepproteins', self.pepprot_generator), patch(
                 'app.lookups.protein_peptide.ProteinGroupDB',
                 self.mockdb), patch('app.lookups.protein_peptide.tsvreader.generate_tsv_psms', 
-                return_value=lines), patch('app.lookups.protein_peptide.conffilt.passes_filter', return_value=True):
-            lookup.create_protein_pep_lookup('nofn', ['header', 'header2'], 1, True, unroll)
+                return_value=lines), patch('app.lookups.protein_peptide.conffilt.passes_filter',
+                return_value=True), patch('app.lookups.protein_peptide.fastareader.get_proteins_for_db',
+                return_value=(None, None, None)):
+            lookup.create_protein_pep_lookup('nofn', ['header', 'header2'], 1, True, unroll, fastafn=coverage)
         for expected_entry in expected:
-            self.mockdb.store_peptides_proteins.assert_any_call(expected_entry)
+            self.mockdb.store_peptides_proteins.assert_any_call(expected_entry, coverage)
 
     def test_multiprotein_lines(self):
         self.do_asserts(unroll=False)
+    
+    def test_multiprotein_lines_with_coverage(self):
+        self.do_asserts(unroll=False, coverage=True)
 
     def test_unrolled_singleprotein_lines(self):
         self.do_asserts(unroll=True)
 
+    def test_unrolled_singleprotein_lines_with_coverage(self):
+        self.do_asserts(unroll=True, coverage=True)
+    
     def test_unrolled_singleprotein_small_chunk(self):
         self.do_asserts(unroll=True, chunk_size=1)
+    
+    def test_unrolled_singleprotein_small_chunk_with_coverage(self):
+        self.do_asserts(unroll=True, chunk_size=1, coverage=True)
