@@ -48,7 +48,7 @@ parser.add_argument('-c', dest='command', type=str,
                     'files to correlate retention time to scan nrs.\n'
                     'proteingroup   - Groups proteins from of mzid2tsv\n'
                     'output. With flags --confidence-lvl, --confidence-col,\n'
-                    '--confidence-better, --fasta\n'
+                    '--confidence-better, --fasta\n',
 #                    'conf_filter - Filter out all rows of tsv with \n'
 #                    'confidence value better than the specified one.\n'
                     required=True
