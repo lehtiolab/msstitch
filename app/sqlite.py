@@ -162,8 +162,10 @@ class ProteinGroupDB(DatabaseConnection):
                                              'FOREIGN KEY(protein_acc) '
                                              'REFERENCES '
                                              'proteins(protein_acc)'],
-                        'protein_group_master': ['master '
-                                                 'TEXT PRIMARY KEY NOT NULL'],
+                        'protein_group_master': ['master TEXT',
+                                                 'FOREIGN KEY(master) '
+                                                 'REFERENCES '
+                                                 'proteins(protein_acc)'],
                         'protein_group_content': ['protein_acc TEXT',
                                                   'master TEXT',
                                                   'peptide_count INTEGER',
@@ -267,10 +269,11 @@ class ProteinGroupDB(DatabaseConnection):
                            'VALUES(?, ?, ?, ?, ?)', protein_groups)
         self.conn.commit()
 
-    def get_all_masters(self):
-        sql = self.get_sql_select(['master'], 'protein_group_master')
+    def get_allpsms_masters_(self):
+        sql = ('SELECT pgm.master, pp.psm_id FROM protein_group_master AS pgm '
+               'JOIN protein_psm as pp USING(protein_acc)')
         cursor = self.get_cursor()
-        return cursor.execute(sql).fetchall()
+        return cursor.execute(sql)
 
     def get_proteins_for_peptide(self, psm_id):
         """Returns list of proteins for a passed psm_id"""

@@ -94,9 +94,17 @@ def build_master_db(fn, oldheader, pgdb, confkey, conflvl, lower_is_better,
 
 def build_content_db(pgdb):
     protein_groups = []
-    for master in pgdb.get_all_masters():
-        master = master[0]
-        protein_groups.extend(get_protein_group_content(master, pgdb))
+    allpsms_masters = pgdb.get_all_masters_psms()
+    lastmaster, psms = next(allpsms_masters)
+    psms = [psms]
+    for master, psm in allpsms_masters:
+        if master == lastmaster:
+            psms.append(psm)
+        else:
+            protein_groups.extend(get_protein_group_content(lastmaster, psms,
+                                                            pgdb))
+            psms = [psm]
+        lastmaster = master
     pgdb.store_protein_group_content(protein_groups)
 
 
@@ -126,7 +134,7 @@ def generate_coverage(seqinfo):
         yield (acc, len(coverage_aa_indices) / len(seq))
 
 
-def get_protein_group_content(master, pgdb):
+def get_protein_group_content(master, psms, pgdb):
     """For each master protein, we generate the protein group proteins
     complete with sequences, psm_ids and scores. Master proteins are included
     in this group.
@@ -134,7 +142,6 @@ def get_protein_group_content(master, pgdb):
     Returns a list of [protein, master, pep_hits, psm_hits, protein_score],
     which is ready to enter the DB table.
     """
-    psms = pgdb.get_peptides_from_protein(master)
     protein_group_plus = pgdb.get_proteins_peptides_from_psms(psms)
     proteins_not_in_group = pgdb.filter_proteins_with_missing_peptides(
         [x[0] for x in protein_group_plus], psms)
