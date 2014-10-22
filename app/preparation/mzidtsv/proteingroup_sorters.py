@@ -1,14 +1,14 @@
 import app.sqlite as lookups
 
 
-def sort_protein_groups(pgroups, fasta, evidence_levels):
+def sort_protein_groups(pgroups, coverage, evidence_levels):
     sortfnxs = [sort_pgroup_peptides,
                 sort_pgroup_psms,
                 sort_pgroup_score,
                 ]
     if evidence_levels:
         sortfnxs.append(sort_evidence_score)
-    if fasta:
+    if coverage:
         sortfnxs.append(sort_pgroup_coverage)
     sortfnxs.append(sort_alphabet)
     pgroups_out = {}
@@ -35,7 +35,8 @@ def sort_protein_group(pgroup, sortfunctions, sortfunc_index):
 
 
 def sort_amounts(proteins, sort_index):
-    """Generic function for sorting peptides and psms"""
+    """Generic function for sorting peptides and psms. Assumes a higher
+    number is better for what is passed at sort_index position in protein."""
     amounts = {}
     for protein in proteins:
         amount_x_for_protein = protein[sort_index]
@@ -59,7 +60,7 @@ def sort_pgroup_score(proteins):
 
 
 def sort_pgroup_coverage(proteins):
-    return [proteins]
+    return sort_amounts(proteins, lookups.COVERAGE_INDEX)
 
 
 def sort_evidence_score(proteins):
