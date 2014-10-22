@@ -16,6 +16,7 @@ import app.drivers.mzidtsv.proteingrouping as pgdrivers
 import app.drivers.mzidtsv.quant as quantdrivers
 import app.drivers.mzidtsv.merge as mergedrivers
 
+
 def parser_file_exists(currentparser, fn):
     if not os.path.exists(fn):
         currentparser.error('Input file %s not found!' % fn)
@@ -30,6 +31,8 @@ def parser_value_in_list(currentparser, value, valuelist):
             ', '.join(valuelist)))
     else:
         return value
+
+
 parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
 parser.add_argument('-c', dest='command', type=str,
                     help='How to manipulate the input:\n'
@@ -45,7 +48,7 @@ parser.add_argument('-c', dest='command', type=str,
                     'files to correlate retention time to scan nrs.\n'
                     'proteingroup   - Groups proteins from of mzid2tsv\n'
                     'output. With flags --confidence-lvl, --confidence-col,\n'
-                    '--confidence-rank\n',
+                    '--confidence-better, --fasta\n'
 #                    'conf_filter - Filter out all rows of tsv with \n'
 #                    'confidence value better than the specified one.\n'
                     required=True
@@ -68,6 +71,10 @@ parser.add_argument('--quants', dest='quants', help='Quants from OpenMS in '
                     type=lambda x: parser_file_exists(parser, x))
 parser.add_argument('--spectra', dest='spectra', help='mzML files', nargs='+',
                     type=lambda x: parser_file_exists(parser, x))
+parser.add_argument('--fasta', dest='fasta', help='FASTA sequence database, '
+                    'to optionally use with proteingrouping to enable sorting '
+                    'on coverage, and in case of UNIPROT FASTA, evidence '
+                    'levels.', type=lambda x: parser_file_exists(parser, x))
 parser.add_argument('--confidence-col', dest='confcol', help='Confidence '
                     'column number or name in the tsv file. First column has'
                     ' number 1.')
