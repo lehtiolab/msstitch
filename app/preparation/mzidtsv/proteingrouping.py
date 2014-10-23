@@ -94,7 +94,7 @@ def build_master_db(fn, oldheader, pgdb, confkey, conflvl, lower_is_better,
 
 def build_content_db(pgdb):
     protein_groups = []
-    allpsms_masters = pgdb.get_all_masters_psms()
+    allpsms_masters = pgdb.get_allpsms_masters()
     lastmaster, psms = next(allpsms_masters)
     psms = [psms]
     for master, psm in allpsms_masters:

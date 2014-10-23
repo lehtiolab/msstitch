@@ -162,8 +162,8 @@ class ProteinGroupDB(DatabaseConnection):
                                              'FOREIGN KEY(protein_acc) '
                                              'REFERENCES '
                                              'proteins(protein_acc)'],
-                        'protein_group_master': ['master TEXT',
-                                                 'FOREIGN KEY(master) '
+                        'protein_group_master': ['protein_acc TEXT',
+                                                 'FOREIGN KEY(protein_acc) '
                                                  'REFERENCES '
                                                  'proteins(protein_acc)'],
                         'protein_group_content': ['protein_acc TEXT',
@@ -176,15 +176,15 @@ class ProteinGroupDB(DatabaseConnection):
                                                   'proteins(protein_acc) '
                                                   'FOREIGN KEY(master) '
                                                   'REFERENCES '
-                                                  'protein_group_master'
-                                                  '(master)'
+                                                  'proteins'
+                                                  '(protein_acc)'
                                                   ],
                         'psm_protein_groups': ['psm_id TEXT',
                                                'master TEXT',
                                                'FOREIGN KEY(psm_id) REFERENCES'
                                                ' psms(psm_id)',
                                                'FOREIGN KEY(master) REFERENCES'
-                                               ' protein_group_master(master)']
+                                               ' proteins(protein_acc)']
                         }, foreign_keys=True)
 
     def store_proteins(self, proteins, evidence_lvls=False, sequences=False):
@@ -248,7 +248,7 @@ class ProteinGroupDB(DatabaseConnection):
                 for master in masters)
         cursor = self.get_cursor()
         cursor.executemany(
-            'INSERT INTO protein_group_master(master) VALUES(?)',
+            'INSERT INTO protein_group_master(protein_acc) VALUES(?)',
             allmasters)
         cursor.executemany(
             'INSERT INTO psm_protein_groups(psm_id, master) '
@@ -269,8 +269,8 @@ class ProteinGroupDB(DatabaseConnection):
                            'VALUES(?, ?, ?, ?, ?)', protein_groups)
         self.conn.commit()
 
-    def get_allpsms_masters_(self):
-        sql = ('SELECT pgm.master, pp.psm_id FROM protein_group_master AS pgm '
+    def get_allpsms_masters(self):
+        sql = ('SELECT pgm.protein_acc, pp.psm_id FROM protein_group_master AS pgm '
                'JOIN protein_psm as pp USING(protein_acc)')
         cursor = self.get_cursor()
         return cursor.execute(sql)
