@@ -241,6 +241,7 @@ class ProteinGroupDB(DatabaseConnection):
 
     def index_protein_peptides(self):
         self.index_column('protein_index', 'protein_psm', 'protein_acc')
+        self.index_column('psmid_index', 'protein_psm', 'psm_id')
 
     def store_masters(self, allmasters, psm_masters):
         allmasters = ((x,) for x in allmasters)
