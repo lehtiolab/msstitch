@@ -110,7 +110,7 @@ def build_content_db(pgdb):
 
 def build_coverage(pgdb):
     coverage = {}
-    for acc, seq, psm_id, psmseq in pgdb.get_all_proteins():
+    for acc, seq, psm_id, psmseq in pgdb.get_all_proteins_psms_seq():
         try:
             coverage[acc]['seq'] = seq
         except KeyError:
