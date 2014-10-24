@@ -318,11 +318,11 @@ class ProteinGroupDB(DatabaseConnection):
         return [x[0] for x in cursor.execute(protsql, psms).fetchall()]
 
     def get_all_proteins_psms_seq(self):
-        sql = ('SELECT p.protein_acc, ps.protein_seq, pp.psm_id, psm.sequence '
+        sql = ('SELECT p.protein_acc, ps.sequence, pp.psm_id, psms.sequence '
                'FROM proteins AS p '
                'JOIN protein_seq AS ps USING(protein_acc) '
                'JOIN protein_psm AS pp USING(protein_acc) '
-               'JOIN psm AS psm USING(psm_id)'
+               'JOIN psms AS psms USING(psm_id)'
                )
         cursor = self.get_cursor()
         return cursor.execute(sql)
