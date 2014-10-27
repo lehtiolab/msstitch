@@ -38,15 +38,11 @@ def create_protein_pep_lookup(fn, header, confkey, conflvl, lower_is_better,
             pgdb.store_peptides_proteins(peptides_proteins, proteins_stored)
             store_soon = False
             peptides_proteins = {}
-        try:
-            peptides_proteins[psm_id]['proteins'].extend(prots)
-            peptides_proteins[psm_id]['rows'].append(rownr)
-        except KeyError:
-            peptides_proteins[psm_id] = {'rows': [rownr],
-                                         'seq': seq,
-                                         'proteins': prots,
-                                         'score': score,
-                                         }
+        peptides_proteins[rownr] = {'psm_id': psm_id,
+                                    'seq': seq,
+                                    'proteins': prots,
+                                    'score': score,
+                                    }
         last_id = psm_id
         rownr += 1
     pgdb.store_peptides_proteins(peptides_proteins, proteins_stored)

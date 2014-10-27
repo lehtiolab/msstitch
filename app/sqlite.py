@@ -205,7 +205,7 @@ class ProteinGroupDB(DatabaseConnection):
     def store_peptides_proteins(self, ppmap, proteins_already_stored=False):
         def generate_proteins(pepprots):
             proteins = {}
-            for psm_id, psmvals in pepprots.items():
+            for psmvals in pepprots.values():
                 for protein in psmvals['proteins']:
                     try:
                         proteins[protein]
@@ -214,29 +214,32 @@ class ProteinGroupDB(DatabaseConnection):
                         yield (protein,)
 
         def generate_protein_psm_ids(pepprots):
-            for psm_id, psmvals in pepprots.items():
+            for psmvals in pepprots.values():
                 for protein in psmvals['proteins']:
-                    yield (protein, psm_id)
+                    yield (protein, psmvals['psm_id'])
 
-        psms = [(psm_id, x['rows'], x['seq'], x['score'])
-                for psm_id, x in ppmap.items()]
-        psms = sorted(psms, key=lambda x: x[1])
-        psm_ids = generate_protein_psm_ids(ppmap)
+        def generate_psms(pepprots):
+            for row, psmvals in pepprots.items():
+                yield (psmvals['psm_id'], row, psmvals['seq'], psmvals['score'])
+
+        psms = generate_psms(ppmap) 
+        psms = sorted(psms, key=lambda x: x[1])  # sorts on psm rows
+        prot_psm_ids = generate_protein_psm_ids(ppmap)
         if not proteins_already_stored:
             self.store_proteins(generate_proteins(ppmap))
-        self.store_psm_relations(psms, psm_ids)
+        self.store_psm_relations(psms, prot_psm_ids)
 
-    def store_psm_relations(self, psms, psm_ids):
+    def store_psm_relations(self, psms, prot_psm_ids):
         cursor = self.get_cursor()
         cursor.executemany(
             'INSERT INTO psms(psm_id, sequence, score)'
             ' VALUES(?, ?, ?)', ((x[0], x[2], x[3]) for x in psms))
         cursor.executemany(
             'INSERT INTO psmrows(psm_id, rownr) VALUES(?, ?)',
-            ((psm[0], row) for psm in psms for row in psm[1]))
+            ((psm[0], psm[1]) for psm in psms))
         cursor.executemany(
             'INSERT INTO protein_psm(protein_acc, psm_id)'
-            ' VALUES (?, ?)', psm_ids)
+            ' VALUES (?, ?)', prot_psm_ids)
         self.conn.commit()
 
     def index_protein_peptides(self):
