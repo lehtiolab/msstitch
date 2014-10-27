@@ -34,7 +34,8 @@ def get_evidence_iter(fastafn):
 
 def parse_fasta(fn):
     with open(fn) as fp:
-        return SeqIO.parse(fp, 'fasta')
+        for record in SeqIO.parse(fp, 'fasta'):
+            yield record
 
 
 def has_evidence_levels(fastafn):
