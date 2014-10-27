@@ -26,8 +26,9 @@ def generate_tsv_psms_line(fn):
 
 
 def get_psm_id(line):
-    return '{0}_{1}'.format(line[mzidtsvdata.HEADER_SPECFILE],
-                            line[mzidtsvdata.HEADER_SCANNR])
+    return '{0}_{1}_{2}'.format(line[mzidtsvdata.HEADER_SPECFILE],
+                                line[mzidtsvdata.HEADER_SCANNR],
+                                line[mzidtsvdata.HEADER_PEPTIDE])
 
 
 def get_proteins_from_psm(line):
