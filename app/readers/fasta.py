@@ -12,13 +12,18 @@ def get_proteins_for_db(fastafn, evidence_levels=False):
 def get_protein_acc_iter(fastafn):
     """Returns iterator with protein accessions"""
     for record in parse_fasta(fastafn):
-        yield record.id
+        yield (parse_protein_identifier(record),)
+
+
+def parse_protein_identifier(record):
+    ## FIXME now parsing uniprot only...
+    return record.id.split('|')[1]
 
 
 def get_sequence_iter(fastafn):
     """Returns iterator with protein accessions, sequences in tuple"""
     for record in parse_fasta(fastafn):
-        yield (record.id, record.seq)
+        yield (parse_protein_identifier(record), str(record.seq))
 
 
 def get_evidence_iter(fastafn):
