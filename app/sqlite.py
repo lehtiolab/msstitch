@@ -127,8 +127,8 @@ PROTEIN_ACC_INDEX = 2
 PEPTIDE_COUNT_INDEX = 3
 PSM_COUNT_INDEX = 4
 PROTEIN_SCORE_INDEX = 5
-EVIDENCE_LVL_INDEX = 6
-COVERAGE_INDEX = 7
+COVERAGE_INDEX = 6
+EVIDENCE_LVL_INDEX = 7
 
 
 class ProteinGroupDB(DatabaseConnection):
@@ -336,12 +336,13 @@ class ProteinGroupDB(DatabaseConnection):
                   'pgc.peptide_count', 'pgc.psm_count', 'pgc.protein_score']
         joins = [('psm_protein_groups', 'ppg', 'psm_id'),
                  ('protein_group_content', 'pgc', 'master')]
+        # TODO if evidence levels but not coverage, the indexes of these fields will be wrong.
+        if coverage:
+            fields.append('pc.coverage')
+            joins.append(('protein_coverage', 'pc', 'protein_acc'))
         if evidence_levels:
             fields.append('pev.evidence_lvl')
             joins.append(('protein_evidence', 'pev', 'protein_acc'))
-        if coverage:
-            fields.append('psq.sequence')
-            joins.append(('protein_seq', 'psq', 'protein_acc'))
         join_sql = '\n'.join(['JOIN {0} AS {1} USING({2})'.format(
             j[0], j[1], j[2]) for j in joins])
         sql = 'SELECT {0} FROM psmrows AS pr {1}'.format(
