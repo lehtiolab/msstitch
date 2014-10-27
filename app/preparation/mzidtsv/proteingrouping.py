@@ -129,7 +129,12 @@ def generate_coverage(seqinfo):
         coverage_aa_indices = set()
         seq = protinfo['seq']
         for psmseq in protinfo['psms']:
-            start = seq.index(psmseq)
+            try:
+                start = seq.index(psmseq)
+            except:
+                print(acc)
+                print(seq)
+                print(psmseq)
             coverage_aa_indices.update(range(start, start + len(psmseq)))
         yield (acc, len(coverage_aa_indices) / len(seq))
 
