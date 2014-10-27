@@ -14,7 +14,7 @@ def sort_protein_groups(pgroups, coverage, evidence_levels):
     pgroups_out = {}
     for pgroup in pgroups.values():
         sorted_pgroup = sort_protein_group(pgroup, sortfnxs, 0)
-        pgroups_out[sorted_pgroup[0][lookups.MASTER_INDEX]] = sorted_pgroup
+        pgroups_out[sorted_pgroup[0][lookups.PROTEIN_ACC_INDEX]] = sorted_pgroup
     return pgroups_out
 
 
