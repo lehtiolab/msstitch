@@ -29,7 +29,7 @@ def get_sequence_iter(fastafn):
 def get_evidence_iter(fastafn):
     """Returns iterator with protein accessions, evidence levels in tuple"""
     for record in parse_fasta(fastafn):
-        yield (record.id, get_uniprot_evidence_level(record.description))
+        yield (parse_protein_identifier(record), get_uniprot_evidence_level(record.description))
 
 
 def parse_fasta(fn):
