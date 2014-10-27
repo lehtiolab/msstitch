@@ -129,6 +129,9 @@ def generate_coverage(seqinfo):
         coverage_aa_indices = set()
         seq = protinfo['seq']
         for psmseq in protinfo['psms']:
+            psmseq = tsvreader.strip_modifications(psmseq)
+            # FIXME try block is for problems with coverage, see if it is
+            # needed
             try:
                 start = seq.index(psmseq)
             except:

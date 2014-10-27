@@ -1,3 +1,4 @@
+import re
 import itertools
 from app.dataformats import mzidtsv as mzidtsvdata
 
@@ -62,3 +63,9 @@ def get_pepproteins(line, unroll=False):
         peptideseq = peptideseq.split('.')[1]
     proteins = get_proteins_from_psm(line)
     return specfn, scan, peptideseq, score, proteins
+
+
+def strip_modifications(seq):
+    nomodseq = re.sub('\d+', '', seq)
+    nomodseq = re.sub('\+\.', '', seq)
+    return nomodseq
