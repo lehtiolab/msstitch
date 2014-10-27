@@ -47,12 +47,15 @@ def has_evidence_levels(fastafn):
 
 
 def get_uniprot_evidence_level(header):
+    """Returns uniprot protein existence evidence level for a fasta header.
+    Evidence levels are 1-5, but we return 5 - x since sorting still demands
+    that higher is better."""
     header = header.split()
     for item in header:
         item = item.split('=')
         try:
             if item[0] == 'PE':
-                return item[1]
+                return 5 - item[1]
         except IndexError:
             continue
     return False
