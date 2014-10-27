@@ -264,6 +264,7 @@ class ProteinGroupDB(DatabaseConnection):
         sql = ('INSERT INTO protein_coverage(protein_acc, coverage) '
                'VALUES(?, ?)')
         cursor.executemany(sql, coverage)
+        self.conn.commit()
 
     def store_protein_group_content(self, protein_groups):
         cursor = self.get_cursor()
