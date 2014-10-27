@@ -194,7 +194,7 @@ class ProteinGroupDB(DatabaseConnection):
             'VALUES(?)', proteins)
         if evidence_lvls:
             cursor.executemany(
-                'INSERT INTO protein_evidence(protein_acc, evidence) '
+                'INSERT INTO protein_evidence(protein_acc, evidence_lvl) '
                 'VALUES(?, ?)', evidence_lvls)
         if sequences:
             cursor.executemany(
