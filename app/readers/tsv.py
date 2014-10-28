@@ -67,5 +67,5 @@ def get_pepproteins(line, unroll=False):
 
 def strip_modifications(seq):
     nomodseq = re.sub('\d+', '', seq)
-    nomodseq = re.sub('\+\.', '', seq)
+    nomodseq = re.sub('\+\.', '', nomodseq)
     return nomodseq
