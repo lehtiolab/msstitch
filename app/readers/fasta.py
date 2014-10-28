@@ -16,8 +16,7 @@ def get_protein_acc_iter(fastafn):
 
 
 def parse_protein_identifier(record):
-    ## FIXME now parsing uniprot only...
-    return record.id.split('|')[1]
+    return record.id
 
 
 def get_sequence_iter(fastafn):
