@@ -16,6 +16,13 @@ def generate_psms_quanted(quantdbfn, tsvfn, quantheader, oldheader):
         yield outpsm
 
 
+def get_full_and_quant_headers(oldheader, quantdbfn):
+    quantdb = sqlite.QuantDB(quantdbfn)
+    quantmap = quantdb.get_all_quantmaps()
+    qheader = sorted([x[0] for x in quantmap])
+    return oldheader + qheader, qheader
+
+
 def get_quant_header(oldheader, quantdbfn):
     quantdb = sqlite.QuantDB(quantdbfn)
     quantmap = quantdb.get_all_quantmaps()
@@ -40,4 +47,4 @@ def get_quant_NAs(quantdata, quantheader):
 def lookup_quant(spectrafile, psm_scan_nr, quantdb):
     """Outputs dict with keys == quantname, values == quantintensity."""
     dbquants = quantdb.lookup_quant(spectrafile, psm_scan_nr)
-    return {x[0]: x[1] for x in dbquants}
+    return {x[0]: str(x[1]) for x in dbquants}
