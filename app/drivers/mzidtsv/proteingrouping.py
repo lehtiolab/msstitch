@@ -28,6 +28,7 @@ class ProteinGroupDriver(MzidTSVDriver):
             coverage = False
         confkey = self.oldheader[int(self.confcol) - 1]
         protgroupdb = lookups.create_protein_pep_lookup(self.fn,
+                                                        self.workdir,
                                                         self.oldheader,
                                                         confkey,
                                                         self.conflvl,

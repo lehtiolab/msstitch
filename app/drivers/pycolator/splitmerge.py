@@ -16,6 +16,7 @@ class SplitDriver(base.PycolatorDriver):
             self.set_features(filter_type)
             self.outsuffix = td[filter_type]
             self.write()
+        self.finish()
 
     def set_features(self, filter_type):
         """ Calls splitter to split percolator output into target/decoy elements.

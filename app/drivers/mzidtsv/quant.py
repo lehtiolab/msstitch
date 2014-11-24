@@ -29,4 +29,5 @@ class TSVQuantDriver(MzidTSVDriver):
         """
         fn_spectra = spectrareader.mzml_generator(self.spectrafns)
         consensus_quants = openmsreader.quant_generator(self.quantfns)
-        return lookups.create_quant_lookup(fn_spectra, consensus_quants)
+        return lookups.create_quant_lookup(fn_spectra, self.workdir,
+                                           consensus_quants)

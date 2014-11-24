@@ -6,13 +6,13 @@ from app.readers import openms as openmsreader
 from app.readers import spectra as specreader
 
 
-def create_quant_lookup(fn_spectra, consensus_els):
+def create_quant_lookup(fn_spectra, workdir, consensus_els):
     """Creates an sqlite lookup table of scannrs with quant data.
 
     spectra - an iterable of tupled (filename, spectra)
     consensus_els - a iterable with consensusElements"""
     quantdb = sqlite.QuantDB()
-    quantdb.create_quantdb()
+    quantdb.create_quantdb(workdir)
     quants = {}
     count = 0
     for consensus_el in consensus_els:

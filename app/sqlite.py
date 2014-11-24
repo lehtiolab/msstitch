@@ -9,12 +9,12 @@ class DatabaseConnection(object):
         if self.fn is not None:
             self.connect(self.fn)
 
-    def create_db(self, tables, outfn=None, foreign_keys=False):
+    def create_db(self, workdir, tables, outfn=None, foreign_keys=False):
         """Creates a sqlite db file.
         tables is a dict with keys=table names, values=lists of cols.
         """
         if outfn is None:
-            fd, outfn = mkstemp(prefix='msstitcher_tmp_', dir=os.getcwd())
+            fd, outfn = mkstemp(prefix='msstitcher_tmp_', dir=workdir)
             os.close(fd)
         self.fn = outfn
         self.connect(outfn, foreign_keys)
@@ -54,7 +54,10 @@ class DatabaseConnection(object):
 
 class SearchSpaceDB(DatabaseConnection):
     def create_searchspacedb(self, outfn):
-        self.create_db({'known_searchspace': ['seqs TEXT']}, outfn)
+        """Creates a searchspace lookup sqlite. Since the ultimate output
+        of this is the sqlite file, we use None as workdir."""
+        self.create_db(None,
+                       {'known_searchspace': ['seqs TEXT']}, outfn)
 
     def write_peps(self, peps, reverse_seqs):
         """Writes peps to db. We can reverse to be able to look up
@@ -92,8 +95,9 @@ class SearchSpaceDB(DatabaseConnection):
 
 
 class QuantDB(DatabaseConnection):
-    def create_quantdb(self):
-        self.create_db({'quant': ['spectra_filename TEXT', 'scan_nr TEXT',
+    def create_quantdb(self, workdir):
+        self.create_db(workdir,
+                       {'quant': ['spectra_filename TEXT', 'scan_nr TEXT',
                                   'quantmap TEXT', 'intensity REAL']})
 
     def store_quants(self, quants):
@@ -132,8 +136,9 @@ EVIDENCE_LVL_INDEX = 7
 
 
 class ProteinGroupDB(DatabaseConnection):
-    def create_pgdb(self):
-        self.create_db({'psms': ['psm_id TEXT PRIMARY KEY NOT NULL',
+    def create_pgdb(self, workdir):
+        self.create_db(workdir,
+                       {'psms': ['psm_id TEXT PRIMARY KEY NOT NULL',
                                  'sequence TEXT',
                                  'score TEXT'],
                         'psmrows': ['psm_id TEXT',

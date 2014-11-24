@@ -31,6 +31,7 @@ class PycolatorDriver(base.BaseDriver):
         self.prepare()
         self.set_features()
         self.write()
+        self.finish()
 
     def write(self):
         outfn = self.create_outfilepath(self.fn, self.outsuffix)

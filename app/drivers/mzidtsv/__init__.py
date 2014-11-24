@@ -8,6 +8,7 @@ class MzidTSVDriver(base.BaseDriver):
         self.oldheader = tsvreader.get_tsv_header(self.fn)
         self.get_psms()
         self.write()
+        self.finish()
 
     def write(self):
         outfn = self.create_outfilepath(self.fn, self.outsuffix)
