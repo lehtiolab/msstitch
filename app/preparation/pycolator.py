@@ -1,7 +1,7 @@
 import re
 from lxml import etree
 from app import formatting
-from app import sqlite
+from app.lookups.sqlite import searchspace as sqlite
 from app.readers import pycolator as reader
 
 

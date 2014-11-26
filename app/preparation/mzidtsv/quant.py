@@ -1,4 +1,4 @@
-from app import sqlite
+from app.lookups.sqlite import quant as sqlite
 from app.readers import tsv as readers
 from app.dataformats import mzidtsv as mzidtsvdata
 

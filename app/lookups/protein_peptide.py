@@ -2,7 +2,7 @@ MZIDTSV_PEP_COL = 9
 MZIDTSV_PROT_COL = 10
 DB_STORE_CHUNK = 500000
 
-from app.sqlite import ProteinGroupDB
+from app.lookups.sqlite.proteingroups import ProteinGroupDB
 from app.readers import tsv as tsvreader
 from app.readers import fasta as fastareader
 from app.preparation.mzidtsv import confidencefilters as conffilt

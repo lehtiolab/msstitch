@@ -2,7 +2,7 @@ from collections import OrderedDict
 
 from app.readers import tsv as tsvreader
 from app.dataformats import mzidtsv as mzidtsvdata
-import app.sqlite as lookups
+import app.lookups.sqlite.proteingroups as lookups
 import app.preparation.mzidtsv.proteingroup_sorters as sorters
 from app.preparation.mzidtsv import confidencefilters as conffilt
 

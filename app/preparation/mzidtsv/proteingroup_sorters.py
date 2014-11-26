@@ -1,4 +1,4 @@
-import app.sqlite as lookups
+import app.lookups.sqlite.proteingroups as lookups
 
 
 def sort_protein_groups(pgroups, coverage, evidence_levels):
