@@ -21,6 +21,9 @@ class DatabaseConnection(object):
             os.close(fd)
         self.fn = outfn
         self.connect(outfn, foreign_keys)
+        self.create_tables(tables)
+
+    def create_tables(self, tables):
         cursor = self.get_cursor()
         for table in tables:
             columns = tables[table]
