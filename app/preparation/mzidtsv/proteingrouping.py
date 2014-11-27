@@ -16,14 +16,20 @@ def get_all_proteins_from_unrolled_psm(rownr, pgdb):
     return pgdb.get_proteins_for_peptide([rownr])
 
 
-def generate_psms_with_proteingroups(fn, oldheader, newheader, pgdb, confkey,
-                                     conflvl, lower_is_better, unroll=False,
-                                     coverage=False, evidence_levels=False):
+def build_proteingroup_db(fn, oldheader, pgdb, confkey, conflvl,
+                          lower_is_better, unroll, coverage):
     build_master_db(fn, oldheader, pgdb, confkey, conflvl, lower_is_better,
                     unroll)
     build_content_db(pgdb)
     if coverage:
         build_coverage(pgdb)
+
+
+def generate_psms_with_proteingroups(fn, oldheader, newheader, pgdb, confkey,
+                                     conflvl, lower_is_better, unroll=False,
+                                     coverage=False, evidence_levels=False):
+    build_proteingroup_db(fn, oldheader, pgdb, confkey, conflvl,
+                          lower_is_better, unroll, coverage)
     rownr = 0
     all_protein_group_content = pgdb.get_all_psms_proteingroups(
         coverage, evidence_levels)

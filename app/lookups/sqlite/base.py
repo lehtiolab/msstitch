@@ -9,6 +9,9 @@ class DatabaseConnection(object):
         if self.fn is not None:
             self.connect(self.fn)
 
+    def get_fn(self):
+        return self.fn
+
     def create_db(self, workdir, tables, outfn=None, foreign_keys=False):
         """Creates a sqlite db file.
         tables is a dict with keys=table names, values=lists of cols.
