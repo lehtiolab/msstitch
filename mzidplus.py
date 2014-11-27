@@ -46,11 +46,11 @@ parser.add_argument('-c', dest='command', type=str,
                     'PSMs, their statistics and their quantification data.\n'
                     'Needs except these also the corresponding mzML spectra\n'
                     'files to correlate retention time to scan nrs.\n'
-                    'proteingroup   - Groups proteins from of mzid2tsv\n'
+                    'proteingrouplookup  - Groups proteins from mzid2tsv\n'
                     'output. With flags --confidence-lvl, --confidence-col,\n'
-                    '--confidence-better, --fasta\n',
-#                    'conf_filter - Filter out all rows of tsv with \n'
-#                    'confidence value better than the specified one.\n'
+                    '--confidence-better, --fasta\n'
+                    'proteingroup   - As proteingrouplookup, but\n'
+                    'outputs mzidtsv file with protein groups.\n',
                     required=True
                     )
 parser.add_argument('-i', dest='infile', help='TSV table of mzIdentML',
@@ -108,6 +108,7 @@ commandmap = {
     'mergetsv': mergedrivers.MzidTSVConcatenateDriver,
     'quanttsv': quantdrivers.TSVQuantDriver,
     'proteingroup': pgdrivers.ProteinGroupDriver,
+    'proteingrouplookup': pgdrivers.ProteinGroupLookupDriver,
 }
 
 command = commandmap[args.command](**vars(args))
