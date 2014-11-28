@@ -57,8 +57,9 @@ class ProteinGroupLookupDriver(ProteinGroupDriver):
         # FIXME Should really be called process_psms, but have to change in
         # all mzidtsv drivers
         confkey = self.oldheader[int(self.confcol) - 1]
-        prot_pep_lookup = self.create_protein_pep_lookup(confkey)
-        prep.build_proteingroup_db(self.fn, self.oldheader, prot_pep_lookup,
+        self.prot_pep_lookup = self.create_protein_pep_lookup(confkey)
+        prep.build_proteingroup_db(self.fn, self.oldheader,
+                                   self.prot_pep_lookup,
                                    confkey, self.conflvl, self.lowerbetter,
                                    self.unroll, self.coverage)
 
