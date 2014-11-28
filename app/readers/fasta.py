@@ -10,11 +10,12 @@ def get_proteins_for_db(fastafn, evidence_levels=False):
     for record in parse_fasta(fastafn):
         objects[parse_protein_identifier(record)] = record
     if evidence_levels:
-        return (((acc,) for acc in list(objects)), 
+        return (((acc,) for acc in list(objects)),
                 ((acc, str(record.seq)) for acc, record in objects.items()),
-                ((acc, get_uniprot_evidence_level(record.description)) for acc, record in objects.items()))
+                ((acc, get_uniprot_evidence_level(record.description))
+                 for acc, record in objects.items()))
     else:
-        return (((acc,) for acc in list(objects)), 
+        return (((acc,) for acc in list(objects)),
                 ((acc, str(record.seq)) for acc, record in objects.items()),
                 False)
 
