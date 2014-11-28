@@ -1,5 +1,5 @@
 from Bio import SeqIO
-from app import sqlite
+from app.lookups.sqlite import searchspace as sqlite
 
 
 def create_searchspace(dbfn, workdir, outfile, proline_cut=False,

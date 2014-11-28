@@ -1,6 +1,6 @@
 from decimal import Decimal, getcontext
 
-from app import sqlite
+from app.lookups.sqlite import quant as sqlite
 from app import formatting
 from app.readers import openms as openmsreader
 from app.readers import spectra as specreader
