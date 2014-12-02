@@ -13,7 +13,15 @@ def generate_tsv_lines_multifile(fns, header):
                                           for fn in fns])
 
 
+def generate_tsv_proteins(fn, header):
+    return generate_split_tsv_lines(fn, header)
+
+
 def generate_tsv_psms(fn, header):
+    return generate_split_tsv_lines(fn, header)
+
+
+def generate_split_tsv_lines(fn, header):
     """Returns dicts with header-keys and psm statistic values"""
     for line in generate_tsv_psms_line(fn):
         yield {x: y for (x, y) in zip(header, line.strip().split('\t'))}
