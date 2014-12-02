@@ -257,3 +257,32 @@ class ProteinGroupDB(DatabaseConnection):
         proteins_not_in_group = cursor.execute(not_in_sql,
                                                proteins + peptides)
         return [x[0] for x in proteins_not_in_group]
+
+
+class ProteinGroupProteinTableDB(ProteinGroupDB):
+    def add_tables(self):
+        self.create_tables({'prot_desc': ['protein_acc TEXT',
+                                          'description TEXT',
+                                          'FOREIGN KEY(protein_acc) '
+                                          'REFERENCES proteins(protein_acc)'],
+                            })
+
+    def store_descriptions(self, descriptions):
+        cursor = self.get_cursor()
+        cursor.executemany(
+            'INSERT INTO prot_desc(protein_acc, description) '
+            'VALUES(?, ?)', descriptions)
+        self.conn.commit()
+
+    def get_protein_data(self, protein_acc):
+        fields = ['psm.psm_id', 'psm.sequence', 'pgc.master',
+                  'pgc.protein_acc', 'pcov.coverage', 'pd.description']
+        joins = [('psm_protein_groups', 'ppg', 'psm_id'),
+                 ('protein_group_content', 'pgc', 'master')]
+        joins.append(('protein_coverage', 'pc', 'protein_acc'))
+        join_sql = '\n'.join(['JOIN {0} AS {1} USING({2})'.format(
+            j[0], j[1], j[2]) for j in joins])
+        sql = 'SELECT {0} FROM protein_group_content AS pgc {1}'.format(
+            ', '.join(fields), join_sql)
+        cursor = self.get_cursor()
+        return cursor.execute(sql)
