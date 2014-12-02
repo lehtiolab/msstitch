@@ -49,5 +49,6 @@ def add_protein_data(proteins, header, pgdb):
 
 
 def collect_descriptions(pgdb, fastafn):
+    pgdb.add_tables()
     protein_descriptions = fasta.get_proteins_descriptions(fastafn)
     pgdb.store_descriptions(protein_descriptions)
