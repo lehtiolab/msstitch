@@ -1,5 +1,5 @@
 from app.readers import fasta
-from app.dataformats import prottabledata
+from app.dataformats import prottable as prottabledata
 
 
 def get_header_with_proteindata(header):
