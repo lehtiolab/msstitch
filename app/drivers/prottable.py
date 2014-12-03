@@ -1,3 +1,5 @@
+import os
+import shutil
 from app.drivers.base import BaseDriver
 from app.writers import prottable as writers
 from app.readers import tsv as reader
@@ -15,9 +17,16 @@ class AddProteinInfoDriver(BaseDriver):
 
     def run(self):
         self.oldheader = reader.get_tsv_header(self.fn)
+        self.copy_db_to_workdir()
         self.set_protein_generator()
         self.write()
         self.finish()
+
+    def copy_db_to_workdir(self):
+        pgdbfn = os.path.basename(self.pgdb)
+        copied_lookup = os.path.join(self.workdir, pgdbfn)
+        shutil.copy(self.pgdb, copied_lookup)
+        self.pgdb = copied_lookup
 
     def write(self):
         outfn = self.create_outfilepath(self.fn, self.outsuffix)
