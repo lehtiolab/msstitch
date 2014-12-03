@@ -139,6 +139,7 @@ class ProteinGroupDB(DatabaseConnection):
             'INSERT INTO psm_protein_groups(psm_id, master) '
             'VALUES(?, ?)', psms)
         self.conn.commit()
+        self.index_column('psm_pg_index', 'psm_protein_groups', 'master')
 
     def store_coverage(self, coverage):
         cursor = self.get_cursor()
@@ -146,6 +147,7 @@ class ProteinGroupDB(DatabaseConnection):
                'VALUES(?, ?)')
         cursor.executemany(sql, coverage)
         self.conn.commit()
+        self.index_column('cov_index', 'protein_coverage', 'protein_acc')
 
     def store_protein_group_content(self, protein_groups):
         cursor = self.get_cursor()
@@ -154,6 +156,8 @@ class ProteinGroupDB(DatabaseConnection):
                            'psm_count, protein_score) '
                            'VALUES(?, ?, ?, ?, ?)', protein_groups)
         self.conn.commit()
+        self.index_column('pgc_master_index', 'protein_group_content',
+                          'master')
 
     def get_allpsms_masters(self):
         sql = ('SELECT pgm.protein_acc, pp.psm_id FROM protein_group_master '
@@ -266,6 +270,7 @@ class ProteinGroupProteinTableDB(ProteinGroupDB):
                                           'FOREIGN KEY(protein_acc) '
                                           'REFERENCES proteins(protein_acc)'],
                             })
+        self.index_column('protdesc_index', 'prot_desc', 'protein_acc')
 
     def store_descriptions(self, descriptions):
         cursor = self.get_cursor()
