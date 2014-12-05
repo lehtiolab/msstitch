@@ -111,6 +111,7 @@ def build_content_db(pgdb):
                                                             pgdb))
             psms = [psm]
         lastmaster = master
+    protein_groups.extend(get_protein_group_content(lastmaster, psms, pgdb))
     pgdb.store_protein_group_content(protein_groups)
 
 
