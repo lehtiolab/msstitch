@@ -1,5 +1,3 @@
-import os
-import shutil
 from app.drivers.base import BaseDriver
 from app.writers import prottable as writers
 from app.readers import tsv as reader
@@ -13,7 +11,7 @@ class AddProteinInfoDriver(BaseDriver):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.fasta = kwargs.get('fasta')
-        self.pgdb = kwargs.get('protgroupdb')
+        self.lookup = kwargs.get('protgroupdb')
 
     def run(self):
         self.oldheader = reader.get_tsv_header(self.fn)
@@ -22,19 +20,12 @@ class AddProteinInfoDriver(BaseDriver):
         self.write()
         self.finish()
 
-    def copy_db_to_workdir(self):
-        pgdbfn = os.path.basename(self.pgdb)
-        copied_lookup = os.path.join(self.workdir, pgdbfn)
-        shutil.copy(self.pgdb, copied_lookup)
-        self.pgdb = copied_lookup
-
     def write(self):
         outfn = self.create_outfilepath(self.fn, self.outsuffix)
         writers.write_prottable(self.header, self.proteins, outfn)
 
     def set_protein_generator(self):
-        protgroupdb = ProteinGroupProteinTableDB(self.pgdb)
-        # FIXME copy db file to workdir first
+        protgroupdb = ProteinGroupProteinTableDB(self.lookup)
         preparation.collect_descriptions(protgroupdb, self.fasta)
         self.header = preparation.get_header_with_proteindata(self.oldheader)
         proteins = reader.generate_tsv_proteins(self.fn, self.oldheader)

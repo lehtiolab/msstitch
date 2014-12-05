@@ -49,8 +49,10 @@ parser.add_argument('-c', dest='command', type=str,
                     'proteingrouplookup  - Groups proteins from mzid2tsv\n'
                     'output. With flags --confidence-lvl, --confidence-col,\n'
                     '--confidence-better, --fasta\n'
-                    'proteingroup   - As proteingrouplookup, but\n'
-                    'outputs mzidtsv file with protein groups.\n',
+                    'proteingroup   - Takes lookup SQLite result from \n'
+                    'proteingrouplookup, uses it to output mzidtsv file with\n'
+                    'protein groups. Same flags as proteingrouplookup, and\n'
+                    '--protgroupdb \n',
                     required=True
                     )
 parser.add_argument('-i', dest='infile', help='TSV table of mzIdentML',

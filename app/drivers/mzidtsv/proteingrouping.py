@@ -18,10 +18,30 @@ class ProteinGroupDriver(MzidTSVDriver):
         self.evidence_levels = None
         self.fasta = kwargs.get('fasta', False)
         self.coverage = self.fasta is not False
+        self.lookup = kwargs.get('protgroupdb')
 
     def parse_fasta(self):
         if self.fasta:
             self.evidence_levels = fasta.has_evidence_levels(self.fasta)
+
+    def get_psms(self):
+        confkey = self.oldheader[int(self.confcol) - 1]
+        self.copy_db_to_workdir()
+        self.header = prep.get_header_with_proteingroups(self.oldheader)
+        self.psms = prep.generate_psms_with_proteingroups(self.fn,
+                                                          self.oldheader,
+                                                          self.header,
+                                                          self.lookup,
+                                                          confkey,
+                                                          self.conflvl,
+                                                          self.lowerbetter,
+                                                          self.unroll,
+                                                          self.coverage,
+                                                          self.evidence_levels)
+
+
+class ProteinGroupLookupDriver(MzidTSVDriver):
+    outsuffix = '_protgrouplookup.txt'
 
     def create_protein_pep_lookup(self, confkey):
         return lookups.create_protein_pep_lookup(self.fn,
@@ -35,35 +55,16 @@ class ProteinGroupDriver(MzidTSVDriver):
                                                  self.evidence_levels)
 
     def get_psms(self):
-        confkey = self.oldheader[int(self.confcol) - 1]
-        protgroupdb = self.create_protein_pep_lookup(confkey)
-        self.header = prep.get_header_with_proteingroups(self.oldheader)
-        self.psms = prep.generate_psms_with_proteingroups(self.fn,
-                                                          self.oldheader,
-                                                          self.header,
-                                                          protgroupdb,
-                                                          confkey,
-                                                          self.conflvl,
-                                                          self.lowerbetter,
-                                                          self.unroll,
-                                                          self.coverage,
-                                                          self.evidence_levels)
-
-
-class ProteinGroupLookupDriver(ProteinGroupDriver):
-    outsuffix = '_protgrouplookup.txt'
-
-    def get_psms(self):
         # FIXME Should really be called process_psms, but have to change in
         # all mzidtsv drivers
         confkey = self.oldheader[int(self.confcol) - 1]
-        self.prot_pep_lookup = self.create_protein_pep_lookup(confkey)
+        self.lookup = self.create_protein_pep_lookup(confkey)
         prep.build_proteingroup_db(self.fn, self.oldheader,
-                                   self.prot_pep_lookup,
+                                   self.lookup,
                                    confkey, self.conflvl, self.lowerbetter,
                                    self.unroll, self.coverage)
 
     def write(self):
         """Moves outfile from workdir to destination"""
         outfn = self.create_outfilepath(self.fn, self.outsuffix)
-        shutil.move(self.prot_pep_lookup.get_fn(), outfn)
+        shutil.move(self.lookup.get_fn(), outfn)

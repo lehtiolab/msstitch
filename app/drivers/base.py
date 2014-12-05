@@ -25,3 +25,9 @@ class BaseDriver(object):
         basefn = os.path.basename(fn)
         outfn = basefn + suffix
         return os.path.join(self.outdir, outfn)
+
+    def copy_db_to_workdir(self):
+        lookupfn = os.path.basename(self.lookup)
+        copied_lookup = os.path.join(self.workdir, lookupfn)
+        shutil.copy(self.lookup, copied_lookup)
+        self.lookup = copied_lookup
