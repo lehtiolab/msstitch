@@ -4,6 +4,7 @@ from app.preparation.mzidtsv import proteingrouping as prep
 from app.lookups import protein_peptide as lookups
 from app.drivers.mzidtsv import MzidTSVDriver
 from app.readers import fasta
+from app.lookups.sqlite.proteingroups import ProteinGroupProteinTableDB
 
 
 class ProteinGroupDriver(MzidTSVDriver):
@@ -27,11 +28,12 @@ class ProteinGroupDriver(MzidTSVDriver):
     def get_psms(self):
         confkey = self.oldheader[int(self.confcol) - 1]
         self.copy_db_to_workdir()
+        protgroupdb = ProteinGroupProteinTableDB(self.lookup)
         self.header = prep.get_header_with_proteingroups(self.oldheader)
         self.psms = prep.generate_psms_with_proteingroups(self.fn,
                                                           self.oldheader,
                                                           self.header,
-                                                          self.lookup,
+                                                          protgroupdb,
                                                           confkey,
                                                           self.conflvl,
                                                           self.lowerbetter,

@@ -28,8 +28,6 @@ def build_proteingroup_db(fn, oldheader, pgdb, confkey, conflvl,
 def generate_psms_with_proteingroups(fn, oldheader, newheader, pgdb, confkey,
                                      conflvl, lower_is_better, unroll=False,
                                      coverage=False, evidence_levels=False):
-    build_proteingroup_db(fn, oldheader, pgdb, confkey, conflvl,
-                          lower_is_better, unroll, coverage)
     rownr = 0
     all_protein_group_content = pgdb.get_all_psms_proteingroups(
         coverage, evidence_levels)
