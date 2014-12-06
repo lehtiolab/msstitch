@@ -91,6 +91,10 @@ parser.add_argument('--confidence-better', dest='conftype', help='Confidence '
                     'of [higher, lower]',
                     type=lambda x: parser_value_in_list(parser, x, ['higher',
                                                                     'lower']))
+parser.add_argument('--protgroupdb', dest='protgroupdb', help='Protein group '
+                    'lookup database in SQLite format. Can be created using '
+                    'mzidplus.py command.',
+                    type=lambda x: parser_file_exists(parser, x))
 parser.add_argument('--unroll', dest='unroll', help='Flag. The tsv input file '
                     'from Mzid2TSV contains either one PSM per line with all '
                     'the proteins of that shared peptide on the same line (not'
