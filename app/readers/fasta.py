@@ -22,7 +22,7 @@ def get_proteins_for_db(fastafn, evidence_levels=False):
 
 def get_proteins_descriptions(fastafn):
     for record in parse_fasta(fastafn):
-        yield (record.id, record.desc)
+        yield (record.id, record.description)
 
 
 def parse_protein_identifier(record):
