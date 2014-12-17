@@ -12,13 +12,6 @@ class ProteinGroupDriver(MzidTSVDriver):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.confcol = kwargs.get('confcol', None)
-        self.conflvl = kwargs.get('conflvl', None)
-        self.lowerbetter = kwargs.get('conftype', None) == 'lower'
-        self.unroll = kwargs.get('unroll', False)
-        self.evidence_levels = None
-        self.fasta = kwargs.get('fasta', False)
-        self.coverage = self.fasta is not False
         self.lookup = kwargs.get('protgroupdb')
 
     def parse_fasta(self):

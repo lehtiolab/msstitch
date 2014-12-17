@@ -4,6 +4,16 @@ from app.writers import mzidtsv as writers
 
 
 class MzidTSVDriver(base.BaseDriver):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.confcol = kwargs.get('confcol', None)
+        self.conflvl = kwargs.get('conflvl', None)
+        self.lowerbetter = kwargs.get('conftype', None) == 'lower'
+        self.unroll = kwargs.get('unroll', False)
+        self.evidence_levels = None
+        self.fasta = kwargs.get('fasta', False)
+        self.coverage = self.fasta is not False
+
     def run(self):
         self.oldheader = tsvreader.get_tsv_header(self.fn)
         self.parse_fasta()
