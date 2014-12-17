@@ -40,7 +40,7 @@ def get_spec_scan_nr(fn_spectra, cons_rt):
     retention time in cons_rt, when given a generator of multiple
     spectra files in fn_spectra.
     The generator is a tuple of fn, spectrum, namespace."""
-    getcontext().prec = 8  # sets decimal point precision
+    getcontext().prec = 14 # sets decimal point precision
     cons_rt_dec = Decimal(cons_rt)
     for fn, spectrum, ns in fn_spectra:
         mzml_rt = Decimal(specreader.get_mzml_rt(spectrum, ns))
