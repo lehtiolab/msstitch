@@ -7,9 +7,9 @@ from app.drivers import BaseDriver
 
 class LookupDriver(BaseDriver):
     def __init__(self, **kwargs):
-        self.spectrafns = kwargs.get('spectra', None)  # not for all lookups
         lookupfn = kwargs.get('lookup', None)
         if lookupfn is not None:
+            # FIXME make this general
             self.lookup = lookups.get_quant_lookup(lookupfn)
         else:
             self.lookup = lookups.initiate_quant_lookup(self.workdir,
@@ -27,7 +27,13 @@ class LookupDriver(BaseDriver):
         shutil.move(self.lookup.get_fn(), outfn)
 
 
-class SpectraLookupDriver(LookupDriver):
+class QuantLookupDriver(LookupDriver):
+    def __init__(self, **kwargs):
+        super().__init__(kwargs)
+        self.spectrafns = kwargs.get('spectra', None)  # not for all lookups
+
+
+class SpectraLookupDriver(QuantLookupDriver):
     outsuffix = 'spectralookup.sqlite'
 
     def create_lookup(self):
@@ -35,7 +41,7 @@ class SpectraLookupDriver(LookupDriver):
         lookups.create_spectra_lookup(self.lookup, fn_spectra)
 
 
-class IsobaricQuantLookupDriver(LookupDriver):
+class IsobaricQuantLookupDriver(QuantLookupDriver):
     outsuffix = 'isobquantlookup.sqlite'
 
     def __init__(self, **kwargs):
@@ -51,7 +57,7 @@ class IsobaricQuantLookupDriver(LookupDriver):
                                              consensus_quants)
 
 
-class PrecursorQuantLookupDriver(LookupDriver):
+class PrecursorQuantLookupDriver(QuantLookupDriver):
     outsuffix = '_ms1quantlookup.sqlite'
 
     def __init__(self, **kwargs):
