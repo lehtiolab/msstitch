@@ -27,6 +27,16 @@ def generate_psms_quanted(quantdbfn, tsvfn, isob_header, oldheader,
 
 def get_full_and_isobaric_headers(oldheader, quantdbfn, isobaric=False,
                                   precursor=False):
+    # FIXME:
+    # if we let db decide, and already isobaric done on tsv gets a double db,
+    # then automatically we get twice isobaric on the tsv header. not good,
+    # because it will fuck up the psm dicts per line.
+    # also, maybe we should make sure there is no overwriting the header fields
+    # with new fields in case that would  happne, or output a set.
+    # is there any other scenario where we dont want a specific part of quant
+    # data included in the tsv except 'it is already there'?
+    # is we're outputting a set, we should do this as a general method for tsv
+    # driven stuff. then output here oldheader and new fields as tuple.
     fullheader = oldheader
     if precursor:
         fullheader += mzidtsvdata.HEADER_PRECURSOR_QUANT
@@ -38,12 +48,6 @@ def get_full_and_isobaric_headers(oldheader, quantdbfn, isobaric=False,
     else:
         isob_header = None
     return fullheader, isob_header
-
-
-def get_quant_header(oldheader, quantdbfn):
-    quantdb = sqlite.QuantDB(quantdbfn)
-    quantmap = quantdb.get_all_quantmaps()
-    return oldheader + sorted([x[0] for x in quantmap])
 
 
 def create_tsv_header_quant(tsvfn, quantheader):

@@ -43,9 +43,9 @@ parser.add_argument('-c', dest='command', type=str,
                     'output. Make sure headers are same in all files.\n'
                     'quanttsv       - Add quantitative data from openMS\n'
                     'consensusXML to a tab separated file with\n'
-                    'PSMs, their statistics and their quantification data.\n'
-                    'Needs except these also the corresponding mzML spectra\n'
-                    'files to correlate retention time to scan nrs.\n'
+                    'PSMs. Needs to be passed a lookup db with --lookup,\n'
+                    'which has to contain quant information, and\n'
+                    'optionally --isobaric, --precursor, --rttol, --mztol.\n'
                     'proteingrouplookup  - Groups proteins from mzid2tsv\n'
                     'output. With flags --confidence-lvl, --confidence-col,\n'
                     '--confidence-better, --fasta\n'
@@ -72,11 +72,6 @@ parser.add_argument('--workdir', dest='workdir',
                     )
 parser.add_argument('--mzid', dest='mzid', help='mzIdentML file',
                     type=lambda x: parser_file_exists(parser, x))
-parser.add_argument('--quants', dest='quants', help='Quants from OpenMS in '
-                    'consXML format', nargs='+',
-                    type=lambda x: parser_file_exists(parser, x))
-parser.add_argument('--spectra', dest='spectra', help='mzML files', nargs='+',
-                    type=lambda x: parser_file_exists(parser, x))
 parser.add_argument('--fasta', dest='fasta', help='FASTA sequence database, '
                     'to optionally use with proteingrouping to enable sorting '
                     'on coverage, and in case of UNIPROT FASTA, evidence '
@@ -91,6 +86,28 @@ parser.add_argument('--confidence-better', dest='conftype', help='Confidence '
                     'of [higher, lower]',
                     type=lambda x: parser_value_in_list(parser, x, ['higher',
                                                                     'lower']))
+parser.add_argument('--precursor', dest='precursor', help='Flag. Specifies\n'
+                    'quant data from MS1 precursors should be added from\n'
+                    'lookup DB to tsv file.',
+                    action='store_const', const=True, default=False)
+parser.add_argument('--isobaric', dest='isobaric', help='Flag. Specifies\n'
+                    'quant data from isobaric tags should be added from\n'
+                    'lookup DB to tsv file.',
+                    action='store_const', const=True, default=False)
+parser.add_argument('--rttol', dest='rttol', help='Specifies tolerance\n'
+                    'in retention time when mapping MS1 feature quant info\n'
+                    'to identifications in the PSM table.', type=float)
+parser.add_argument('--mztol', dest='mztol', help='Specifies tolerance\n'
+                    'in mass-to-charge when mapping MS1 feature quant info\n'
+                    'to identifications in the PSM table.', type=float)
+parser.add_argument('--mztoltype', dest='mztoltype', help='Type of tolerance\n'
+                    'in mass-to-charge when mapping MS1 feature quant info\n'
+                    'to identifications in the PSM table. One of ppm, Da.',
+                    type=lambda x: parser_value_in_list(parser, x, ['ppm',
+                                                                    'Da']))
+parser.add_argument('--lookup', dest='lookup', help='Lookup database in '
+                    'SQLite format, to be created using mslookup.py.',
+                    type=lambda x: parser_file_exists(parser, x))
 parser.add_argument('--protgroupdb', dest='protgroupdb', help='Protein group '
                     'lookup database in SQLite format. Can be created using '
                     'mzidplus.py command.',
