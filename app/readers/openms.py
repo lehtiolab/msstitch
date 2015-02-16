@@ -2,26 +2,26 @@ import os
 import app.readers.xml as basereader
 
 
-def quant_generator(consfiles):
-    return basereader.generate_tags_multiple_files(
-        consfiles,
-        'consensusElement',
-        ['consensusElementList'],
-    )
+def specfn_quant_generator(specfiles, quantfiles, tag, ignore_tags):
+    """Generates tuples of specfile and quant element for general formats"""
+    for specfn, qfn in zip(specfiles, quantfiles):
+        ns = basereader.get_namespace(qfn)
+        for quant_el in basereader.generate_xmltags(qfn, tag, ignore_tags, ns):
+            yield os.path.basename(specfn), quant_el
 
 
-def mzmlfn_feature_generator(spectrafiles, featfiles):
+def mzmlfn_cons_el_generator(specfiles, consfiles):
+    """Returns generation of tuples of spectra file and
+    consensusXML quant elements"""
+    return specfn_quant_generator(specfiles, consfiles, 'consensusElement',
+                                  ['consensusElementList'])
+
+
+def mzmlfn_feature_generator(specfiles, featfiles):
     """Returns tuple of spectrafile and features of OpenMS
     feature XML format"""
-    for specfn, featfn in zip(spectrafiles, featfiles):
-        ns = basereader.get_namespace(featfn)
-        features = basereader.generate_xmltags(
-            featfn,
-            'feature',
-            ['featureList'],
-            ns)
-        for feature in features:
-            yield os.path.basename(specfn), feature
+    return specfn_quant_generator(specfiles, featfiles, 'feature',
+                                  ['featureList'])
 
 
 def get_consxml_rt(cons_el):

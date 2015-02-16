@@ -51,10 +51,9 @@ class IsobaricQuantLookupDriver(QuantLookupDriver):
     def create_lookup(self):
         # FIXME here get quantmap for channel labels as dict {'0': '113', etc}
         # then pass this dict to create_isobaric_quant_lookup
-        fn_spectra = spectrareader.mzmlfn_spectra_generator(self.spectrafns)
-        consensus_quants = openmsreader.quant_generator(self.quantfns)
-        lookups.create_isobaric_quant_lookup(self.quantdb, fn_spectra,
-                                             consensus_quants)
+        mzmlfn_consxml = openmsreader.mzmlfn_cons_el_generator(self.spectrafns,
+                                                               self.quantfns)
+        lookups.create_isobaric_quant_lookup(self.quantdb, mzmlfn_consxml),
 
 
 class PrecursorQuantLookupDriver(QuantLookupDriver):
