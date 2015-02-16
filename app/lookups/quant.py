@@ -57,7 +57,7 @@ def create_spectra_lookup(quantdb, fn_spectra):
     """Stores all spectra rt and scan nr in db"""
     to_store = []
     for fn, spectrum, ns in fn_spectra:
-        mzml_rt = Decimal(specreader.get_mzml_rt(spectrum, ns))
+        mzml_rt = float(Decimal(specreader.get_mzml_rt(spectrum, ns)))
         scan_nr = specreader.get_spec_scan_nr(spectrum)
         to_store.append((fn, scan_nr, mzml_rt))
         if len(to_store) == 5000:

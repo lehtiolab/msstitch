@@ -22,7 +22,7 @@ def get_mzml_rt(spectrum, ns):
     for cvparam in scan.findall('{%s}cvParam' % ns['xmlns']):
         try:
             if cvparam.attrib['name'] == 'scan start time':
-                return float(cvparam.attrib['value'])
+                return cvparam.attrib['value']
         except KeyError:
             pass
 
