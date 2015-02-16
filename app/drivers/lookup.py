@@ -8,11 +8,12 @@ from app.drivers.base import BaseDriver
 class LookupDriver(BaseDriver):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        lookupfn = kwargs.get('lookup', None)
-        if lookupfn is not None:
+        self.lookupfn = kwargs.get('lookup', None)
+        if self.lookupfn is not None:
             # FIXME make this general
             self.lookup = lookups.get_quant_lookup(lookupfn)
         else:
+            self.lookupfn = 'msstitcher_lookup.sqlite' 
             self.lookup = lookups.initiate_quant_lookup(self.workdir)
 
     def run(self):
@@ -23,7 +24,7 @@ class LookupDriver(BaseDriver):
     def write_move(self):
         """Moves outfile from workdir to destination, used from different
         lookup creating commands"""
-        outfn = self.create_outfilepath(self.fn, self.outsuffix)
+        outfn = self.create_outfilepath(self.lookupfn, self.outsuffix)
         shutil.move(self.lookup.get_fn(), outfn)
 
 
