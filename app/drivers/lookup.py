@@ -2,18 +2,18 @@ import shutil
 from app.readers import spectra as spectrareader
 from app.readers import openms as openmsreader
 from app.lookups import quant as lookups
-from app.drivers import BaseDriver
+from app.drivers.base import BaseDriver
 
 
 class LookupDriver(BaseDriver):
     def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         lookupfn = kwargs.get('lookup', None)
         if lookupfn is not None:
             # FIXME make this general
             self.lookup = lookups.get_quant_lookup(lookupfn)
         else:
-            self.lookup = lookups.initiate_quant_lookup(self.workdir,
-                                                        foreign_keys=True)
+            self.lookup = lookups.initiate_quant_lookup(self.workdir)
 
     def run(self):
         self.create_lookup()
@@ -29,7 +29,7 @@ class LookupDriver(BaseDriver):
 
 class QuantLookupDriver(LookupDriver):
     def __init__(self, **kwargs):
-        super().__init__(kwargs)
+        super().__init__(**kwargs)
         self.spectrafns = kwargs.get('spectra', None)  # not for all lookups
 
 
@@ -37,7 +37,7 @@ class SpectraLookupDriver(QuantLookupDriver):
     outsuffix = 'spectralookup.sqlite'
 
     def __init__(self, **kwargs):
-        super().__init__(kwargs)
+        super().__init__(**kwargs)
         self.spectrafns = self.fn
 
     def create_lookup(self):
@@ -49,25 +49,25 @@ class IsobaricQuantLookupDriver(QuantLookupDriver):
     outsuffix = 'isobquantlookup.sqlite'
 
     def __init__(self, **kwargs):
-        super().__init__(kwargs)
+        super().__init__(**kwargs)
         self.consensusfns = self.fn
 
     def create_lookup(self):
         # FIXME here get quantmap for channel labels as dict {'0': '113', etc}
         # then pass this dict to create_isobaric_quant_lookup
         mzmlfn_consxml = openmsreader.mzmlfn_cons_el_generator(self.spectrafns,
-                                                               self.quantfns)
-        lookups.create_isobaric_quant_lookup(self.quantdb, mzmlfn_consxml),
+                                                               self.consensusfns)
+        lookups.create_isobaric_quant_lookup(self.lookup, mzmlfn_consxml),
 
 
 class PrecursorQuantLookupDriver(QuantLookupDriver):
     outsuffix = '_ms1quantlookup.sqlite'
 
     def __init__(self, **kwargs):
-        super().__init__(kwargs)
+        super().__init__(**kwargs)
         self.precursorfns = self.fn
 
     def create_lookup(self):
         specfn_feats = openmsreader.mzmlfn_feature_generator(self.spectrafns,
                                                              self.precursorfns)
-        lookups.create_precursor_quant_lookup(self.quantdb, specfn_feats)
+        lookups.create_precursor_quant_lookup(self.lookup, specfn_feats)

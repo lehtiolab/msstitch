@@ -6,7 +6,7 @@ mslookup - Creating SQLite lookups for internal and external use
 
 import argparse
 import os
-import app.drivers.lookups as drivers
+import app.drivers.lookup as drivers
 
 
 def parser_file_exists(currentparser, fn):
@@ -68,8 +68,9 @@ parser.add_argument('--spectra', dest='spectra', help='Spectra files in mzML\n'
 args = parser.parse_args()
 
 commandmap = {
-    'addprotdata': drivers.AddProteinInfoDriver,
-    #'createprottable': drivers.CreateProteinTableDriver,
+    'spectra': drivers.SpectraLookupDriver,
+    'isoquant': drivers.IsobaricQuantLookupDriver,
+    'ms1quant': drivers.PrecursorQuantLookupDriver,
 }
 
 command = commandmap[args.command](**vars(args))
