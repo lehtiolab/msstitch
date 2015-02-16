@@ -3,7 +3,7 @@ import app.readers.xml as basereader
 import app.readers.ml as ml
 
 
-def mzml_generator(mzmlfiles):
+def mzmlfn_spectra_generator(mzmlfiles):
     for fn in mzmlfiles:
         ns = basereader.get_namespace(fn)
         spectra = basereader.generate_xmltags(
