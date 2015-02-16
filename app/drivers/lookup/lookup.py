@@ -36,6 +36,10 @@ class QuantLookupDriver(LookupDriver):
 class SpectraLookupDriver(QuantLookupDriver):
     outsuffix = 'spectralookup.sqlite'
 
+    def __init__(self, **kwargs):
+        super().__init__(kwargs)
+        self.spectrafns = self.fn
+
     def create_lookup(self):
         fn_spectra = spectrareader.mzmlfn_spectra_generator(self.spectrafns)
         lookups.create_spectra_lookup(self.lookup, fn_spectra)
@@ -46,7 +50,7 @@ class IsobaricQuantLookupDriver(QuantLookupDriver):
 
     def __init__(self, **kwargs):
         super().__init__(kwargs)
-        self.consensusfns = kwargs.get('isob_quants', None)
+        self.consensusfns = self.fn
 
     def create_lookup(self):
         # FIXME here get quantmap for channel labels as dict {'0': '113', etc}
@@ -61,7 +65,7 @@ class PrecursorQuantLookupDriver(QuantLookupDriver):
 
     def __init__(self, **kwargs):
         super().__init__(kwargs)
-        self.precursorfns = kwargs.get('precur_quants', None)
+        self.precursorfns = self.fn
 
     def create_lookup(self):
         specfn_feats = openmsreader.mzmlfn_feature_generator(self.spectrafns,
