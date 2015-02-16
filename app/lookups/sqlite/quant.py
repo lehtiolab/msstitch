@@ -4,7 +4,8 @@ from app.lookups.sqlite.base import DatabaseConnection
 class QuantDB(DatabaseConnection):
     def create_quantdb(self, workdir):
         self.create_db(workdir,
-                       {'mzml': ['mzmlfilename TEXT',
+                       {
+                        'mzml': ['mzmlfilename TEXT',
                                  'scan_nr TEXT',
                                  'retention_time REAL'],
                         # FIXME in future, make possible to build full db in
@@ -23,27 +24,23 @@ class QuantDB(DatabaseConnection):
                         # FIXME lookup of ms1 quant like this:
                         # scannr -> rt from mzmltable; rt interval & mz
                         # interval -> ms1quants -> select best match on mz
-                        'isobaric_quant': ['mzmlfilename TEXT'
+                        'isobaric_quant': ['mzmlfilename TEXT',
                                            'retention_time REAL',
                                            'quantmap TEXT',
                                            'intensity REAL',
-                                           'FOREIGN KEY(mzmlfilename)',
+                                           'FOREIGN KEY(mzmlfilename)'
                                            'REFERENCES mzml '
-                                           'USING(mzmlfilename)'
-                                           'FOREIGN KEY(retention_time)',
+                                           'FOREIGN KEY(retention_time)'
                                            'REFERENCES mzml '
-                                           'USING(retention_time)'
                                            ],
                         'ms1_quant': ['mzmlfilename TEXT',
                                       'retention_time REAL', 'mz REAL',
                                       'charge INTEGER', 'intensity REAL',
-                                      'FOREIGN KEY(mzmlfilename)',
+                                      'FOREIGN KEY(mzmlfilename)'
                                       'REFERENCES mzml '
-                                      'USING(mzmlfilename)'
-                                      'FOREIGN KEY(retention_time)',
-                                      'REFERENCES mzml '
-                                      'USING(retention_time)'
-                                      ]})
+                                      'FOREIGN KEY(retention_time)'
+                                      'REFERENCES mzml ']
+                                      }, foreign_keys=True)
 
     def store_isobaric_quants(self, quants):
         self.store_many(
