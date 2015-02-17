@@ -64,6 +64,7 @@ def create_spectra_lookup(quantdb, fn_spectra):
             quantdb.store_mzmls(to_store)
             to_store = []
     quantdb.store_mzmls(to_store)
+    quantdb.index_mzml()
 
 
 def get_quant_data(cons_el):
