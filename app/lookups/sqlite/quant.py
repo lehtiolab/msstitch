@@ -72,10 +72,10 @@ class QuantDB(DatabaseConnection):
         self.index_column('rt_index', 'isobaric_quant', 'retention_time')
 
     def index_precursor_quants(self):
-        self.index_column('mzmlfn_index', 'isobaric_quant', 'mzmlfilename')
-        self.index_column('rt_index', 'isobaric_quant', 'retention_time')
-        self.index_column('charge_index', 'isobaric_quant', 'charge')
-        self.index_column('mz_index', 'isobaric_quant', 'mz')
+        self.index_column('mzmlfn_index', 'ms1_quant', 'mzmlfilename')
+        self.index_column('rt_index', 'ms1_quant', 'retention_time')
+        self.index_column('charge_index', 'ms1_quant', 'charge')
+        self.index_column('mz_index', 'ms1_quant', 'mz')
 
     def lookup_retention_time(self, spectrafile, scannr):
         cursor = self.get_cursor()

@@ -11,7 +11,7 @@ class LookupDriver(BaseDriver):
         self.lookupfn = kwargs.get('lookup', None)
         if self.lookupfn is not None:
             # FIXME make this general
-            self.lookup = lookups.get_quant_lookup(lookupfn)
+            self.lookup = lookups.get_quant_lookup(self.lookupfn)
         else:
             self.lookupfn = 'msstitcher_lookup.sqlite' 
             self.lookup = lookups.initiate_quant_lookup(self.workdir)
