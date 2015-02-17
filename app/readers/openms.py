@@ -5,8 +5,7 @@ import app.readers.xml as basereader
 def specfn_quant_generator(specfiles, quantfiles, tag, ignore_tags):
     """Generates tuples of specfile and quant element for general formats"""
     for specfn, qfn in zip(specfiles, quantfiles):
-        ns = basereader.get_namespace(qfn)
-        for quant_el in basereader.generate_xmltags(qfn, tag, ignore_tags, ns):
+        for quant_el in basereader.generate_xmltags(qfn, tag, ignore_tags):
             yield os.path.basename(specfn), quant_el
 
 
