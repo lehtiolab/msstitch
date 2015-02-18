@@ -24,9 +24,8 @@ def mzmlfn_feature_generator(specfiles, featfiles):
 
 
 def get_consxml_rt(cons_el):
-    """Returns consensusXML in minutes"""
-    rt = cons_el.find('centroid').attrib['rt']
-    return float(rt)
+    """Returns consensusXML in seconds"""
+    return cons_el.find('centroid').attrib['rt']
 
 
 def get_feature_info(feature):

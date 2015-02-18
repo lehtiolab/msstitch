@@ -25,6 +25,7 @@ def create_isobaric_quant_lookup(quantdb, specfn_consensus_els):
     quants = []
     for specfn, consensus_el in specfn_consensus_els:
         rt = openmsreader.get_consxml_rt(consensus_el)
+        rt = float(Decimal(rt) / 60)
         qdata = get_quant_data(consensus_el)
         for quantmap in sorted(qdata.keys()):
             quants.append((specfn, rt, quantmap, qdata[quantmap]))
@@ -42,7 +43,7 @@ def create_precursor_quant_lookup(quantdb, mzmlfn_featsxml):
     getcontext().prec = 14  # sets decimal point precision
     for specfn, feat_element in mzmlfn_featsxml:
         feat = openmsreader.get_feature_info(feat_element)
-        feat['rt'] = float(Decimal(feat['rt']))
+        feat['rt'] = float(Decimal(feat['rt']) / 60)
         features.append((specfn, feat['rt'], feat['mz'],
                          feat['charge'], feat['intensity'])
                         )
