@@ -72,6 +72,7 @@ def lookup_quant(specfile, scannr, charge, quantfunctions, mz,
     for func in quantfunctions:
         outquants.update(func(quantdb, specfile, scannr, charge,
                               mz, rttol, mztol, header=isob_header))
+    return outquants
 
 
 def lookup_iso_quant(quantdb, spectrafile, scannr, *args, **kwargs):
