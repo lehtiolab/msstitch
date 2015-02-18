@@ -78,7 +78,7 @@ class QuantDB(DatabaseConnection):
         cursor = self.get_cursor()
         cursor.execute(
             'SELECT retention_time FROM mzml '
-            'WHERE spectra_filename=? AND scan_nr=?',
+            'WHERE mzmlfilename=? AND scan_nr=?',
             (spectrafile, scannr))
         return cursor.fetchall()
 
@@ -88,7 +88,7 @@ class QuantDB(DatabaseConnection):
             'SELECT iq.quantmap, iq.intensity '
             'FROM mzml AS mz '
             'JOIN isobaric_quant AS iq USING(retention_time) '
-            'WHERE spectra_filename=? AND scan_nr=?', (spectrafile, scannr))
+            'WHERE mz.mzmlfilename=? AND mz.scan_nr=?', (spectrafile, scannr))
         return cursor.fetchall()
 
     def lookup_precursor_quant(self, spectrafile, charge, minrt, maxrt,
