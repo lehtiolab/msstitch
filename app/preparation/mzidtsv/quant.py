@@ -4,13 +4,13 @@ from app.dataformats import mzidtsv as mzidtsvdata
 
 
 def generate_psms_quanted(quantdbfn, tsvfn, isob_header, oldheader,
-                          is_ibariq=None, rttolerance=None, mztolerance=None,
+                          is_ibariq=False, rttolerance=None, mztolerance=None,
                           mztoltype=None):
     """Takes dbfn and connects, gets quants for each line in tsvfn, sorts
     them in line by using keys in quantheader list."""
     quantdb = sqlite.QuantDB(quantdbfn)
     quantfunctions = []
-    if is_ibariq is not None:
+    if is_ibariq:
         quantfunctions.append(lookup_iso_quant)
     if None not in [rttolerance, mztolerance, mztoltype]:
         quantfunctions.append(lookup_precursor_quant)
@@ -40,7 +40,7 @@ def get_full_and_isobaric_headers(oldheader, quantdbfn, isobaric=False,
     # driven stuff. then output here oldheader and new fields as tuple.
     fullheader = oldheader
     if precursor:
-        fullheader += mzidtsvdata.HEADER_PRECURSOR_QUANT
+        fullheader += [mzidtsvdata.HEADER_PRECURSOR_QUANT]
     if isobaric:
         quantdb = sqlite.QuantDB(quantdbfn)
         quantmap = quantdb.get_all_quantmaps()
@@ -71,7 +71,7 @@ def lookup_quant(specfile, scannr, charge, quantfunctions, mz,
     outquants = {}
     for func in quantfunctions:
         outquants.update(func(quantdb, specfile, scannr, charge,
-                              mz, rttol, mztol, header=isob_header))
+                              mz, rttol, mztol, mztoltype, header=isob_header))
     return outquants
 
 
@@ -81,7 +81,7 @@ def lookup_iso_quant(quantdb, spectrafile, scannr, *args, **kwargs):
     return get_quant_NAs({x[0]: str(x[1]) for x in dbquants}, kwargs['header'])
 
 
-def lookup_precursor_quant(quantheader, quantdb, spectrafile, scannr,
+def lookup_precursor_quant(quantdb, spectrafile, scannr,
                            charge, mz, rttol, mztol, mztoltype, **kwargs):
     """Lookup quant features in db that lie inside the m/z and retention time
     tolerance limits. Returns the one feature which has the best matching
@@ -93,11 +93,15 @@ def lookup_precursor_quant(quantheader, quantdb, spectrafile, scannr,
         elif toltype == 'Da':
             tolerance = float(tolerance)
         return center - tolerance, center + tolerance
-    ms2_rt = quantdb.lookup_retention_time(spectrafile, scannr)
+    ms2_rt = quantdb.lookup_retention_time(spectrafile, scannr)[0][0]
     minrt, maxrt = get_minmax(ms2_rt, rttol)
     minmz, maxmz = get_minmax(mz, mztol, mztoltype)
     dbquants = quantdb.lookup_precursor_quant(spectrafile, charge, minrt,
                                               maxrt, minmz, maxmz)
-    # m/z has index 1 from db output tuple
-    features = {abs(mz - x[1]): x for x in dbquants}
-    return {mzidtsvdata.HEADER_PRECURSOR_QUANT: features[max(features)]}
+    # m/z has index 0 from db output tuple
+    features = {abs(float(mz) - x[0]): x[1] for x in dbquants}
+    if features:
+        outquant = str(features[max(features)])
+    else:
+        outquant = 'NA'
+    return {mzidtsvdata.HEADER_PRECURSOR_QUANT: outquant}

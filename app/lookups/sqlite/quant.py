@@ -97,10 +97,10 @@ class QuantDB(DatabaseConnection):
         # we could replace the mz BETWEEN by filtering in python
         cursor = self.get_cursor()
         return cursor.execute(
-            'SELECT retention_time, mz, intensity '
-            'FROM precur_quants '
+            'SELECT mz, intensity '
+            'FROM ms1_quant '
             'WHERE mzmlfilename=? AND charge=? AND '
-            'rt BETWEEN ? AND ? AND mz BETWEEN ? AND ?',
+            'retention_time BETWEEN ? AND ? AND mz BETWEEN ? AND ?',
             (spectrafile, charge, minrt, maxrt, minmz, maxmz))
 
     def get_all_quantmaps(self):
