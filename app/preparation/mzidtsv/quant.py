@@ -89,19 +89,19 @@ def lookup_precursor_quant(quantdb, spectrafile, scannr,
     def get_minmax(center, tolerance, toltype=None):
         center = float(center)
         if toltype == 'ppm':
-            tolerance = int(tolerance) / 1000 * center
+            tolerance = int(tolerance) / 1000000 * center
         elif toltype == 'Da':
             tolerance = float(tolerance)
         return center - tolerance, center + tolerance
     ms2_rt = quantdb.lookup_retention_time(spectrafile, scannr)[0][0]
-    minrt, maxrt = get_minmax(ms2_rt, rttol)
+    minrt, maxrt = get_minmax(ms2_rt, rttol / 60)
     minmz, maxmz = get_minmax(mz, mztol, mztoltype)
     dbquants = quantdb.lookup_precursor_quant(spectrafile, charge, minrt,
                                               maxrt, minmz, maxmz)
     # m/z has index 0 from db output tuple
     features = {abs(float(mz) - x[0]): x[1] for x in dbquants}
     if features:
-        outquant = str(features[max(features)])
+        outquant = str(features[min(features)])
     else:
         outquant = 'NA'
     return {mzidtsvdata.HEADER_PRECURSOR_QUANT: outquant}

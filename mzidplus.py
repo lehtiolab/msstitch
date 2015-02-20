@@ -95,8 +95,9 @@ parser.add_argument('--isobaric', dest='isobaric', help='Flag. Specifies\n'
                     'lookup DB to tsv file.',
                     action='store_const', const=True, default=False)
 parser.add_argument('--rttol', dest='rttol', help='Specifies tolerance\n'
-                    'in retention time when mapping MS1 feature quant info\n'
-                    'to identifications in the PSM table.', type=float)
+                    'in seconds for retention time when mapping MS1 feature\n'
+                    'quant info to identifications in the PSM table.', 
+                    type=float)
 parser.add_argument('--mztol', dest='mztol', help='Specifies tolerance\n'
                     'in mass-to-charge when mapping MS1 feature quant info\n'
                     'to identifications in the PSM table.', type=float)
