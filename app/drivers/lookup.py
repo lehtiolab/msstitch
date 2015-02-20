@@ -35,7 +35,7 @@ class QuantLookupDriver(LookupDriver):
 
 
 class SpectraLookupDriver(QuantLookupDriver):
-    outsuffix = 'spectralookup.sqlite'
+    outsuffix = '_spectralookup.sqlite'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -47,7 +47,7 @@ class SpectraLookupDriver(QuantLookupDriver):
 
 
 class IsobaricQuantLookupDriver(QuantLookupDriver):
-    outsuffix = 'isobquantlookup.sqlite'
+    outsuffix = '_isobquantlookup.sqlite'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
