@@ -43,7 +43,7 @@ parser.add_argument('-c', dest='command', type=str,
                     'output. Make sure headers are same in all files.\n'
                     'quanttsv       - Add quantitative data from openMS\n'
                     'consensusXML to a tab separated file with\n'
-                    'PSMs. Needs to be passed a lookup db with --lookup,\n'
+                    'PSMs. Needs to be passed a lookup db with --dbfile,\n'
                     'which has to contain quant information, and\n'
                     'optionally --isobaric, --precursor, --rttol, --mztol,\n'
                     '--spectracolumn changes the column where the spectra\n'
@@ -112,7 +112,7 @@ parser.add_argument('--spectracolumn', dest='speccol', help='Column number\n'
                     'in which spectra file names are, in case some framework\n'
                     'has changed the file names. First column number is 1.',
                     type=int, required=False)
-parser.add_argument('--lookup', dest='lookup', help='Lookup database in '
+parser.add_argument('--dbfile', dest='lookup', help='Lookup database in '
                     'SQLite format, to be created using mslookup.py.',
                     type=lambda x: parser_file_exists(parser, x))
 parser.add_argument('--protgroupdb', dest='protgroupdb', help='Protein group '
