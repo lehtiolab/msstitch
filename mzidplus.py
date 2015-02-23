@@ -45,7 +45,9 @@ parser.add_argument('-c', dest='command', type=str,
                     'consensusXML to a tab separated file with\n'
                     'PSMs. Needs to be passed a lookup db with --lookup,\n'
                     'which has to contain quant information, and\n'
-                    'optionally --isobaric, --precursor, --rttol, --mztol.\n'
+                    'optionally --isobaric, --precursor, --rttol, --mztol,\n'
+                    '--spectracolumn changes the column where the spectra\n'
+                    'file names are in from the standard #SpecFile column.\n'
                     'proteingrouplookup  - Groups proteins from mzid2tsv\n'
                     'output. With flags --confidence-lvl, --confidence-col,\n'
                     '--confidence-better, --fasta\n'
@@ -96,7 +98,7 @@ parser.add_argument('--isobaric', dest='isobaric', help='Flag. Specifies\n'
                     action='store_const', const=True, default=False)
 parser.add_argument('--rttol', dest='rttol', help='Specifies tolerance\n'
                     'in seconds for retention time when mapping MS1 feature\n'
-                    'quant info to identifications in the PSM table.', 
+                    'quant info to identifications in the PSM table.',
                     type=float)
 parser.add_argument('--mztol', dest='mztol', help='Specifies tolerance\n'
                     'in mass-to-charge when mapping MS1 feature quant info\n'
@@ -106,6 +108,10 @@ parser.add_argument('--mztoltype', dest='mztoltype', help='Type of tolerance\n'
                     'to identifications in the PSM table. One of ppm, Da.',
                     type=lambda x: parser_value_in_list(parser, x, ['ppm',
                                                                     'Da']))
+parser.add_argument('--spectracolumn', dest='speccol', help='Column number\n'
+                    'in which spectra file names are, in case some framework\n'
+                    'has changed the file names. First column number is 1.',
+                    type=int, required=False)
 parser.add_argument('--lookup', dest='lookup', help='Lookup database in '
                     'SQLite format, to be created using mslookup.py.',
                     type=lambda x: parser_file_exists(parser, x))

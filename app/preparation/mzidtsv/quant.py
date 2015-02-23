@@ -5,7 +5,7 @@ from app.dataformats import mzidtsv as mzidtsvdata
 
 def generate_psms_quanted(quantdbfn, tsvfn, isob_header, oldheader,
                           is_ibariq=False, rttolerance=None, mztolerance=None,
-                          mztoltype=None):
+                          mztoltype=None, spec_column=None):
     """Takes dbfn and connects, gets quants for each line in tsvfn, sorts
     them in line by using keys in quantheader list."""
     quantdb = sqlite.QuantDB(quantdbfn)
@@ -16,7 +16,10 @@ def generate_psms_quanted(quantdbfn, tsvfn, isob_header, oldheader,
         quantfunctions.append(lookup_precursor_quant)
     for psm in readers.generate_tsv_psms(tsvfn, oldheader):
         outpsm = {x: y for x, y in psm.items()}
-        specfile = outpsm[mzidtsvdata.HEADER_SPECFILE]
+        if spec_column is not None:
+            specfile = outpsm[oldheader[spec_column - 1]]
+        else:
+            specfile = outpsm[mzidtsvdata.HEADER_SPECFILE]
         scannr = outpsm[mzidtsvdata.HEADER_SCANNR]
         charge = outpsm[mzidtsvdata.HEADER_CHARGE]
         mz = outpsm[mzidtsvdata.HEADER_PRECURSOR_MZ]

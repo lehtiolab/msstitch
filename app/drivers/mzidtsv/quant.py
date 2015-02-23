@@ -13,6 +13,7 @@ class TSVQuantDriver(MzidTSVDriver):
         self.rt_tol = kwargs.get('rttol', None)
         self.mz_tol = kwargs.get('mztol', None)
         self.mz_toltype = kwargs.get('mztoltype', None)
+        self.spec_column = kwargs.get('speccol', None)
 
     def get_psms(self):
         """Creates iterator to write to new tsv. Contains input tsv
@@ -22,4 +23,5 @@ class TSVQuantDriver(MzidTSVDriver):
         self.psms = prep.generate_psms_quanted(self.quantdb, self.fn,
                                                isob_header, self.oldheader,
                                                self.isobaric, self.rt_tol,
-                                               self.mz_tol, self.mz_toltype)
+                                               self.mz_tol, self.mz_toltype,
+                                               self.spec_column)
