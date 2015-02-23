@@ -40,3 +40,16 @@ def get_feature_info(feature):
             'charge': int(feature.find('charge').text),
             'intensity': float(feature.find('intensity').text),
             }
+
+
+def get_quantmap(consfile):
+    """Returns map of isobaric quant channel names as values, channel numbers
+    from consensus XML.
+    E.g. {'0': '113',
+          '1': '114',}
+    """
+    quantmap = {}
+    maplist = basereader.get_element(consfile, 'mapList')
+    for mapitem in maplist:
+        quantmap[mapitem.attrib['id']] = mapitem.attrib['label']
+    return quantmap

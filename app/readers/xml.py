@@ -28,6 +28,7 @@ def get_namespace(fn):
         ns['xmlns{0}{1}'.format(separator, nsprefix)] = root.nsmap[prefix]
     return ns
 
+
 def generate_tags_multiple_files(input_files, tag, ignore_tags, ns=None):
     """
     Calls xmltag generator for multiple files.
@@ -50,10 +51,7 @@ def generate_xmltags(fn, tag, ignore_tags, ns=None):
     as well as for mzML, mzIdentML.
     ignore_tags are the ones that are not cleared when met by parser.
     """
-    if ns is None:
-        xmlns = ''
-    else:
-        xmlns = '{%s}' % ns['xmlns']
+    xmlns = create_namespace(ns)
     for ac, el in etree.iterparse(fn):
         if el.tag == '{0}{1}'.format(xmlns, tag):
             yield el
@@ -62,3 +60,15 @@ def generate_xmltags(fn, tag, ignore_tags, ns=None):
             formatting.clear_el(el)
 
 
+def get_element(fn, tag, ns=None):
+    xmlns = create_namespace(ns)
+    for ac, el in etree.iterparse(fn):
+        if el.tag == '{0}{1}'.format(xmlns, tag):
+            return el
+
+
+def create_namespace(ns):
+    if ns is None:
+        return ''
+    else:
+        return '{%s}' % ns['xmlns']

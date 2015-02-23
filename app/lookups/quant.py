@@ -17,7 +17,7 @@ def get_quant_lookup(quantfn):
     return sqlite.QuantDB(quantfn)
 
 
-def create_isobaric_quant_lookup(quantdb, specfn_consensus_els):
+def create_isobaric_quant_lookup(quantdb, specfn_consensus_els, channelmap):
     """Creates an sqlite lookup table of scannrs with quant data.
 
     spectra - an iterable of tupled (filename, spectra)
@@ -27,8 +27,9 @@ def create_isobaric_quant_lookup(quantdb, specfn_consensus_els):
         rt = openmsreader.get_consxml_rt(consensus_el)
         rt = float(Decimal(rt) / 60)
         qdata = get_quant_data(consensus_el)
-        for quantmap in sorted(qdata.keys()):
-            quants.append((specfn, rt, quantmap, qdata[quantmap]))
+        for channel_no in sorted(qdata.keys()):
+            quants.append((specfn, rt, channelmap[channel_no],
+                           qdata[channel_no]))
             if len(quants) == 5000:
                 quantdb.store_isobaric_quants(quants)
     quantdb.store_isobaric_quants(quants)
