@@ -3,44 +3,8 @@ from app.lookups.sqlite.base import DatabaseConnection
 
 class QuantDB(DatabaseConnection):
     def create_quantdb(self, workdir):
-        self.create_db(workdir,
-                       {
-                        'mzml': ['mzmlfilename TEXT',
-                                 'scan_nr TEXT',
-                                 'retention_time REAL'],
-                        # FIXME in future, make possible to build full db in
-                        # small steps. This will speed up pipeline since
-                        # identification takes longer time than quanting. Also
-                        # would be good to make one large sqlite file with id,
-                        # protein group, quant in it. Problem is: ID is
-                        # slowest, but thats where the foreign keys will refer
-                        # to, if we dont do a RT/MS2/file db from the mzml
-                        # FIXME all iso/precursor quants, or only ones with IDs?
-                        # if only ones with ids, we can foreign key to ID
-                        # table.
-                        # FIXME isoquant should get retention time instead of
-                        # scan nr so we can fk join on rt/specfile to the
-                        # mzml table
-                        # FIXME lookup of ms1 quant like this:
-                        # scannr -> rt from mzmltable; rt interval & mz
-                        # interval -> ms1quants -> select best match on mz
-                        'isobaric_quant': ['mzmlfilename TEXT',
-                                           'retention_time REAL',
-                                           'quantmap TEXT',
-                                           'intensity REAL',
-                                           'FOREIGN KEY(mzmlfilename)'
-                                           'REFERENCES mzml '
-                                           'FOREIGN KEY(retention_time)'
-                                           'REFERENCES mzml '
-                                           ],
-                        'ms1_quant': ['mzmlfilename TEXT',
-                                      'retention_time REAL', 'mz REAL',
-                                      'charge INTEGER', 'intensity REAL',
-                                      'FOREIGN KEY(mzmlfilename)'
-                                      'REFERENCES mzml '
-                                      'FOREIGN KEY(retention_time)'
-                                      'REFERENCES mzml ']
-                                      }, foreign_keys=True)
+        self.create_db(workdir, ['mzml', 'isobaric_quant', 'ms1_quant'],
+                       foreign_keys=True)
 
     def store_isobaric_quants(self, quants):
         self.store_many(

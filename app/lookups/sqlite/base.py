@@ -93,6 +93,10 @@ mslookup_tables = {'mzml': ['spectra_id INTEGER PRIMARY KEY',
                                           ' psms(psm_id)',
                                           'FOREIGN KEY(master) REFERENCES'
                                           ' proteins(protein_acc)'],
+                   'prot_desc': ['protein_acc TEXT',
+                                 'description TEXT',
+                                 'FOREIGN KEY(protein_acc) '
+                                 'REFERENCES proteins(protein_acc)'],
                    }
 
 

@@ -13,59 +13,10 @@ EVIDENCE_LVL_INDEX = 7
 class ProteinGroupDB(DatabaseConnection):
     def create_pgdb(self, workdir):
         self.create_db(workdir,
-                       {'psms': ['psm_id TEXT PRIMARY KEY NOT NULL',
-                                 'sequence TEXT',
-                                 'score TEXT'],
-                        'psmrows': ['psm_id TEXT',
-                                    'rownr INTEGER',
-                                    'FOREIGN KEY(psm_id) '
-                                    'REFERENCES psms(psm_id)'],
-                        'proteins': ['protein_acc TEXT PRIMARY KEY NOT NULL'],
-                        'protein_psm': ['protein_acc TEXT',
-                                        'psm_id TEXT',
-                                        'FOREIGN KEY(protein_acc) '
-                                        'REFERENCES proteins(protein_acc) '
-                                        'FOREIGN KEY(psm_id) '
-                                        'REFERENCES psms(psm_id)'],
-                        'protein_evidence': ['protein_acc TEXT',
-                                             'evidence_lvl REAL',
-                                             'FOREIGN KEY(protein_acc) '
-                                             'REFERENCES '
-                                             'proteins(protein_acc)'],
-                        'protein_seq': ['protein_acc TEXT',
-                                        'sequence TEXT',
-                                        'FOREIGN KEY(protein_acc) '
-                                        'REFERENCES '
-                                        'proteins(protein_acc)'],
-                        'protein_coverage': ['protein_acc TEXT',
-                                             'coverage REAL',
-                                             'FOREIGN KEY(protein_acc) '
-                                             'REFERENCES '
-                                             'proteins(protein_acc)'],
-                        'protein_group_master': ['protein_acc TEXT',
-                                                 'FOREIGN KEY(protein_acc) '
-                                                 'REFERENCES '
-                                                 'proteins(protein_acc)'],
-                        'protein_group_content': ['protein_acc TEXT',
-                                                  'master TEXT',
-                                                  'peptide_count INTEGER',
-                                                  'psm_count INTEGER',
-                                                  'protein_score INTEGER',
-                                                  'FOREIGN KEY(protein_acc) '
-                                                  'REFERENCES '
-                                                  'proteins(protein_acc) '
-                                                  'FOREIGN KEY(master) '
-                                                  'REFERENCES '
-                                                  'proteins'
-                                                  '(protein_acc)'
-                                                  ],
-                        'psm_protein_groups': ['psm_id TEXT',
-                                               'master TEXT',
-                                               'FOREIGN KEY(psm_id) REFERENCES'
-                                               ' psms(psm_id)',
-                                               'FOREIGN KEY(master) REFERENCES'
-                                               ' proteins(protein_acc)']
-                        }, foreign_keys=True)
+                       ['psms', 'psmrows', 'proteins', 'protein_psm',
+                        'protein_evidence', 'protein_seq', 'protein_coverage',
+                        'protein_group_master', 'protein_group_content',
+                        'psm_protein_groups'], foreign_keys=True)
 
     def store_proteins(self, proteins, evidence_lvls=False, sequences=False):
         cursor = self.get_cursor()
@@ -265,11 +216,7 @@ class ProteinGroupDB(DatabaseConnection):
 
 class ProteinGroupProteinTableDB(ProteinGroupDB):
     def add_tables(self):
-        self.create_tables({'prot_desc': ['protein_acc TEXT',
-                                          'description TEXT',
-                                          'FOREIGN KEY(protein_acc) '
-                                          'REFERENCES proteins(protein_acc)'],
-                            })
+        self.create_tables(['prot_desc'])
         self.index_column('protdesc_index', 'prot_desc', 'protein_acc')
 
     def store_descriptions(self, descriptions):
