@@ -48,13 +48,11 @@ parser.add_argument('-c', dest='command', type=str,
                     'optionally --isobaric, --precursor, --rttol, --mztol,\n'
                     '--spectracolumn changes the column where the spectra\n'
                     'file names are in from the standard #SpecFile column.\n'
-                    'proteingrouplookup  - Groups proteins from mzid2tsv\n'
-                    'output. With flags --confidence-lvl, --confidence-col,\n'
-                    '--confidence-better, --fasta\n'
                     'proteingroup   - Takes lookup SQLite result from \n'
                     'proteingrouplookup, uses it to output mzidtsv file with\n'
-                    'protein groups. Same flags as proteingrouplookup, and\n'
-                    '--protgroupdb \n',
+                    'protein groups. With flags --confidence-lvl, \n'
+                    '--confidence-col, --confidence-better, --fasta\n'
+                    '--lookup\n',
                     required=True
                     )
 parser.add_argument('-i', dest='infile', help='TSV table of mzIdentML',
@@ -113,7 +111,7 @@ parser.add_argument('--lookup', dest='lookup', help='Lookup database in '
                     type=lambda x: parser_file_exists(parser, x))
 parser.add_argument('--protgroupdb', dest='protgroupdb', help='Protein group '
                     'lookup database in SQLite format. Can be created using '
-                    'mzidplus.py command.',
+                    'mslookup.py command.',
                     type=lambda x: parser_file_exists(parser, x))
 parser.add_argument('--unroll', dest='unroll', help='Flag. The tsv input file '
                     'from Mzid2TSV contains either one PSM per line with all '
@@ -134,7 +132,6 @@ commandmap = {
     'mergetsv': mergedrivers.MzidTSVConcatenateDriver,
     'quanttsv': quantdrivers.TSVQuantDriver,
     'proteingroup': pgdrivers.ProteinGroupDriver,
-    'proteingrouplookup': pgdrivers.ProteinGroupLookupDriver,
 }
 
 command = commandmap[args.command](**vars(args))
