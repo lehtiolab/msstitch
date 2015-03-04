@@ -1,6 +1,5 @@
 import sqlite3
-import os
-from tempfile import mkstemp
+from app.lookups.sqlite import proteingroups, quant, searchspace
 
 
 mslookup_tables = {'mzml': ['spectra_id INTEGER PRIMARY KEY',
@@ -101,26 +100,13 @@ mslookup_tables = {'mzml': ['spectra_id INTEGER PRIMARY KEY',
 
 
 class DatabaseConnection(object):
-    def __init__(self, fn=None, foreign_keys=False):
+    def __init__(self, fn=None):
         self.fn = fn
         if self.fn is not None:
             self.connect(self.fn)
 
     def get_fn(self):
         return self.fn
-
-    def initialize(self, tables=None, outfn=None):
-        """Creates and/or connects to a sqlite db file.
-        tables is a list with table names, which will be looked up in
-        mslookup_tables.
-        """
-        if outfn is None:
-            fd, outfn = mkstemp(prefix='msstitcher_tmp_')
-            os.close(fd)
-        self.fn = outfn
-        self.connect(outfn)
-        if tables is not None:
-            self.create_tables(tables)
 
     def create_tables(self, tables):
         cursor = self.get_cursor()
@@ -130,11 +116,10 @@ class DatabaseConnection(object):
                 table, ', '.join(columns)))
         self.conn.commit()
 
-    def connect(self, fn, foreign_keys=False):
+    def connect(self, fn):
         self.conn = sqlite3.connect(fn)
         cur = self.get_cursor()
-        if foreign_keys:
-            cur.execute('PRAGMA FOREIGN_KEYS=ON')
+        cur.execute('PRAGMA FOREIGN_KEYS=ON')
 
     def get_cursor(self):
         return self.conn.cursor()
@@ -155,3 +140,16 @@ class DatabaseConnection(object):
         sql = 'SELECT {0} {1} FROM {2}'
         dist = {True: 'DISTINCT', False: ''}[distinct]
         return sql.format(dist, ', '.join(columns), table)
+
+
+def get_lookup(fn, lookuptype):
+    lookupmap = {'proteingroups': proteingroups.ProteinGroupDB,
+                 'quant': quant.QuantDB,
+                 }
+    return lookupmap[lookuptype](fn)
+
+
+def create_new_lookup(fn, lookuptype):
+    with open(fn, 'w'):
+        pass
+    return get_lookup(fn, lookuptype)

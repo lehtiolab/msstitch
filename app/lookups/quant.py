@@ -1,20 +1,7 @@
 from decimal import Decimal, getcontext
 
-from app.lookups.sqlite import quant as sqlite
 from app.readers import openms as openmsreader
 from app.readers import spectra as specreader
-
-
-def initiate_quant_lookup(workdir):
-    """Creates a quant db sqlite file and fills a table with spectra mzml
-    info on scan nrs and retention times"""
-    quantdb = sqlite.QuantDB()
-    quantdb.create_quantdb(workdir)
-    return quantdb
-
-
-def get_quant_lookup(quantfn):
-    return sqlite.QuantDB(quantfn)
 
 
 def create_isobaric_quant_lookup(quantdb, specfn_consensus_els, channelmap):

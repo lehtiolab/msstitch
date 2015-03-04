@@ -9,12 +9,17 @@ class LookupDriver(BaseDriver):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.lookupfn = kwargs.get('lookup', None)
+        self.initialize_lookup()
+
+    def initialize_lookup(self):
         if self.lookupfn is not None:
-            # FIXME make this general
             self.lookup = lookups.get_lookup(self.lookupfn, self.lookuptype)
         else:
+            # FIXME MUST be a set or mzml lookup? here is place to assert
+            # correct lookuptype!
             self.lookupfn = 'msstitcher_lookup.sqlite'
-            self.lookup = lookups.initiate_quant_lookup()
+            self.lookup = lookups.create_new_lookup(self.lookupfn)
+        self.lookup.add_tables()
 
     def run(self):
         self.create_lookup()
@@ -34,6 +39,7 @@ class QuantLookupDriver(LookupDriver):
 
 class SpectraLookupDriver(QuantLookupDriver):
     outsuffix = '_spectralookup.sqlite'
+    lookuptype = 'spectra'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -46,14 +52,13 @@ class SpectraLookupDriver(QuantLookupDriver):
 
 class IsobaricQuantLookupDriver(QuantLookupDriver):
     outsuffix = '_isobquantlookup.sqlite'
+    lookuptpe = 'isobaricquant'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.consensusfns = self.fn
 
     def create_lookup(self):
-        # FIXME here get quantmap for channel labels as dict {'0': '113', etc}
-        # then pass this dict to create_isobaric_quant_lookup
         quantmap = openmsreader.get_quantmap(self.consensusfns)
         mzmlfn_consxml = openmsreader.mzmlfn_cons_el_generator(self.spectrafns,
                                                                self.consensusfns)
@@ -63,6 +68,7 @@ class IsobaricQuantLookupDriver(QuantLookupDriver):
 
 class PrecursorQuantLookupDriver(QuantLookupDriver):
     outsuffix = '_ms1quantlookup.sqlite'
+    lookuptype = 'ms1quant'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
