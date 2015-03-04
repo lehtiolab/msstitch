@@ -3,13 +3,7 @@ from app.lookups.sqlite import proteingroups, quant, searchspace, \
     biosets, spectra
 
 
-mslookup_tables = {'mzml': ['spectra_id INTEGER PRIMARY KEY',
-                            'mzmlfile_id INTEGER',
-                            'scan_nr TEXT',
-                            'retention_time REAL',
-                            'FOREIGN KEY(mzmlfile_id)'
-                            'REFERENCES mzmlfiles'],
-                   'biosets': ['set_id INTEGER PRIMARY KEY',
+mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                'set_name TEXT'],
                    'mzmlfiles': ['mzmlfile_id INTEGER PRIMARY KEY',
                                  'mzmlfilename TEXT',
@@ -17,6 +11,12 @@ mslookup_tables = {'mzml': ['spectra_id INTEGER PRIMARY KEY',
                                  'FOREIGN KEY(set_id)'
                                  'REFERENCES biosets'
                                  ],
+                   'mzml': ['spectra_id INTEGER PRIMARY KEY',
+                            'mzmlfile_id INTEGER',
+                            'scan_nr TEXT',
+                            'retention_time REAL',
+                            'FOREIGN KEY(mzmlfile_id)'
+                            'REFERENCES mzmlfiles'],
                    'isobaric_quant': ['mzmlfile_id INTEGER',
                                       'retention_time REAL',
                                       'quantmap TEXT',
