@@ -148,7 +148,7 @@ def get_lookup(fn, lookuptype):
                  'spectra': spectra.SpectraDB,
                  'proteingroups': proteingroups.ProteinGroupDB,
                  'quant': quant.QuantDB,
-                 #'searchspace': searchspace.
+                 'searchspace': searchspace.SearchSpaceDB,
                  }
     return lookupmap[lookuptype](fn)
 
