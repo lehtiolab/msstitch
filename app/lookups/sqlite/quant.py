@@ -15,12 +15,6 @@ class QuantDB(DatabaseConnection):
             'INSERT INTO ms1_quant(mzmlfilename, retention_time, mz, '
             'charge, intensity) VALUES (?, ?, ?, ?, ?)', quants)
 
-    def store_many(self, sql, values):
-        # FIXME!
-        cursor = self.get_cursor()
-        cursor.executemany(sql, values)
-        self.conn.commit()
-
     def index_isobaric_quants(self):
         pass
 

@@ -142,6 +142,11 @@ class DatabaseConnection(object):
         dist = {True: 'DISTINCT', False: ''}[distinct]
         return sql.format(dist, ', '.join(columns), table)
 
+    def store_many(self, sql, values):
+        cursor = self.get_cursor()
+        cursor.executemany(sql, values)
+        self.conn.commit()
+
 
 def get_lookup(fn, lookuptype):
     lookupmap = {'biosets': biosets.BioSetDB,
