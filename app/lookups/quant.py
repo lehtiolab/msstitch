@@ -10,12 +10,14 @@ def create_isobaric_quant_lookup(quantdb, specfn_consensus_els, channelmap):
     spectra - an iterable of tupled (filename, spectra)
     consensus_els - a iterable with consensusElements"""
     quants = []
+    mzmlmap = quantdb.get_mzmlfile_map()
     for specfn, consensus_el in specfn_consensus_els:
         rt = openmsreader.get_consxml_rt(consensus_el)
         rt = float(Decimal(rt) / 60)
         qdata = get_quant_data(consensus_el)
+        spectra_id = quantdb.get_spectra_id(mzmlmap[specfn], rt)
         for channel_no in sorted(qdata.keys()):
-            quants.append((specfn, rt, channelmap[channel_no],
+            quants.append((spectra_id, channelmap[channel_no],
                            qdata[channel_no]))
             if len(quants) == 5000:
                 quantdb.store_isobaric_quants(quants)

@@ -17,13 +17,10 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                             'retention_time REAL',
                             'FOREIGN KEY(mzmlfile_id)'
                             'REFERENCES mzmlfiles'],
-                   'isobaric_quant': ['mzmlfile_id INTEGER',
-                                      'retention_time REAL',
+                   'isobaric_quant': ['spectra_id INTEGER',
                                       'quantmap TEXT',
                                       'intensity REAL',
-                                      'FOREIGN KEY(mzmlfile_id)'
-                                      'REFERENCES mzmlfiles '
-                                      'FOREIGN KEY(retention_time)'
+                                      'FOREIGN KEY(spectra_id)'
                                       'REFERENCES mzml'
                                       ],
                    'ms1_quant': ['mzmlfile_id INTEGER',
@@ -153,6 +150,11 @@ class ResultLookupInterface(DatabaseConnection):
         cursor = self.get_cursor()
         cursor.execute('SELECT mzmlfile_id, mzmlfilename FROM mzmlfiles')
         return {fn: fnid for fn, fnid in cursor.fetchall()}
+
+    def get_spectra_id(self, fn_id, retention_time):
+        cursor = self.get_cursor()
+        cursor.execute('SELECT spectra_id FROM mzml WHERE mzmlfile_id=? AND '
+                       'retention_time=?', (fn_id, retention_time))
 
 
 def get_lookup(fn, lookuptype):

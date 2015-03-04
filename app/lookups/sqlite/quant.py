@@ -7,8 +7,8 @@ class QuantDB(ResultLookupInterface):
 
     def store_isobaric_quants(self, quants):
         self.store_many(
-            'INSERT INTO isobaric_quant(mzmlfilename, retention_time, '
-            'quantmap, intensity) VALUES (?, ?, ?, ?)', quants)
+            'INSERT INTO isobaric_quant(spectra_id, quantmap, intensity) '
+            'VALUES (?, ?, ?)', quants)
 
     def store_ms1_quants(self, quants):
         self.store_many(
@@ -16,7 +16,7 @@ class QuantDB(ResultLookupInterface):
             'charge, intensity) VALUES (?, ?, ?, ?, ?)', quants)
 
     def index_isobaric_quants(self):
-        pass
+        self.index_column('spectraid_index', 'isobaric_quant', 'spectra_id')
 
     def index_precursor_quants(self):
         self.index_column('charge_index', 'ms1_quant', 'charge')
@@ -30,13 +30,13 @@ class QuantDB(ResultLookupInterface):
             (spectrafile, scannr))
         return cursor.fetchall()
 
-    def lookup_isobaric_quant(self, spectrafile, scannr):
+    def lookup_isobaric_quant(self, mzmlfn_id, scannr):
         cursor = self.get_cursor()
         cursor.execute(
             'SELECT iq.quantmap, iq.intensity '
             'FROM mzml AS mz '
-            'JOIN isobaric_quant AS iq USING(retention_time) '
-            'WHERE mz.mzmlfilename=? AND mz.scan_nr=?', (spectrafile, scannr))
+            'JOIN isobaric_quant AS iq USING(spectra_id) '
+            'WHERE mz.mzmlfile_id=? AND mz.scan_nr=?', (mzmlfn_id, scannr))
         return cursor.fetchall()
 
     def lookup_precursor_quant(self, spectrafile, charge, minrt, maxrt,
