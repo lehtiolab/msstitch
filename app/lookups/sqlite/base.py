@@ -1,5 +1,6 @@
 import sqlite3
-from app.lookups.sqlite import proteingroups, quant, searchspace
+from app.lookups.sqlite import proteingroups, quant, searchspace, \
+    biosets, spectra
 
 
 mslookup_tables = {'mzml': ['spectra_id INTEGER PRIMARY KEY',
@@ -143,8 +144,11 @@ class DatabaseConnection(object):
 
 
 def get_lookup(fn, lookuptype):
-    lookupmap = {'proteingroups': proteingroups.ProteinGroupDB,
+    lookupmap = {'biosets': biosets.BioSetDB,
+                 'spectra': spectra.SpectraDB,
+                 'proteingroups': proteingroups.ProteinGroupDB,
                  'quant': quant.QuantDB,
+                 #'searchspace': searchspace.
                  }
     return lookupmap[lookuptype](fn)
 

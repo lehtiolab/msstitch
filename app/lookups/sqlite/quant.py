@@ -3,17 +3,12 @@ from app.lookups.sqlite.base import DatabaseConnection
 
 class QuantDB(DatabaseConnection):
     def add_tables(self):
-        self.create_tables(['mzml', 'isobaric_quant', 'ms1_quant'])
+        self.create_tables(['isobaric_quant', 'ms1_quant'])
 
     def store_isobaric_quants(self, quants):
         self.store_many(
             'INSERT INTO isobaric_quant(mzmlfilename, retention_time, '
             'quantmap, intensity) VALUES (?, ?, ?, ?)', quants)
-
-    def store_mzmls(self, spectra):
-        self.store_many(
-            'INSERT INTO mzml(mzmlfilename, scan_nr, retention_time) '
-            'VALUES (?, ?, ?)', spectra)
 
     def store_ms1_quants(self, quants):
         self.store_many(
@@ -21,14 +16,10 @@ class QuantDB(DatabaseConnection):
             'charge, intensity) VALUES (?, ?, ?, ?, ?)', quants)
 
     def store_many(self, sql, values):
+        # FIXME!
         cursor = self.get_cursor()
         cursor.executemany(sql, values)
         self.conn.commit()
-
-    def index_mzml(self):
-        self.index_column('mzmlfn_index', 'mzml', 'mzmlfilename')
-        self.index_column('scan_index', 'mzml', 'scan_nr')
-        self.index_column('rt_index', 'mzml', 'retention_time')
 
     def index_isobaric_quants(self):
         pass
