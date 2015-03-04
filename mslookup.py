@@ -6,7 +6,7 @@ mslookup - Creating SQLite lookups for internal and external use
 
 import argparse
 import os
-from app.drivers.mslookup import spectra, quant, proteingroups
+from app.drivers.mslookup import spectra, quant, proteingroups, biosets
 
 
 def parser_file_exists(currentparser, fn):
@@ -86,6 +86,7 @@ parser.add_argument('--confidence-better', dest='conftype', help='Confidence '
 args = parser.parse_args()
 
 commandmap = {
+    'biosets': biosets.BioSetLookupDriver,
     'spectra': spectra.SpectraLookupDriver,
     'isoquant': quant.IsobaricQuantLookupDriver,
     'ms1quant': quant.PrecursorQuantLookupDriver,
