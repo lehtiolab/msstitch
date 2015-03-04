@@ -12,7 +12,7 @@ class QuantDB(ResultLookupInterface):
 
     def store_ms1_quants(self, quants):
         self.store_many(
-            'INSERT INTO ms1_quant(mzmlfilename, retention_time, mz, '
+            'INSERT INTO ms1_quant(mzmlfile_id, retention_time, mz, '
             'charge, intensity) VALUES (?, ?, ?, ?, ?)', quants)
 
     def index_isobaric_quants(self):
@@ -22,12 +22,12 @@ class QuantDB(ResultLookupInterface):
         self.index_column('charge_index', 'ms1_quant', 'charge')
         self.index_column('mz_index', 'ms1_quant', 'mz')
 
-    def lookup_retention_time(self, spectrafile, scannr):
+    def lookup_retention_time(self, mzmlfn_id, scannr):
         cursor = self.get_cursor()
         cursor.execute(
             'SELECT retention_time FROM mzml '
-            'WHERE mzmlfilename=? AND scan_nr=?',
-            (spectrafile, scannr))
+            'WHERE mzmlfile_id=? AND scan_nr=?',
+            (mzmlfn_id, scannr))
         return cursor.fetchall()
 
     def lookup_isobaric_quant(self, mzmlfn_id, scannr):
