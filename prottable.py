@@ -41,10 +41,6 @@ parser.add_argument('-i', dest='infile',
 parser.add_argument('-d', dest='outdir', required=True,
                     help='Directory to output in',
                     type=lambda x: parser_file_exists(parser, x))
-parser.add_argument('--workdir', dest='workdir',
-                    help='Working directory to output temporary files in. '
-                    'Temporary files will be removed after finishing.'
-                    )
 parser.add_argument('--fasta', dest='fasta', help='FASTA sequence database, '
                     'to optionally use with proteingrouping to enable sorting '
                     'on coverage, and in case of UNIPROT FASTA, evidence '

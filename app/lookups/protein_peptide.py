@@ -8,14 +8,15 @@ from app.readers import fasta as fastareader
 from app.preparation.mzidtsv import confidencefilters as conffilt
 
 
-def create_protein_pep_lookup(fn, workdir, header, confkey, conflvl,
+def create_protein_pep_lookup(fn, dbfn, header, confkey, conflvl,
                               lower_is_better, unroll=False, fastafn=None,
                               evidence_lvl=False):
     """Reads PSMs from file, extracts their proteins and peptides and passes
     them to a database backend in chunked PSMs.
     """
     pgdb = ProteinGroupDB()
-    pgdb.create_pgdb(workdir)
+    pgdb.initialize(outfn=dbfn)
+    pgdb.add_tables()
     evidences = None
     proteins_stored = False
     if fastafn:

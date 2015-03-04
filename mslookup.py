@@ -51,10 +51,6 @@ parser.add_argument('-i', dest='infile', nargs='+',
 parser.add_argument('-d', dest='outdir', required=True,
                     help='Directory to output in',
                     type=lambda x: parser_file_exists(parser, x))
-parser.add_argument('--workdir', dest='workdir',
-                    help='Working directory to output temporary files in. '
-                    'Temporary files will be removed after finishing.'
-                    )
 parser.add_argument('--dbfile', dest='lookup', help='File containing an\n'
                     'SQLite database to build on. Some commands need this\n'
                     'in order to build on.',

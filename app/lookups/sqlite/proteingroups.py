@@ -11,12 +11,11 @@ EVIDENCE_LVL_INDEX = 7
 
 
 class ProteinGroupDB(DatabaseConnection):
-    def create_pgdb(self, workdir):
-        self.create_db(workdir,
-                       ['psms', 'psmrows', 'proteins', 'protein_psm',
-                        'protein_evidence', 'protein_seq', 'protein_coverage',
-                        'protein_group_master', 'protein_group_content',
-                        'psm_protein_groups'], foreign_keys=True)
+    def add_tables(self):
+        self.create_tables(['psms', 'psmrows', 'proteins', 'protein_psm',
+                            'protein_evidence', 'protein_seq',
+                            'protein_coverage', 'protein_group_master',
+                            'protein_group_content', 'psm_protein_groups'])
 
     def store_proteins(self, proteins, evidence_lvls=False, sequences=False):
         cursor = self.get_cursor()

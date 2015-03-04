@@ -58,10 +58,6 @@ parser.add_argument('--multifiles', dest='multifile_input', nargs='+',
                     'the file specified with -i.')
 parser.add_argument('-d', dest='outdir', required=True,
                     help='Directory to output in')
-parser.add_argument('--workdir', dest='workdir',
-                    help='Working directory to output temporary files in. '
-                    'Temporary files will be removed after finishing.'
-                    )
 parser.add_argument('-s', dest='score', help='Score to filter unique peptides '
 'on (only for command mergebest and filterknownmerge)', default='svm')
 parser.add_argument('--maxlen', dest='maxlength', help='Maximum length of '

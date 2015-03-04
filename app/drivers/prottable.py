@@ -15,7 +15,6 @@ class AddProteinInfoDriver(BaseDriver):
 
     def run(self):
         self.oldheader = reader.get_tsv_header(self.fn)
-        self.copy_db_to_workdir()
         self.set_protein_generator()
         self.write()
         self.finish()

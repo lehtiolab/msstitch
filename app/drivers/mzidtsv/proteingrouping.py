@@ -20,7 +20,6 @@ class ProteinGroupDriver(MzidTSVDriver):
 
     def get_psms(self):
         confkey = self.oldheader[int(self.confcol) - 1]
-        self.copy_db_to_workdir()
         protgroupdb = ProteinGroupProteinTableDB(self.lookup)
         self.header = prep.get_header_with_proteingroups(self.oldheader)
         self.psms = prep.generate_psms_with_proteingroups(self.fn,
@@ -40,7 +39,6 @@ class ProteinGroupLookupDriver(MzidTSVDriver):
 
     def create_protein_pep_lookup(self, confkey):
         return lookups.create_protein_pep_lookup(self.fn,
-                                                 self.workdir,
                                                  self.oldheader,
                                                  confkey,
                                                  self.conflvl,
@@ -60,6 +58,4 @@ class ProteinGroupLookupDriver(MzidTSVDriver):
                                    self.unroll, self.coverage)
 
     def write(self):
-        """Moves outfile from workdir to destination"""
-        outfn = self.create_outfilepath(self.fn, self.outsuffix)
-        shutil.move(self.lookup.get_fn(), outfn)
+        pass

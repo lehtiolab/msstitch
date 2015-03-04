@@ -11,15 +11,13 @@ class LookupDriver(BaseDriver):
         self.lookupfn = kwargs.get('lookup', None)
         if self.lookupfn is not None:
             # FIXME make this general
-            self.lookup = lookups.get_quant_lookup(self.lookupfn)
+            self.lookup = lookups.get_lookup(self.lookupfn, self.lookuptype)
         else:
-            self.lookupfn = 'msstitcher_lookup.sqlite' 
-            self.lookup = lookups.initiate_quant_lookup(self.workdir)
+            self.lookupfn = 'msstitcher_lookup.sqlite'
+            self.lookup = lookups.initiate_quant_lookup()
 
     def run(self):
         self.create_lookup()
-        self.write_move()
-        self.finish()
 
     def write_move(self):
         """Moves outfile from workdir to destination, used from different
