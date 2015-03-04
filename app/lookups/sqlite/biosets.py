@@ -1,7 +1,7 @@
-from app.lookups.sqlite.base import DatabaseConnection
+from app.lookups.sqlite.base import ResultLookupInterface
 
 
-class BioSetDB(DatabaseConnection):
+class BioSetDB(ResultLookupInterface):
     def add_tables(self):
         self.create_tables(['biosets', 'mzmlfiles'])
 

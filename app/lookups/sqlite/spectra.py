@@ -1,14 +1,9 @@
-from app.lookups.sqlite.base import DatabaseConnection
+from app.lookups.sqlite.base import ResultLookupInterface
 
 
-class SpectraDB(DatabaseConnection):
+class SpectraDB(ResultLookupInterface):
     def add_tables(self):
         self.create_tables(['mzml'])
-
-    def get_mzmlfile_map(self):
-        cursor = self.get_cursor()
-        cursor.execute('SELECT mzmlfile_id, mzmlfilename FROM mzmlfiles')
-        return cursor.fetchall()
 
     def store_mzmls(self, spectra):
         self.store_many(

@@ -1,7 +1,7 @@
-from app.lookups.sqlite.base import DatabaseConnection
+from app.lookups.sqlite.base import ResultLookupInterface
 
 
-class QuantDB(DatabaseConnection):
+class QuantDB(ResultLookupInterface):
     def add_tables(self):
         self.create_tables(['isobaric_quant', 'ms1_quant'])
 
