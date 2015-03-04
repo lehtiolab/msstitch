@@ -1,6 +1,6 @@
 from app.drivers.mslookup import base
 from app.readers import openms as openmsreader
-from app.lookups import quant as lookups
+from app.actions.mslookup import quant as lookups
 
 
 class QuantLookupDriver(base.LookupDriver):

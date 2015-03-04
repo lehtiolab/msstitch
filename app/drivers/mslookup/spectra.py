@@ -1,6 +1,6 @@
 from app.drivers.mslookup import base
 from app.readers import spectra as spectrareader
-from app.lookups import quant as lookups
+from app.actions.mslookup import spectra as lookups
 
 
 class SpectraLookupDriver(base.LookupDriver):
