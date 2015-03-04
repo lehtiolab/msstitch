@@ -4,7 +4,7 @@ from app.actions.mslookup import biosets as lookups
 
 class BioSetLookupDriver(base.LookupDriver):
     outsuffix = '_setlookup.sqlite'
-    lookuptype = 'setnames'
+    lookuptype = 'biosets'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
