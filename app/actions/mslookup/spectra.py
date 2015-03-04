@@ -7,7 +7,7 @@ def create_spectra_lookup(lookup, fn_spectra):
     """Stores all spectra rt and scan nr in db"""
     getcontext().prec = 14  # sets decimal point precision
     to_store = []
-    mzmlmap = {fn: fnid for fn, fnid in lookup.get_mzmlfile_map()}
+    mzmlmap = lookup.get_mzmlfile_map()
     for fn, spectrum, ns in fn_spectra:
         mzml_rt = float(Decimal(specreader.get_mzml_rt(spectrum, ns)))
         scan_nr = specreader.get_spec_scan_nr(spectrum)

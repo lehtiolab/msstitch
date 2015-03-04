@@ -152,7 +152,7 @@ class ResultLookupInterface(DatabaseConnection):
     def get_mzmlfile_map(self):
         cursor = self.get_cursor()
         cursor.execute('SELECT mzmlfile_id, mzmlfilename FROM mzmlfiles')
-        return cursor.fetchall()
+        return {fn: fnid for fn, fnid in cursor.fetchall()}
 
 
 def get_lookup(fn, lookuptype):
