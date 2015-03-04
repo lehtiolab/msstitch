@@ -43,7 +43,7 @@ parser.add_argument('-c', dest='command', type=str,
                     'output. Make sure headers are same in all files.\n'
                     'quanttsv       - Add quantitative data from openMS\n'
                     'consensusXML to a tab separated file with\n'
-                    'PSMs. Needs to be passed a lookup db with --lookup,\n'
+                    'PSMs. Needs to be passed a lookup db with --dbfile,\n'
                     'which has to contain quant information, and\n'
                     'optionally --isobaric, --precursor, --rttol, --mztol,\n'
                     '--spectracolumn changes the column where the spectra\n'
@@ -52,7 +52,7 @@ parser.add_argument('-c', dest='command', type=str,
                     'proteingrouplookup, uses it to output mzidtsv file with\n'
                     'protein groups. With flags --confidence-lvl, \n'
                     '--confidence-col, --confidence-better, --fasta\n'
-                    '--lookup\n',
+                    '--dbfile\n',
                     required=True
                     )
 parser.add_argument('-i', dest='infile', help='TSV table of mzIdentML',
@@ -106,12 +106,8 @@ parser.add_argument('--spectracolumn', dest='speccol', help='Column number\n'
                     'in which spectra file names are, in case some framework\n'
                     'has changed the file names. First column number is 1.',
                     type=int, required=False)
-parser.add_argument('--lookup', dest='lookup', help='Lookup database in '
+parser.add_argument('--dbfile', dest='lookup', help='Lookup database in '
                     'SQLite format, to be created using mslookup.py.',
-                    type=lambda x: parser_file_exists(parser, x))
-parser.add_argument('--protgroupdb', dest='protgroupdb', help='Protein group '
-                    'lookup database in SQLite format. Can be created using '
-                    'mslookup.py command.',
                     type=lambda x: parser_file_exists(parser, x))
 parser.add_argument('--unroll', dest='unroll', help='Flag. The tsv input file '
                     'from Mzid2TSV contains either one PSM per line with all '

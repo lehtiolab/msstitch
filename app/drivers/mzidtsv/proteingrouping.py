@@ -12,7 +12,7 @@ class ProteinGroupDriver(MzidTSVDriver):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.lookup = kwargs.get('protgroupdb')
+        self.lookup = kwargs.get('lookup')
 
     def parse_fasta(self):
         if self.fasta:

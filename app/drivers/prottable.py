@@ -11,7 +11,7 @@ class AddProteinInfoDriver(BaseDriver):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.fasta = kwargs.get('fasta')
-        self.lookup = kwargs.get('protgroupdb')
+        self.lookup = kwargs.get('lookup')
 
     def run(self):
         self.oldheader = reader.get_tsv_header(self.fn)

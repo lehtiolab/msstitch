@@ -30,7 +30,7 @@ parser.add_argument('-c', dest='command', type=str,
                     help='How to manipulate the input:\n'
                     'addprotdata - Add protein data (description, coverage,\n'
                     '# PSMs, etc.) to a table with protein accessions\n'
-                    'Use with --fasta and --protgroupdb\n',
+                    'Use with --fasta and --dbfile\n',
                     required=True
                     )
 parser.add_argument('-i', dest='infile',
@@ -45,9 +45,9 @@ parser.add_argument('--fasta', dest='fasta', help='FASTA sequence database, '
                     'to optionally use with proteingrouping to enable sorting '
                     'on coverage, and in case of UNIPROT FASTA, evidence '
                     'levels.', type=lambda x: parser_file_exists(parser, x))
-parser.add_argument('--protgroupdb', dest='protgroupdb', help='Protein group '
+parser.add_argument('--dbfile', dest='lookup', help='Protein group '
                     'lookup database in SQLite format. Can be created using '
-                    'mzidplus.py command.',
+                    'mslookup.py command.',
                     type=lambda x: parser_file_exists(parser, x))
 
 args = parser.parse_args()
