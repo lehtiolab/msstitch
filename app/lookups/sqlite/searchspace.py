@@ -2,11 +2,9 @@ from app.lookups.sqlite.base import DatabaseConnection
 
 
 class SearchSpaceDB(DatabaseConnection):
-    def create_searchspacedb(self, outfn):
-        """Creates a searchspace lookup sqlite. Since the ultimate output
-        of this is the sqlite file, we use None as workdir."""
-        self.create_db(None,
-                       {'known_searchspace': ['seqs TEXT']}, outfn)
+    def add_tables(self):
+        """Creates a searchspace lookup sqlite."""
+        self.create_tables(['known_searchspace'])
 
     def write_peps(self, peps, reverse_seqs):
         """Writes peps to db. We can reverse to be able to look up

@@ -2,9 +2,8 @@ from app.lookups.sqlite.base import DatabaseConnection
 
 
 class QuantDB(DatabaseConnection):
-    def create_quantdb(self, workdir):
-        self.create_db(workdir, ['mzml', 'isobaric_quant', 'ms1_quant'],
-                       foreign_keys=True)
+    def add_tables(self):
+        self.create_tables(['mzml', 'isobaric_quant', 'ms1_quant'])
 
     def store_isobaric_quants(self, quants):
         self.store_many(
