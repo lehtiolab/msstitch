@@ -73,6 +73,9 @@ parser.add_argument('--spectra', dest='spectra', help='Spectra files in mzML\n'
                     'important, e.g. when matching them with quant data, the\n'
                     'order will be their input order at the command line.',
                     type=lambda x: parser_file_exists(parser, x), nargs='+')
+parser.add_argument('--setnames', dest='setnames', help='Names of biological\n'
+                    'sets. Can be specified with quotation marks if spaces\n'
+                    'are used', nargs='+')
 parser.add_argument('--confidence-col', dest='confcol', help='Confidence '
                     'column number or name in the tsv file. First column has'
                     ' number 1.')
