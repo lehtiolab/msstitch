@@ -1,3 +1,5 @@
+import os
+
 from app.lookups import base as lookups
 from app.drivers.base import BaseDriver
 
@@ -14,7 +16,8 @@ class LookupDriver(BaseDriver):
         else:
             # FIXME MUST be a set or mzml lookup? here is place to assert
             # correct lookuptype!
-            self.lookupfn = 'msstitcher_lookup.sqlite'
+            self.lookupfn = os.path.join(self.outdir,
+                                         'msstitcher_lookup.sqlite')
             self.lookup = lookups.create_new_lookup(self.lookupfn)
         self.lookup.add_tables()
 
