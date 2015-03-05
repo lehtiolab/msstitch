@@ -3,7 +3,6 @@ from app.drivers.mslookup import base
 
 
 class ProteinGroupLookupDriver(base.LookupDriver):
-    outsuffix = '_protgrouplookup.txt'
 
     def create_lookup(self):
         confkey = self.oldheader[int(self.confcol) - 1]

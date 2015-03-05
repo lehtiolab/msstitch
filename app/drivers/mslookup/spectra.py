@@ -4,7 +4,6 @@ from app.actions.mslookup import spectra as lookups
 
 
 class SpectraLookupDriver(base.LookupDriver):
-    outsuffix = '_spectralookup.sqlite'
     lookuptype = 'spectra'
 
     def __init__(self, **kwargs):

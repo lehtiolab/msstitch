@@ -10,7 +10,6 @@ class QuantLookupDriver(base.LookupDriver):
 
 
 class IsobaricQuantLookupDriver(QuantLookupDriver):
-    outsuffix = '_isobquantlookup.sqlite'
     lookuptpe = 'isobaricquant'
 
     def __init__(self, **kwargs):
@@ -26,7 +25,6 @@ class IsobaricQuantLookupDriver(QuantLookupDriver):
 
 
 class PrecursorQuantLookupDriver(QuantLookupDriver):
-    outsuffix = '_ms1quantlookup.sqlite'
     lookuptype = 'ms1quant'
 
     def __init__(self, **kwargs):
