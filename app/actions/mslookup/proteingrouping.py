@@ -7,7 +7,7 @@ from collections import OrderedDict
 from app.lookups.sqlite.proteingroups import ProteinGroupDB
 from app.readers import tsv as tsvreader
 from app.readers import fasta as fastareader
-from app.preparation.mzidtsv import confidencefilters as conffilt
+from app.actions.mzidtsv import confidencefilters as conffilt
 
 
 def create_protein_pep_lookup(fn, dbfn, header, confkey, conflvl,

@@ -1,4 +1,4 @@
-from app.preparation.mzidtsv import merge as prep
+from app.actions.mzidtsv import merge as prep
 from app.drivers.mzidtsv import MzidTSVDriver
 
 

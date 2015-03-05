@@ -1,5 +1,5 @@
 from app.drivers.pycolator import base
-from app.preparation import pycolator as preparation
+from app.actions import pycolator as preparation
 
 
 class FilterPeptideLength(base.PycolatorDriver):

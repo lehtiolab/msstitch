@@ -1,4 +1,4 @@
-from app.preparation.mzidtsv import proteingrouping as prep
+from app.actions.mzidtsv import proteingrouping as prep
 from app.drivers.mzidtsv import MzidTSVDriver
 from app.readers import fasta
 from app.lookups.sqlite.proteingroups import ProteinGroupProteinTableDB
