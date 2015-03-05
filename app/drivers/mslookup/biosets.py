@@ -11,4 +11,4 @@ class BioSetLookupDriver(base.LookupDriver):
         self.setnames = kwargs.get('setnames')
 
     def create_lookup(self):
-        lookups.create_set_lookup(self.lookup, self.fn, self.setnames)
+        lookups.create_bioset_lookup(self.lookup, self.fn, self.setnames)

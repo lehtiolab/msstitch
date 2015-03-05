@@ -18,7 +18,7 @@ class LookupDriver(BaseDriver):
             # correct lookuptype!
             self.lookupfn = os.path.join(self.outdir,
                                          'msstitcher_lookup.sqlite')
-            self.lookup = lookups.create_new_lookup(self.lookupfn)
+            self.lookup = lookups.create_new_lookup(self.lookupfn, self.lookuptype)
         self.lookup.add_tables()
 
     def run(self):
