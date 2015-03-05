@@ -1,6 +1,4 @@
 import sqlite3
-from app.lookups.sqlite import proteingroups, quant, searchspace, \
-    biosets, spectra
 
 
 mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
@@ -157,19 +155,3 @@ class ResultLookupInterface(DatabaseConnection):
         cursor = self.get_cursor()
         cursor.execute('SELECT spectra_id FROM mzml WHERE mzmlfile_id=? AND '
                        'retention_time=?', (fn_id, retention_time))
-
-
-def get_lookup(fn, lookuptype):
-    lookupmap = {'biosets': biosets.BioSetDB,
-                 'spectra': spectra.SpectraDB,
-                 'proteingroups': proteingroups.ProteinGroupDB,
-                 'quant': quant.QuantDB,
-                 'searchspace': searchspace.SearchSpaceDB,
-                 }
-    return lookupmap[lookuptype](fn)
-
-
-def create_new_lookup(fn, lookuptype):
-    with open(fn, 'w'):
-        pass
-    return get_lookup(fn, lookuptype)
