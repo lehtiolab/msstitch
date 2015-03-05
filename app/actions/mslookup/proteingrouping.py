@@ -46,6 +46,8 @@ def create_protein_pep_lookup(fn, dbfn, header, confkey, conflvl,
                                     'seq': seq,
                                     'proteins': prots,
                                     'score': score,
+                                    'specfn': specfn,
+                                    'scannr': scan,
                                     }
         last_id = psm_id
         rownr += 1

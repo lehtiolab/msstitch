@@ -50,8 +50,10 @@ class ProteinGroupDB(DatabaseConnection):
 
         def generate_psms(pepprots):
             for row, psmvals in pepprots.items():
-                yield (psmvals['psm_id'], row,
-                       psmvals['seq'], psmvals['score'])
+                spectra_id = self.get_spectra_id(psmvals['specfn'],
+                                                 psmvals['scannr'])
+                yield (psmvals['psm_id'], row, psmvals['seq'],
+                       psmvals['score'], spectra_id)
 
         psms = generate_psms(ppmap)
         psms = sorted(psms, key=lambda x: x[1])  # sorts on psm rows
@@ -63,8 +65,8 @@ class ProteinGroupDB(DatabaseConnection):
     def store_psm_relations(self, psms, prot_psm_ids):
         cursor = self.get_cursor()
         cursor.executemany(
-            'INSERT INTO psms(psm_id, sequence, score)'
-            ' VALUES(?, ?, ?)', ((x[0], x[2], x[3]) for x in psms))
+            'INSERT INTO psms(psm_id, sequence, score, spectra_id)'
+            ' VALUES(?, ?, ?)', ((x[0], x[2], x[3], x[4]) for x in psms))
         cursor.executemany(
             'INSERT INTO psmrows(psm_id, rownr) VALUES(?, ?)',
             ((psm[0], psm[1]) for psm in psms))

@@ -36,7 +36,6 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                    'psms': ['psm_id TEXT PRIMARY KEY NOT NULL',
                             'sequence TEXT',
                             'score TEXT',
-                            'set_name TEXT',
                             'spectra_id INTEGER',
                             'FOREIGN KEY(spectra_id)'
                             'REFERENCES mzml'
