@@ -6,7 +6,8 @@ def get_lookup(fn, lookuptype):
     lookupmap = {'biosets': biosets.BioSetDB,
                  'spectra': spectra.SpectraDB,
                  'proteingroups': proteingroups.ProteinGroupDB,
-                 'quant': quant.QuantDB,
+                 'isobaricquant': quant.QuantDB,
+                 'ms1quant': quant.QuantDB,
                  'searchspace': searchspace.SearchSpaceDB,
                  }
     return lookupmap[lookuptype](fn)

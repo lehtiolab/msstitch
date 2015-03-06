@@ -10,14 +10,14 @@ class QuantLookupDriver(base.LookupDriver):
 
 
 class IsobaricQuantLookupDriver(QuantLookupDriver):
-    lookuptpe = 'isobaricquant'
+    lookuptype = 'isobaricquant'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.cons_fns = self.fn
 
     def create_lookup(self):
-        quantmap = openmsreader.get_quantmap(self.consensusfns)
+        quantmap = openmsreader.get_quantmap(self.cons_fns[0])
         mzmlfn_consxml = openmsreader.mzmlfn_cons_el_generator(self.spectrafns,
                                                                self.cons_fns)
         lookups.create_isobaric_quant_lookup(self.lookup, mzmlfn_consxml,
