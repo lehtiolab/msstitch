@@ -12,7 +12,7 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                    'mzml': ['spectra_id INTEGER PRIMARY KEY',
                             'mzmlfile_id INTEGER',
                             'scan_nr TEXT',
-                            'retention_time REAL',
+                            'retention_time DOUBLE',
                             'FOREIGN KEY(mzmlfile_id)'
                             'REFERENCES mzmlfiles'],
                    'isobaric_quant': ['spectra_id INTEGER',
@@ -170,3 +170,4 @@ class ResultLookupInterface(DatabaseConnection):
         cursor = self.get_cursor()
         cursor.execute('SELECT spectra_id FROM mzml WHERE mzmlfile_id=? AND '
                        'retention_time=?', (fn_id, retention_time))
+        return cursor.fetchone()[0]

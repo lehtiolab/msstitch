@@ -9,6 +9,7 @@ class BioSetLookupDriver(base.LookupDriver):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.setnames = kwargs.get('setnames')
+        self.setnames = [x.replace('"', '') for x in self.setnames]
 
     def create_lookup(self):
         lookups.create_bioset_lookup(self.lookup, self.fn, self.setnames)

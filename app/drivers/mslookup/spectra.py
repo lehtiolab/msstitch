@@ -15,6 +15,8 @@ class SpectraLookupDriver(base.LookupDriver):
             assert self.lookup is not None, ('Must specify lookup '
                                              'if setnames have not '
                                              'been provided')
+        else:
+            self.setnames = [x.replace('"', '') for x in self.setnames]
 
     def create_lookup(self):
         biosetlookup.create_bioset_lookup(self.lookup, self.spectrafns,
