@@ -41,6 +41,9 @@ class QuantDB(ResultLookupInterface):
 
     def lookup_precursor_quant(self, spectrafile, charge, minrt, maxrt,
                                minmz, maxmz):
+        """Looks up a precursor quant feature from db matching spectra
+        filename, charge and retention time/mz tolerance. Basically
+        pre-aligning."""
         # FIXME check if this is slow since it has two BETWEEN in it
         # we could replace the mz BETWEEN by filtering in python
         cursor = self.get_cursor()
@@ -52,6 +55,7 @@ class QuantDB(ResultLookupInterface):
             (spectrafile, charge, minrt, maxrt, minmz, maxmz))
 
     def get_all_quantmaps(self):
+        """Returns all unique quant channels from lookup as list"""
         cursor = self.get_cursor()
         cursor.execute(
             'SELECT DISTINCT quantmap FROM isobaric_quant')

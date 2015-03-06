@@ -99,14 +99,17 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
 
 class DatabaseConnection(object):
     def __init__(self, fn=None):
+        """SQLite connecting when given filename"""
         self.fn = fn
         if self.fn is not None:
             self.connect(self.fn)
 
     def get_fn(self):
+        """Returns lookup filename"""
         return self.fn
 
     def create_tables(self, tables):
+        """Creates database tables in sqlite lookup db"""
         cursor = self.get_cursor()
         for table in tables:
             columns = mslookup_tables[table]
@@ -115,43 +118,55 @@ class DatabaseConnection(object):
         self.conn.commit()
 
     def connect(self, fn):
+        """SQLite connect method and enabling foreign keys"""
         self.conn = sqlite3.connect(fn)
         cur = self.get_cursor()
         cur.execute('PRAGMA FOREIGN_KEYS=ON')
 
     def get_cursor(self):
+        """Quickly get cursor, abstracting connection"""
         return self.conn.cursor()
 
     def close_connection(self):
+        """Close connection to db, abstracts connection object"""
         self.conn.close()
 
     def index_column(self, index_name, table, column):
+        """Called by interfaces to index specific column in table"""
         cursor = self.get_cursor()
         cursor.execute(
             'CREATE INDEX {0} on {1}({2})'.format(index_name, table, column))
         self.conn.commit()
 
     def get_inclause(self, inlist):
+        """Returns SQL IN clauses"""
         return 'IN ({0})'.format(', '.join('?' * len(inlist)))
 
     def get_sql_select(self, columns, table, distinct=False):
+        """Creates and returns an SQL SELECT statement"""
         sql = 'SELECT {0} {1} FROM {2}'
         dist = {True: 'DISTINCT', False: ''}[distinct]
         return sql.format(dist, ', '.join(columns), table)
 
     def store_many(self, sql, values):
+        """Abstraction over executemany method"""
         cursor = self.get_cursor()
         cursor.executemany(sql, values)
         self.conn.commit()
 
 
 class ResultLookupInterface(DatabaseConnection):
+    """Connection subclass shared by result lookup interfaces that need
+    to query the database when storing to get e.g. spectra id"""
+
     def get_mzmlfile_map(self):
+        """Returns dict of mzmlfilenames and their db ids"""
         cursor = self.get_cursor()
         cursor.execute('SELECT mzmlfile_id, mzmlfilename FROM mzmlfiles')
         return {fn: fnid for fnid, fn in cursor.fetchall()}
 
     def get_spectra_id(self, fn_id, retention_time):
+        """Returns spectra id for spectra filename and retention time"""
         cursor = self.get_cursor()
         cursor.execute('SELECT spectra_id FROM mzml WHERE mzmlfile_id=? AND '
                        'retention_time=?', (fn_id, retention_time))
