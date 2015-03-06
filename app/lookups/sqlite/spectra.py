@@ -1,8 +1,9 @@
-from app.lookups.sqlite.base import ResultLookupInterface
+from app.lookups.sqlite.biosets import BioSetDB
 
 
-class SpectraDB(ResultLookupInterface):
+class SpectraDB(BioSetDB):
     def add_tables(self):
+        super().add_tables()
         self.create_tables(['mzml'])
 
     def store_mzmls(self, spectra):

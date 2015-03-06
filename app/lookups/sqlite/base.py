@@ -149,7 +149,7 @@ class ResultLookupInterface(DatabaseConnection):
     def get_mzmlfile_map(self):
         cursor = self.get_cursor()
         cursor.execute('SELECT mzmlfile_id, mzmlfilename FROM mzmlfiles')
-        return {fn: fnid for fn, fnid in cursor.fetchall()}
+        return {fn: fnid for fnid, fn in cursor.fetchall()}
 
     def get_spectra_id(self, fn_id, retention_time):
         cursor = self.get_cursor()
