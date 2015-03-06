@@ -35,8 +35,8 @@ parser.add_argument('-c', dest='command', type=str,
                     'spectra - Create lookup of spectra in mzML \n'
                     'format. Requires passing mzML files to -i, but\n'
                     'neither --spectra nor --dbfile. Biological set names\n'
-                    'for each file can optionally be specified using\n'
-                    '--bioset\n'
+                    'for each file should be specified using\n'
+                    '--setnames\n'
 
                     'proteingrouplookup  - Groups proteins from mzid2tsv\n'
                     'output (single file passed to -i). With flags \n'
