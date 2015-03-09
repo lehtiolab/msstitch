@@ -165,9 +165,16 @@ class ResultLookupInterface(DatabaseConnection):
         cursor.execute('SELECT mzmlfile_id, mzmlfilename FROM mzmlfiles')
         return {fn: fnid for fnid, fn in cursor.fetchall()}
 
-    def get_spectra_id(self, fn_id, retention_time):
+    def get_spectra_id(self, fn_id, retention_time=None, scan_nr=None):
         """Returns spectra id for spectra filename and retention time"""
         cursor = self.get_cursor()
-        cursor.execute('SELECT spectra_id FROM mzml WHERE mzmlfile_id=? AND '
-                       'retention_time=?', (fn_id, retention_time))
+        sql = 'SELECT spectra_id FROM mzml WHERE mzmlfile_id=? '
+        values = [fn_id]
+        if retention_time is not None:
+            sql = '{0} AND retention_time=?'.format(sql)
+            values.append(retention_time)
+        if scan_nr is not None:
+            sql = '{0} AND scan_nr=?'.format(sql)
+            values.append(scan_nr)
+        cursor.execute(sql, tuple(values))
         return cursor.fetchone()[0]
