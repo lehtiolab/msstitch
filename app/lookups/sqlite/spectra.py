@@ -12,6 +12,7 @@ class SpectraDB(BioSetDB):
             'VALUES (?, ?, ?)', spectra)
 
     def index_mzml(self):
+        self.index_column('spectra_id_index', 'mzml', 'spectra_id')
         self.index_column('mzmlfnid_index', 'mzml', 'mzmlfile_id')
         self.index_column('scan_index', 'mzml', 'scan_nr')
         self.index_column('rt_index', 'mzml', 'retention_time')
