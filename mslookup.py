@@ -41,7 +41,7 @@ parser.add_argument('-c', dest='command', type=str,
                     'proteingrouplookup  - Groups proteins from mzid2tsv\n'
                     'output (single file passed to -i). With flags \n'
                     '--confidence-lvl, --confidence-col,\n'
-                    '--confidence-better, --fasta\n'
+                    '--confidence-better, --fasta, --spectracolumn\n'
 
                     'isoquant - Create lookup of isobaric quant data in\n'
                     'OpenMS consensusXML format. Use requires --spectra,\n'
@@ -76,6 +76,10 @@ parser.add_argument('--spectra', dest='spectra', help='Spectra files in mzML\n'
 parser.add_argument('--setnames', dest='setnames', help='Names of biological\n'
                     'sets. Can be specified with quotation marks if spaces\n'
                     'are used', nargs='+')
+parser.add_argument('--fasta', dest='fasta', help='FASTA sequence database, '
+                    'to optionally use with proteingrouping to enable sorting '
+                    'on coverage, and in case of UNIPROT FASTA, evidence '
+                    'levels.', type=lambda x: parser_file_exists(parser, x))
 parser.add_argument('--confidence-col', dest='confcol', help='Confidence '
                     'column number or name in the tsv file. First column has'
                     ' number 1.')
@@ -86,6 +90,18 @@ parser.add_argument('--confidence-better', dest='conftype', help='Confidence '
                     'of [higher, lower]',
                     type=lambda x: parser_value_in_list(parser, x, ['higher',
                                                                     'lower']))
+parser.add_argument('--spectracol', dest='speccol', help='Column number\n'
+                    'in which spectra file names are, in case some framework\n'
+                    'has changed the file names. First column number is 1.',
+                    type=int, required=False)
+parser.add_argument('--unroll', dest='unroll', help='Flag. The tsv input file '
+                    'from Mzid2TSV contains either one PSM per line with all '
+                    'the proteins of that shared peptide on the same line (not'
+                    ' unrolled, default), or one PSM/protein match per line '
+                    'where each protein from that shared peptide gets its own '
+                    'line (unrolled).',
+                    action='store_const', const=True, default=False)
+
 args = parser.parse_args()
 
 commandmap = {

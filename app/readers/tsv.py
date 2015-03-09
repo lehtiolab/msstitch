@@ -53,7 +53,7 @@ def get_proteins_from_psm(line):
     return outproteins
 
 
-def get_pepproteins(line, unroll=False):
+def get_pepproteins(line, unroll=False, specfncol=None):
     """Returns from a PSM line peptide sequence,
     and other information about the PSM.
     Return values:
@@ -63,7 +63,9 @@ def get_pepproteins(line, unroll=False):
         score		-   str
         proteins        -   list of str
     """
-    specfn = line[mzidtsvdata.HEADER_SPECFILE]
+    if specfncol is None:
+        specfncol = mzidtsvdata.HEADER_SPECFILE
+    specfn = line[specfncol]
     scan = line[mzidtsvdata.HEADER_SCANNR]
     score = line[mzidtsvdata.HEADER_MSGFSCORE]
     peptideseq = line[mzidtsvdata.HEADER_PEPTIDE]

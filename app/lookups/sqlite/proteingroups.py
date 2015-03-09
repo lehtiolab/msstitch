@@ -1,4 +1,4 @@
-from app.lookups.sqlite.base import DatabaseConnection
+from app.lookups.sqlite.base import ResultLookupInterface
 
 
 MASTER_INDEX = 1
@@ -10,7 +10,7 @@ COVERAGE_INDEX = 6
 EVIDENCE_LVL_INDEX = 7
 
 
-class ProteinGroupDB(DatabaseConnection):
+class ProteinGroupDB(ResultLookupInterface):
     def add_tables(self):
         self.create_tables(['psms', 'psmrows', 'proteins', 'protein_psm',
                             'protein_evidence', 'protein_seq',
@@ -51,7 +51,7 @@ class ProteinGroupDB(DatabaseConnection):
         def generate_psms(pepprots):
             for row, psmvals in pepprots.items():
                 spectra_id = self.get_spectra_id(psmvals['specfn'],
-                                                 psmvals['scannr'])
+                                                 scan_nr=psmvals['scannr'])
                 yield (psmvals['psm_id'], row, psmvals['seq'],
                        psmvals['score'], spectra_id)
 
@@ -66,7 +66,7 @@ class ProteinGroupDB(DatabaseConnection):
         cursor = self.get_cursor()
         cursor.executemany(
             'INSERT INTO psms(psm_id, sequence, score, spectra_id)'
-            ' VALUES(?, ?, ?)', ((x[0], x[2], x[3], x[4]) for x in psms))
+            ' VALUES(?, ?, ?, ?)', ((x[0], x[2], x[3], x[4]) for x in psms))
         cursor.executemany(
             'INSERT INTO psmrows(psm_id, rownr) VALUES(?, ?)',
             ((psm[0], psm[1]) for psm in psms))

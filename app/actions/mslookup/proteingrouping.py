@@ -10,15 +10,13 @@ from app.readers import fasta as fastareader
 from app.actions.mzidtsv import confidencefilters as conffilt
 
 
-def create_protein_pep_lookup(fn, dbfn, header, confkey, conflvl,
+def create_protein_pep_lookup(fn, header, pgdb, confkey, conflvl,
                               lower_is_better, unroll=False, fastafn=None,
-                              evidence_lvl=False):
+                              evidence_lvl=False, specfncol=None):
     """Reads PSMs from file, extracts their proteins and peptides and passes
     them to a database backend in chunked PSMs.
     """
-    pgdb = ProteinGroupDB()
-    pgdb.initialize(outfn=dbfn)
-    pgdb.add_tables()
+    mzmlmap = pgdb.get_mzmlfile_map()
     evidences = None
     proteins_stored = False
     if fastafn:
@@ -26,15 +24,14 @@ def create_protein_pep_lookup(fn, dbfn, header, confkey, conflvl,
             fastafn, evidence_lvl)
         pgdb.store_proteins(proteins, evidences, sequences)
         proteins_stored = True
-
     rownr, last_id, peptides_proteins = 0, None, {}
     store_soon = False
-    for psm in tsvreader.generate_tsv_psms(fn, header):
+    for psm in tsvreader.generate_tsv_lines_multifile(fn, header):
         if not conffilt.passes_filter(psm, conflvl, confkey, lower_is_better):
             rownr += 1
             continue
         specfn, scan, seq, score, prots = tsvreader.get_pepproteins(
-            psm, unroll)
+            psm, unroll, specfncol)
         psm_id = tsvreader.get_psm_id(psm)
         if peptides_proteins and len(peptides_proteins) % DB_STORE_CHUNK == 0:
             store_soon = True
@@ -46,7 +43,7 @@ def create_protein_pep_lookup(fn, dbfn, header, confkey, conflvl,
                                     'seq': seq,
                                     'proteins': prots,
                                     'score': score,
-                                    'specfn': specfn,
+                                    'specfn': mzmlmap[specfn],
                                     'scannr': scan,
                                     }
         last_id = psm_id
@@ -70,7 +67,7 @@ def build_master_db(fn, oldheader, pgdb, confkey, conflvl, lower_is_better,
     psm_masters = OrderedDict()
     allmasters = {}
     rownr = 0
-    for line in tsvreader.generate_tsv_psms(fn, oldheader):
+    for line in tsvreader.generate_tsv_lines_multifile(fn, oldheader):
         if not conffilt.passes_filter(line, conflvl, confkey, lower_is_better):
             rownr += 1
             continue
