@@ -3,12 +3,11 @@ from app.readers import tsv as readers
 from app.dataformats import mzidtsv as mzidtsvdata
 
 
-def generate_psms_quanted(quantdbfn, tsvfn, isob_header, oldheader,
+def generate_psms_quanted(quantdb, tsvfn, isob_header, oldheader,
                           is_ibariq=False, rttolerance=None, mztolerance=None,
                           mztoltype=None, spec_column=None):
     """Takes dbfn and connects, gets quants for each line in tsvfn, sorts
     them in line by using keys in quantheader list."""
-    quantdb = sqlite.QuantDB(quantdbfn)
     mzmlmap = quantdb.get_mzmlfile_map()
     quantfunctions = []
     if is_ibariq:
@@ -30,7 +29,7 @@ def generate_psms_quanted(quantdbfn, tsvfn, isob_header, oldheader,
         yield outpsm
 
 
-def get_full_and_isobaric_headers(oldheader, quantdbfn, isobaric=False,
+def get_full_and_isobaric_headers(oldheader, quantdb, isobaric=False,
                                   precursor=False):
     # FIXME:
     # if we let db decide, and already isobaric done on tsv gets a double db,
@@ -46,7 +45,6 @@ def get_full_and_isobaric_headers(oldheader, quantdbfn, isobaric=False,
     if precursor:
         fullheader += [mzidtsvdata.HEADER_PRECURSOR_QUANT]
     if isobaric:
-        quantdb = sqlite.QuantDB(quantdbfn)
         quantmap = quantdb.get_all_quantmaps()
         isob_header = sorted([x[0] for x in quantmap])
         fullheader += isob_header
