@@ -11,6 +11,7 @@ EXAMPLE:
 
 import argparse
 import os
+import app.drivers.mzidtsv.spectra as spectradrivers
 import app.drivers.mzidtsv.percolator as percodrivers
 import app.drivers.mzidtsv.proteingrouping as pgdrivers
 import app.drivers.mzidtsv.quant as quantdrivers
@@ -36,6 +37,8 @@ def parser_value_in_list(currentparser, value, valuelist):
 parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
 parser.add_argument('-c', dest='command', type=str,
                     help='How to manipulate the input:\n'
+                    'spectratsv - Add spectra data such as retention time,\n'
+                    'biological set name to tsv\n'
                     'percotsv       - Add percolator data to a  TSV with \n'
                     'MSGF+ output. Specify TSV file with -i, mzid file with \n'
                     '--mzid.\n'
@@ -123,6 +126,7 @@ parser.add_argument('--unroll', dest='unroll', help='Flag. The tsv input file '
 args = parser.parse_args()
 
 commandmap = {
+    'spectratsv': spectradrivers.TSVSpectraDriver,
     'percotsv': percodrivers.MzidPercoTSVDriver,
     'mergetsv': mergedrivers.MzidTSVConcatenateDriver,
     'quanttsv': quantdrivers.TSVQuantDriver,

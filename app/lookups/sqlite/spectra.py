@@ -16,3 +16,14 @@ class SpectraDB(BioSetDB):
         self.index_column('mzmlfnid_index', 'mzml', 'mzmlfile_id')
         self.index_column('scan_index', 'mzml', 'scan_nr')
         self.index_column('rt_index', 'mzml', 'retention_time')
+
+    def get_spectradata(self, mzmlfn_id, scannr):
+        cursor = self.get_cursor()
+        cursor.execute(
+            'SELECT bs.set_name, sp.retention_time '
+            'FROM mzmlfiles as mf '
+            'JOIN mzml AS sp USING(mzmlfile_id) '
+            'JOIN biosets AS bs USING(set_id) '
+            'WHERE mzmlfilename=? AND scan_nr=?',
+            (mzmlfn_id, scannr))
+        return cursor.fetchone()[0]
