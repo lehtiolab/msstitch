@@ -1,6 +1,7 @@
 from app.drivers import base
 from app.readers import tsv as tsvreader
 from app.writers import mzidtsv as writers
+from app.lookups import base as lookups
 
 
 class MzidTSVDriver(base.BaseDriver):
@@ -28,3 +29,10 @@ class MzidTSVDriver(base.BaseDriver):
     def write(self):
         outfn = self.create_outfilepath(self.fn, self.outsuffix)
         writers.write_mzid_tsv(self.header, self.psms, outfn)
+
+
+class MzidTSVDriverLookup(MzidTSVDriver):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        lookupfn = kwargs.get('lookup', None)
+        self.lookup = lookups.get_lookup(lookupfn, self.lookuptype)
