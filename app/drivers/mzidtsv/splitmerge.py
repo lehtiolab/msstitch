@@ -1,4 +1,4 @@
-from app.actions.mzidtsv import merge as prep
+from app.actions.mzidtsv import splitmerge as prep
 from app.drivers.mzidtsv import MzidTSVDriver
 from app.writers import mzidtsv as writers
 

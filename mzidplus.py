@@ -15,7 +15,7 @@ import app.drivers.mzidtsv.spectra as spectradrivers
 import app.drivers.mzidtsv.percolator as percodrivers
 import app.drivers.mzidtsv.proteingrouping as pgdrivers
 import app.drivers.mzidtsv.quant as quantdrivers
-import app.drivers.mzidtsv.merge as mergedrivers
+import app.drivers.mzidtsv.splitmerge as splitmergedrivers
 
 
 def parser_file_exists(currentparser, fn):
@@ -144,7 +144,8 @@ args = parser.parse_args()
 commandmap = {
     'spectratsv': spectradrivers.TSVSpectraDriver,
     'percotsv': percodrivers.MzidPercoTSVDriver,
-    'mergetsv': mergedrivers.MzidTSVConcatenateDriver,
+    'mergetsv': splitmergedrivers.MzidTSVConcatenateDriver,
+    'splittsv': splitmergedrivers.MzidTSVSplitDriver,
     'quanttsv': quantdrivers.TSVQuantDriver,
     'proteingroup': pgdrivers.ProteinGroupDriver,
 }
