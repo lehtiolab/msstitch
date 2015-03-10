@@ -18,12 +18,12 @@ def generate_psms_spectradata(lookup, tsvfn, oldheader,	spec_column):
             specfile = outpsm[mzidtsvdata.HEADER_SPECFILE]
         scannr = outpsm[mzidtsvdata.HEADER_SCANNR]
         outpsm.update(lookup_spectra(lookup, mzmlmap[specfile], scannr))
+        yield outpsm
 
 
 def lookup_spectra(lookup, spectrafile_id, scannr):
-    """Outputs dict with keys == spectradataheadernames, values == spectra data."""
+    """Outputs dict with keys == spectradataheadernames,
+    values == spectra data."""
     specdata = lookup.get_spectradata(spectrafile_id, scannr)
-    return {mzidtsvdata.HEADER_SETNAME: specdata[0], 
+    return {mzidtsvdata.HEADER_SETNAME: specdata[0],
             mzidtsvdata.HEADER_RETENTION_TIME: specdata[1]}
-
-
