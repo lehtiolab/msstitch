@@ -14,6 +14,7 @@ class MzidTSVDriver(base.BaseDriver):
         self.evidence_levels = None
         self.fasta = kwargs.get('fasta', False)
         self.coverage = self.fasta is not False
+        self.spec_column = kwargs.get('speccol', None)
 
     def run(self):
         self.oldheader = tsvreader.get_tsv_header(self.fn)

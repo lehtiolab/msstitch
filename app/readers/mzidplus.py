@@ -14,6 +14,7 @@ PERCO_ORDER = [P_SVM, P_PSMP, P_PSMQ, P_PSMPEP, P_PEPTIDEQ, P_PEPTIDEPEP]
 PERCO_HEADER = [x[1] for x in PERCO_ORDER]
 PERCO_HEADERMAP = {x[0]: x[1] for x in PERCO_ORDER}
 
+
 def get_mzid_namespace(mzidfile):
     return basereader.get_namespace_from_top(mzidfile, None)
 
@@ -85,4 +86,3 @@ def get_specidentitem_percolator_data(item, namespace):
         except KeyError:
             percodata[key] = 'NA'
     return percodata
-

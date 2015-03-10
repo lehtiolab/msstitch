@@ -24,6 +24,6 @@ class SpectraDB(BioSetDB):
             'FROM mzmlfiles as mf '
             'JOIN mzml AS sp USING(mzmlfile_id) '
             'JOIN biosets AS bs USING(set_id) '
-            'WHERE mzmlfilename=? AND scan_nr=?',
+            'WHERE mzmlfile_id=? AND scan_nr=?',
             (mzmlfn_id, scannr))
         return cursor.fetchone()[0]
