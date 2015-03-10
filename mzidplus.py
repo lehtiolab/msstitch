@@ -129,13 +129,9 @@ parser.add_argument('--bioset', dest='bioset', help='Flag. When using '
                     action='store_const', const=True, default=False)
 parser.add_argument('--splitcol', dest='splitcol', help='Column number on '
                     'which to split a TSV PSM table', type=int, required=False)
-parser.add_argument('--set-rename', dest='setrename', help='Flag. When using '
-                    'splittsv, this enables renaming of channels. Use with '
-                    'rename-col',
-                    action='store_const', const=True, default=False)
-parser.add_argument('--rename-col', dest='renamecol', help='Column numbers to '
-                    'rename with name of e.g. set used for splitting. Rename '
-                    'pattern: setname_oldcolumnname.', nargs='+')
+parser.add_argument('--rename-col', dest='renamecols', help='Column numbers '
+                    'to rename with name of e.g. set used for splitting. '
+                    'Rename pattern: setname_oldcolumnname.', nargs='+')
 
 
 # not supported yet

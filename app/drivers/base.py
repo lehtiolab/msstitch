@@ -28,3 +28,8 @@ class BaseDriver(object):
         basefn = os.path.basename(fn)
         outfn = basefn + suffix
         return os.path.join(self.outdir, outfn)
+
+    def create_multi_outfile_basepath(self, fn, suffix=None):
+        """Returns a basepath to dynamically create outfiles by writer
+        modules. Basepath includes a formatting string"""
+        self.create_outfilepath(fn + '_{0}', suffix)
