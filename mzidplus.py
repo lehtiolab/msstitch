@@ -41,20 +41,24 @@ parser.add_argument('-c', dest='command', type=str,
                     'biological set name to tsv\n'
                     'percotsv       - Add percolator data to a  TSV with \n'
                     'MSGF+ output. Specify TSV file with -i, mzid file with \n'
-                    '--mzid.\n'
-                    'mergetsv       - Merges multiple TSV tables of MSGF+ \n'
-                    'output. Make sure headers are same in all files.\n'
+                    '--mzid.\n\n'
                     'quanttsv       - Add quantitative data from openMS\n'
                     'consensusXML to a tab separated file with\n'
                     'PSMs. Needs to be passed a lookup db with --dbfile,\n'
                     'which has to contain quant information, and\n'
                     'optionally --isobaric, --precursor, --rttol, --mztol,\n'
                     '--spectracol changes the column where the spectra\n'
-                    'file names are in from the standard #SpecFile column.\n'
+                    'file names are in from the standard #SpecFile column.\n\n'
                     'proteingroup   - Takes lookup SQLite result, uses it\n'
                     'to output mzidtsv file with protein groups\n'
                     'With flags --confidence-lvl, --confidence-col,\n'
-                    '--confidence-better, --fasta, --dbfile, --spectracol\n',
+                    '--confidence-better, --fasta, --dbfile, --spectracol\n\n'
+                    'mergetsv       - Merges multiple TSV tables of MSGF+ \n'
+                    'output. Make sure headers are same in all files.\n\n'
+                    'splittsv       - Splits an MSGF TSV PSM table into\n'
+                    'multiple new tables based. Use with flags --bioset or\n'
+                    '--splitcol, and optionally --set-rename and\n'
+                    '--rename-cols.',
                     required=True
                     )
 parser.add_argument('-i', dest='infile', help='TSV table of mzIdentML',
@@ -118,6 +122,22 @@ parser.add_argument('--unroll', dest='unroll', help='Flag. The tsv input file '
                     'where each protein from that shared peptide gets its own '
                     'line (unrolled).',
                     action='store_const', const=True, default=False)
+parser.add_argument('--bioset', dest='bioset', help='Flag. When using '
+                    'splittsv, this enables automatic splitting on '
+                    'biological set names, for which a a column specifying '
+                    'these must exist.',
+                    action='store_const', const=True, default=False)
+parser.add_argument('--splitcol', dest='splitcol', help='Column number on '
+                    'which to split a TSV PSM table', type=int, required=False)
+parser.add_argument('--set-rename', dest='setrename', help='Flag. When using '
+                    'splittsv, this enables renaming of channels. Use with '
+                    'rename-col',
+                    action='store_const', const=True, default=False)
+parser.add_argument('--rename-col', dest='renamecol', help='Column numbers to '
+                    'rename with name of e.g. set used for splitting. Rename '
+                    'pattern: setname_oldcolumnname.', nargs='+')
+
+
 # not supported yet
 #parser.add_argument('--allpsms', dest='allpsms', action='store_true',
 #                    help='All PSMs from a single scan should be included, '
