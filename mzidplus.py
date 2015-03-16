@@ -131,8 +131,8 @@ parser.add_argument('--splitcol', dest='splitcol', help='Column number on '
                     'which to split a TSV PSM table', type=int, required=False)
 parser.add_argument('--rename-cols', dest='renamecols', help='Column numbers '
                     'to rename with name of e.g. set used for splitting. '
-                    'Rename pattern: setname_oldcolumnname.', nargs='+')
-parser.add_argument('--rename-col-startswith', dest='renamecolpatttern',
+                    'Rename pattern: setname_oldcolumnname.', type=int, nargs='+')
+parser.add_argument('--rename-col-startswith', dest='renamecolpattern',
                     help='Rename column headings that start with the pattern '
                     'specified here. Renaming is done as follows: '
                     'setname_oldcolumnname.')
