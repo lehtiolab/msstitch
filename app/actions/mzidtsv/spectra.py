@@ -25,6 +25,8 @@ def generate_psms_spectradata(lookup, tsvfn, oldheader,	spec_column):
 def lookup_spectra(lookup, spectrafile_id, scannr):
     """Outputs dict with keys == spectradataheadernames,
     values == spectra data."""
-    specdata = lookup.get_spectradata(spectrafile_id, scannr)
-    return {mzidtsvdata.HEADER_SETNAME: specdata[0],
-            mzidtsvdata.HEADER_RETENTION_TIME: specdata[1]}
+    for specdata in lookup.get_spectradata(scannr):
+        if specdata[0] == spectrafile_id:
+            break
+    return {mzidtsvdata.HEADER_SETNAME: specdata[1],
+            mzidtsvdata.HEADER_RETENTION_TIME: str(specdata[2])}
