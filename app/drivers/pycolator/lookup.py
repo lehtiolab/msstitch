@@ -17,8 +17,6 @@ class CreateLookup(base.PycolatorDriver):
 
     def run(self):
         self.outfn = self.create_outfilepath(self.fn, self.outsuffix)
-        self.searchspace = sequences.create_searchspace(self.fn,
-                                                        self.outfn,
-                                                        self.proline,
-                                                        self.falloff)
+        sequences.create_searchspace(self.fn, self.outfn, self.proline,
+                                     self.falloff)
         self.finish()

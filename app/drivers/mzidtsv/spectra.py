@@ -1,4 +1,4 @@
-from app.actions.mzidtsv import spectra as actions 
+from app.actions.mzidtsv import spectra as actions
 from app.drivers.mzidtsv import MzidTSVDriverLookup
 
 

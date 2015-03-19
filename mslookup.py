@@ -31,23 +31,23 @@ parser.add_argument('-c', dest='command', type=str,
                     help='How to manipulate the input:\n'
                     'biosets - Create SQLite lookup of mzML input files and\n'
                     'biological set names. Input files are passed to -i,\n'
-                    'respective set names are passed to --setnames\n'
+                    'respective set names are passed to --setnames\n\n'
 
                     'spectra - Create lookup of spectra in mzML \n'
                     'format. Requires passing mzML files to -i, but\n'
                     'neither --spectra nor --dbfile. Biological set names\n'
                     'for each file should be specified using\n'
-                    '--setnames\n'
+                    '--setnames\n\n'
 
                     'proteingrouplookup  - Groups proteins from mzid2tsv\n'
                     'output (single file passed to -i). With flags \n'
                     '--confidence-lvl, --confidence-col,\n'
-                    '--confidence-better, --fasta, --spectracolumn\n'
+                    '--confidence-better, --fasta, --spectracolumn\n\n'
 
                     'isoquant - Create lookup of isobaric quant data in\n'
                     'OpenMS consensusXML format. Use requires --spectra,\n'
                     '--dbfile with an sqlite lookup of spectra, and passing\n'
-                    'a consensusXML file to -i.\n'
+                    'a consensusXML file to -i.\n\n'
 
                     'ms1quant - Creates lookup of precursor quant data in \n'
                     'OpenMS featureXML format. Use requires --spectra,\n'
