@@ -114,8 +114,9 @@ parser.add_argument('--protcol', dest='protcol', help='Column number\n'
                     'of protein table in which protein accessions are \n'
                     'stored. First column number is 1.',
                     type=int, required=False)
-parser.add_argument('--quantcols', dest='quantcols', help='Column numbers\n'
-                    'of protein table in which quant intensities are stored.\n'
+parser.add_argument('--quantcolpattern', dest='quantcolpattern',
+                    help='Column numbers of protein table in which quant \n'
+                    'intensities are stored.\n'
                     'First column number is 1.',
                     type=int, nargs='+', required=False)
 
