@@ -110,6 +110,10 @@ parser.add_argument('--unroll', dest='unroll', help='Flag. The tsv input file '
                     'where each protein from that shared peptide gets its own '
                     'line (unrolled).',
                     action='store_const', const=True, default=False)
+parser.add_argument('--protcol', dest='protcol', help='Column number\n'
+                    'of protein table in which protein accessions are \n'
+                    'stored. First column number is 1.',
+                    type=int, required=False)
 parser.add_argument('--quantcols', dest='quantcols', help='Column numbers\n'
                     'of protein table in which quant intensities are stored.\n'
                     'First column number is 1.',

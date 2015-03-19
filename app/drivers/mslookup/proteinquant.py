@@ -9,7 +9,8 @@ class ProteinQuantLookupDriver(base.LookupDriver):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.quantcols = kwargs.get('quantcols', None)
+        self.proteincols = kwargs.get('protcol', None)
 
     def create_lookup(self):
         lookups.create_proteinquant_lookup(self.fn, self.lookup,
-                                           self.quantcols)
+                                           self.proteincols, self.quantcols)
