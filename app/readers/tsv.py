@@ -17,6 +17,15 @@ def generate_tsv_proteins(fn, header):
     return generate_split_tsv_lines(fn, header)
 
 
+def generate_tsv_proteinquants(fns):
+    """Unlike generate_tsv_lines_multifile, this generates tsv lines
+    from multiple files that may have different headers"""
+    for fn in fns:
+        header = get_tsv_header(fn)
+        for pquant in generate_split_tsv_lines(fn, header):
+            yield pquant
+
+
 def generate_tsv_psms(fn, header):
     return generate_split_tsv_lines(fn, header)
 

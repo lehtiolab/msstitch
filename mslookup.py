@@ -6,7 +6,8 @@ mslookup - Creating SQLite lookups for internal and external use
 
 import argparse
 import os
-from app.drivers.mslookup import spectra, quant, proteingroups, biosets
+from app.drivers.mslookup import (spectra, quant, proteingroups, biosets,
+                                  proteinquant)
 
 
 def parser_file_exists(currentparser, fn):
@@ -51,14 +52,22 @@ parser.add_argument('-c', dest='command', type=str,
                     'ms1quant - Creates lookup of precursor quant data in \n'
                     'OpenMS featureXML format. Use requires --spectra,\n'
                     '--dbfile wiht an sqlite lookup of spectra, and passing '
-                    'a featureXML file to -i',
+                    'a featureXML file to -i\n\n'
+
+                    'protquant - Creates lookup of protein quantification\n'
+                    'data in tab separated format. Header should include\n'
+                    'quantification channel names, and if possible the\n'
+                    'number of peptides quantified for each protein in the\n'
+                    'respective channels. Lookup should already include '
+                    'proteins.',
                     required=True
                     )
 parser.add_argument('-i', dest='infile', nargs='+',
                     help='The input files to create the lookup from. Can be\n'
                     'type mzML, consensusXML, featureXML, percolatoroutXML,\n'
-                    'tab separated PSM table. If order is important then it\n'
-                    'is taken from the input order at the command line.',
+                    'tab separated PSM table or protein table. If order is\n'
+                    'important then it is taken from the input order at the\n'
+                    'command line.',
                     type=lambda x: parser_file_exists(parser, x),
                     required=True)
 parser.add_argument('-d', dest='outdir', required=True,
@@ -101,6 +110,10 @@ parser.add_argument('--unroll', dest='unroll', help='Flag. The tsv input file '
                     'where each protein from that shared peptide gets its own '
                     'line (unrolled).',
                     action='store_const', const=True, default=False)
+parser.add_argument('--quantcols', dest='quantcols', help='Column numbers\n'
+                    'of protein table in which quant intensities are stored.\n'
+                    'First column number is 1.',
+                    type=int, nargs='+', required=False)
 
 args = parser.parse_args()
 
@@ -110,6 +123,7 @@ commandmap = {
     'isoquant': quant.IsobaricQuantLookupDriver,
     'ms1quant': quant.PrecursorQuantLookupDriver,
     'proteingrouplookup': proteingroups.ProteinGroupLookupDriver,
+    'protquant': proteinquant.ProteinQuantLookupDriver,
 }
 
 command = commandmap[args.command](**vars(args))
