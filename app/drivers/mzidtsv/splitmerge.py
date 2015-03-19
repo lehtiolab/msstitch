@@ -35,9 +35,8 @@ class MzidTSVSplitDriver(MzidTSVDriver):
         self.header = prep.get_splitheader(self.oldheader, self.renamecols,
                                            self.renamecolpattern)
         self.psms = prep.generate_psms_split(self.fn, self.oldheader,
-                                             self.header, self.bioset,
-                                             self.splitcol)
+                                             self.bioset, self.splitcol)
 
     def write(self):
-        base_outfile = self.get_multi_outfile_basepath(self.fn, self.outsuffix)
-        writers.write_multi_mzidtsv(self.header, self.psms, base_outfile)
+        base_outfile = self.create_multi_outfile_basepath(self.fn, self.outsuffix)
+        writers.write_multi_mzidtsv(self.header, self.oldheader, self.psms, base_outfile)

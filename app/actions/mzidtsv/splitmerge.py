@@ -17,7 +17,7 @@ def get_splitcolnr(header, bioset, splitcol):
     """Returns column nr on which to split PSM table. Chooses from flags
     given via bioset and splitcol"""
     if bioset is not None:
-        return header[mzidtsvdata.HEADER_SETNAME]
+        return header.index(mzidtsvdata.HEADER_SETNAME)
     elif splitcol is not None:
         return splitcol - 1
     else:
@@ -38,12 +38,12 @@ def get_splitheader(oldheader, rename_cols=None, renamepattern=None):
     return header
 
 
-def generate_psms_split(fn, oldheader, baseheader, bioset, splitcol):
+def generate_psms_split(fn, oldheader, bioset, splitcol):
     """Loops PSMs and outputs dictionaries passed to writer. Dictionaries
     contain the PSMs and info to which split pool the
     respective PSM belongs"""
     splitcolnr = get_splitcolnr(oldheader, bioset, splitcol)
-    for psm in tsvreader.generate_tsv_psms(fn, baseheader):
+    for psm in tsvreader.generate_tsv_psms(fn, oldheader):
         yield {'psm': psm,
                'split_pool':  ''.join(x for x in psm[oldheader[splitcolnr]]
                                       if x.isalnum() or x in '_.-')

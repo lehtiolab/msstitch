@@ -32,4 +32,4 @@ class BaseDriver(object):
     def create_multi_outfile_basepath(self, fn, suffix=None):
         """Returns a basepath to dynamically create outfiles by writer
         modules. Basepath includes a formatting string"""
-        self.create_outfilepath(fn + '_{0}', suffix)
+        return self.create_outfilepath(fn + '_{0}', suffix)

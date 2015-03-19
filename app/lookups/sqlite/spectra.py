@@ -13,17 +13,17 @@ class SpectraDB(BioSetDB):
 
     def index_mzml(self):
         self.index_column('spectra_id_index', 'mzml', 'spectra_id')
-        self.index_column('mzmlfnid_index', 'mzml', 'mzmlfile_id')
+        self.index_column('mzmlfnid_mzml_index', 'mzml', 'mzmlfile_id')
         self.index_column('scan_index', 'mzml', 'scan_nr')
         self.index_column('rt_index', 'mzml', 'retention_time')
 
-    def get_spectradata(self, mzmlfn_id, scannr):
+    def get_spectradata(self, scannr):
         cursor = self.get_cursor()
         cursor.execute(
-            'SELECT bs.set_name, sp.retention_time '
-            'FROM mzmlfiles as mf '
-            'JOIN mzml AS sp USING(mzmlfile_id) '
+            'SELECT sp.mzmlfile_id, bs.set_name, sp.retention_time '
+            'FROM mzml AS sp '
+            'JOIN mzmlfiles AS mf USING(mzmlfile_id) '
             'JOIN biosets AS bs USING(set_id) '
-            'WHERE mzmlfile_id=? AND scan_nr=?',
-            (mzmlfn_id, scannr))
-        return cursor.fetchone()[0]
+            'WHERE sp.scan_nr=?'
+            , (scannr,))
+        return cursor

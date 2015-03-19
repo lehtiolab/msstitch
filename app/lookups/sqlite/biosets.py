@@ -15,7 +15,9 @@ class BioSetDB(ResultLookupInterface):
     def index_biosets(self):
         self.index_column('setname_index', 'biosets', 'set_name')
         self.index_column('setid_index', 'biosets', 'set_id')
+        self.index_column('setid_mzmlfn_index', 'mzmlfiles', 'set_id')
         self.index_column('mzmlfn_index', 'mzmlfiles', 'mzmlfilename')
+        self.index_column('mzmlfnid_index', 'mzmlfiles', 'mzmlfile_id')
 
     def get_setnames(self):
         cursor = self.get_cursor()
