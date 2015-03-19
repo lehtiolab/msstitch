@@ -58,9 +58,11 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                        'protquant_channels(channel_id)'
                                        ],
                    'protquant_channels': ['channel_id INTEGER PRIMARY KEY',
-                                          'channel_name TEXT PRIMARY KEY'],
-                   'protein_quanted_psms': ['proteinquant_id INTEGER',
-                                            'amount_psms INTEGER'],
+                                          'channel_name TEXT'],
+                   'protein_quanted_psms': ['proteinquant_id INTEGER PRIMARY KEY',
+                                            'amount_psms INTEGER',
+                                            'FOREIGN KEY(proteinquant_id) '
+                                            'REFERENCES protein_quanted(proteinquant_id)'],
                    'protein_psm': ['protein_acc TEXT',
                                    'psm_id TEXT',
                                    'FOREIGN KEY(protein_acc) '
