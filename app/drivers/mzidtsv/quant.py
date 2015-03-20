@@ -1,8 +1,8 @@
 from app.actions.mzidtsv import quant as prep
-from app.drivers.mzidtsv import MzidTSVDriverLookup
+from app.drivers.mzidtsv import MzidTSVDriver
 
 
-class TSVQuantDriver(MzidTSVDriverLookup):
+class TSVQuantDriver(MzidTSVDriver):
     lookuptype = 'quant'
     outsuffix = '_quant.tsv'
 

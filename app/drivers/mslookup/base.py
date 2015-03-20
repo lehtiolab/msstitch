@@ -7,7 +7,6 @@ from app.drivers.base import BaseDriver
 class LookupDriver(BaseDriver):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.lookupfn = kwargs.get('lookup', None)
         self.conflvl = kwargs.get('conflvl', None)
         self.lowerbetter = kwargs.get('conftype', None) == 'lower'
         self.unroll = kwargs.get('unroll', False)
@@ -17,14 +16,12 @@ class LookupDriver(BaseDriver):
         self.confcol = kwargs.get('confcol', False)
 
     def initialize_lookup(self):
-        if self.lookupfn is not None:
-            self.lookup = lookups.get_lookup(self.lookupfn, self.lookuptype)
-        else:
+        if self.lookup is None:
             # FIXME MUST be a set or mzml lookup? here is place to assert
             # correct lookuptype!
-            self.lookupfn = os.path.join(self.outdir,
-                                         'msstitcher_lookup.sqlite')
-            self.lookup = lookups.create_new_lookup(self.lookupfn,
+            lookupfn = os.path.join(self.outdir,
+                                    'msstitcher_lookup.sqlite')
+            self.lookup = lookups.create_new_lookup(lookupfn,
                                                     self.lookuptype)
         self.lookup.add_tables()
 

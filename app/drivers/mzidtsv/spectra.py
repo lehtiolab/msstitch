@@ -1,8 +1,8 @@
 from app.actions.mzidtsv import spectra as actions
-from app.drivers.mzidtsv import MzidTSVDriverLookup
+from app.drivers.mzidtsv import MzidTSVDriver
 
 
-class TSVSpectraDriver(MzidTSVDriverLookup):
+class TSVSpectraDriver(MzidTSVDriver):
     lookuptype = 'spectra'
     outsuffix = '_spectradata.tsv'
 

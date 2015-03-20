@@ -2,11 +2,18 @@ import os
 import shutil
 from tempfile import mkdtemp
 
+from app.lookups import base as lookups
+
 
 class BaseDriver(object):
     def __init__(self, **kwargs):
         self.fn = kwargs['infile']
         self.outdir = kwargs['outdir']
+        lookupfn = kwargs.get('lookup', None)
+        if lookupfn is not None and hasattr(self, 'lookuptype'):
+            self.lookup = lookups.get_lookup(lookupfn, self.lookuptype)
+        else:
+            self.lookup = None
         # self.workdir = self.set_workdir(kwargs.get('workdir', os.getcwd()))
 
     def finish(self):
