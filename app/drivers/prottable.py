@@ -9,7 +9,6 @@ class ProttableDriver(BaseDriver):
     """Base class for prottable.py"""
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.fasta = kwargs.get('fasta')
 
     def run(self):
         self.oldheader = reader.get_tsv_header(self.fn)
