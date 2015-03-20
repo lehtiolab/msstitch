@@ -28,7 +28,6 @@ class AddProteinInfoDriver(ProttableDriver):
         writers.write_prottable(self.header, self.proteins, outfn)
 
     def set_protein_generator(self):
-        preparation.collect_descriptions(self.lookup, self.fasta)
         self.header = preparation.get_header_with_proteindata(self.oldheader)
         proteins = reader.generate_tsv_proteins(self.fn, self.oldheader)
         self.proteins = preparation.add_protein_data(proteins,

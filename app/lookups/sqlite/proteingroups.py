@@ -15,7 +15,8 @@ class ProteinGroupDB(ResultLookupInterface):
         self.create_tables(['psms', 'psmrows', 'proteins', 'protein_psm',
                             'protein_evidence', 'protein_seq',
                             'protein_coverage', 'protein_group_master',
-                            'protein_group_content', 'psm_protein_groups'])
+                            'protein_group_content', 'psm_protein_groups',
+                            'prot_desc'])
 
     def store_proteins(self, proteins, evidence_lvls=False, sequences=False):
         cursor = self.get_cursor()
@@ -78,6 +79,7 @@ class ProteinGroupDB(ResultLookupInterface):
     def index_protein_peptides(self):
         self.index_column('protein_index', 'protein_psm', 'protein_acc')
         self.index_column('psmid_index', 'protein_psm', 'psm_id')
+        self.index_column('protdesc_index', 'prot_desc', 'protein_acc')
 
     def store_masters(self, allmasters, psm_masters):
         allmasters = ((x,) for x in allmasters)
@@ -213,13 +215,7 @@ class ProteinGroupDB(ResultLookupInterface):
         proteins_not_in_group = cursor.execute(not_in_sql,
                                                proteins + peptides)
         return [x[0] for x in proteins_not_in_group]
-
-
-class ProteinGroupProteinTableDB(ProteinGroupDB):
-    def add_tables(self):
-        self.create_tables(['prot_desc'])
-        self.index_column('protdesc_index', 'prot_desc', 'protein_acc')
-
+    
     def store_descriptions(self, descriptions):
         cursor = self.get_cursor()
         cursor.executemany(
@@ -227,6 +223,9 @@ class ProteinGroupProteinTableDB(ProteinGroupDB):
             'VALUES(?, ?)', descriptions)
         self.conn.commit()
 
+
+
+class ProteinGroupProteinTableDB(ProteinGroupDB):
     def get_protein_data(self, protein_acc):
         fields = ['psm.psm_id', 'psm.sequence', 'pgc.master',
                   'pgc.protein_acc', 'pcov.coverage', 'pd.description']

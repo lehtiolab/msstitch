@@ -53,9 +53,3 @@ def get_protein_data(protein_acc, pgdb):
             #prottabledata.HEADER_NO_QUANT_PSM: quantcount,
             #prottabledata.HEADER_CV_QUANT_PSM: quantcv,
             }
-
-
-def collect_descriptions(pgdb, fastafn):
-    pgdb.add_tables()
-    protein_descriptions = fasta.get_proteins_descriptions(fastafn)
-    pgdb.store_descriptions(protein_descriptions)

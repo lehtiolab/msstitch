@@ -20,10 +20,14 @@ def create_protein_pep_lookup(fn, header, pgdb, confkey, conflvl,
     evidences = None
     proteins_stored = False
     if fastafn:
+        # Store protein accessions from fasta file, instead of from PSM table
         proteins, sequences, evidences = fastareader.get_proteins_for_db(
             fastafn, evidence_lvl)
         pgdb.store_proteins(proteins, evidences, sequences)
+        protein_descriptions = fastareader.get_proteins_descriptions(fastafn)
+        pgdb.store_descriptions(protein_descriptions)
         proteins_stored = True
+    
     rownr, last_id, peptides_proteins = 0, None, {}
     store_soon = False
     for psm in tsvreader.generate_tsv_lines_multifile(fn, header):
