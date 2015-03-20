@@ -1,3 +1,4 @@
+import re
 from app.readers import tsv as tsvreader
 
 
@@ -24,7 +25,7 @@ def create_proteinquant_lookup(fns, pqdb, protacc_colnr, qcolpattern):
 
 def get_quantcolumns(header, quantcolpattern):
     for field in header:
-        if quantcolpattern in field:
+        if re.search(quantcolpattern, field) is not None:
             yield field
 
 
