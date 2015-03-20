@@ -16,3 +16,9 @@ class ProtQuantDB(ResultLookupInterface):
         cursor.execute(
             'SELECT channel_id, channel_name FROM protquant_channels')
         return {channel: chan_id for chan_id, channel in cursor}
+
+    def store_protquants(self, quants):
+        self.store_many(
+            'INSERT INTO protein_quanted(protein_acc, channel_id, quantvalue) '
+            'VALUES (?, ?, ?)', quants)
+

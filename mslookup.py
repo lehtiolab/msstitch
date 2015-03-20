@@ -115,10 +115,9 @@ parser.add_argument('--protcol', dest='protcol', help='Column number\n'
                     'stored. First column number is 1.',
                     type=int, required=False)
 parser.add_argument('--quantcolpattern', dest='quantcolpattern',
-                    help='Column numbers of protein table in which quant \n'
-                    'intensities are stored.\n'
-                    'First column number is 1.',
-                    type=int, nargs='+', required=False)
+                    help='Unique text pattern to identify quant column in \n'
+                    'protein table.',
+                    type=str, required=False)
 
 args = parser.parse_args()
 

@@ -50,7 +50,6 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                        'protein_acc TEXT',
                                        'channel_id INTEGER',
                                        'quantvalue REAL',
-                                       'amount_peptides INTEGER',
                                        'FOREIGN KEY(protein_acc) '
                                        'REFERENCES proteins(protein_acc) '
                                        'FOREIGN KEY(channel_id) '

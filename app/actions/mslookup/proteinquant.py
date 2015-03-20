@@ -8,12 +8,11 @@ def create_proteinquant_lookup(fns, pqdb, protacc_colnr, qcolpattern):
     allquantcols = set()
     for fn in fns:
         header = tsvreader.get_tsv_header(fn)
-        allquantcols.update([header[x] for x in
-                             get_quantcolumns(header, qcolpattern)])
-    pqdb.store_quant_channels(allquantcols)
+        allquantcols.update(get_quantcolumns(header, qcolpattern))
+    pqdb.store_quant_channels(((x,) for x in allquantcols))
     quantmap = pqdb.get_quantchannel_ids()
     to_store = []
-    for pquant in tsvreader.generate_protein_quants(fns):
+    for header, pquant in tsvreader.generate_tsv_protein_quants(fns):
         pqdata = get_protquant_data(pquant, header, protacc_colnr, qcolpattern,
                                     quantmap)
         to_store.extend(pqdata)
