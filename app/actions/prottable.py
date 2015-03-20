@@ -2,6 +2,10 @@ from app.readers import fasta
 from app.dataformats import prottable as prottabledata
 
 
+def get_quantchannels(pqdb):
+    return [x[1] for x in pqdb.get_quantchannel_ids()]
+
+
 def get_header(oldheader=None, quantchannels=None, addprotein_data=False):
     if oldheader is None:
         header = [prottabledata.HEADER_PROTEIN]
@@ -24,6 +28,22 @@ def get_header_with_proteindata(header):
                 #prottabledata.HEADER_CV_QUANT_PSM,
                 ]
     return header[:ix] + new_data + header[ix:]
+
+
+def build_quanted_proteintable(pqdb, header):
+    """Fetches proteins and quants from joined lookup table, loops through
+    them and when all of a protein's quants have been collected, yields the
+    protein quant information."""
+    proteins = pqdb.get_quanted_proteins()
+    protein = next(proteins)
+    outprotein = {prottabledata.HEADER_PROTEIN: protein[0],
+                  protein[1]: protein[2]}
+    for protein in proteins:
+        if protein[0] != outprotein[prottabledata.HEADER_PROTEIN]:
+            yield next(add_protein_data([protein], pqdb))
+            outprotein = {prottabledata.HEADER_PROTEIN: protein[0]}
+        outprotein[protein[1]] = protein[2]
+    yield next(add_protein_data([protein], pqdb))
 
 
 def add_protein_data(proteins, pgdb):

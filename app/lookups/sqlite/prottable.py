@@ -29,6 +29,15 @@ class ProtTableDB(ResultLookupInterface):
                                                  protein_acc))
         cursor = self.get_cursor()
         return cursor.execute(sql).fetchall()
+    
+    def get_quanted_proteins(self):
+        sql = ('SELECT pq.protein_acc, pc.channel_name, pq.quantvalue '
+               'FROM protein_quanted AS pq '
+               'JOIN protquant_channels AS pc USING(channel_id) '
+               'ORDER BY pq.protein_acc')
+        cursor = self.get_cursor()
+        cursor.execute(sql)
+        return cursor
 
     def get_quantchannel_ids(self):
         cursor = self.get_cursor()
