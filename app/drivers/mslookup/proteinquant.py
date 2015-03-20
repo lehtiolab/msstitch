@@ -4,7 +4,7 @@ from app.drivers.mslookup import base
 
 class ProteinQuantLookupDriver(base.LookupDriver):
     """Creates lookup of protein tables that contain quant data"""
-    lookuptype = 'proteinquant'
+    lookuptype = 'prottable'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

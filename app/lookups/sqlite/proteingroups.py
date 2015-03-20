@@ -222,25 +222,3 @@ class ProteinGroupDB(ResultLookupInterface):
             'INSERT INTO prot_desc(protein_acc, description) '
             'VALUES(?, ?)', descriptions)
         self.conn.commit()
-
-
-
-class ProteinGroupProteinTableDB(ProteinGroupDB):
-    def get_protein_data(self, protein_acc):
-        fields = ['psm.psm_id', 'psm.sequence', 'pgc.master',
-                  'pgc.protein_acc', 'pcov.coverage', 'pd.description']
-        joins = [('psm_protein_groups', 'ppg', 'master'),
-                 ('protein_coverage', 'pcov', 'protein_acc'),
-                 ('prot_desc', 'pd', 'protein_acc'),
-                 ('psms', 'psm', 'psm_id'),
-                 ]
-        join_sql = '\n'.join(['JOIN {0} AS {1} USING({2})'.format(
-            j[0], j[1], j[2]) for j in joins])
-        sql = ('SELECT {0} FROM protein_group_content AS pgc {1}'
-               'WHERE master IN '
-               '(SELECT master FROM protein_group_content '
-               'WHERE protein_acc="{2}")'.format(', '.join(fields),
-                                                 join_sql,
-                                                 protein_acc))
-        cursor = self.get_cursor()
-        return cursor.execute(sql).fetchall()

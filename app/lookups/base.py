@@ -1,5 +1,5 @@
 from app.lookups.sqlite import (proteingroups, quant, searchspace,
-                                biosets, spectra, proteinquant)
+                                biosets, spectra, prottable)
 
 
 def get_lookup(fn, lookuptype):
@@ -8,8 +8,7 @@ def get_lookup(fn, lookuptype):
                  'proteingroups': proteingroups.ProteinGroupDB,
                  'quant': quant.QuantDB,
                  'searchspace': searchspace.SearchSpaceDB,
-                 'proteinquant': proteinquant.ProtQuantDB,
-                 'protgroupprottable': proteingroups.ProteinGroupProteinTableDB,
+                 'prottable': prottable.ProtTableDB,
                  }
     return lookupmap[lookuptype](fn)
 

@@ -25,7 +25,7 @@ class ProttableDriver(BaseDriver):
 
 class AddProteinInfoDriver(ProttableDriver):
     outsuffix = '_proteindata.txt'
-    lookuptype = 'protgroupprottable'
+    lookuptype = 'prottable'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
