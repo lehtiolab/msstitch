@@ -26,7 +26,9 @@ def get_header_with_proteindata(header):
     return header[:ix] + new_data + header[ix:]
 
 
-def add_protein_data(proteins, header, pgdb):
+def add_protein_data(proteins, pgdb):
+    """Loops proteins and calls a parsing method to get information
+    from a lookup db. Yields proteins with output data"""
     for protein in proteins:
         outprotein = {k: v for k, v in protein.items()}
         protein_acc = protein[prottabledata.HEADER_PROTEIN]
@@ -36,6 +38,7 @@ def add_protein_data(proteins, header, pgdb):
 
 
 def get_protein_data(protein_acc, pgdb):
+    """Parses protein data that is fetched from the database."""
     #protein data is ((psm_id, psmseq, fakemaster, all_group_proteins_acc,
     #                   coverage, description),)
     protein_data = pgdb.get_protein_data(protein_acc)

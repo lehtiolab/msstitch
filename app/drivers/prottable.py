@@ -39,5 +39,4 @@ class AddProteinInfoDriver(ProttableDriver):
         self.header = preparation.get_header_with_proteindata(self.oldheader)
         proteins = reader.generate_tsv_proteins(self.fn, self.oldheader)
         self.proteins = preparation.add_protein_data(proteins,
-                                                     self.oldheader,
                                                      self.lookup)
