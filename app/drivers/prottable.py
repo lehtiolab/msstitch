@@ -1,8 +1,9 @@
+import os
+
 from app.drivers.base import BaseDriver
 from app.writers import prottable as writers
 from app.readers import tsv as reader
 from app.actions import prottable as preparation
-from app.lookups.sqlite.proteingroups import ProteinGroupProteinTableDB
 
 
 class ProttableDriver(BaseDriver):

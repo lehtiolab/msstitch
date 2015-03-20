@@ -30,7 +30,7 @@ def get_header_with_proteindata(header):
     return header[:ix] + new_data + header[ix:]
 
 
-def build_quanted_proteintable(pqdb, header):
+def build_quanted_proteintable(pqdb):
     """Fetches proteins and quants from joined lookup table, loops through
     them and when all of a protein's quants have been collected, yields the
     protein quant information."""
