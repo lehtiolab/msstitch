@@ -2,6 +2,15 @@ from app.readers import fasta
 from app.dataformats import prottable as prottabledata
 
 
+def get_header(oldheader=None, quantchannels=None, addprotein_data=False):
+    if oldheader is None:
+        header = [prottabledata.HEADER_PROTEIN]
+        header.extend(quantchannels)
+    if add_protein_data:
+        header = get_header_with_proteindata(header)
+    return header
+
+
 def get_header_with_proteindata(header):
     ix = header.index(prottabledata.HEADER_PROTEIN) + 1
     new_data = [prottabledata.HEADER_DESCRIPTION,

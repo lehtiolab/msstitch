@@ -9,18 +9,27 @@ class ProttableDriver(BaseDriver):
     """Base class for prottable.py"""
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.protdata = kwargs.get('proteindata', False)
+        self.quantchannels = None
+        self.oldheader = None
 
     def run(self):
-        self.oldheader = reader.get_tsv_header(self.fn)
+        self.initialize_output()
         self.set_protein_generator()
         self.write()
         self.finish()
 
+    def initialize_output(self):
+        self.header = preparation.get_header(self.oldheader, self.quantchannels, self.protdata)
 
 
 class AddProteinInfoDriver(ProttableDriver):
     outsuffix = '_proteindata.txt'
     lookuptype = 'protgroupprottable'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.oldheader = reader.get_tsv_header(self.fn)
 
     def write(self):
         outfn = self.create_outfilepath(self.fn, self.outsuffix)
