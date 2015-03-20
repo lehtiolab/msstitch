@@ -9,6 +9,7 @@ def get_lookup(fn, lookuptype):
                  'quant': quant.QuantDB,
                  'searchspace': searchspace.SearchSpaceDB,
                  'proteinquant': proteinquant.ProtQuantDB,
+                 'protgroupprottable': proteingroups.ProteinGroupProteinTableDB,
                  }
     return lookupmap[lookuptype](fn)
 
