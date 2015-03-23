@@ -6,8 +6,8 @@ PROTEIN_ACC_INDEX = 2
 PEPTIDE_COUNT_INDEX = 3
 PSM_COUNT_INDEX = 4
 PROTEIN_SCORE_INDEX = 5
-COVERAGE_INDEX = 6
-EVIDENCE_LVL_INDEX = 7
+EVIDENCE_LVL_INDEX = 6
+COVERAGE_INDEX = 7
 
 
 class ProteinGroupDB(ResultLookupInterface):
@@ -18,15 +18,14 @@ class ProteinGroupDB(ResultLookupInterface):
                             'protein_group_content', 'psm_protein_groups',
                             'prot_desc'])
 
-    def store_proteins(self, proteins, evidence_lvls=False, sequences=False):
+    def store_proteins(self, proteins, evidence_lvls, sequences=False):
         cursor = self.get_cursor()
         cursor.executemany(
             'INSERT INTO proteins(protein_acc) '
             'VALUES(?)', proteins)
-        if evidence_lvls:
-            cursor.executemany(
-                'INSERT INTO protein_evidence(protein_acc, evidence_lvl) '
-                'VALUES(?, ?)', evidence_lvls)
+        cursor.executemany(
+            'INSERT INTO protein_evidence(protein_acc, evidence_lvl) '
+            'VALUES(?, ?)', evidence_lvls)
         if sequences:
             cursor.executemany(
                 'INSERT INTO protein_seq(protein_acc, sequence) '
@@ -170,19 +169,16 @@ class ProteinGroupDB(ResultLookupInterface):
         cursor = self.get_cursor()
         return cursor.execute(sql)
 
-    def get_all_psms_proteingroups(self, coverage, evidence_levels):
+    def get_all_psms_proteingroups(self, coverage):
         fields = ['pr.rownr', 'ppg.master', 'pgc.protein_acc',
-                  'pgc.peptide_count', 'pgc.psm_count', 'pgc.protein_score']
+                  'pgc.peptide_count', 'pgc.psm_count', 'pgc.protein_score',
+                  'pev.evidence_lvl']
         joins = [('psm_protein_groups', 'ppg', 'psm_id'),
-                 ('protein_group_content', 'pgc', 'master')]
-        # TODO if evidence levels but not coverage,
-        # the indexes of these fields will be wrong.
+                 ('protein_group_content', 'pgc', 'master'),
+                 ('protein_evidence', 'pev', 'protein_acc')]
         if coverage:
             fields.append('pc.coverage')
             joins.append(('protein_coverage', 'pc', 'protein_acc'))
-        if evidence_levels:
-            fields.append('pev.evidence_lvl')
-            joins.append(('protein_evidence', 'pev', 'protein_acc'))
         join_sql = '\n'.join(['JOIN {0} AS {1} USING({2})'.format(
             j[0], j[1], j[2]) for j in joins])
         sql = 'SELECT {0} FROM psmrows AS pr {1}'.format(

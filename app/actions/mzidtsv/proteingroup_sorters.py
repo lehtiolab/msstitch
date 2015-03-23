@@ -1,13 +1,12 @@
 import app.lookups.sqlite.proteingroups as lookups
 
 
-def sort_protein_groups(pgroups, coverage, evidence_levels):
+def sort_protein_groups(pgroups, coverage):
     sortfnxs = [sort_pgroup_peptides,
                 sort_pgroup_psms,
                 sort_pgroup_score,
+                sort_evidence_score,
                 ]
-    if evidence_levels:
-        sortfnxs.append(sort_evidence_score)
     if coverage:
         sortfnxs.append(sort_pgroup_coverage)
     sortfnxs.append(sort_alphabet)

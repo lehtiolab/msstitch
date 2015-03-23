@@ -1,7 +1,7 @@
 from Bio import SeqIO
 
 
-def get_proteins_for_db(fastafn, evidence_levels=False):
+def get_proteins_for_db(fastafn):
     """Runs through fasta file and returns proteins accession nrs, sequences
     and evidence levels for storage in lookup DB. Duplicate accessions in
     fasta are accepted and removed by keeping only the last one.
@@ -9,15 +9,10 @@ def get_proteins_for_db(fastafn, evidence_levels=False):
     objects = {}
     for record in parse_fasta(fastafn):
         objects[parse_protein_identifier(record)] = record
-    if evidence_levels:
-        return (((acc,) for acc in list(objects)),
-                ((acc, str(record.seq)) for acc, record in objects.items()),
-                ((acc, get_uniprot_evidence_level(record.description))
-                 for acc, record in objects.items()))
-    else:
-        return (((acc,) for acc in list(objects)),
-                ((acc, str(record.seq)) for acc, record in objects.items()),
-                False)
+    return (((acc,) for acc in list(objects)),
+            ((acc, str(record.seq)) for acc, record in objects.items()),
+            ((acc, get_uniprot_evidence_level(record.description))
+             for acc, record in objects.items()))
 
 
 def get_proteins_descriptions(fastafn):
@@ -55,4 +50,4 @@ def get_uniprot_evidence_level(header):
                 return 5 - item[1]
         except IndexError:
             continue
-    return False
+    return -1

@@ -10,7 +10,6 @@ class LookupDriver(BaseDriver):
         self.conflvl = kwargs.get('conflvl', None)
         self.lowerbetter = kwargs.get('conftype', None) == 'lower'
         self.unroll = kwargs.get('unroll', False)
-        self.evidence_levels = None
         self.fasta = kwargs.get('fasta', False)
         self.coverage = self.fasta is not False
         self.confcol = kwargs.get('confcol', False)

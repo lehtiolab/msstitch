@@ -21,7 +21,6 @@ class ProteinGroupLookupDriver(base.LookupDriver):
                                           self.lowerbetter,
                                           self.unroll,
                                           self.fasta,
-                                          self.evidence_levels,
                                           specfncol)
         lookups.build_proteingroup_db(self.fn, header,
                                       self.lookup,

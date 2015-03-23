@@ -12,17 +12,16 @@ from app.actions.mzidtsv import confidencefilters as conffilt
 
 def create_protein_pep_lookup(fn, header, pgdb, confkey, conflvl,
                               lower_is_better, unroll=False, fastafn=None,
-                              evidence_lvl=False, specfncol=None):
+                              specfncol=None):
     """Reads PSMs from file, extracts their proteins and peptides and passes
     them to a database backend in chunked PSMs.
     """
     mzmlmap = pgdb.get_mzmlfile_map()
-    evidences = None
     proteins_stored = False
     if fastafn:
         # Store protein accessions from fasta file, instead of from PSM table
         proteins, sequences, evidences = fastareader.get_proteins_for_db(
-            fastafn, evidence_lvl)
+            fastafn)
         pgdb.store_proteins(proteins, evidences, sequences)
         protein_descriptions = fastareader.get_proteins_descriptions(fastafn)
         pgdb.store_descriptions(protein_descriptions)

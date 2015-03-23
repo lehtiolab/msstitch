@@ -7,10 +7,6 @@ class ProteinGroupDriver(MzidTSVDriver):
     outsuffix = '_protgroups.txt'
     lookuptype = 'proteingroups'
 
-    def parse_fasta(self):
-        if self.fasta:
-            self.evidence_levels = fasta.has_evidence_levels(self.fasta)
-
     def get_psms(self):
         confkey = self.oldheader[int(self.confcol) - 1]
         self.header = prep.get_header_with_proteingroups(self.oldheader)
@@ -22,5 +18,4 @@ class ProteinGroupDriver(MzidTSVDriver):
                                                           self.conflvl,
                                                           self.lowerbetter,
                                                           self.unroll,
-                                                          self.coverage,
-                                                          self.evidence_levels)
+                                                          self.coverage)
