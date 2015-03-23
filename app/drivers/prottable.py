@@ -23,6 +23,10 @@ class ProttableDriver(BaseDriver):
     def initialize_output(self):
         self.header = preparation.get_header(self.oldheader, self.quantchannels, self.protdata)
 
+    def write(self):
+        outfn = self.create_outfilepath(self.fn, self.outsuffix)
+        writers.write_prottable(self.header, self.proteins, outfn)
+
 
 class AddProteinInfoDriver(ProttableDriver):
     outsuffix = '_proteindata.txt'
@@ -32,17 +36,13 @@ class AddProteinInfoDriver(ProttableDriver):
         super().__init__(**kwargs)
         self.oldheader = reader.get_tsv_header(self.fn)
 
-    def write(self):
-        outfn = self.create_outfilepath(self.fn, self.outsuffix)
-        writers.write_prottable(self.header, self.proteins, outfn)
-
     def set_protein_generator(self):
         proteins = reader.generate_tsv_proteins(self.fn, self.oldheader)
         self.proteins = preparation.add_protein_data(proteins,
                                                      self.lookup)
 
 
-class BuildProteinTableDriver(BaseDriver):
+class BuildProteinTableDriver(ProttableDriver):
     outsuffix = ''
     lookuptype = 'prottable'
 
@@ -61,4 +61,4 @@ class BuildProteinTableDriver(BaseDriver):
 
     def set_protein_generator(self):
         """Generates proteins with quant from the lookup table""" 
-        self.proteins = preparation.build_quanted_proteintable(self.lookup)
+        self.proteins = preparation.build_quanted_proteintable(self.lookup, self.header)

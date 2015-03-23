@@ -3,7 +3,7 @@ from app.dataformats import prottable as prottabledata
 
 
 def get_quantchannels(pqdb):
-    return [x[1] for x in pqdb.get_quantchannel_ids()]
+    return sorted(list(pqdb.get_quantchannel_ids()))
 
 
 def get_header(oldheader=None, quantchannels=None, addprotein_data=False):
@@ -30,7 +30,7 @@ def get_header_with_proteindata(header):
     return header[:ix] + new_data + header[ix:]
 
 
-def build_quanted_proteintable(pqdb):
+def build_quanted_proteintable(pqdb, header):
     """Fetches proteins and quants from joined lookup table, loops through
     them and when all of a protein's quants have been collected, yields the
     protein quant information."""
@@ -40,10 +40,10 @@ def build_quanted_proteintable(pqdb):
                   protein[1]: protein[2]}
     for protein in proteins:
         if protein[0] != outprotein[prottabledata.HEADER_PROTEIN]:
-            yield next(add_protein_data([protein], pqdb))
+            yield parse_NA(next(add_protein_data([outprotein], pqdb)), header)
             outprotein = {prottabledata.HEADER_PROTEIN: protein[0]}
         outprotein[protein[1]] = protein[2]
-    yield next(add_protein_data([protein], pqdb))
+    yield parse_NA(next(add_protein_data([outprotein], pqdb)), header)
 
 
 def add_protein_data(proteins, pgdb):
@@ -85,3 +85,12 @@ def get_protein_data(protein_acc, pgdb):
             #prottabledata.HEADER_NO_QUANT_PSM: quantcount,
             #prottabledata.HEADER_CV_QUANT_PSM: quantcv,
             }
+
+
+def parse_NA(protein, header):
+    for field in header:
+        try:
+            protein[field]
+        except KeyError:
+            protein[field] = 'NA'
+    return protein
