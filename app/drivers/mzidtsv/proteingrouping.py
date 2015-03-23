@@ -5,6 +5,7 @@ from app.readers import fasta
 
 class ProteinGroupDriver(MzidTSVDriver):
     outsuffix = '_protgroups.txt'
+    lookuptype = 'proteingroups'
 
     def parse_fasta(self):
         if self.fasta:
