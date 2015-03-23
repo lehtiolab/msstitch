@@ -30,30 +30,33 @@ parser.add_argument('-c', dest='command', type=str,
                     help='How to manipulate the input:\n'
                     'addprotdata - Add protein data (description, coverage,\n'
                     '# PSMs, etc.) to a table with protein accessions\n'
-                    'Use with --fasta and --dbfile\n',
+                    'Use with --dbfile\n\n'
+                    'buildquant - Create protein quant data from a lookup\n'
+                    'database. E.g. when multiple protein quant tables have\n'
+                    'been read into the lookup and will be combined. Use with\n'
+                    '--dbfile, --proteindata but NOT with -i.',
                     required=True
                     )
 parser.add_argument('-i', dest='infile',
-                    help='Protein accession table, or if using \n'
-                    'createprottable an MzidTSV file with protein groups',
+                    help='Protein accession table if applicable\n',
                     type=lambda x: parser_file_exists(parser, x),
-                    required=True)
+                    )
 parser.add_argument('-d', dest='outdir', required=True,
                     help='Directory to output in',
                     type=lambda x: parser_file_exists(parser, x))
-parser.add_argument('--fasta', dest='fasta', help='FASTA sequence database, '
-                    'to optionally use with proteingrouping to enable sorting '
-                    'on coverage, and in case of UNIPROT FASTA, evidence '
-                    'levels.', type=lambda x: parser_file_exists(parser, x))
 parser.add_argument('--dbfile', dest='lookup', help='Protein group '
                     'lookup database in SQLite format. Can be created using '
                     'mslookup.py command.',
                     type=lambda x: parser_file_exists(parser, x))
+parser.add_argument('--proteindata', dest='proteindata', help='Include protein '
+                    'group data such as coverage in output. Flag.',
+                    action='store_const', default=False, const=True) 
 
 args = parser.parse_args()
 
 commandmap = {
     'addprotdata': drivers.AddProteinInfoDriver,
+    'buildquant': drivers.BuildProteinTableDriver,
     #'createprottable': drivers.CreateProteinTableDriver,
 }
 
