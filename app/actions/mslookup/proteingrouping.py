@@ -160,9 +160,7 @@ def generate_coverage(seqinfo):
             try:
                 start = seq.index(psmseq)
             except:
-                print(acc)
-                print(seq)
-                print(psmseq)
+                print('CANNOT FIND PSM seq {0} in seq {1} for acc {2}'.format(psmseq, seq, acc))
             coverage_aa_indices.update(range(start, start + len(psmseq)))
         yield (acc, len(coverage_aa_indices) / len(seq))
 
