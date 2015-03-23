@@ -32,17 +32,7 @@ class ProteinGroupDB(ResultLookupInterface):
                 'VALUES(?, ?)', sequences)
         self.conn.commit()
 
-    def store_peptides_proteins(self, ppmap, proteins_already_stored=False):
-        def generate_proteins(pepprots):
-            proteins = {}
-            for psmvals in pepprots.values():
-                for protein in psmvals['proteins']:
-                    try:
-                        proteins[protein]
-                    except KeyError:
-                        proteins[protein] = 1
-                        yield (protein,)
-
+    def store_peptides_proteins(self, ppmap):
         def generate_protein_psm_ids(pepprots):
             for psmvals in pepprots.values():
                 for protein in psmvals['proteins']:
@@ -58,8 +48,6 @@ class ProteinGroupDB(ResultLookupInterface):
         psms = generate_psms(ppmap)
         psms = sorted(psms, key=lambda x: x[1])  # sorts on psm rows
         prot_psm_ids = generate_protein_psm_ids(ppmap)
-        if not proteins_already_stored:
-            self.store_proteins(generate_proteins(ppmap))
         self.store_psm_relations(psms, prot_psm_ids)
 
     def store_psm_relations(self, psms, prot_psm_ids):

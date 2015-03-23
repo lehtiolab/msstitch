@@ -17,15 +17,11 @@ def create_protein_pep_lookup(fn, header, pgdb, confkey, conflvl,
     them to a database backend in chunked PSMs.
     """
     mzmlmap = pgdb.get_mzmlfile_map()
-    proteins_stored = False
-    if fastafn:
-        # Store protein accessions from fasta file, instead of from PSM table
-        proteins, sequences, evidences = fastareader.get_proteins_for_db(
-            fastafn)
-        pgdb.store_proteins(proteins, evidences, sequences)
-        protein_descriptions = fastareader.get_proteins_descriptions(fastafn)
-        pgdb.store_descriptions(protein_descriptions)
-        proteins_stored = True
+    proteins, sequences, evidences = fastareader.get_proteins_for_db(
+        fastafn)
+    pgdb.store_proteins(proteins, evidences, sequences)
+    protein_descriptions = fastareader.get_proteins_descriptions(fastafn)
+    pgdb.store_descriptions(protein_descriptions)
     
     rownr, last_id, peptides_proteins = 0, None, {}
     store_soon = False
@@ -39,7 +35,7 @@ def create_protein_pep_lookup(fn, header, pgdb, confkey, conflvl,
         if peptides_proteins and len(peptides_proteins) % DB_STORE_CHUNK == 0:
             store_soon = True
         if store_soon and last_id != psm_id:
-            pgdb.store_peptides_proteins(peptides_proteins, proteins_stored)
+            pgdb.store_peptides_proteins(peptides_proteins)
             store_soon = False
             peptides_proteins = {}
         peptides_proteins[rownr] = {'psm_id': psm_id,
@@ -51,7 +47,7 @@ def create_protein_pep_lookup(fn, header, pgdb, confkey, conflvl,
                                     }
         last_id = psm_id
         rownr += 1
-    pgdb.store_peptides_proteins(peptides_proteins, proteins_stored)
+    pgdb.store_peptides_proteins(peptides_proteins)
     pgdb.index_protein_peptides()
     return pgdb
 
