@@ -85,16 +85,17 @@ parser.add_argument('--decoy', dest='decoyfn',
                     type=lambda x: parser_file_exists(parser, x),
                     help='Decoy input file (percolator out XML) for qvality')
 parser.add_argument('--target', dest='targetfn',
-        type=lambda x: parser_file_exists(parser, x),
-        help='Target input file for qvality')
+                    type=lambda x: parser_file_exists(parser, x),
+                    help='Target input file for qvality')
 parser.add_argument('-f', dest='feattype', help='Feature type to use for '
-                    'qvality or pout2tsv. Can either be psm or peptide.')
+                    'qvality, reassign features or pout2tsv. Can either be '
+                    'psm or peptide.')
 parser.add_argument('-o', dest='options', nargs='+',
                     help='Extra options that may be passed to qvality.'
                     'Option form: -o ***flag value ***flag ***flag value')
 parser.add_argument('-q', dest='qvalityout', help='Qvality output file. '
                     'Required when using the reassign command.',
-                    type=lambda x:parser_file_exists(parser, x))
+                    type=lambda x: parser_file_exists(parser, x))
 
 # FIXME make db files required after we figure out if supplying raw db files is
 # ok performance wise. If too slow, we may switch to sqlite db.
