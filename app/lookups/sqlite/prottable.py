@@ -22,9 +22,7 @@ class ProtTableDB(ResultLookupInterface):
         join_sql = '\n'.join(['JOIN {0} AS {1} USING({2})'.format(
             j[0], j[1], j[2]) for j in joins])
         sql = ('SELECT {0} FROM protein_group_content AS pgc {1}'
-               'WHERE master IN '
-               '(SELECT master FROM protein_group_content '
-               'WHERE protein_acc="{2}")'.format(', '.join(fields),
+               'WHERE protein_acc="{2}"'.format(', '.join(fields),
                                                  join_sql,
                                                  protein_acc))
         cursor = self.get_cursor()
