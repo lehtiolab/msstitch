@@ -54,31 +54,33 @@ def create_protein_pep_lookup(fn, header, pgdb, confkey, conflvl,
 
 def build_proteingroup_db(fn, oldheader, pgdb, confkey, conflvl,
                           lower_is_better, unroll, coverage):
-    build_master_db(fn, oldheader, pgdb, confkey, conflvl, lower_is_better,
-                    unroll)
+    build_master_db(pgdb)
     build_content_db(pgdb)
     if coverage:
         build_coverage(pgdb)
 
 
-def build_master_db(fn, oldheader, pgdb, confkey, conflvl, lower_is_better,
-                    unroll):
+def build_master_db(pgdb):
     psm_masters = OrderedDict()
     allmasters = {}
-    for line in tsvreader.generate_tsv_lines_multifile(fn, oldheader):
-        if not conffilt.passes_filter(line, conflvl, confkey, lower_is_better):
-            continue
-        psm_id = tsvreader.get_psm_id(line)
-        if unroll:
-            lineproteins = pgdb.get_proteins_for_peptide([psm_id])
-        else:
-            lineproteins = tsvreader.get_proteins_from_psm(line)
-        pepprotmap = pgdb.get_protpepmap_from_proteins(lineproteins)
-        masters = get_masters(pepprotmap)
-        psm_masters[psm_id] = {x: 1 for x in masters}
-        allmasters.update({x: 1 for x in masters})
+    allpepprots = pgdb.get_all_pepprots()
+    current_psm, protein_acc, prot_psm_id = next(allpepprots)
+    pepprotmap = {protein_acc: [prot_psm_id]}
+    for psm_id, protein_acc, prot_psm_id in allpepprots:
+        if psm_id != current_psm:
+            # got all psm_protein mappings for this psm
+            # flush mappings and store masters, psm_master mapping in variables
+            masters = get_masters(pepprotmap)
+            psm_masters[current_psm] = {x: 1 for x in masters}
+            allmasters.update({x: 1 for x in masters})
+            pepprotmap = {}
+        current_psm = psm_id
+        try:
+            pepprotmap[protein_acc].append(prot_psm_id)
+        except KeyError:
+            pepprotmap[protein_acc] = [prot_psm_id]
+    print('Collected {0} masters, {1} PSM-master mappings'.format(len(allmasters), len(psm_masters)))
     pgdb.store_masters(allmasters, psm_masters)
-    return allmasters
 
 
 def build_content_db(pgdb):

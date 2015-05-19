@@ -114,6 +114,11 @@ class ProteinGroupDB(ResultLookupInterface):
         proteins = cursor.execute(protsql, psm_id).fetchall()
         return [x[0] for x in proteins]
 
+    def get_all_pepprots(self):
+        pepsql = 'SELECT p.psm_id, pp.protein_acc, pp.psm_id FROM protein_psm AS p JOIN protein_psm AS pp USING(protein_acc) ORDER BY p.psm_id'
+        cursor = self.get_cursor()
+        return cursor.execute(pepsql)
+        
     def get_protpepmap_from_proteins(self, proteins):
         pepsql = self.get_sql_select(['protein_acc', 'psm_id'],
                                      'protein_psm',
@@ -169,7 +174,7 @@ class ProteinGroupDB(ResultLookupInterface):
             joins.append(('protein_coverage', 'pc', 'protein_acc'))
         join_sql = '\n'.join(['JOIN {0} AS {1} USING({2})'.format(
             j[0], j[1], j[2]) for j in joins])
-        sql = 'SELECT {0} FROM psmrows AS pr {1}'.format(
+        sql = 'SELECT {0} FROM psmrows AS pr {1} ORDER BY pr.rownr'.format(
             ', '.join(fields), join_sql)
         cursor = self.get_cursor()
         return cursor.execute(sql)
