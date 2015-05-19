@@ -65,10 +65,8 @@ def build_master_db(fn, oldheader, pgdb, confkey, conflvl, lower_is_better,
                     unroll):
     psm_masters = OrderedDict()
     allmasters = {}
-    rownr = 0
     for line in tsvreader.generate_tsv_lines_multifile(fn, oldheader):
         if not conffilt.passes_filter(line, conflvl, confkey, lower_is_better):
-            rownr += 1
             continue
         psm_id = tsvreader.get_psm_id(line)
         if unroll:
@@ -79,7 +77,6 @@ def build_master_db(fn, oldheader, pgdb, confkey, conflvl, lower_is_better,
         masters = get_masters(pepprotmap)
         psm_masters[psm_id] = {x: 1 for x in masters}
         allmasters.update({x: 1 for x in masters})
-        rownr += 1
     pgdb.store_masters(allmasters, psm_masters)
     return allmasters
 

@@ -19,7 +19,7 @@ def create_isobaric_quant_lookup(quantdb, specfn_consensus_els, channelmap):
         for channel_no in sorted(qdata.keys()):
             quants.append((spectra_id, channelmap[channel_no],
                            qdata[channel_no]))
-            if len(quants) == 5000:
+            if len(quants) == 500000:
                 quantdb.store_isobaric_quants(quants)
     quantdb.store_isobaric_quants(quants)
     quantdb.index_isobaric_quants()
