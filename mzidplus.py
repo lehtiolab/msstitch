@@ -16,6 +16,7 @@ import app.drivers.mzidtsv.percolator as percodrivers
 import app.drivers.mzidtsv.proteingrouping as pgdrivers
 import app.drivers.mzidtsv.quant as quantdrivers
 import app.drivers.mzidtsv.splitmerge as splitmergedrivers
+import app.drivers.mzidtsv.peptable as pepdrivers
 
 
 def parser_file_exists(currentparser, fn):
@@ -58,7 +59,12 @@ parser.add_argument('-c', dest='command', type=str,
                     'splittsv       - Splits an MSGF TSV PSM table into\n'
                     'multiple new tables based. Use with flags --bioset or\n'
                     '--splitcol, and optionally --set-rename and\n'
-                    '--rename-cols.',
+                    '--rename-cols.\n\n'
+                    'peptsv         - Creates a peptide table from a TSV PSM\n'
+                    'table. Filters out the best peptide option for each \n'
+                    'PSM based on the highest score. Options are --fncol and\n'
+                    '--scorecol\n\n'
+                    '',
                     required=True
                     )
 parser.add_argument('-i', dest='infile', help='TSV table of mzIdentML',
@@ -131,11 +137,18 @@ parser.add_argument('--splitcol', dest='splitcol', help='Column number on '
                     'which to split a TSV PSM table', type=int, required=False)
 parser.add_argument('--rename-cols', dest='renamecols', help='Column numbers '
                     'to rename with name of e.g. set used for splitting. '
-                    'Rename pattern: setname_oldcolumnname.', type=int, nargs='+')
+                    'Rename pattern: setname_oldcolumnname.', type=int,
+                    nargs='+')
 parser.add_argument('--rename-col-startswith', dest='renamecolpattern',
                     help='Rename column headings that start with the pattern '
                     'specified here. Renaming is done as follows: '
                     'setname_oldcolumnname.')
+parser.add_argument('--fncol', dest='fncol', help='Column number in which '
+                    'spectra filenames are written, overrides standard '
+                    'column number 1', type=int, required=False)
+parser.add_argument('--scorecol', dest='scorecol', help='Column number in '
+                    'which score to filter on is written.',
+                    type=int, required=False)
 
 
 # not supported yet
@@ -152,6 +165,7 @@ commandmap = {
     'splittsv': splitmergedrivers.MzidTSVSplitDriver,
     'quanttsv': quantdrivers.TSVQuantDriver,
     'proteingroup': pgdrivers.ProteinGroupDriver,
+    'peptable': pepdrivers.MzidTSVPeptableDriver,
 }
 
 command = commandmap[args.command](**vars(args))
