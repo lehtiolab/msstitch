@@ -33,7 +33,7 @@ def get_specresult_data(specresults, id_fnlookup):
 
 
 def add_percolator_to_mzidtsv(mzidfn, tsvfn, multipsm,
-                              oldheader, header, seqdb=None):
+                              oldheader, seqdb=None):
     """Takes a MSGF+ tsv and corresponding mzId, adds percolatordata
     to tsv lines. Generator yields the lines. Multiple PSMs per scan
     can be delivered, in which case rank is also reported.

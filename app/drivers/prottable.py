@@ -21,7 +21,8 @@ class ProttableDriver(BaseDriver):
         self.finish()
 
     def initialize_output(self):
-        self.header = preparation.get_header(self.oldheader, self.quantchannels, self.protdata)
+        self.header = preparation.get_header(self.oldheader,
+                                             self.quantchannels, self.protdata)
 
     def write(self):
         outfn = self.create_outfilepath(self.fn, self.outsuffix)
