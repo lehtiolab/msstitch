@@ -28,5 +28,4 @@ class MzidPercoTSVDriver(MzidTSVDriver):
                                                    self.fn,
                                                    self.multipsm_per_scan,
                                                    self.oldheader,
-                                                   self.header,
                                                    seqlookup)
