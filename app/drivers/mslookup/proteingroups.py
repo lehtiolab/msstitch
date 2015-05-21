@@ -13,7 +13,7 @@ class ProteinGroupLookupDriver(base.LookupDriver):
         header = tsvreader.get_tsv_header(self.fn[0])
         confkey = header[int(self.confcol) - 1]
         specfncol = header[int(self.spectracol) - 1]
-        lookups.create_protein_pep_lookup(self.fn,
+        allpsms = lookups.create_protein_pep_lookup(self.fn,
                                           header,
                                           self.lookup,
                                           confkey,
@@ -22,7 +22,6 @@ class ProteinGroupLookupDriver(base.LookupDriver):
                                           self.unroll,
                                           self.fasta,
                                           specfncol)
-        lookups.build_proteingroup_db(self.fn, header,
+        lookups.build_proteingroup_db(
                                       self.lookup,
-                                      confkey, self.conflvl, self.lowerbetter,
-                                      self.unroll, self.coverage)
+                                      allpsms, self.coverage)

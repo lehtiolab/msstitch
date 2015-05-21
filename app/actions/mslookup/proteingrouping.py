@@ -16,6 +16,7 @@ def create_protein_pep_lookup(fn, header, pgdb, confkey, conflvl,
     """Reads PSMs from file, extracts their proteins and peptides and passes
     them to a database backend in chunked PSMs.
     """
+    allpsms = OrderedDict()
     mzmlmap = pgdb.get_mzmlfile_map()
     proteins, sequences, evidences = fastareader.get_proteins_for_db(
         fastafn)
@@ -32,6 +33,7 @@ def create_protein_pep_lookup(fn, header, pgdb, confkey, conflvl,
         specfn, scan, seq, score, prots = tsvreader.get_pepproteins(
             psm, unroll, specfncol)
         psm_id = tsvreader.get_psm_id(psm)
+        allpsms[psm_id] = prots
         if peptides_proteins and len(peptides_proteins) % DB_STORE_CHUNK == 0:
             store_soon = True
         if store_soon and last_id != psm_id:
@@ -49,16 +51,34 @@ def create_protein_pep_lookup(fn, header, pgdb, confkey, conflvl,
         rownr += 1
     pgdb.store_peptides_proteins(peptides_proteins)
     pgdb.index_protein_peptides()
-    return pgdb
+    return allpsms
 
 
-def build_proteingroup_db(fn, oldheader, pgdb, confkey, conflvl,
-                          lower_is_better, unroll, coverage):
-    build_master_db(pgdb)
+def build_proteingroup_db(pgdb, allpsms,
+                          coverage):
+    build_new_master_db(pgdb, allpsms)
     build_content_db(pgdb)
     if coverage:
         build_coverage(pgdb)
 
+def build_new_master_db(pgdb, allpsms):
+    psm_masters = OrderedDict()
+    allmasters = {}
+    while len(allpsms) > 0:
+        psm_id, proteins = allpsms.popitem()
+        pepprotmap = pgdb.get_protpepmap_from_proteins(proteins)
+        masters = get_masters(pepprotmap)
+        for psm_id_delete in [x for y in pepprotmap.values() for x in y]:
+            try:
+                psm_masters[psm_id_delete].update({x: 1 for x in masters})
+            except KeyError:
+                psm_masters[psm_id_delete] = {x: 1 for x in masters}
+            if psm_id_delete in allpsms:
+                del(allpsms[psm_id_delete])
+        psm_masters[psm_id] = {x: 1 for x in masters}
+        allmasters.update({x: 1 for x in masters})
+    print('Collected {0} masters, {1} PSM-master mappings'.format(len(allmasters), len(psm_masters)))
+    pgdb.store_masters(allmasters, psm_masters)
 
 def build_master_db(pgdb):
     psm_masters = OrderedDict()
