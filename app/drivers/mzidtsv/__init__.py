@@ -29,6 +29,7 @@ class MzidTSVDriver(base.BaseDriver):
         convert_columns = ['confcol', 'spec_column']
         convert_columns.extend(column_var_names)
         for col in convert_columns:
-            if getattr(self, col) is None:
+            value = getattr(self, col)
+            if value is None:
                 continue
-            setattr(self, col, self.oldheader[col - 1])
+            setattr(self, col, self.oldheader[int(value) - 1])

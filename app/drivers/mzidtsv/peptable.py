@@ -17,6 +17,5 @@ class MzidTSVPeptableDriver(MzidTSVDriver):
     def get_psms(self):
         self.header = prep.get_peptable_header(self.oldheader)
         self.get_column_header_for_number(['fncol', 'scorecol'])
-        self.psms = prep.generate_peptides(self.fn, self.header,
-                                           self.oldheader, self.scorecol,
+        self.psms = prep.generate_peptides(self.fn, self.oldheader, self.scorecol,
                                            self.fncol)
