@@ -51,8 +51,9 @@ parser.add_argument('-c', dest='command', type=str,
 
                     'ms1quant - Creates lookup of precursor quant data in \n'
                     'OpenMS featureXML format. Use requires --spectra,\n'
-                    '--dbfile wiht an sqlite lookup of spectra, and passing '
-                    'a featureXML file to -i\n\n'
+                    '--dbfile with an sqlite lookup of spectra, --quanttype\n'
+                    'to determine quant output and passing \n'
+                    'a featureXML or kronik file to -i\n\n'
 
                     'protquant - Creates lookup of protein quantification\n'
                     'data in tab separated format. Header should include\n'
@@ -117,6 +118,10 @@ parser.add_argument('--protcol', dest='protcol', help='Column number\n'
 parser.add_argument('--quantcolpattern', dest='quantcolpattern',
                     help='Unique text pattern to identify quant column in \n'
                     'protein table.',
+                    type=str, required=False)
+parser.add_argument('--quanttype', dest='quanttype',
+                    help='Filetype of precursor quants to store. Choose from\n'
+                    'kronik or openms.',
                     type=str, required=False)
 
 args = parser.parse_args()

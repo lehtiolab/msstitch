@@ -1,5 +1,6 @@
 from app.drivers.mslookup import base
 from app.readers import openms as openmsreader
+from app.readers import tsv as tsvreader
 from app.actions.mslookup import quant as lookups
 
 
@@ -30,8 +31,14 @@ class PrecursorQuantLookupDriver(QuantLookupDriver):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.precursorfns = self.fn
+        self.quantfiletype = kwargs.get('quanttype')
 
     def create_lookup(self):
-        specfn_feats = openmsreader.mzmlfn_feature_generator(self.spectrafns,
-                                                             self.precursorfns)
-        lookups.create_precursor_quant_lookup(self.lookup, specfn_feats)
+        if self.quantfiletype == 'openms':
+            specfn_feats = openmsreader.mzmlfn_feature_generator(
+                self.spectrafns, self.precursorfns)
+        elif self.quantfiletype == 'kronik':
+            specfn_feats = tsvreader.mzmlfn_kronikfeature_generator(
+                self.spectrafns, self.precursorfns)
+        lookups.create_precursor_quant_lookup(self.lookup, specfn_feats,
+                                              self.quantfiletype)

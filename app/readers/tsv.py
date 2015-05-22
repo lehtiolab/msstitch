@@ -1,4 +1,5 @@
 import re
+import os
 import itertools
 from app.dataformats import mzidtsv as mzidtsvdata
 
@@ -25,6 +26,20 @@ def generate_tsv_protein_quants(fns):
         header = get_tsv_header(fn)
         for pquant in generate_split_tsv_lines(fn, header):
             yield header, pquant
+
+
+def generate_kronik_feats(fn):
+    """Generates features from a Kronik output file"""
+    header = get_tsv_header(fn)
+    return generate_split_tsv_lines(fn, header)
+
+
+def mzmlfn_kronikfeature_generator(mzmlfns, kronikfns):
+    """Generates tuples of spectra filename and corresponding output
+    features from kronik"""
+    for mzmlfn, kronikfn in zip(mzmlfns, kronikfns):
+        for quant_el in generate_kronik_feats(kronikfn):
+            yield os.path.basename(mzmlfn), quant_el
 
 
 def generate_tsv_psms(fn, header):

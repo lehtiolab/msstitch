@@ -1,6 +1,7 @@
 from decimal import Decimal, getcontext
 
 from app.readers import openms as openmsreader
+DB_STORE_CHUNK = 500000
 
 
 def create_isobaric_quant_lookup(quantdb, specfn_consensus_els, channelmap):
@@ -14,35 +15,50 @@ def create_isobaric_quant_lookup(quantdb, specfn_consensus_els, channelmap):
         rt = openmsreader.get_consxml_rt(consensus_el)
         rt = float(Decimal(rt) / 60)
         qdata = get_quant_data(consensus_el)
-        spectra_id = quantdb.get_spectra_id(mzmlmap[specfn], 
+        spectra_id = quantdb.get_spectra_id(mzmlmap[specfn],
                                             retention_time=rt)
         for channel_no in sorted(qdata.keys()):
             quants.append((spectra_id, channelmap[channel_no],
                            qdata[channel_no]))
-            if len(quants) == 500000:
+            if len(quants) == DB_STORE_CHUNK:
                 quantdb.store_isobaric_quants(quants)
     quantdb.store_isobaric_quants(quants)
     quantdb.index_isobaric_quants()
 
 
-def create_precursor_quant_lookup(quantdb, mzmlfn_featsxml):
+def create_precursor_quant_lookup(quantdb, mzmlfn_feats, quanttype):
     """Fills quant sqlite with precursor quant from:
         features - generator of xml features from openms
     """
+    featparsermap = {'kronik': kronik_featparser,
+                     'openms': openms_featparser,
+                     }
     features = []
     getcontext().prec = 14  # sets decimal point precision
     mzmlmap = quantdb.get_mzmlfile_map()
-    for specfn, feat_element in mzmlfn_featsxml:
-        feat = openmsreader.get_feature_info(feat_element)
+    for specfn, feat_element in mzmlfn_feats:
+        feat = featparsermap[quanttype](feat_element)
         feat['rt'] = float(Decimal(feat['rt']) / 60)
         features.append((mzmlmap[specfn], feat['rt'], feat['mz'],
                          feat['charge'], feat['intensity'])
                         )
-        if len(features) == 5000:
+        if len(features) == DB_STORE_CHUNK:
             quantdb.store_ms1_quants(features)
             features = []
     quantdb.store_ms1_quants(features)
     quantdb.index_precursor_quants()
+
+
+def kronik_featparser(feature):
+    return {'rt': float(feature['Best RTime']),
+            'mz': float(feature['Monoisotopic Mass']),
+            'charge': int(feature['Charge']),
+            'intensity': float(feature['Best Intensity']),
+            }
+
+
+def openms_featparser(feature):
+    return openmsreader.get_feature_info(feature)
 
 
 def get_quant_data(cons_el):
