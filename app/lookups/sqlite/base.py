@@ -12,6 +12,8 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                    'mzml': ['spectra_id INTEGER PRIMARY KEY',
                             'mzmlfile_id INTEGER',
                             'scan_nr TEXT',
+                            'charge INTEGER',
+                            'mz DOUBLE',
                             'retention_time DOUBLE',
                             'FOREIGN KEY(mzmlfile_id)'
                             'REFERENCES mzmlfiles'],

@@ -8,14 +8,15 @@ class SpectraDB(BioSetDB):
 
     def store_mzmls(self, spectra):
         self.store_many(
-            'INSERT INTO mzml(mzmlfile_id, scan_nr, retention_time) '
-            'VALUES (?, ?, ?)', spectra)
+            'INSERT INTO mzml(mzmlfile_id, scan_nr, charge, mz, retention_time) '
+            'VALUES (?, ?, ?, ?, ?)', spectra)
 
     def index_mzml(self):
         self.index_column('spectra_id_index', 'mzml', 'spectra_id')
         self.index_column('mzmlfnid_mzml_index', 'mzml', 'mzmlfile_id')
         self.index_column('scan_index', 'mzml', 'scan_nr')
-        self.index_column('rt_index', 'mzml', 'retention_time')
+        self.index_column('specrt_index', 'mzml', 'retention_time')
+        self.index_column('specmz_index', 'mzml', 'mz')
 
     def get_spectradata(self, scannr):
         cursor = self.get_cursor()

@@ -1,6 +1,7 @@
 from decimal import Decimal, getcontext
 
 from app.readers import spectra as specreader
+DB_STORE_CHUNK = 500000
 
 
 def create_spectra_lookup(lookup, fn_spectra):
@@ -8,11 +9,11 @@ def create_spectra_lookup(lookup, fn_spectra):
     getcontext().prec = 14  # sets decimal point precision
     to_store = []
     mzmlmap = lookup.get_mzmlfile_map()
-    for fn, spectrum, ns in fn_spectra:
-        mzml_rt = float(Decimal(specreader.get_mzml_rt(spectrum, ns)))
-        scan_nr = specreader.get_spec_scan_nr(spectrum)
-        to_store.append((mzmlmap[fn], scan_nr, mzml_rt))
-        if len(to_store) == 500000:
+    for fn, spectrum in fn_spectra:
+        mzml_rt = float(Decimal(spectrum['rt']))
+        mz = float(Decimal(spectrum['mz']))
+        to_store.append((mzmlmap[fn], spectrum['scan'], spectrum['charge'], mz, mzml_rt))
+        if len(to_store) ==DB_STORE_CHUNK:
             lookup.store_mzmls(to_store)
             to_store = []
     lookup.store_mzmls(to_store)

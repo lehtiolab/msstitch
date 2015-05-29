@@ -29,6 +29,10 @@ def get_namespace(fn):
     return ns
 
 
+def find_element_xpath(base, name, ns):
+    return base.find('.//{%s}%s' % (ns['xmlns'], name))
+
+
 def generate_tags_multiple_files(input_files, tag, ignore_tags, ns=None):
     """
     Calls xmltag generator for multiple files.
@@ -45,15 +49,15 @@ def generate_tags_multiple_files_strings(input_files, ns, tag, ignore_tags):
         yield formatting.string_and_clear(el, ns)
 
 
-def generate_xmltags(fn, tag, ignore_tags, ns=None):
+def generate_xmltags(fn, returntag, ignore_tags, ns=None):
     """
     Base generator for percolator xml psm, peptide, protein output,
     as well as for mzML, mzIdentML.
-    ignore_tags are the ones that are not cleared when met by parser.
+    ignore_tags are the ones that are cleared when met by parser.
     """
     xmlns = create_namespace(ns)
     for ac, el in etree.iterparse(fn):
-        if el.tag == '{0}{1}'.format(xmlns, tag):
+        if el.tag == '{0}{1}'.format(xmlns, returntag):
             yield el
         elif el.tag in ['{0}{1}'.format(xmlns, x) for x in
                         ignore_tags]:
