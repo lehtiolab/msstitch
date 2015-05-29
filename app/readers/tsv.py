@@ -66,8 +66,8 @@ def get_psm_id(line):
 
 
 def get_proteins_from_psm(line):
-    """From a line, return list of proteins reported by Mzid2TSV. The line
-    should not be unrolled."""
+    """From a line, return list of proteins reported by Mzid2TSV. When unrolled
+    lines are given, this returns the single protein from the line."""
     proteins = line[mzidtsvdata.HEADER_PROTEIN].split(';')
     outproteins = []
     for protein in proteins:
