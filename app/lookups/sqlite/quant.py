@@ -16,25 +16,6 @@ class QuantDB(ResultLookupInterface):
         cursor = self.get_cursor()
         return cursor.execute(sql)
 
-    def lookup_retention_time(self, mzmlfn_id, scannr):
-       # deprecate FIXME
-        cursor = self.get_cursor()
-        cursor.execute(
-            'SELECT retention_time FROM mzml '
-            'WHERE mzmlfile_id=? AND scan_nr=?',
-            (mzmlfn_id, scannr))
-        return cursor.fetchall()
-
-    def lookup_isobaric_quant(self, mzmlfn_id, scannr):
-        # FIXME deprecate
-        cursor = self.get_cursor()
-        cursor.execute(
-            'SELECT iq.quantmap, iq.intensity '
-            'FROM mzml AS mz '
-            'JOIN isobaric_quant AS iq USING(spectra_id) '
-            'WHERE mz.mzmlfile_id=? AND mz.scan_nr=?', (mzmlfn_id, scannr))
-        return cursor.fetchall()
-
     def get_precursor_quant_window(self, windowsize, minmz):
         cursor = self.get_cursor()
         return cursor.execute(

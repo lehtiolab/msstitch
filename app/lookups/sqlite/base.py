@@ -47,9 +47,6 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                             'FOREIGN KEY(spectra_id)'
                             'REFERENCES mzml'
                             ],
-                   # FIXME create a spectra_id: scan nr reference when
-                   # inserting psms, otherwise we must look them up?
-                   # protein table - protein ref, quant data, set ref
                    'psmrows': ['psm_id TEXT',
                                'rownr INTEGER',
                                'FOREIGN KEY(psm_id) '

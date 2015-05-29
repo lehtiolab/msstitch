@@ -4,28 +4,22 @@ from app.dataformats import mzidtsv as mzidtsvdata
 
 
 def generate_psms_quanted(quantdb, tsvfn, isob_header, oldheader,
-                          is_ibariq=False, rttolerance=None, mztolerance=None,
-                          mztoltype=None, spec_column=None):
+                          is_ibariq=False, precursor=False): 
     """Takes dbfn and connects, gets quants for each line in tsvfn, sorts
     them in line by using keys in quantheader list."""
-    mzmlmap = quantdb.get_mzmlfile_map()
-    quantfunctions = []
-    if is_ibariq:
-        quantfunctions.append(lookup_iso_quant)
-    if None not in [rttolerance, mztolerance, mztoltype]:
-        quantfunctions.append(lookup_precursor_quant)
-    for psm in readers.generate_tsv_psms(tsvfn, oldheader):
+    allquants = quantdb.select_all_psm_quants()
+    quant = next(allquants)
+    for rownr, psm in enumerate(readers.generate_tsv_psms(tsvfn, oldheader)):
         outpsm = {x: y for x, y in psm.items()}
-        if spec_column is not None:
-            specfile = outpsm[oldheader[spec_column - 1]]
+        if quant[3] is not None:
+            outpsm.update({mzidtsvdata.HEADER_PRECURSOR_QUANT: str(quant[3])})
         else:
-            specfile = outpsm[mzidtsvdata.HEADER_SPECFILE]
-        scannr = outpsm[mzidtsvdata.HEADER_SCANNR]
-        charge = outpsm[mzidtsvdata.HEADER_CHARGE]
-        mz = outpsm[mzidtsvdata.HEADER_PRECURSOR_MZ]
-        outpsm.update(lookup_quant(mzmlmap[specfile], scannr, charge,
-                      quantfunctions, mz, rttolerance, mztolerance,
-                      mztoltype, quantdb, isob_header))
+            outpsm.update({mzidtsvdata.HEADER_PRECURSOR_QUANT: 'NA'})
+        isoquants = {}
+        while quant[0] == rownr:
+             isoquants.update({quant[1]: str(quant[2])})
+             quant = next(allquants)
+        outpsm.update(get_quant_NAs(isoquants, isob_header))
         yield outpsm
 
 
@@ -40,7 +34,8 @@ def get_full_and_isobaric_headers(oldheader, quantdb, isobaric=False,
     # is there any other scenario where we dont want a specific part of quant
     # data included in the tsv except 'it is already there'?
     # is we're outputting a set, we should do this as a general method for tsv
-    # driven stuff. then output here oldheader and new fields as tuple.
+    # driven stuff. then output here oldheader and new fields as tuple
+    # FIXME Make sure header is in mass-order, not alphabetical as it is now
     fullheader = oldheader
     if precursor:
         fullheader += [mzidtsvdata.HEADER_PRECURSOR_QUANT]
@@ -66,44 +61,3 @@ def get_quant_NAs(quantdata, quantheader):
     for qkey in quantheader:
         out[qkey] = quantdata.get(qkey, 'NA')
     return out
-
-
-def lookup_quant(specfile_id, scannr, charge, quantfunctions, mz,
-                 rttol, mztol, mztoltype, quantdb, isob_header=None):
-    outquants = {}
-    for func in quantfunctions:
-        outquants.update(func(quantdb, specfile_id, scannr, charge,
-                              mz, rttol, mztol, mztoltype, header=isob_header))
-    return outquants
-
-
-def lookup_iso_quant(quantdb, spectrafile_id, scannr, *args, **kwargs):
-    """Outputs dict with keys == quantname, values == quantintensity."""
-    dbquants = quantdb.lookup_isobaric_quant(spectrafile_id, scannr)
-    return get_quant_NAs({x[0]: str(x[1]) for x in dbquants}, kwargs['header'])
-
-
-def lookup_precursor_quant(quantdb, spectrafile_id, scannr,
-                           charge, mz, rttol, mztol, mztoltype, **kwargs):
-    """Lookup quant features in db that lie inside the m/z and retention time
-    tolerance limits. Returns the one feature which has the best matching
-    m/z, but not necessarily best matching retention time"""
-    def get_minmax(center, tolerance, toltype=None):
-        center = float(center)
-        if toltype == 'ppm':
-            tolerance = int(tolerance) / 1000000 * center
-        elif toltype == 'Da':
-            tolerance = float(tolerance)
-        return center - tolerance, center + tolerance
-    ms2_rt = quantdb.lookup_retention_time(spectrafile_id, scannr)[0][0]
-    minrt, maxrt = get_minmax(ms2_rt, rttol / 60)
-    minmz, maxmz = get_minmax(mz, mztol, mztoltype)
-    dbquants = quantdb.lookup_precursor_quant(spectrafile_id, charge, minrt,
-                                              maxrt, minmz, maxmz)
-    # m/z has index 0 from db output tuple
-    features = {abs(float(mz) - x[0]): x[1] for x in dbquants}
-    if features:
-        outquant = str(features[min(features)])
-    else:
-        outquant = 'NA'
-    return {mzidtsvdata.HEADER_PRECURSOR_QUANT: outquant}

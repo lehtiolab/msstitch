@@ -47,7 +47,7 @@ parser.add_argument('-c', dest='command', type=str,
                     'consensusXML to a tab separated file with\n'
                     'PSMs. Needs to be passed a lookup db with --dbfile,\n'
                     'which has to contain quant information, and\n'
-                    'optionally --isobaric, --precursor, --rttol, --mztol,\n'
+                    '--isobaric or --precursor, \n'
                     '--spectracol changes the column where the spectra\n'
                     'file names are in from the standard #SpecFile column.\n\n'
                     'proteingroup   - Takes lookup SQLite result, uses it\n'
@@ -102,18 +102,6 @@ parser.add_argument('--isobaric', dest='isobaric', help='Flag. Specifies\n'
                     'quant data from isobaric tags should be added from\n'
                     'lookup DB to tsv file.',
                     action='store_const', const=True, default=False)
-parser.add_argument('--rttol', dest='rttol', help='Specifies tolerance\n'
-                    'in seconds for retention time when mapping MS1 feature\n'
-                    'quant info to identifications in the PSM table.',
-                    type=float)
-parser.add_argument('--mztol', dest='mztol', help='Specifies tolerance\n'
-                    'in mass-to-charge when mapping MS1 feature quant info\n'
-                    'to identifications in the PSM table.', type=float)
-parser.add_argument('--mztoltype', dest='mztoltype', help='Type of tolerance\n'
-                    'in mass-to-charge when mapping MS1 feature quant info\n'
-                    'to identifications in the PSM table. One of ppm, Da.',
-                    type=lambda x: parser_value_in_list(parser, x, ['ppm',
-                                                                    'Da']))
 parser.add_argument('--spectracol', dest='speccol', help='Column number\n'
                     'in which spectra file names are, in case some framework\n'
                     'has changed the file names. First column number is 1.',
