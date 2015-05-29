@@ -52,6 +52,7 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                        'protein_acc TEXT',
                                        'channel_id INTEGER',
                                        'quantvalue REAL',
+                                       'amount_psms INTEGER',
                                        'FOREIGN KEY(protein_acc) '
                                        'REFERENCES proteins(protein_acc) '
                                        'FOREIGN KEY(channel_id) '
@@ -59,11 +60,20 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                        'protquant_channels(channel_id)'
                                        ],
                    'protquant_channels': ['channel_id INTEGER PRIMARY KEY',
-                                          'channel_name TEXT'],
-                   'protein_quanted_psms': ['proteinquant_id INTEGER PRIMARY KEY',
-                                            'amount_psms INTEGER',
-                                            'FOREIGN KEY(proteinquant_id) '
-                                            'REFERENCES protein_quanted(proteinquant_id)'],
+                                          'protquant_file TEXT',
+                                          'channel_name TEXT',
+                                          'amount_psms_name TEXT',
+                                          ],
+                   # FIXME DEPRECATE? psm amount already in protein_quanted
+                   'protquant_psms': ['proteinquant_id INTEGER PRIMARY KEY',
+                                      'channel_id INTEGER',
+                                      'amount_psms INTEGER',
+                                      'FOREIGN KEY(proteinquant_id) '
+                                      'REFERENCES protein_quanted(proteinquant_id) '
+                                      'FOREIGN KEY(channel_id) '
+                                      'REFERENCES '
+                                      'protquant_channels(channel_id)'
+                                      ],
                    'protein_psm': ['protein_acc TEXT',
                                    'psm_id TEXT',
                                    'FOREIGN KEY(protein_acc) '

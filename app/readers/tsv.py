@@ -21,11 +21,11 @@ def generate_tsv_proteins(fn, header):
 def generate_tsv_protein_quants(fns):
     """Unlike generate_tsv_lines_multifile, this generates tsv lines
     from multiple files that may have different headers. Yields
-    header as well as quant data for each protein quant"""
+    fn, header as well as quant data for each protein quant"""
     for fn in fns:
         header = get_tsv_header(fn)
         for pquant in generate_split_tsv_lines(fn, header):
-            yield header, pquant
+            yield fn, header, pquant
 
 
 def generate_kronik_feats(fn):

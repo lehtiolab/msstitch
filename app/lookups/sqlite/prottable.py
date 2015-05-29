@@ -37,11 +37,17 @@ class ProtTableDB(ResultLookupInterface):
         cursor.execute(sql)
         return cursor
 
-    def get_quantchannel_ids(self):
+    def get_quantchannel_map(self):
+        outdict = {}
         cursor = self.get_cursor()
         cursor.execute(
-            'SELECT channel_id, channel_name FROM protquant_channels')
-        return {channel: chan_id for chan_id, channel in cursor}
+            'SELECT channel_id, protquant_file, channel_name, amount_psms_name FROM protquant_channels')
+        for channel_id, fname, channel_name in cursor:
+            try:
+                outdict[fname][channel_name] = (channel_id, amount_psms_name)
+            except KeyError:
+                outdict[fname] = {channel_name: (channel_id, amount_psms_name)}
+        return outdict
 
     def store_protquants(self, quants):
         self.store_many(
