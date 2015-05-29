@@ -26,13 +26,20 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                    # ms1_quant has no spectra_id reference since it contains
                    # features and Im not sure if they can be linked to
                    # spectra_ids or that retention time is averaged
-                   'ms1_quant': ['mzmlfile_id INTEGER',
+                   'ms1_quant': ['feature_id INTEGER PRIMARY KEY',
+                                 'mzmlfile_id INTEGER',
                                  'retention_time REAL', 'mz REAL',
                                  'charge INTEGER', 'intensity REAL',
                                  'FOREIGN KEY(mzmlfile_id)'
-                                 'REFERENCES mzmlfiles '
-                                 'FOREIGN KEY(retention_time)'
-                                 'REFERENCES mzml'],
+                                 'REFERENCES mzmlfiles'],
+                   'ms1_align': ['spectra_id INTEGER',
+                                 'feature_id INTEGER',
+                                 'FOREIGN KEY(spectra_id) '
+                                 'REFERENCES mzml '
+                                 'FOREIGN KEY(feature_id) '
+                                 'REFERENCES ms1_quant',
+                                 ],
+                     
                    'psms': ['psm_id TEXT PRIMARY KEY NOT NULL',
                             'sequence TEXT',
                             'score TEXT',

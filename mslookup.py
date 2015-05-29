@@ -57,7 +57,8 @@ parser.add_argument('-c', dest='command', type=str,
                     'ms1quant - Creates lookup of precursor quant data in \n'
                     'OpenMS featureXML format. Use requires --spectra,\n'
                     '--dbfile with an sqlite lookup of spectra, --quanttype\n'
-                    'to determine quant output and passing \n'
+                    'to determine quant output, --mztol, --rttol, --mztoltype\n'
+                    'for tolerance specification, and passing \n'
                     'a featureXML or kronik file to -i\n\n'
 
                     'protquant - Creates lookup of protein quantification\n'
@@ -132,6 +133,18 @@ parser.add_argument('--quanttype', dest='quanttype',
                     help='Filetype of precursor quants to store. Choose from\n'
                     'kronik or openms.',
                     type=str, required=False)
+parser.add_argument('--rttol', dest='rttol', help='Specifies tolerance\n'
+                    'in seconds for retention time when mapping MS1 feature\n'
+                    'quant info to identifications in the PSM table.',
+                    type=float)
+parser.add_argument('--mztol', dest='mztol', help='Specifies tolerance\n'
+                    'in mass-to-charge when mapping MS1 feature quant info\n'
+                    'to identifications in the PSM table.', type=float)
+parser.add_argument('--mztoltype', dest='mztoltype', help='Type of tolerance\n'
+                    'in mass-to-charge when mapping MS1 feature quant info\n'
+                    'to identifications in the PSM table. One of ppm, Da.',
+                    type=lambda x: parser_value_in_list(parser, x, ['ppm',
+                                                                    'Da']))
 
 args = parser.parse_args()
 

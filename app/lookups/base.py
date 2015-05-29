@@ -8,6 +8,8 @@ def get_lookup(fn, lookuptype):
                  'psm': psms.PSMDB,
                  'proteingroups': proteingroups.ProteinGroupDB,
                  'quant': quant.QuantDB,
+                 'isoquant': quant.IsobaricQuantDB,
+                 'ms1quant': quant.PrecursorQuantDB,
                  'searchspace': searchspace.SearchSpaceDB,
                  'prottable': prottable.ProtTableDB,
                  }

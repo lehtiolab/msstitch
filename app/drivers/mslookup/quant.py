@@ -11,7 +11,7 @@ class QuantLookupDriver(base.LookupDriver):
 
 
 class IsobaricQuantLookupDriver(QuantLookupDriver):
-    lookuptype = 'quant'
+    lookuptype = 'isoquant'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -26,12 +26,15 @@ class IsobaricQuantLookupDriver(QuantLookupDriver):
 
 
 class PrecursorQuantLookupDriver(QuantLookupDriver):
-    lookuptype = 'quant'
+    lookuptype = 'ms1quant'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.precursorfns = self.fn
         self.quantfiletype = kwargs.get('quanttype')
+        self.rt_tol = kwargs.get('rttol', None)
+        self.mz_tol = kwargs.get('mztol', None)
+        self.mz_toltype = kwargs.get('mztoltype', None)
 
     def create_lookup(self):
         if self.quantfiletype == 'openms':
@@ -41,4 +44,7 @@ class PrecursorQuantLookupDriver(QuantLookupDriver):
             specfn_feats = tsvreader.mzmlfn_kronikfeature_generator(
                 self.spectrafns, self.precursorfns)
         lookups.create_precursor_quant_lookup(self.lookup, specfn_feats,
-                                              self.quantfiletype)
+                                              self.quantfiletype,
+                                              self.rt_tol,
+                                              self.mz_tol,
+                                              self.mz_toltype)
