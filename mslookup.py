@@ -7,7 +7,7 @@ mslookup - Creating SQLite lookups for internal and external use
 import argparse
 import os
 from app.drivers.mslookup import (spectra, quant, proteingroups, biosets,
-                                  proteinquant)
+                                  proteinquant, psms)
 
 
 def parser_file_exists(currentparser, fn):
@@ -39,10 +39,15 @@ parser.add_argument('-c', dest='command', type=str,
                     'for each file should be specified using\n'
                     '--setnames\n\n'
 
+                    'psms - Loads PSM table into lookup. Important for\n'
+                    'several steps later on, such as protein grouping and\n'
+                    'PSM quantitation. PSM TSV table passed to -i, \n'
+                    'With flags --unroll, --spectracol\n\n' 
+
                     'proteingrouplookup  - Groups proteins from mzid2tsv\n'
                     'output (single file passed to -i). With flags \n'
                     '--confidence-lvl, --confidence-col,\n'
-                    '--confidence-better, --fasta, --spectracolumn\n\n'
+                    '--confidence-better, --fasta\n\n'
 
                     'isoquant - Create lookup of isobaric quant data in\n'
                     'OpenMS consensusXML format. Use requires --spectra,\n'
@@ -129,6 +134,7 @@ args = parser.parse_args()
 commandmap = {
     'biosets': biosets.BioSetLookupDriver,
     'spectra': spectra.SpectraLookupDriver,
+    'psms': psms.PSMLookupDriver,
     'isoquant': quant.IsobaricQuantLookupDriver,
     'ms1quant': quant.PrecursorQuantLookupDriver,
     'proteingrouplookup': proteingroups.ProteinGroupLookupDriver,

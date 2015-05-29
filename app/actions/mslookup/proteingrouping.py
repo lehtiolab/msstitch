@@ -11,45 +11,36 @@ from app.actions.mzidtsv import confidencefilters as conffilt
 
 
 def create_protein_pep_lookup(fn, header, pgdb, confkey, conflvl,
-                              lower_is_better, unroll=False, fastafn=None,
-                              specfncol=None):
+                              lower_is_better, fastafn=None):
     """Reads PSMs from file, extracts their proteins and peptides and passes
-    them to a database backend in chunked PSMs.
+    them to a database backend in chunks.
     """
-    allpsms = OrderedDict()
-    mzmlmap = pgdb.get_mzmlfile_map()
     proteins, sequences, evidences = fastareader.get_proteins_for_db(
         fastafn)
     pgdb.store_proteins(proteins, evidences, sequences)
     protein_descriptions = fastareader.get_proteins_descriptions(fastafn)
     pgdb.store_descriptions(protein_descriptions)
-    
-    rownr, last_id, peptides_proteins = 0, None, {}
+    # TODO do we need an OrderedDict or is regular dict enough? Sorting for psm_id useful? 
+    allpsms = OrderedDict()
+    last_id, psmids_to_store = None, set()
     store_soon = False
     for psm in tsvreader.generate_tsv_lines_multifile(fn, header):
         if not conffilt.passes_filter(psm, conflvl, confkey, lower_is_better):
-            rownr += 1
             continue
-        specfn, scan, seq, score, prots = tsvreader.get_pepproteins(
-            psm, unroll, specfncol)
-        psm_id = tsvreader.get_psm_id(psm)
-        allpsms[psm_id] = prots
-        if peptides_proteins and len(peptides_proteins) % DB_STORE_CHUNK == 0:
+        psm_id, prots = tsvreader.get_pepproteins(psm)
+        try:
+            allpsms[psm_id].extend(prots)
+        except KeyError:
+            allpsms[psm_id] = prots
+        if len(psmids_to_store) % DB_STORE_CHUNK == 0:
             store_soon = True
         if store_soon and last_id != psm_id:
-            pgdb.store_peptides_proteins(peptides_proteins)
+            pgdb.store_peptides_proteins(allpsms, psmids_to_store)
             store_soon = False
-            peptides_proteins = {}
-        peptides_proteins[rownr] = {'psm_id': psm_id,
-                                    'seq': seq,
-                                    'proteins': prots,
-                                    'score': score,
-                                    'specfn': mzmlmap[specfn],
-                                    'scannr': scan,
-                                    }
+            psmids_to_store = set()
+        psmids_to_store.add(psm_id)
         last_id = psm_id
-        rownr += 1
-    pgdb.store_peptides_proteins(peptides_proteins)
+    pgdb.store_peptides_proteins(allpsms, psmids_to_store)
     pgdb.index_protein_peptides()
     return allpsms
 

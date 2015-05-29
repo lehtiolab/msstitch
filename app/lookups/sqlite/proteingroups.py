@@ -12,7 +12,7 @@ COVERAGE_INDEX = 7
 
 class ProteinGroupDB(ResultLookupInterface):
     def add_tables(self):
-        self.create_tables(['psms', 'psmrows', 'proteins', 'protein_psm',
+        self.create_tables(['proteins', 'protein_psm',
                             'protein_evidence', 'protein_seq',
                             'protein_coverage', 'protein_group_master',
                             'protein_group_content', 'psm_protein_groups',
@@ -32,32 +32,12 @@ class ProteinGroupDB(ResultLookupInterface):
                 'VALUES(?, ?)', sequences)
         self.conn.commit()
 
-    def store_peptides_proteins(self, ppmap):
-        def generate_protein_psm_ids(pepprots):
-            for psmvals in pepprots.values():
-                for protein in psmvals['proteins']:
-                    yield (protein, psmvals['psm_id'])
-
-        def generate_psms(pepprots):
-            for row, psmvals in pepprots.items():
-                spectra_id = self.get_spectra_id(psmvals['specfn'],
-                                                 scan_nr=psmvals['scannr'])
-                yield (psmvals['psm_id'], row, psmvals['seq'],
-                       psmvals['score'], spectra_id)
-
-        psms = generate_psms(ppmap)
-        psms = sorted(psms, key=lambda x: x[1])  # sorts on psm rows
-        prot_psm_ids = generate_protein_psm_ids(ppmap)
-        self.store_psm_relations(psms, prot_psm_ids)
-
-    def store_psm_relations(self, psms, prot_psm_ids):
+    def store_peptides_proteins(self, allpepprot, psmids_to_store):
+        ppmap = {psm_id: allpepprot[psm_id] for psm_id in psmids_to_store}
+        prot_psm_ids = ((prot_acc, psm_id) 
+                        for psm_id, prots in ppmap.items() 
+                        for prot_acc in prots)
         cursor = self.get_cursor()
-        cursor.executemany(
-            'INSERT INTO psms(psm_id, sequence, score, spectra_id)'
-            ' VALUES(?, ?, ?, ?)', ((x[0], x[2], x[3], x[4]) for x in psms))
-        cursor.executemany(
-            'INSERT INTO psmrows(psm_id, rownr) VALUES(?, ?)',
-            ((psm[0], psm[1]) for psm in psms))
         cursor.executemany(
             'INSERT INTO protein_psm(protein_acc, psm_id)'
             ' VALUES (?, ?)', prot_psm_ids)
@@ -65,7 +45,7 @@ class ProteinGroupDB(ResultLookupInterface):
 
     def index_protein_peptides(self):
         self.index_column('protein_index', 'protein_psm', 'protein_acc')
-        self.index_column('psmid_index', 'protein_psm', 'psm_id')
+        self.index_column('protpsmid_index', 'protein_psm', 'psm_id')
         self.index_column('protdesc_index', 'prot_desc', 'protein_acc')
 
     def store_masters(self, allmasters, psm_masters):

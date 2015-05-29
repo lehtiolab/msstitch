@@ -78,26 +78,38 @@ def get_proteins_from_psm(line):
     return outproteins
 
 
-def get_pepproteins(line, unroll=False, specfncol=None):
+def get_psm(line, unroll=False, specfncol=None):
     """Returns from a PSM line peptide sequence,
     and other information about the PSM.
     Return values:
         specfn          -   str
+        psm_id 	 	-   str
         scan            -   str
         peptideseq      -   str
         score		-   str
-        proteins        -   list of str
     """
     if specfncol is None:
         specfncol = mzidtsvdata.HEADER_SPECFILE
     specfn = line[specfncol]
+    psm_id = get_psm_id(line)
     scan = line[mzidtsvdata.HEADER_SCANNR]
-    score = line[mzidtsvdata.HEADER_MSGFSCORE]
     peptideseq = line[mzidtsvdata.HEADER_PEPTIDE]
     if unroll and '.' in peptideseq:
         peptideseq = peptideseq.split('.')[1]
+    score = line[mzidtsvdata.HEADER_MSGFSCORE]
+    return specfn, psm_id, scan, peptideseq, score
+
+
+def get_pepproteins(line):
+    """Returns from a PSM line peptide sequence,
+    and other information about the PSM.
+    Return values:
+        psm_id          -   str
+        proteins        -   list of str
+    """
+    psm_id = get_psm_id(line)
     proteins = get_proteins_from_psm(line)
-    return specfn, scan, peptideseq, score, proteins
+    return psm_id, proteins
 
 
 def strip_modifications(seq):
