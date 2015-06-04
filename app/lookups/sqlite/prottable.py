@@ -3,12 +3,11 @@ from app.lookups.sqlite.base import ResultLookupInterface
 
 class ProtTableDB(ResultLookupInterface):
     def add_tables(self):
-        self.create_tables(['protein_quanted', 'protquant_channels',
-                            'protein_quanted_psms'])
+        self.create_tables(['protein_quanted', 'protquant_channels'])
 
     def store_quant_channels(self, quantchannels):
         self.store_many(
-            'INSERT INTO protquant_channels(channel_name) VALUES (?)',
+            'INSERT INTO protquant_channels(protquant_file, channel_name, amount_psms_name) VALUES (?, ?, ?)',
             quantchannels)
     
     def get_protein_data(self, protein_acc):
@@ -51,6 +50,6 @@ class ProtTableDB(ResultLookupInterface):
 
     def store_protquants(self, quants):
         self.store_many(
-            'INSERT INTO protein_quanted(protein_acc, channel_id, quantvalue) '
-            'VALUES (?, ?, ?)', quants)
+            'INSERT INTO protein_quanted(protein_acc, channel_id, quantvalue, amount_psms) '
+            'VALUES (?, ?, ?, ?)', quants)
 
