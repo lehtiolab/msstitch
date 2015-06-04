@@ -3,13 +3,21 @@ from app.dataformats import prottable as prottabledata
 
 
 def get_quantchannels(pqdb):
-    return sorted(list(pqdb.get_quantchannel_ids()))
+    quantheader = []
+    for fn, chan_name, amount_psms_name in pqdb.get_quantchannel_headerfields():
+        quantheader.append(build_quantchan_header_field(fn, chan_name))
+        quantheader.append(build_quantchan_header_field(fn, amount_psms_name))
+    return sorted(quantheader)
 
 
-def get_header(oldheader=None, quantchannels=None, addprotein_data=False):
+def build_quantchan_header_field(fn, channame):
+    return '{}_{}'.format(fn, channame)
+
+
+def get_header(oldheader=None, quant_psm_channels=None, addprotein_data=False):
     if oldheader is None:
         header = [prottabledata.HEADER_PROTEIN]
-        header.extend(quantchannels)
+        header.extend(quant_psm_channels)
     if add_protein_data:
         header = get_header_with_proteindata(header)
     return header
@@ -42,7 +50,10 @@ def build_quanted_proteintable(pqdb, header):
         if protein[0] != outprotein[prottabledata.HEADER_PROTEIN]:
             yield parse_NA(next(add_protein_data([outprotein], pqdb)), header)
             outprotein = {prottabledata.HEADER_PROTEIN: protein[0]}
-        outprotein[protein[1]] = protein[2]
+        quantheadfield = build_quantchan_header_field(protein[2], protein[1])
+        amount_psmheadfield = build_quantchan_header_field(protein[2], protein[3])
+        outprotein[quantheadfield] = protein[4]
+        outprotein[amount_psmheadfield] = protein[5]
     yield parse_NA(next(add_protein_data([outprotein], pqdb)), header)
 
 

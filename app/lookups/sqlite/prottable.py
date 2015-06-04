@@ -28,20 +28,27 @@ class ProtTableDB(ResultLookupInterface):
         return cursor.execute(sql).fetchall()
     
     def get_quanted_proteins(self):
-        sql = ('SELECT pq.protein_acc, pc.channel_name, pq.quantvalue '
+        sql = ('SELECT pq.protein_acc, pc.channel_name, pc.protquant_file, '
+               'pc.amount_psms_name, pq.quantvalue, pq.amount_psms '
                'FROM protein_quanted AS pq '
                'JOIN protquant_channels AS pc USING(channel_id) '
                'ORDER BY pq.protein_acc')
         cursor = self.get_cursor()
         cursor.execute(sql)
         return cursor
-
+    
+    def get_quantchannel_headerfields(self):
+        cursor = self.get_cursor()
+        cursor.execute(
+            'SELECT protquant_file, channel_name, amount_psms_name FROM protquant_channels')
+        return cursor
+ 
     def get_quantchannel_map(self):
         outdict = {}
         cursor = self.get_cursor()
         cursor.execute(
             'SELECT channel_id, protquant_file, channel_name, amount_psms_name FROM protquant_channels')
-        for channel_id, fname, channel_name in cursor:
+        for channel_id, fname, channel_name, amount_psms_name in cursor:
             try:
                 outdict[fname][channel_name] = (channel_id, amount_psms_name)
             except KeyError:
