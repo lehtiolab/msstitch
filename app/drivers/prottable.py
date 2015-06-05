@@ -16,13 +16,14 @@ class ProttableDriver(BaseDriver):
         self.oldheader = None
 
     def run(self):
-        self.initialize_output()
         self.initialize_input()
+        self.initialize_output()
         self.set_protein_generator()
         self.write()
         self.finish()
 
     def initialize_input(self):
+        self.oldheader = reader.get_tsv_header(self.fn)
         self.in_proteins = reader.generate_tsv_proteins(self.fn, self.oldheader)
 
     def initialize_output(self):
@@ -41,7 +42,6 @@ class AddProteinInfoDriver(ProttableDriver):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.oldheader = reader.get_tsv_header(self.fn)
 
     def set_protein_generator(self):
         self.proteins = preparation.add_protein_data(self.in_proteins,
@@ -66,7 +66,7 @@ class BuildProteinTableDriver(ProttableDriver):
         super().initialize_output()
 
     def initialize_input(self):
-        """Not using input protein table"""
+        """Not using input protein tables"""
         pass
 
     def set_protein_generator(self):
@@ -76,7 +76,7 @@ class BuildProteinTableDriver(ProttableDriver):
 
 
 class AddPrecursorAreaDriver(ProttableDriver):
-    outsuffix = '_ms1q'
+    outsuffix = '_ms1q.txt'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -85,7 +85,7 @@ class AddPrecursorAreaDriver(ProttableDriver):
 
     def initialize_input(self):
         super().initialize_input()
-        self.in_peptides = tsvreader.generate_tsv_peptides(self.pepfile)
+        self.in_peptides = reader.generate_tsv_peptides(self.pepfile)
 
     def set_protein_generator(self):
         self.proteins = preparation.add_ms1_quant_from_top3_mzidtsv(

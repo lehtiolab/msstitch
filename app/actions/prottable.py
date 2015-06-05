@@ -9,9 +9,10 @@ def add_ms1_quant_from_top3_mzidtsv(proteins, peptides):
     top_ms1_peptides = {}
     for peptide in peptides:
         protacc = peptide[mzidtsvdata.HEADER_MASTER_PROT]
-        if ';' in protacc:
+        precursor_amount = peptide[mzidtsvdata.HEADER_PRECURSOR_QUANT]
+        if ';' in protacc or precursor_amount == 'NA':
             continue
-        precursor_amount = float(peptide[mzidtsvdata.HEADER_PRECURSOR_QUANT])
+        precursor_amount = float(precursor_amount)
         pep_id = tsvreader.get_psm_id(peptide)
         try:
             min_precursor_amount = min(top_ms1_peptides[protacc])
@@ -19,14 +20,20 @@ def add_ms1_quant_from_top3_mzidtsv(proteins, peptides):
             top_ms1_peptides[protacc] = {-1: None, -2: None,
                                          precursor_amount: pep_id}
             continue
-        if precursor_amount > min_precursor_amount:
-            top_ms1_peptides[precursor_amount] = pep_id
-            top_ms1_peptides.pop(min_precursor_amount)
+        else:
+            if precursor_amount > min_precursor_amount:
+                top_ms1_peptides[protacc][precursor_amount] = pep_id
+                top_ms1_peptides[protacc].pop(min_precursor_amount)
     for protein in proteins:
-        amounts = top_ms1_peptides[protein[prottabledata.HEADER_PROTEIN]]
-        amounts = [x for x in amounts if x > 0]
         outprotein = {k: v for k, v in protein.items()}
-        outprotein[prottabledata.HEADER_AREA] = sum(amounts) / len(amounts)
+        try:
+            amounts = top_ms1_peptides[protein[prottabledata.HEADER_PROTEIN]]
+        except KeyError:
+            prec_area = 'NA' 
+        else:
+            amounts = [x for x in amounts if x > 0]
+            prec_area = sum(amounts) / len(amounts)
+        outprotein[prottabledata.HEADER_AREA] = str(prec_area)
         yield outprotein
 
 
@@ -45,12 +52,14 @@ def build_quantchan_header_field(fn, channame):
 def get_header(oldheader=None, quant_psm_channels=None, addprotein_data=False,
                addprecursor_area=False):
     if oldheader is None:
-        header = [prottabledata.HEADER_PROTEIN]
+        header.append(prottabledata.HEADER_PROTEIN)
         header.extend(quant_psm_channels)
-    if add_protein_data:
+    else:
+        header = oldheader[:]
+    if addprotein_data:
         header = get_header_with_proteindata(header)
     if addprecursor_area:
-        header = get_header_with_precursordata(header)
+        header = get_header_with_precursorarea(header)
     return header
 
 
@@ -69,7 +78,7 @@ def get_header_with_proteindata(header):
 
 
 def get_header_with_precursorarea(header):
-    ix = header.index(prottabledata.HEADER_NO_PSM) + 1
+    ix = header.index(prottabledata.HEADER_PROTEIN) + 1
     return header[:ix] + [prottabledata.HEADER_AREA] + header[ix:]
 
 

@@ -64,6 +64,7 @@ args = parser.parse_args()
 commandmap = {
     'addprotdata': drivers.AddProteinInfoDriver,
     'buildquant': drivers.BuildProteinTableDriver,
+    'addms1quant': drivers.AddPrecursorAreaDriver,
     #'createprottable': drivers.CreateProteinTableDriver,
 }
 
