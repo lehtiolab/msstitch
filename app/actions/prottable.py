@@ -1,5 +1,33 @@
-from app.readers import fasta
+from app.readers import tsv as tsvreader
 from app.dataformats import prottable as prottabledata
+from app.dataformats import mzidtsv as mzidtsvdata
+
+
+def add_ms1_quant_from_top3_mzidtsv(proteins, peptides):
+    """Collects peptides or PSMs with the highes precursor quant values,
+    adds sum of the top 3 of these to a protein table"""
+    top_ms1_peptides = {}
+    for peptide in peptides:
+        protacc = peptide[mzidtsvdata.HEADER_MASTER_PROT]
+        if ';' in protacc:
+            continue
+        precursor_amount = float(peptide[mzidtsvdata.HEADER_PRECURSOR_QUANT])
+        pep_id = tsvreader.get_psm_id(peptide)
+        try:
+            min_precursor_amount = min(top_ms1_peptides[protacc])
+        except KeyError:
+            top_ms1_peptides[protacc] = {-1: None, -2: None,
+                                         precursor_amount: pep_id}
+            continue
+        if precursor_amount > min_precursor_amount:
+            top_ms1_peptides[precursor_amount] = pep_id
+            top_ms1_peptides.pop(min_precursor_amount)
+    for protein in proteins:
+        amounts = top_ms1_peptides[protein[prottabledata.HEADER_PROTEIN]]
+        amounts = [x for x in amounts if x > 0]
+        outprotein = {k: v for k, v in protein.items()}
+        outprotein[prottabledata.HEADER_AREA] = sum(amounts) / len(amounts)
+        yield outprotein
 
 
 def get_quantchannels(pqdb):
@@ -14,12 +42,15 @@ def build_quantchan_header_field(fn, channame):
     return '{}_{}'.format(fn, channame)
 
 
-def get_header(oldheader=None, quant_psm_channels=None, addprotein_data=False):
+def get_header(oldheader=None, quant_psm_channels=None, addprotein_data=False,
+               addprecursor_area=False):
     if oldheader is None:
         header = [prottabledata.HEADER_PROTEIN]
         header.extend(quant_psm_channels)
     if add_protein_data:
         header = get_header_with_proteindata(header)
+    if addprecursor_area:
+        header = get_header_with_precursordata(header)
     return header
 
 
@@ -31,11 +62,15 @@ def get_header_with_proteindata(header):
                 prottabledata.HEADER_NO_UNIPEP,
                 prottabledata.HEADER_NO_PEPTIDE,
                 prottabledata.HEADER_NO_PSM,
-                #prottabledata.HEADER_AREA,
                 #prottabledata.HEADER_NO_QUANT_PSM,
                 #prottabledata.HEADER_CV_QUANT_PSM,
                 ]
     return header[:ix] + new_data + header[ix:]
+
+
+def get_header_with_precursorarea(header):
+    ix = header.index(prottabledata.HEADER_NO_PSM) + 1
+    return header[:ix] + [prottabledata.HEADER_AREA] + header[ix:]
 
 
 def build_quanted_proteintable(pqdb, header):

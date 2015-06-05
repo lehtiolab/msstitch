@@ -46,6 +46,11 @@ def generate_tsv_psms(fn, header):
     return generate_split_tsv_lines(fn, header)
 
 
+def generate_tsv_peptides(fn):
+    header = get_tsv_header(fn)
+    return generate_split_tsv_lines(fn, header)
+
+
 def generate_split_tsv_lines(fn, header):
     """Returns dicts with header-keys and psm statistic values"""
     for line in generate_tsv_psms_line(fn):
