@@ -47,7 +47,7 @@ def get_uniprot_evidence_level(header):
         item = item.split('=')
         try:
             if item[0] == 'PE':
-                return 5 - item[1]
+                return 5 - int(item[1])
         except IndexError:
             continue
     return -1

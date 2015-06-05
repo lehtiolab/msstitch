@@ -1,4 +1,5 @@
 import re
+import os
 from app.readers import tsv as tsvreader
 
 
@@ -10,8 +11,9 @@ def create_proteinquant_lookup(fns, pqdb, protacc_colnr, qcolpattern, psmnrpatte
     psmnrcolmap = {}
     for fn in fns:
         header = tsvreader.get_tsv_header(fn)
-        allquantcols.update({fn: get_quantcolumns(header, qcolpattern)})
-        psmnrcolmap.update({fn: get_quantcolumns(header, psmnrpattern)})
+        basefn = os.path.basename(fn)
+        allquantcols.update({basefn: get_quantcolumns(header, qcolpattern)})
+        psmnrcolmap.update({basefn: get_quantcolumns(header, psmnrpattern)})
     pqdb.store_quant_channels(map_psmnrcol_to_quantcol(allquantcols,
                                                        psmnrcolmap))
     quantmap = pqdb.get_quantchannel_map()

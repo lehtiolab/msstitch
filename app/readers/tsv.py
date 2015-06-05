@@ -25,7 +25,7 @@ def generate_tsv_protein_quants(fns):
     for fn in fns:
         header = get_tsv_header(fn)
         for pquant in generate_split_tsv_lines(fn, header):
-            yield fn, header, pquant
+            yield os.path.basename(fn), header, pquant
 
 
 def generate_kronik_feats(fn):
@@ -43,6 +43,11 @@ def mzmlfn_kronikfeature_generator(mzmlfns, kronikfns):
 
 
 def generate_tsv_psms(fn, header):
+    return generate_split_tsv_lines(fn, header)
+
+
+def generate_tsv_peptides(fn):
+    header = get_tsv_header(fn)
     return generate_split_tsv_lines(fn, header)
 
 

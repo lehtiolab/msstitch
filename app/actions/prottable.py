@@ -1,17 +1,56 @@
-from app.readers import fasta
+from app.readers import tsv as tsvreader
 from app.dataformats import prottable as prottabledata
+from app.dataformats import mzidtsv as mzidtsvdata
+
+
+def add_ms1_quant_from_top3_mzidtsv(proteins, peptides):
+    """Collects peptides or PSMs with the highes precursor quant values,
+    adds sum of the top 3 of these to a protein table"""
+    top_ms1_peptides = {}
+    for peptide in peptides:
+        protacc = peptide[mzidtsvdata.HEADER_MASTER_PROT]
+        if ';' in protacc:
+            continue
+        precursor_amount = float(peptide[mzidtsvdata.HEADER_PRECURSOR_QUANT])
+        pep_id = tsvreader.get_psm_id(peptide)
+        try:
+            min_precursor_amount = min(top_ms1_peptides[protacc])
+        except KeyError:
+            top_ms1_peptides[protacc] = {-1: None, -2: None,
+                                         precursor_amount: pep_id}
+            continue
+        if precursor_amount > min_precursor_amount:
+            top_ms1_peptides[precursor_amount] = pep_id
+            top_ms1_peptides.pop(min_precursor_amount)
+    for protein in proteins:
+        amounts = top_ms1_peptides[protein[prottabledata.HEADER_PROTEIN]]
+        amounts = [x for x in amounts if x > 0]
+        outprotein = {k: v for k, v in protein.items()}
+        outprotein[prottabledata.HEADER_AREA] = sum(amounts) / len(amounts)
+        yield outprotein
 
 
 def get_quantchannels(pqdb):
-    return sorted(list(pqdb.get_quantchannel_ids()))
+    quantheader = []
+    for fn, chan_name, amount_psms_name in pqdb.get_quantchannel_headerfields():
+        quantheader.append(build_quantchan_header_field(fn, chan_name))
+        quantheader.append(build_quantchan_header_field(fn, amount_psms_name))
+    return sorted(quantheader)
 
 
-def get_header(oldheader=None, quantchannels=None, addprotein_data=False):
+def build_quantchan_header_field(fn, channame):
+    return '{}_{}'.format(fn, channame)
+
+
+def get_header(oldheader=None, quant_psm_channels=None, addprotein_data=False,
+               addprecursor_area=False):
     if oldheader is None:
         header = [prottabledata.HEADER_PROTEIN]
-        header.extend(quantchannels)
+        header.extend(quant_psm_channels)
     if add_protein_data:
         header = get_header_with_proteindata(header)
+    if addprecursor_area:
+        header = get_header_with_precursordata(header)
     return header
 
 
@@ -23,11 +62,15 @@ def get_header_with_proteindata(header):
                 prottabledata.HEADER_NO_UNIPEP,
                 prottabledata.HEADER_NO_PEPTIDE,
                 prottabledata.HEADER_NO_PSM,
-                #prottabledata.HEADER_AREA,
                 #prottabledata.HEADER_NO_QUANT_PSM,
                 #prottabledata.HEADER_CV_QUANT_PSM,
                 ]
     return header[:ix] + new_data + header[ix:]
+
+
+def get_header_with_precursorarea(header):
+    ix = header.index(prottabledata.HEADER_NO_PSM) + 1
+    return header[:ix] + [prottabledata.HEADER_AREA] + header[ix:]
 
 
 def build_quanted_proteintable(pqdb, header):
@@ -42,7 +85,10 @@ def build_quanted_proteintable(pqdb, header):
         if protein[0] != outprotein[prottabledata.HEADER_PROTEIN]:
             yield parse_NA(next(add_protein_data([outprotein], pqdb)), header)
             outprotein = {prottabledata.HEADER_PROTEIN: protein[0]}
-        outprotein[protein[1]] = protein[2]
+        quantheadfield = build_quantchan_header_field(protein[2], protein[1])
+        amount_psmheadfield = build_quantchan_header_field(protein[2], protein[3])
+        outprotein[quantheadfield] = protein[4]
+        outprotein[amount_psmheadfield] = protein[5]
     yield parse_NA(next(add_protein_data([outprotein], pqdb)), header)
 
 

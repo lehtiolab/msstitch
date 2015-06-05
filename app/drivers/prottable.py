@@ -11,18 +11,24 @@ class ProttableDriver(BaseDriver):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.protdata = kwargs.get('proteindata', False)
+        self.precursorarea = False
         self.quantchannels = None
         self.oldheader = None
 
     def run(self):
         self.initialize_output()
+        self.initialize_input()
         self.set_protein_generator()
         self.write()
         self.finish()
 
+    def initialize_input(self):
+        self.in_proteins = reader.generate_tsv_proteins(self.fn, self.oldheader)
+
     def initialize_output(self):
         self.header = preparation.get_header(self.oldheader,
-                                             self.quantchannels, self.protdata)
+                                             self.quantchannels, self.protdata,
+                                             self.precursorarea)
 
     def write(self):
         outfn = self.create_outfilepath(self.fn, self.outsuffix)
@@ -38,8 +44,7 @@ class AddProteinInfoDriver(ProttableDriver):
         self.oldheader = reader.get_tsv_header(self.fn)
 
     def set_protein_generator(self):
-        proteins = reader.generate_tsv_proteins(self.fn, self.oldheader)
-        self.proteins = preparation.add_protein_data(proteins,
+        self.proteins = preparation.add_protein_data(self.in_proteins,
                                                      self.lookup)
 
 
@@ -60,7 +65,28 @@ class BuildProteinTableDriver(ProttableDriver):
         self.quantchannels = preparation.get_quantchannels(self.lookup)
         super().initialize_output()
 
+    def initialize_input(self):
+        """Not using input protein table"""
+        pass
+
     def set_protein_generator(self):
         """Generates proteins with quant from the lookup table"""
         self.proteins = preparation.build_quanted_proteintable(self.lookup,
                                                                self.header)
+
+
+class AddPrecursorAreaDriver(ProttableDriver):
+    outsuffix = '_ms1q'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.precursorarea = True
+        self.pepfile = kwargs.get('pepfile', False)
+
+    def initialize_input(self):
+        super().initialize_input()
+        self.in_peptides = tsvreader.generate_tsv_peptides(self.pepfile)
+
+    def set_protein_generator(self):
+        self.proteins = preparation.add_ms1_quant_from_top3_mzidtsv(
+            self.in_proteins, self.in_peptides)
