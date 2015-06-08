@@ -73,6 +73,10 @@ parser.add_argument('--cutproline', dest='proline', help='With flag, trypsin is 
                     'considered to cut before a proline residue. The filter '
                     'known will filter against both cut and non-cut peptides.',
                     action='store_const', const=True, default=False)
+parser.add_argument('--notrypsin', dest='notrypsin', help='With flag, no \n'
+                    'trypsinization is performed. User is expected to deliver\n'
+                    'pretrypsinized FASTA file.',
+                    action='store_const', const=False, default=True)
 parser.add_argument('--ntermwildcards', dest='falloff', help='With flag, the filter '
                     'known will filter against both intact peptides and those '
                     'that match to the C-terminal part of a tryptic peptide '
