@@ -3,7 +3,7 @@ from app.lookups.sqlite import searchspace as sqlite
 
 
 def create_searchspace(dbfn, outfile, proline_cut=False,
-                       reverse_seqs=True):
+                       reverse_seqs=True, do_trypsinize=True):
     """Given a FASTA database, proteins are trypsinized and resulting peptides
     stored in a database or dict for lookups"""
     lookup = sqlite.SearchSpaceDB()
@@ -12,7 +12,10 @@ def create_searchspace(dbfn, outfile, proline_cut=False,
     allpeps = []
     protindex = SeqIO.index(dbfn, 'fasta')
     for acc in protindex:
-        pepseqs = trypsinize(protindex[acc].seq, proline_cut)
+        if do_trypsinize:
+            pepseqs = trypsinize(protindex[acc].seq, proline_cut)
+        else:
+            pepseqs = [protindex[acc].seq]
         # Exchange all leucines to isoleucines because MS can't differ
         pepseqs = [(str(pep).replace('L', 'I'),) for pep in pepseqs]
         allpeps.extend(pepseqs)

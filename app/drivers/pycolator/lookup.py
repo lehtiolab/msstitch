@@ -14,9 +14,10 @@ class CreateLookup(base.PycolatorDriver):
         super(CreateLookup, self).__init__(**kwargs)
         self.falloff = kwargs.get('falloff')
         self.proline = kwargs.get('proline')
+        self.trypsinize = kwargs.get('notrypsin', True)
 
     def run(self):
         self.outfn = self.create_outfilepath(self.fn, self.outsuffix)
         sequences.create_searchspace(self.fn, self.outfn, self.proline,
-                                     self.falloff)
+                                     self.falloff, self.trypsinize)
         self.finish()
