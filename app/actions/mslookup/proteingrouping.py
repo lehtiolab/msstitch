@@ -47,68 +47,83 @@ def create_protein_pep_lookup(fn, header, pgdb, confkey, conflvl,
 
 def build_proteingroup_db(pgdb, allpsms,
                           coverage):
-    build_new_master_db(pgdb, allpsms)
+    build_master_db(pgdb, allpsms)
     build_content_db(pgdb)
     if coverage:
         build_coverage(pgdb)
 
-def build_new_master_db(pgdb, allpsms):
+
+def build_master_db(pgdb, allpsms):
     psm_masters = OrderedDict()
     allmasters = {}
     while len(allpsms) > 0:
         psm_id, proteins = allpsms.popitem()
         pepprotmap = pgdb.get_protpepmap_from_proteins(proteins)
-        masters = get_masters(pepprotmap)
+        #masters = get_masters(pepprotmap)
         for psm_id_delete in [x for y in pepprotmap.values() for x in y]:
+            psmid_masters = {x: 1 for x in get_masters(pepprotmap, psm_id_delete)}
+            allmasters.update({x: 1 for x in psmid_masters})
             try:
-                psm_masters[psm_id_delete].update({x: 1 for x in masters})
+                psm_masters[psm_id_delete].update(psmid_masters)
             except KeyError:
-                psm_masters[psm_id_delete] = {x: 1 for x in masters}
+                psm_masters[psm_id_delete] = psmid_masters
             if psm_id_delete in allpsms:
                 del(allpsms[psm_id_delete])
-        psm_masters[psm_id] = {x: 1 for x in masters}
-        allmasters.update({x: 1 for x in masters})
-    print('Collected {0} masters, {1} PSM-master mappings'.format(len(allmasters), len(psm_masters)))
-    pgdb.store_masters(allmasters, psm_masters)
-
-def build_master_db(pgdb):
-    psm_masters = OrderedDict()
-    allmasters = {}
-    allpepprots = pgdb.get_all_pepprots()
-    current_psm, protein_acc, prot_psm_id = next(allpepprots)
-    pepprotmap = {protein_acc: [prot_psm_id]}
-    for psm_id, protein_acc, prot_psm_id in allpepprots:
-        if psm_id != current_psm:
-            # got all psm_protein mappings for this psm
-            # flush mappings and store masters, psm_master mapping in variables
-            masters = get_masters(pepprotmap)
-            psm_masters[current_psm] = {x: 1 for x in masters}
-            allmasters.update({x: 1 for x in masters})
-            pepprotmap = {}
-        current_psm = psm_id
-        try:
-            pepprotmap[protein_acc].append(prot_psm_id)
-        except KeyError:
-            pepprotmap[protein_acc] = [prot_psm_id]
     print('Collected {0} masters, {1} PSM-master mappings'.format(len(allmasters), len(psm_masters)))
     pgdb.store_masters(allmasters, psm_masters)
 
 
 def build_content_db(pgdb):
+    all_master_psm_proteins = pgdb.get_master_contentproteins_psms()
+    all_master_psms = pgdb.get_all_master_psms()
+    lastpsmmaster, masterpsm = next(all_master_psms)
+    lastcontentmaster, contentpsm, protein, pepseq, score = next(all_master_psm_proteins)
+    master_psms = {masterpsm}
+    contentmap = add_protein_psm_to_pre_proteingroup(dict(), protein, pepseq, contentpsm, score)
     protein_groups = []
-    allpsms_masters = pgdb.get_allpsms_masters()
-    lastmaster, psms = next(allpsms_masters)
-    psms = [psms]
-    for master, psm in allpsms_masters:
-        if master == lastmaster:
-            psms.append(psm)
-        else:
-            protein_groups.extend(get_protein_group_content(lastmaster, psms,
-                                                            pgdb))
-            psms = [psm]
-        lastmaster = master
-    protein_groups.extend(get_protein_group_content(lastmaster, psms, pgdb))
+    for master, masterpsm in all_master_psms:
+        # outer loop gets all master PSMs
+        if master != lastpsmmaster:
+            for contentmaster, contentpsm, protein, pepseq, score in all_master_psm_proteins:
+                # Inner loop gets protein group content from another DB join table
+                if contentmaster != lastcontentmaster:
+                    proteingroup = filter_proteins_with_missing_psms(contentmap, master_psms)
+                    lastcontentmaster, contentmap = contentmaster, dict()
+                    contentmap = add_protein_psm_to_pre_proteingroup(contentmap, protein, pepseq, contentpsm, score)
+                    break 
+                contentmap = add_protein_psm_to_pre_proteingroup(contentmap, protein, pepseq, contentpsm, score)
+            protein_groups.extend(get_protein_group_content(proteingroup, lastpsmmaster))
+            master_psms = set()
+            lastpsmmaster = master
+        master_psms.add(masterpsm)
     pgdb.store_protein_group_content(protein_groups)
+
+
+def add_protein_psm_to_pre_proteingroup(prepgmap, protein, pepseq, psm_id, score):
+    score = float(score)
+    try:
+        prepgmap[protein][pepseq].add((psm_id, score))
+    except KeyError:
+        try:
+            prepgmap[protein][pepseq] = {(psm_id, score)}
+        except KeyError:
+            prepgmap[protein] = {pepseq: {(psm_id, score)}}
+    return prepgmap
+                
+
+def filter_proteins_with_missing_psms(proteins, pg_psms):
+    filtered_protein_map = {}
+    for protein, protein_psms in proteins.items():
+        filter_out = False
+        for psm_id, score in [psm for peptide in protein_psms.values() for psm in peptide]:
+            if psm_id not in pg_psms:
+                filter_out = True
+                break
+        if filter_out:
+            continue
+        else:
+            filtered_protein_map[protein] = protein_psms
+    return filtered_protein_map
 
 
 def build_coverage(pgdb):
@@ -122,15 +137,18 @@ def build_coverage(pgdb):
     pgdb.store_coverage(generate_coverage(coverage))
 
 
-def get_masters(ppgraph):
+def get_masters(ppgraph, psm_id):
     """From a protein-peptide graph dictionary (keys proteins,
     values peptides), return master proteins aka those which
-    have no proteins whose peptides are supersets of them.
+    have no proteins whose peptides are supersets of them. psm_id
+    specifies that the master protein must map to this PSM.
     If shared master proteins are found, report only the first,
     we will sort the whole proteingroup later anyway. In that
     case, the master reported here may be temporary."""
     masters = {}
     for protein, peps in ppgraph.items():
+        if psm_id not in peps:
+            continue
         ismaster = True
         peps = set(peps)
         multimaster = set()
@@ -170,7 +188,7 @@ def generate_coverage(seqinfo):
         yield (acc, len(coverage_aa_indices) / len(seq))
 
 
-def get_protein_group_content(master, psms, pgdb):
+def get_protein_group_content(pgmap, master):
     """For each master protein, we generate the protein group proteins
     complete with sequences, psm_ids and scores. Master proteins are included
     in this group.
@@ -178,21 +196,6 @@ def get_protein_group_content(master, psms, pgdb):
     Returns a list of [protein, master, pep_hits, psm_hits, protein_score],
     which is ready to enter the DB table.
     """
-    protein_group_plus = pgdb.get_proteins_peptides_from_psms(psms)
-    proteins_not_in_group = pgdb.filter_proteins_with_missing_peptides(
-        [x[0] for x in protein_group_plus], psms)
-    pgmap = {}
-    for protein, pepseq, score, psm_id in protein_group_plus:
-        if protein in proteins_not_in_group:
-            continue
-        score = int(score)  # MZIDSCORE is INTEGER
-        try:
-            pgmap[protein][pepseq].append((psm_id, score))
-        except KeyError:
-            try:
-                pgmap[protein][pepseq] = [(psm_id, score)]
-            except KeyError:
-                pgmap[protein] = {pepseq: [(psm_id, score)]}
     pgmap = [[protein, master, len(peptides), len([psm for pgpsms in
                                                    peptides.values()
                                                    for psm in pgpsms]),

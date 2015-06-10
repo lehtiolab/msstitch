@@ -32,6 +32,13 @@ class ProteinGroupDB(ResultLookupInterface):
                 'VALUES(?, ?)', sequences)
         self.conn.commit()
 
+    def store_descriptions(self, descriptions):
+        cursor = self.get_cursor()
+        cursor.executemany(
+            'INSERT INTO prot_desc(protein_acc, description) '
+            'VALUES(?, ?)', descriptions)
+        self.conn.commit()
+
     def store_peptides_proteins(self, allpepprot, psmids_to_store):
         ppmap = {psm_id: allpepprot[psm_id] for psm_id in psmids_to_store}
         prot_psm_ids = ((prot_acc, psm_id) 
@@ -94,11 +101,6 @@ class ProteinGroupDB(ResultLookupInterface):
         proteins = cursor.execute(protsql, psm_id).fetchall()
         return [x[0] for x in proteins]
 
-    def get_all_pepprots(self):
-        pepsql = 'SELECT p.psm_id, pp.protein_acc, pp.psm_id FROM protein_psm AS p JOIN protein_psm AS pp USING(protein_acc) ORDER BY p.psm_id'
-        cursor = self.get_cursor()
-        return cursor.execute(pepsql)
-        
     def get_protpepmap_from_proteins(self, proteins):
         pepsql = self.get_sql_select(['protein_acc', 'psm_id'],
                                      'protein_psm',
@@ -115,23 +117,6 @@ class ProteinGroupDB(ResultLookupInterface):
                 outmap[protein] = [peptide]
         return outmap
 
-    def get_peptides_from_protein(self, protein):
-        pepsql = self.get_sql_select(['psm_id'], 'protein_psm',
-                                     distinct=True)
-        pepsql = '{0} WHERE protein_acc=?'.format(
-            pepsql)
-        cursor = self.get_cursor()
-        peptides = cursor.execute(pepsql, (protein,)).fetchall()
-        return [x[0] for x in peptides]
-
-    def get_proteins_from_psms(self, psms):
-        protsql = self.get_sql_select(['protein_acc'],
-                                      'protein_psm', distinct=True)
-        protsql = '{0} WHERE psm_id {1}'.format(
-            protsql, self.get_inclause(psms))
-        cursor = self.get_cursor()
-        return [x[0] for x in cursor.execute(protsql, psms).fetchall()]
-
     def get_all_proteins_psms_seq(self):
         sql = ('SELECT p.protein_acc, ps.sequence, pp.psm_id, psms.sequence '
                'FROM proteins AS p '
@@ -141,7 +126,26 @@ class ProteinGroupDB(ResultLookupInterface):
                )
         cursor = self.get_cursor()
         return cursor.execute(sql)
-
+    
+    def get_master_contentproteins_psms(self):
+        sql = ('SELECT ppg.master, pp2.psm_id, pp.protein_acc, p.sequence, p.score '
+               'FROM psm_protein_groups AS ppg '
+               'JOIN protein_psm AS pp USING(psm_id) '
+               'JOIN protein_psm AS pp2 USING(protein_acc) '
+               'JOIN psms AS p USING(psm_id) '
+               'ORDER BY ppg.master'
+               )
+        cursor = self.get_cursor()
+        return cursor.execute(sql)
+      
+    def get_all_master_psms(self):
+        sql = ('SELECT master, psm_id '
+               'FROM psm_protein_groups '
+               'ORDER BY master'
+               )
+        cursor = self.get_cursor()
+        return ((master, psm) for master, psm in cursor.execute(sql).fetchall())
+    
     def get_all_psms_proteingroups(self, coverage):
         fields = ['pr.rownr', 'ppg.master', 'pgc.protein_acc',
                   'pgc.peptide_count', 'pgc.psm_count', 'pgc.protein_score',
@@ -158,36 +162,3 @@ class ProteinGroupDB(ResultLookupInterface):
             ', '.join(fields), join_sql)
         cursor = self.get_cursor()
         return cursor.execute(sql)
-
-    def get_proteins_peptides_from_psms(self, psms):
-        """Returns dict of proteins and lists of corresponding peptides
-        from db. DB call gets all rows where psm_id is in peptides.
-        """
-        sql = ('SELECT protein_psm.protein_acc, psms.sequence, psms.score, '
-               'psm_id FROM psms '
-               'JOIN protein_psm USING(psm_id)')
-        sql = '{0} WHERE psm_id {1}'.format(sql, self.get_inclause(psms))
-        cursor = self.get_cursor()
-        return cursor.execute(sql, psms).fetchall()
-
-    def filter_proteins_with_missing_peptides(self, proteins, peptides):
-        """Returns proteins of passed list that have peptides not in
-        peptide list.
-        """
-        not_in_sql = self.get_sql_select(['protein_acc'], 'protein_psm',
-                                         distinct=True)
-        not_in_sql = '{0} WHERE protein_acc {1} AND psm_id NOT {2}'.format(
-            not_in_sql,
-            self.get_inclause(proteins),
-            self.get_inclause(peptides))
-        cursor = self.get_cursor()
-        proteins_not_in_group = cursor.execute(not_in_sql,
-                                               proteins + peptides)
-        return [x[0] for x in proteins_not_in_group]
-    
-    def store_descriptions(self, descriptions):
-        cursor = self.get_cursor()
-        cursor.executemany(
-            'INSERT INTO prot_desc(protein_acc, description) '
-            'VALUES(?, ?)', descriptions)
-        self.conn.commit()
