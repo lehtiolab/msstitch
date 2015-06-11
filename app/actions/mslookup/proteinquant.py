@@ -30,9 +30,9 @@ def create_precursor_proteinquant_lookup(fns, pqdb, protacc_colnr,
     to_store = []
     for fn, header, pquant in tsvreader.generate_tsv_protein_quants(fns):
         pqdata = (pquant[header[protacc_colnr]], pquant[quantcolmap[fn]])
-        to_store.extend(pqdata)
+        to_store.append(pqdata)
         if len(to_store) > 10000:
-            pqdb.store_prot_precursor_quants(to_store)
+            pqdb.store_precursor_protquants(to_store)
             to_store = []
     pqdb.store_precursor_protquants(to_store)
 
@@ -51,7 +51,7 @@ def create_isobaric_proteinquant_lookup(fns, pqdb, protacc_colnr,
                                          quantmap)
         to_store.extend(pqdata)
         if len(to_store) > 10000:
-            pqdb.store_protquants(to_store)
+            pqdb.store_isobaric_protquants(to_store)
             to_store = []
     pqdb.store_isobaric_protquants(to_store)
 

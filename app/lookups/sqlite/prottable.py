@@ -3,7 +3,8 @@ from app.lookups.sqlite.base import ResultLookupInterface
 
 class ProtTableDB(ResultLookupInterface):
     def add_tables(self):
-        self.create_tables(['protein_quanted', 'protquant_channels'])
+        self.create_tables(['protein_quanted', 'protquant_channels', 
+                            'protein_precur_quanted'])
 
     def store_quant_channels(self, quantchannels):
         self.store_many(
