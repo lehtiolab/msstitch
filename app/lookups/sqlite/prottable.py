@@ -7,9 +7,10 @@ class ProtTableDB(ResultLookupInterface):
 
     def store_quant_channels(self, quantchannels):
         self.store_many(
-            'INSERT INTO protquant_channels(protquant_file, channel_name, amount_psms_name) VALUES (?, ?, ?)',
+            'INSERT INTO protquant_channels(protquant_file, channel_name, '
+            'amount_psms_name) VALUES (?, ?, ?)',
             quantchannels)
-    
+
     def get_protein_data(self, protein_acc):
         fields = ['psm.psm_id', 'psm.sequence', 'pgc.master',
                   'pgc.protein_acc', 'pcov.coverage', 'pd.description']
@@ -22,11 +23,11 @@ class ProtTableDB(ResultLookupInterface):
             j[0], j[1], j[2]) for j in joins])
         sql = ('SELECT {0} FROM protein_group_content AS pgc {1}'
                'WHERE protein_acc="{2}"'.format(', '.join(fields),
-                                                 join_sql,
-                                                 protein_acc))
+                                                join_sql,
+                                                protein_acc))
         cursor = self.get_cursor()
         return cursor.execute(sql).fetchall()
-    
+
     def get_quanted_proteins(self):
         sql = ('SELECT pq.protein_acc, pc.channel_name, pc.protquant_file, '
                'pc.amount_psms_name, pq.quantvalue, pq.amount_psms '
@@ -36,18 +37,20 @@ class ProtTableDB(ResultLookupInterface):
         cursor = self.get_cursor()
         cursor.execute(sql)
         return cursor
-    
+
     def get_quantchannel_headerfields(self):
         cursor = self.get_cursor()
         cursor.execute(
-            'SELECT protquant_file, channel_name, amount_psms_name FROM protquant_channels')
+            'SELECT protquant_file, channel_name, amount_psms_name '
+            'FROM protquant_channels')
         return cursor
- 
+
     def get_quantchannel_map(self):
         outdict = {}
         cursor = self.get_cursor()
         cursor.execute(
-            'SELECT channel_id, protquant_file, channel_name, amount_psms_name FROM protquant_channels')
+            'SELECT channel_id, protquant_file, channel_name, amount_psms_name'
+            ' FROM protquant_channels')
         for channel_id, fname, channel_name, amount_psms_name in cursor:
             try:
                 outdict[fname][channel_name] = (channel_id, amount_psms_name)
@@ -55,8 +58,12 @@ class ProtTableDB(ResultLookupInterface):
                 outdict[fname] = {channel_name: (channel_id, amount_psms_name)}
         return outdict
 
-    def store_protquants(self, quants):
+    def store_isobaric_protquants(self, quants):
         self.store_many(
-            'INSERT INTO protein_quanted(protein_acc, channel_id, quantvalue, amount_psms) '
-            'VALUES (?, ?, ?, ?)', quants)
+            'INSERT INTO protein_quanted(protein_acc, channel_id, quantvalue, '
+            'amount_psms) VALUES (?, ?, ?, ?)', quants)
 
+    def store_precursor_protquants(self, quants):
+        self.store_many(
+            'INSERT INTO protein_precur_quanted(protein_acc, quantvalue) '
+            'VALUES (?, ?)', quants)

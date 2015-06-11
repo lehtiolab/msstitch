@@ -42,7 +42,7 @@ parser.add_argument('-c', dest='command', type=str,
                     'psms - Loads PSM table into lookup. Important for\n'
                     'several steps later on, such as protein grouping and\n'
                     'PSM quantitation. PSM TSV table passed to -i, \n'
-                    'With flags --unroll, --spectracol\n\n' 
+                    'With flags --unroll, --spectracol\n\n'
 
                     'proteingrouplookup  - Groups proteins from mzid2tsv\n'
                     'output (single file passed to -i). With flags \n'
@@ -121,9 +121,13 @@ parser.add_argument('--protcol', dest='protcol', help='Column number\n'
                     'of protein table in which protein accessions are \n'
                     'stored. First column number is 1.',
                     type=int, required=False)
+parser.add_argument('--ms1quantcolpattern', dest='precursorquantcolpattern',
+                    help='Unique text pattern to identify precursor quant \n'
+                    'column in protein table.',
+                    type=str, required=False)
 parser.add_argument('--quantcolpattern', dest='quantcolpattern',
-                    help='Unique text pattern to identify quant column in \n'
-                    'protein table.',
+                    help='Unique text pattern to identify isobaric quant \n'
+                    'column in protein table.',
                     type=str, required=False)
 parser.add_argument('--psmnrcolpattern', dest='psmnrcolpattern',
                     help='Unique text pattern to identify number-of-psms \n'

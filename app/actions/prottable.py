@@ -29,7 +29,7 @@ def add_ms1_quant_from_top3_mzidtsv(proteins, peptides):
         try:
             amounts = top_ms1_peptides[protein[prottabledata.HEADER_PROTEIN]]
         except KeyError:
-            prec_area = 'NA' 
+            prec_area = 'NA'
         else:
             amounts = [x for x in amounts if x > 0]
             prec_area = sum(amounts) / len(amounts)
@@ -39,9 +39,9 @@ def add_ms1_quant_from_top3_mzidtsv(proteins, peptides):
 
 def get_quantchannels(pqdb):
     quantheader = []
-    for fn, chan_name, amount_psms_name in pqdb.get_quantchannel_headerfields():
+    for fn, chan_name, amnt_psms_name in pqdb.get_quantchannel_headerfields():
         quantheader.append(build_quantchan_header_field(fn, chan_name))
-        quantheader.append(build_quantchan_header_field(fn, amount_psms_name))
+        quantheader.append(build_quantchan_header_field(fn, amnt_psms_name))
     return sorted(quantheader)
 
 
@@ -52,7 +52,7 @@ def build_quantchan_header_field(fn, channame):
 def get_header(oldheader=None, quant_psm_channels=None, addprotein_data=False,
                addprecursor_area=False):
     if oldheader is None:
-        header.append(prottabledata.HEADER_PROTEIN)
+        header = [prottabledata.HEADER_PROTEIN]
         header.extend(quant_psm_channels)
     else:
         header = oldheader[:]
@@ -95,9 +95,9 @@ def build_quanted_proteintable(pqdb, header):
             yield parse_NA(next(add_protein_data([outprotein], pqdb)), header)
             outprotein = {prottabledata.HEADER_PROTEIN: protein[0]}
         quantheadfield = build_quantchan_header_field(protein[2], protein[1])
-        amount_psmheadfield = build_quantchan_header_field(protein[2], protein[3])
+        amntpsm_headfld = build_quantchan_header_field(protein[2], protein[3])
         outprotein[quantheadfield] = protein[4]
-        outprotein[amount_psmheadfield] = protein[5]
+        outprotein[amntpsm_headfld] = protein[5]
     yield parse_NA(next(add_protein_data([outprotein], pqdb)), header)
 
 
