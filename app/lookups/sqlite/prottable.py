@@ -66,5 +66,5 @@ class ProtTableDB(ResultLookupInterface):
 
     def store_precursor_protquants(self, quants):
         self.store_many(
-            'INSERT INTO protein_precur_quanted(protein_acc, quantvalue) '
-            'VALUES (?, ?)', quants)
+            'INSERT INTO protein_precur_quanted(protein_acc, protquant_file, quantvalue) '
+            'VALUES (?, ?, ?)', quants)

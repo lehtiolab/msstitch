@@ -29,7 +29,7 @@ def create_precursor_proteinquant_lookup(fns, pqdb, protacc_colnr,
                                          quantcolmap):
     to_store = []
     for fn, header, pquant in tsvreader.generate_tsv_protein_quants(fns):
-        pqdata = (pquant[header[protacc_colnr]], pquant[quantcolmap[fn]])
+        pqdata = (pquant[header[protacc_colnr]], fn, pquant[quantcolmap[fn]])
         to_store.append(pqdata)
         if len(to_store) > 10000:
             pqdb.store_precursor_protquants(to_store)
