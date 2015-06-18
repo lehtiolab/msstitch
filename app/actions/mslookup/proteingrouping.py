@@ -96,6 +96,7 @@ def build_content_db(pgdb):
             lastpsmmaster = master
         master_psms.add(masterpsm)
     pgdb.store_protein_group_content(protein_groups)
+    pgdb.index_protein_group_content()
 
 
 def add_protein_psm_to_pre_proteingroup(prepgmap, protein, pepseq, psm_id, score):

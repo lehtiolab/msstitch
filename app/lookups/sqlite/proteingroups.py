@@ -84,6 +84,8 @@ class ProteinGroupDB(ResultLookupInterface):
                            'psm_count, protein_score) '
                            'VALUES(?, ?, ?, ?, ?)', protein_groups)
         self.conn.commit()
+
+    def index_protein_group_content(self):
         self.index_column('pgc_master_index', 'protein_group_content',
                           'master')
 
