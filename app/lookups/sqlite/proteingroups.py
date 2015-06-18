@@ -130,10 +130,9 @@ class ProteinGroupDB(ResultLookupInterface):
         return cursor.execute(sql)
     
     def get_master_contentproteins_psms(self):
-        sql = ('SELECT ppg.master, pp2.psm_id, pp.protein_acc, p.sequence, p.score '
+        sql = ('SELECT ppg.master, ppg.psm_id, pp.protein_acc, p.sequence, p.score '
                'FROM psm_protein_groups AS ppg '
                'JOIN protein_psm AS pp USING(psm_id) '
-               'JOIN protein_psm AS pp2 USING(protein_acc) '
                'JOIN psms AS p USING(psm_id) '
                'ORDER BY ppg.master'
                )
