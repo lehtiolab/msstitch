@@ -201,9 +201,9 @@ def get_protein_group_content(pgmap, master):
     Returns a list of [protein, master, pep_hits, psm_hits, protein_score],
     which is ready to enter the DB table.
     """
-    pgmap = [[protein, master, len(peptides), len([psm for pgpsms in
-                                                   peptides.values()
-                                                   for psm in pgpsms]),
-              sum([psm[1] for pgpsms in peptides.values() for psm in pgpsms])]
-             for protein, peptides in pgmap.items()]
-    return pgmap
+    pg_content = [[protein, master, len(peptides), len([psm for pgpsms in
+                                                        peptides.values()
+                                                        for psm in pgpsms]),
+                   sum([psm[1] for pgpsms in peptides.values() for psm in pgpsms])]
+                  for protein, peptides in pgmap.items()]
+    return pg_content
