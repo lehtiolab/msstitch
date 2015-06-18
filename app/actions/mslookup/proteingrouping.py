@@ -1,6 +1,6 @@
 MZIDTSV_PEP_COL = 9
 MZIDTSV_PROT_COL = 10
-DB_STORE_CHUNK = 500000
+DB_STORE_CHUNK = 100000
 
 from collections import OrderedDict
 
