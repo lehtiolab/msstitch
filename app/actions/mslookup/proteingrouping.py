@@ -1,6 +1,6 @@
 MZIDTSV_PEP_COL = 9
 MZIDTSV_PROT_COL = 10
-DB_STORE_CHUNK = 500000
+DB_STORE_CHUNK = 100000
 
 from collections import OrderedDict
 
@@ -59,16 +59,15 @@ def build_master_db(pgdb, allpsms):
     while len(allpsms) > 0:
         psm_id, proteins = allpsms.popitem()
         pepprotmap = pgdb.get_protpepmap_from_proteins(proteins)
-        #masters = get_masters(pepprotmap)
-        for psm_id_delete in [x for y in pepprotmap.values() for x in y]:
-            psmid_masters = {x: 1 for x in get_masters(pepprotmap, psm_id_delete)}
-            allmasters.update({x: 1 for x in psmid_masters})
+        masters = get_masters(pepprotmap)
+        for psm, master in [(p, m) for p, masters in masters.items() for m in masters]:
             try:
-                psm_masters[psm_id_delete].update(psmid_masters)
+                psm_masters[psm].add(master)
             except KeyError:
-                psm_masters[psm_id_delete] = psmid_masters
-            if psm_id_delete in allpsms:
-                del(allpsms[psm_id_delete])
+                psm_masters[psm] = set([master])
+            allmasters[master] = 1
+            if psm in allpsms:
+                del(allpsms[psm])
     print('Collected {0} masters, {1} PSM-master mappings'.format(len(allmasters), len(psm_masters)))
     pgdb.store_masters(allmasters, psm_masters)
 
@@ -97,6 +96,7 @@ def build_content_db(pgdb):
             lastpsmmaster = master
         master_psms.add(masterpsm)
     pgdb.store_protein_group_content(protein_groups)
+    pgdb.index_protein_group_content()
 
 
 def add_protein_psm_to_pre_proteingroup(prepgmap, protein, pepseq, psm_id, score):
@@ -137,33 +137,38 @@ def build_coverage(pgdb):
     pgdb.store_coverage(generate_coverage(coverage))
 
 
-def get_masters(ppgraph, psm_id):
+def get_masters(ppgraph):
     """From a protein-peptide graph dictionary (keys proteins,
     values peptides), return master proteins aka those which
-    have no proteins whose peptides are supersets of them. psm_id
-    specifies that the master protein must map to this PSM.
+    have no proteins whose peptides are supersets of them. 
     If shared master proteins are found, report only the first,
     we will sort the whole proteingroup later anyway. In that
     case, the master reported here may be temporary."""
     masters = {}
     for protein, peps in ppgraph.items():
-        if psm_id not in peps:
-            continue
         ismaster = True
         peps = set(peps)
         multimaster = set()
         for subprotein, subpeps in ppgraph.items():
             if protein == subprotein:
                 continue
-            if peps.issubset(subpeps) and peps.union(subpeps) > peps:
-                ismaster = False
-                break
-            elif peps.issubset(subpeps) and peps.intersection(subpeps) == peps:
-                multimaster.update({protein, subprotein})
-        if ismaster and not multimaster:
-            masters[protein] = 1
-        elif ismaster and multimaster:
-            masters[sorted(list(multimaster))[0]] = 1
+            if peps.issubset(subpeps):
+                if peps.union(subpeps) > peps:
+                    ismaster = False
+                    break
+                elif peps.intersection(subpeps) == peps:
+                    multimaster.update({protein, subprotein})
+        if not ismaster:
+            continue
+        elif multimaster:
+            premaster = sorted(list(multimaster))[0]
+        else:
+            premaster = protein
+        for pep in peps:
+            try:
+                masters[pep].add(premaster)
+            except KeyError:
+                masters[pep] = {premaster}
     return masters
 
 
@@ -196,9 +201,9 @@ def get_protein_group_content(pgmap, master):
     Returns a list of [protein, master, pep_hits, psm_hits, protein_score],
     which is ready to enter the DB table.
     """
-    pgmap = [[protein, master, len(peptides), len([psm for pgpsms in
-                                                   peptides.values()
-                                                   for psm in pgpsms]),
-              sum([psm[1] for pgpsms in peptides.values() for psm in pgpsms])]
-             for protein, peptides in pgmap.items()]
-    return pgmap
+    pg_content = [[protein, master, len(peptides), len([psm for pgpsms in
+                                                        peptides.values()
+                                                        for psm in pgpsms]),
+                   sum([psm[1] for pgpsms in peptides.values() for psm in pgpsms])]
+                  for protein, peptides in pgmap.items()]
+    return pg_content
