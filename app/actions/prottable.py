@@ -86,22 +86,22 @@ def get_header_with_precursorarea(header):
     return header[:ix] + [prottabledata.HEADER_AREA] + header[ix:]
 
 
-def build_quanted_proteintable(pqdb, header):
+def build_quanted_proteintable(pqdb, header, isobaric=False, precursor=False):
     """Fetches proteins and quants from joined lookup table, loops through
     them and when all of a protein's quants have been collected, yields the
     protein quant information."""
-    proteins = pqdb.get_quanted_proteins()
+    iso_quant_map = {True: get_isobaric_quant, False: lambda x: {}}
+    ms1_quant_map = {True: get_precursor_quant, False: lambda x: {}}
+    proteins = pqdb.get_quanted_proteins(isobaric, precursor)
     protein = next(proteins)
-    outprotein = {prottabledata.HEADER_PROTEIN: protein[0],
-                  protein[1]: protein[2]}
+    outprotein = {prottabledata.HEADER_PROTEIN: protein[0]}
+    outprotein.update(iso_quant_map[isobaric](protein))
     for protein in proteins:
         if protein[0] != outprotein[prottabledata.HEADER_PROTEIN]:
             yield parse_NA(next(add_protein_data([outprotein], pqdb)), header)
             outprotein = {prottabledata.HEADER_PROTEIN: protein[0]}
-        quantheadfield = build_quantchan_header_field(protein[2], protein[1])
-        amntpsm_headfld = build_quantchan_header_field(protein[2], protein[3])
-        outprotein[quantheadfield] = protein[4]
-        outprotein[amntpsm_headfld] = protein[5]
+        outprotein.update(iso_quant_map[isobaric](protein))
+        outprotein.update(ms1_quant_map[isobaric](protein))
     yield parse_NA(next(add_protein_data([outprotein], pqdb)), header)
 
 

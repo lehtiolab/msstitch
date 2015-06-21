@@ -59,6 +59,8 @@ class BuildProteinTableDriver(ProttableDriver):
         kwargs['infile'] = os.path.join(os.getcwd(),
                                         'built_protein_table.txt')
         super().__init__(**kwargs)
+        self.isobaric = kwargs.get('isobaric', False)
+        self.precursorarea = kwargs.get('precursor', False)
 
     def initialize_output(self):
         """Defines quantchannels from lookup table for header"""
@@ -72,7 +74,9 @@ class BuildProteinTableDriver(ProttableDriver):
     def set_protein_generator(self):
         """Generates proteins with quant from the lookup table"""
         self.proteins = preparation.build_quanted_proteintable(self.lookup,
-                                                               self.header)
+                                                               self.header,
+                                                               self.isobaric,
+                                                               self.precursorarea)
 
 
 class AddPrecursorAreaDriver(ProttableDriver):

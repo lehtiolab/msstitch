@@ -34,7 +34,8 @@ parser.add_argument('-c', dest='command', type=str,
                     'buildquant - Create protein quant data from a lookup\n'
                     'database. E.g. when multiple protein quant tables have\n'
                     'been read into the lookup and will be combined. Use \n'
-                    'with --dbfile, --proteindata but NOT with -i.\n\n'
+                    'with --dbfile, --proteindata, --precursor, --isobaric\n'
+                    'but NOT with -i.\n\n'
                     'addms1quant - Add MS1 quantification data from a\n'
                     'peptide table containing precursor quant areas. Needs\n'
                     '--peptable.',
@@ -57,6 +58,12 @@ parser.add_argument('--peptable', dest='pepfile', help='Peptide table file '
                     type=lambda x: parser_file_exists(parser, x))
 parser.add_argument('--proteindata', dest='proteindata', help='Include '
                     'protein group data such as coverage in output. Flag.',
+                    action='store_const', default=False, const=True)
+parser.add_argument('--precursor', dest='precursor', help='Build protein '
+                    'which contains precursor quant data. Flag.',
+                    action='store_const', default=False, const=True)
+parser.add_argument('--isobaric', dest='isobaric', help='Build protein '
+                    'which contains isobaric quant data. Flag.',
                     action='store_const', default=False, const=True)
 
 args = parser.parse_args()

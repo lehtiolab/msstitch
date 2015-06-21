@@ -29,12 +29,23 @@ class ProtTableDB(ResultLookupInterface):
         cursor = self.get_cursor()
         return cursor.execute(sql).fetchall()
 
-    def get_quanted_proteins(self):
-        sql = ('SELECT pq.protein_acc, pc.channel_name, pc.protquant_file, '
-               'pc.amount_psms_name, pq.quantvalue, pq.amount_psms '
-               'FROM protein_quanted AS pq '
-               'JOIN protquant_channels AS pc USING(channel_id) '
-               'ORDER BY pq.protein_acc')
+    def get_quanted_proteins(self, precursor=False, isobaric=False):
+        if precursor and isobaric:
+            sql = ('SELECT pq.protein_acc, pc.channel_name, pc.protquant_file, '
+                   'pc.amount_psms_name, pq.quantvalue, pq.amount_psms, '
+                   'preq.protquant_file, preq.quantvalue '
+                   'FROM protein_quanted AS pq '
+                   'JOIN protquant_channels AS pc USING(channel_id) '
+                   'JOIN protein_precur_quanted AS preq USING(protein_acc) '
+                   )
+        elif precursor:
+            sql = ('SELECT pq.protein_acc, pq.protquant_file, pq.quantvalue '
+                   'FROM protein_precur_quanted AS pq')
+        elif isobaric:
+            sql = ('SELECT pq.protein_acc, pc.channel_name, pc.protquant_file, '
+                   'pc.amount_psms_name, pq.quantvalue, pq.amount_psms '
+                   'FROM protein_quanted AS pq '
+                   'JOIN protquant_channels AS pc USING(channel_id) ')
         cursor = self.get_cursor()
         cursor.execute(sql)
         return cursor
