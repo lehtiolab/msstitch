@@ -81,9 +81,25 @@ def get_header_with_proteindata(header):
     return header[:ix] + new_data + header[ix:]
 
 
-def get_header_with_precursorarea(header):
+def get_header_with_precursorarea(header, fns=False):
     ix = header.index(prottabledata.HEADER_PROTEIN) + 1
-    return header[:ix] + [prottabledata.HEADER_AREA] + header[ix:]
+    if fns:
+        quant_fields = [build_quantchan_header_field(fn[0], prottabledata.HEADER_AREA) for fn in fns]
+    else:
+        quant_fields = [prottabledata.HEADER_AREA]
+    return header[:ix] + quant_fields + header[ix:]
+
+
+def get_isobaric_quant(protein):
+    quantheadfield = build_quantchan_header_field(protein[2], protein[1])
+    amntpsm_headfld = build_quantchan_header_field(protein[2], protein[3])
+    return {quantheadfield: protein[4], amntpsm_headfld: protein[5]}
+
+
+def get_precursor_quant(protein):
+    quantheadfield = build_quantchan_header_field(protein[-2],
+                                                  prottabledata.HEADER_AREA)
+    return {quantheadfield: protein[-1]}
 
 
 def build_quanted_proteintable(pqdb, header, isobaric=False, precursor=False):
