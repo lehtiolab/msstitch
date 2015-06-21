@@ -45,6 +45,10 @@ def get_quantchannels(pqdb):
     return sorted(quantheader)
 
 
+def get_precursorquant_headerfields(pqdb):
+    return pqdb.get_precursorquant_headerfields()
+
+
 def build_quantchan_header_field(fn, channame):
     return '{}_{}'.format(fn, channame)
 

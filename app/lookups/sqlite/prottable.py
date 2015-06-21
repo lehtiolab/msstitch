@@ -46,6 +46,13 @@ class ProtTableDB(ResultLookupInterface):
             'FROM protquant_channels')
         return cursor
 
+    def get_precursorquant_headerfields(self):
+        cursor = self.get_cursor()
+        cursor.execute(
+            'SELECT DISTINCT protquant_file '
+            'FROM protein_precur_quanted')
+        return cursor
+
     def get_quantchannel_map(self):
         outdict = {}
         cursor = self.get_cursor()
