@@ -54,7 +54,7 @@ def build_quantchan_header_field(fn, channame):
 
 
 def get_header(oldheader=None, quant_psm_channels=None, addprotein_data=False,
-               addprecursor_area=False):
+               precursor_filenames=False, precursorarea=False):
     if oldheader is None:
         header = [prottabledata.HEADER_PROTEIN]
         header.extend(quant_psm_channels)
@@ -62,8 +62,8 @@ def get_header(oldheader=None, quant_psm_channels=None, addprotein_data=False,
         header = oldheader[:]
     if addprotein_data:
         header = get_header_with_proteindata(header)
-    if addprecursor_area:
-        header = get_header_with_precursorarea(header)
+    if precursor_filenames or precursorarea:
+        header = get_header_with_precursorarea(header, precursor_filenames)
     return header
 
 

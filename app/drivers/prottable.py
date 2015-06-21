@@ -12,6 +12,7 @@ class ProttableDriver(BaseDriver):
         super().__init__(**kwargs)
         self.protdata = kwargs.get('proteindata', False)
         self.precursorarea = False
+        self.precursor_filenames = None
         self.quantchannels = None
         self.oldheader = None
 
@@ -29,7 +30,9 @@ class ProttableDriver(BaseDriver):
     def initialize_output(self):
         self.header = preparation.get_header(self.oldheader,
                                              self.quantchannels, self.protdata,
+                                             self.precursor_filenames,
                                              self.precursorarea)
+
 
     def write(self):
         outfn = self.create_outfilepath(self.fn, self.outsuffix)
@@ -65,6 +68,7 @@ class BuildProteinTableDriver(ProttableDriver):
     def initialize_output(self):
         """Defines quantchannels from lookup table for header"""
         self.quantchannels = preparation.get_quantchannels(self.lookup)
+        self.precursor_filenames = preparation.get_precursorquant_headerfields(self.lookup)
         super().initialize_output()
 
     def initialize_input(self):
