@@ -52,13 +52,17 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                'FOREIGN KEY(psm_id) '
                                'REFERENCES psms(psm_id)'],
                    'proteins': ['protein_acc TEXT PRIMARY KEY NOT NULL'],
+                   'protein_tables': ['prottable_id INTEGER PRIMARY KEY',
+                                      'prottable_file TEXT'],
                    'protein_precur_quanted':
                    ['prot_precquant_id INTEGER PRIMARY KEY',
                     'protein_acc TEXT',
-                    'protquant_file TEXT',
+                    'prottable_id INTEGER',
                     'quantvalue REAL',
                     'FOREIGN KEY(protein_acc) '
-                    'REFERENCES proteins(protein_acc)',
+                    'REFERENCES proteins(protein_acc) '
+                    'FOREIGN KEY(prottable_id) '
+                    'REFERENCES protein_tables(prottable_id)'
                     ],
                    'protein_quanted': ['proteinquant_id INTEGER PRIMARY KEY',
                                        'protein_acc TEXT',
@@ -72,9 +76,19 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                        'protquant_channels(channel_id)'
                                        ],
                    'protquant_channels': ['channel_id INTEGER PRIMARY KEY',
-                                          'protquant_file TEXT',
+                                          'prottable_id INTEGER',
                                           'channel_name TEXT',
                                           'amount_psms_name TEXT',
+                                          'FOREIGN KEY(prottable_id) '
+                                          'REFERENCES protein_tables(prottable_id)'
+                                          ],
+                   'protein_probability': ['protein_acc TEXT',
+                                           'prottable_id TEXT',
+                                           'probability DOUBLE',
+                                           'FOREIGN KEY(protein_acc) '
+                                           'REFERENCES proteins(protein_acc) '
+                                           'FOREIGN KEY(prottable_id) '
+                                           'REFERENCES protein_tables(prottable_id)'
                                           ],
                    'protein_psm': ['protein_acc TEXT',
                                    'psm_id TEXT',
