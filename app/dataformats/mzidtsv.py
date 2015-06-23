@@ -10,7 +10,7 @@ HEADER_PG_CONTENT = 'Protein group(s) content'
 HEADER_PG_AMOUNT_PROTEIN_HITS = 'Amount of matching proteins in group(s)'
 HEADER_PG = [HEADER_MASTER_PROT, HEADER_PG_CONTENT,
              HEADER_PG_AMOUNT_PROTEIN_HITS]
-HEADER_PEPQVAL = 'PepQValue'
+HEADER_PEPTIDE_PEP = 'peptide PEP'
 HEADER_MSGFSCORE = 'MSGFScore'
 HEADER_EVALUE = 'EValue'
 HEADER_LINKED_PSMS = 'Files/scans for peptide'
