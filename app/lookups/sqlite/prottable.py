@@ -35,23 +35,28 @@ class ProtTableDB(ResultLookupInterface):
         cursor = self.get_cursor()
         return cursor.execute(sql).fetchall()
 
-    def get_quanted_proteins(self, precursor=False, isobaric=False):
-        if precursor and isobaric:
-            sql = ('SELECT pq.protein_acc, pc.channel_name, pc.prottable_file, '
-                   'pc.amount_psms_name, pq.quantvalue, pq.amount_psms, '
-                   'preq.prottable_file, preq.quantvalue '
-                   'FROM protein_quanted AS pq '
-                   'JOIN protquant_channels AS pc USING(channel_id) '
-                   'JOIN protein_precur_quanted AS preq USING(protein_acc) '
-                   )
-        elif precursor:
-            sql = ('SELECT pq.protein_acc, pq.prottable_file, pq.quantvalue '
-                   'FROM protein_precur_quanted AS pq')
-        elif isobaric:
-            sql = ('SELECT pq.protein_acc, pc.channel_name, pc.prottable_file, '
-                   'pc.amount_psms_name, pq.quantvalue, pq.amount_psms '
-                   'FROM protein_quanted AS pq '
-                   'JOIN protquant_channels AS pc USING(channel_id) ')
+    def prepare_mergetable_sql(self, precursor=False, isobaric=False, probability=False):
+        selects = ['pq.protein_acc']
+        selectmap = {'p_acc': 0}
+        selectfieldcount = max(selectmap.values()) + 1
+        joins = []
+        if isobaric:
+            selects.extend(['pc.channel_name', 'pc.prottable_id',
+                            'pc.amount_psms_name', 'pq.quantvalue', 'pq.amount_psms'])
+            joins.extend([('protquant_channels', 'pc', 'channel_id')])
+            selectmap.update({field: i + selectfieldcount for i, field in enumerate(['channel', 'isoq_fnid', 'isoq_psmsfield', 'isoq_val', 'isoq_psms'])})
+            selectfieldcount = max(selectmap.values()) + 1
+        if precursor:
+            selects.extend(['preq.prottable_id', 'preq.quantvalue'])
+            joins.extend([('protein_precur_quanted', 'preq', 'protein_acc')])
+            selectmap.update({field: i + selectfieldcount for i, field in enumerate(['preq_fnid', 'preq_val'])})
+            selectfieldcount = max(selectmap.values()) + 1
+        sql = 'SELECT {} FROM protein_quanted AS pq'.format(', '.join(selects))
+        if joins:
+            sql = '{} {}'.format(sql, ' '.join(['JOIN {} AS {} USING({})'.format(j[0], j[1], j[2]) for j in joins]))
+        return sql, selectmap
+
+    def get_merged_proteins(self, sql):
         cursor = self.get_cursor()
         cursor.execute(sql)
         return cursor
@@ -59,14 +64,14 @@ class ProtTableDB(ResultLookupInterface):
     def get_quantchannel_headerfields(self):
         cursor = self.get_cursor()
         cursor.execute(
-            'SELECT prottable_file, channel_name, amount_psms_name '
+            'SELECT prottable_id, channel_name, amount_psms_name '
             'FROM protquant_channels')
         return cursor
 
     def get_precursorquant_headerfields(self):
         cursor = self.get_cursor()
         cursor.execute(
-            'SELECT DISTINCT prottable_file'
+            'SELECT DISTINCT prottable_id '
             'FROM protein_precur_quanted')
         return cursor
 
