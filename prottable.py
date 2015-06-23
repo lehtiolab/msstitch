@@ -6,7 +6,8 @@ prottable -- Creating and modifying protein tables
 
 import argparse
 import os
-import app.drivers.prottable as drivers
+import app.drivers.prottable as driver
+from app.drivers.prottable import probability, info, merge, precursorarea
 
 
 def parser_file_exists(currentparser, fn):
@@ -37,8 +38,12 @@ parser.add_argument('-c', dest='command', type=str,
                     'with --dbfile, --proteindata, --precursor, --isobaric\n'
                     'but NOT with -i.\n\n'
                     'addms1quant - Add MS1 quantification data from a\n'
-                    'peptide table containing precursor quant areas. Needs\n'
-                    '--psmtable.',
+                    'PSM table containing precursor quant areas. Needs\n'
+                    '--psmtable.\n\n'
+                    'addprob - Add protein probabilities from a\n'
+                    'peptide table posterior error probabilities. Needs\n'
+                    '--peptable, and probabilities are calculated \n'
+                    'as in Nesvizhskii et al. (2003) Anal.Chem., eq 3.',
                     required=True
                     )
 parser.add_argument('-i', dest='infile',
@@ -56,6 +61,10 @@ parser.add_argument('--psmtable', dest='pepfile', help='PSM table file '
                     'containing data for protein table, for example precursor '
                     'area amounts.',
                     type=lambda x: parser_file_exists(parser, x))
+parser.add_argument('--peptable', dest='pepfile', help='Peptide table file '
+                    'containing data for protein table, for example '
+                    'peptide probabilities.',
+                    type=lambda x: parser_file_exists(parser, x))
 parser.add_argument('--proteindata', dest='proteindata', help='Include '
                     'protein group data such as coverage in output. Flag.',
                     action='store_const', default=False, const=True)
@@ -69,9 +78,10 @@ parser.add_argument('--isobaric', dest='isobaric', help='Build protein '
 args = parser.parse_args()
 
 commandmap = {
-    'addprotdata': drivers.AddProteinInfoDriver,
-    'buildquant': drivers.BuildProteinTableDriver,
-    'addms1quant': drivers.AddPrecursorAreaDriver,
+    'addprotdata': info.AddProteinInfoDriver,
+    'buildquant': merge.BuildProteinTableDriver,
+    'addms1quant': precursorarea.AddPrecursorAreaDriver,
+    'addprob': probability.AddProteinProbability,
     #'createprottable': drivers.CreateProteinTableDriver,
 }
 
