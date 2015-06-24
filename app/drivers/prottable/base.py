@@ -11,18 +11,18 @@ class ProttableDriver(BaseDriver):
         self.protdata = kwargs.get('proteindata', False)
         self.precursorarea = False
         self.prottable_filenames = False
-        self.quantchannels = None
+        self.quantchannels = False 
         self.oldheader = None
         self.probability = False
 
     def run(self):
         self.initialize_input()
-        self.initialize_output()
+        self.create_header()
         self.set_protein_generator()
         self.write()
         self.finish()
 
-    def initialize_output(self):
+    def create_header(self):
         self.header = preparation.get_header(self.oldheader,
                                              self.quantchannels, self.protdata,
                                              self.prottable_filenames,
