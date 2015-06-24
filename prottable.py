@@ -57,7 +57,7 @@ parser.add_argument('--dbfile', dest='lookup', help='Protein group '
                     'lookup database in SQLite format. Can be created using '
                     'mslookup.py command.',
                     type=lambda x: parser_file_exists(parser, x))
-parser.add_argument('--psmtable', dest='pepfile', help='PSM table file '
+parser.add_argument('--psmtable', dest='psmfile', help='PSM table file '
                     'containing data for protein table, for example precursor '
                     'area amounts.',
                     type=lambda x: parser_file_exists(parser, x))

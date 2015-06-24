@@ -9,7 +9,7 @@ class AddPrecursorAreaDriver(ProttableDriver):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.precursorarea = True
-        self.pepfile = kwargs.get('pepfile', False)
+        self.pepfile = kwargs.get('psmfile', False)
 
     def initialize_input(self):
         super().initialize_input()
