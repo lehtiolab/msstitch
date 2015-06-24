@@ -22,7 +22,7 @@ class BuildProteinTableDriver(ProttableDriver):
     def initialize_output(self):
         """Defines quantchannels from lookup table for header"""
         self.quantchannels = preparation.get_quantchannels(self.lookup)
-        self.precursor_filenames = preparation.get_precursorquant_headerfields(self.lookup)
+        self.prottable_filenames = preparation.get_precursorquant_headerfields(self.lookup)
         super().initialize_output()
 
     def initialize_input(self):

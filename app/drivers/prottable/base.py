@@ -10,7 +10,7 @@ class ProttableDriver(BaseDriver):
         super().__init__(**kwargs)
         self.protdata = kwargs.get('proteindata', False)
         self.precursorarea = False
-        self.precursor_filenames = None
+        self.prottable_filenames = False
         self.quantchannels = None
         self.oldheader = None
         self.probability = False
@@ -29,7 +29,7 @@ class ProttableDriver(BaseDriver):
     def initialize_output(self):
         self.header = preparation.get_header(self.oldheader,
                                              self.quantchannels, self.protdata,
-                                             self.precursor_filenames,
+                                             self.prottable_filenames,
                                              self.precursorarea, self.probability)
 
 
