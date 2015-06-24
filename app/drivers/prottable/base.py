@@ -1,5 +1,6 @@
 from app.readers import tsv as reader
 from app.actions.prottable import old as preparation
+from app.actions.prottable import headers
 from app.writers import prottable as writers
 from app.drivers.base import BaseDriver
 
@@ -12,8 +13,9 @@ class ProttableDriver(BaseDriver):
         self.precursorarea = False
         self.prottable_filenames = False
         self.quantchannels = False 
-        self.oldheader = None
+        self.oldheader = False
         self.probability = False
+        self.samplepool = False
 
     def run(self):
         self.initialize_input()
@@ -23,10 +25,11 @@ class ProttableDriver(BaseDriver):
         self.finish()
 
     def create_header(self):
-        self.header = preparation.get_header(self.oldheader,
-                                             self.quantchannels, self.protdata,
-                                             self.prottable_filenames,
-                                             self.precursorarea, self.probability)
+        self.header = headers.get_header(self.oldheader,
+                                         self.quantchannels, self.protdata,
+                                         self.prottable_filenames,
+                                         self.precursorarea, self.probability,
+                                         self.samplepool)
 
     def write(self):
         outfn = self.create_outfilepath(self.fn, self.outsuffix)
@@ -43,4 +46,3 @@ class ProttableMergeDriver(ProttableDriver):
     def initialize_input(self):
         self.quantchannels = preparation.get_quantchannels(self.lookup)
         self.prottable_filenames = preparation.get_precursorquant_headerfields(self.lookup)
-

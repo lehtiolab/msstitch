@@ -1,4 +1,5 @@
 from app.readers import tsv as tsvreader
+from app.actions.prottable.headers import build_pool_header_field
 from app.dataformats import prottable as prottabledata
 from app.dataformats import mzidtsv as mzidtsvdata
 
@@ -40,8 +41,8 @@ def add_ms1_quant_from_top3_mzidtsv(proteins, psms):
 def get_quantchannels(pqdb):
     quantheader = []
     for fn, chan_name, amnt_psms_name in pqdb.get_quantchannel_headerfields():
-        quantheader.append(build_quantchan_header_field(fn, chan_name))
-        quantheader.append(build_quantchan_header_field(fn, amnt_psms_name))
+        quantheader.append(build_pool_header_field(fn, chan_name))
+        quantheader.append(build_pool_header_field(fn, amnt_psms_name))
     return sorted(quantheader)
 
 
@@ -49,67 +50,14 @@ def get_precursorquant_headerfields(pqdb):
     return pqdb.get_precursorquant_headerfields()
 
 
-def build_quantchan_header_field(fn, channame):
-    return '{}_{}'.format(fn, channame)
-
-
-def get_header(oldheader=False, quant_psm_channels=False, addprotein_data=False,
-               prottable_filenames=False, precursorarea=False, probability=False):
-    if not oldheader:
-        header = [prottabledata.HEADER_PROTEIN]
-    else:
-        header = oldheader[:]
-    if quant_psm_channels:
-        header.extend(quant_psm_channels)
-    if addprotein_data:
-        header = get_header_with_proteindata(header, prottable_filenames)
-    if prottable_filenames or precursorarea:
-        header = get_header_with_precursorarea(header, prottable_filenames)
-    if probability:
-        header = get_header_with_prot_probability(header, prottable_filenames)
-    return header
-
-
-def get_header_with_proteindata(header):
-    ix = header.index(prottabledata.HEADER_PROTEIN) + 1
-    new_data = [prottabledata.HEADER_DESCRIPTION,
-                prottabledata.HEADER_COVERAGE,
-                prottabledata.HEADER_NO_PROTEIN,
-                prottabledata.HEADER_NO_UNIPEP,
-                prottabledata.HEADER_NO_PEPTIDE,
-                prottabledata.HEADER_NO_PSM,
-                #prottabledata.HEADER_NO_QUANT_PSM,
-                #prottabledata.HEADER_CV_QUANT_PSM,
-                ]
-    return header[:ix] + new_data + header[ix:]
-
-
-def get_header_with_prot_probability(header, fns=False):
-    ix = header.index(prottabledata.HEADER_PROTEIN) + 1
-    if fns:
-        new_data = [build_quantchan_header_field(fn, prottabledata.HEADER_PROBABILITY) for fn in fns]
-    else:
-        new_data = [prottabledata.HEADER_PROBABILITY]
-    return header[:ix] + new_data + header[ix:]
-
-
-def get_header_with_precursorarea(header, fns=False):
-    ix = header.index(prottabledata.HEADER_PROTEIN) + 1
-    if fns:
-        quant_fields = [build_quantchan_header_field(fn, prottabledata.HEADER_AREA) for fn in fns]
-    else:
-        quant_fields = [prottabledata.HEADER_AREA]
-    return header[:ix] + quant_fields + header[ix:]
-
-
 def get_isobaric_quant(protein):
-    quantheadfield = build_quantchan_header_field(protein[2], protein[1])
-    amntpsm_headfld = build_quantchan_header_field(protein[2], protein[3])
+    quantheadfield = build_pool_header_field(protein[2], protein[1])
+    amntpsm_headfld = build_pool_header_field(protein[2], protein[3])
     return {quantheadfield: protein[4], amntpsm_headfld: protein[5]}
 
 
 def get_precursor_quant(protein):
-    quantheadfield = build_quantchan_header_field(protein[-2],
+    quantheadfield = build_pool_header_field(protein[-2],
                                                   prottabledata.HEADER_AREA)
     return {quantheadfield: protein[-1]}
 
