@@ -5,8 +5,9 @@ def build_proteintable(pqdb, header, isobaric=False, precursor=False, probabilit
     """Fetches proteins and quants from joined lookup table, loops through
     them and when all of a protein's quants have been collected, yields the
     protein quant information."""
-    iso_quant_map = {True: get_isobaric_quant, False: lambda x: {}}
-    ms1_quant_map = {True: get_precursor_quant, False: lambda x: {}}
+    iso_quant_map = {True: get_isobaric_quant, False: lambda x, y, z: {}}
+    ms1_quant_map = {True: get_precursor_quant, False: lambda x, y, z: {}}
+    prob_map = {True: get_prot_probability, False: lambda x, y, z: {}}
     inv_prottable_map = get_inverted_prottable_map(pqdb)
     protein_sql, sqlfieldmap = pqdb.prepare_mergetable_sql(precursor, isobaric, probability)
     proteins = pqdb.get_merged_proteins(protein_sql)
