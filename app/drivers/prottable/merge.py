@@ -34,4 +34,5 @@ class BuildProteinTableDriver(ProttableDriver):
         self.proteins = preparation.build_proteintable(self.lookup,
                                                        self.header,
                                                        self.isobaric,
-                                                       self.precursorarea)
+                                                       self.precursorarea,
+                                                       self.probability)

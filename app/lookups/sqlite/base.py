@@ -83,7 +83,7 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                           'REFERENCES protein_tables(prottable_id)'
                                           ],
                    'protein_probability': ['protein_acc TEXT',
-                                           'prottable_id TEXT',
+                                           'prottable_id INTEGER',
                                            'probability DOUBLE',
                                            'FOREIGN KEY(protein_acc) '
                                            'REFERENCES proteins(protein_acc) '

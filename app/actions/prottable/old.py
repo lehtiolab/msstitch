@@ -83,9 +83,12 @@ def get_header_with_proteindata(header):
     return header[:ix] + new_data + header[ix:]
 
 
-def get_header_with_prot_probability(header):
+def get_header_with_prot_probability(header, fns=False):
     ix = header.index(prottabledata.HEADER_PROTEIN) + 1
-    new_data = [prottabledata.HEADER_PROBABILITY]
+    if fns:
+        new_data = [build_quantchan_header_field(fn, prottabledata.HEADER_PROBABILITY) for fn in fns]
+    else:
+        new_data = [prottabledata.HEADER_PROBABILITY]
     return header[:ix] + new_data + header[ix:]
 
 

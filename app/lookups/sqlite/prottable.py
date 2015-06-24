@@ -51,6 +51,12 @@ class ProtTableDB(ResultLookupInterface):
             joins.extend([('protein_precur_quanted', 'preq', 'protein_acc')])
             selectmap.update({field: i + selectfieldcount for i, field in enumerate(['preq_fnid', 'preq_val'])})
             selectfieldcount = max(selectmap.values()) + 1
+        if probability:
+            selects.extend(['pprob.prottable_id', 'pprob.probability'])
+            joins.extend([('protein_probability', 'pprob', 'protein_acc')])
+            selectmap.update({field: i + selectfieldcount for i, field in enumerate(['prob_fnid', 'prob_val'])})
+            selectfieldcount = max(selectmap.values()) + 1
+           
         sql = 'SELECT {} FROM protein_quanted AS pq'.format(', '.join(selects))
         if joins:
             sql = '{} {}'.format(sql, ' '.join(['JOIN {} AS {} USING({})'.format(j[0], j[1], j[2]) for j in joins]))

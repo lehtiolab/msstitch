@@ -15,6 +15,7 @@ def build_proteintable(pqdb, header, isobaric=False, precursor=False, probabilit
     outprotein = {prottabledata.HEADER_PROTEIN: protein[sqlfieldmap['p_acc']]}
     outprotein.update(iso_quant_map[isobaric](protein, sqlfieldmap, inv_prottable_map))
     outprotein.update(ms1_quant_map[precursor](protein, sqlfieldmap, inv_prottable_map))
+    outprotein.update(prob_map[probability](protein, sqlfieldmap, inv_prottable_map))
     for protein in proteins:
         if protein[sqlfieldmap['p_acc']] != outprotein[prottabledata.HEADER_PROTEIN]:
             yield parse_NA(next(add_protein_data([outprotein], pqdb)), header)
@@ -80,6 +81,12 @@ def get_precursor_quant(protein, sqlmap, prottable_map):
     fn = prottable_map[protein[sqlmap['preq_fnid']]]
     quantheadfield = build_quantchan_header_field(fn, prottabledata.HEADER_AREA)
     return {quantheadfield: protein[sqlmap['preq_val']]}
+
+
+def get_prot_probability(protein, sqlmap, prottable_map):
+    fn = prottable_map[protein[sqlmap['prob_fnid']]]
+    headfield = build_quantchan_header_field(fn, prottabledata.HEADER_PROBABILITY)
+    return {headfield: protein[sqlmap['prob_val']]}
 
 
 def get_precursorquant_headerfields(pqdb):
