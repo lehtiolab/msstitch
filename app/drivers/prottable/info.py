@@ -9,7 +9,9 @@ class AddProteinInfoDriver(ProttableDriver):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.protdata = True
+        self.samplepool = kwargs.get('samplepool', False)
 
     def set_protein_generator(self):
         self.proteins = preparation.add_protein_data(self.in_proteins,
-                                                     self.lookup)
+                                                     self.lookup,
+                                                     self.samplepool)

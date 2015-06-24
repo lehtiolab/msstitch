@@ -18,22 +18,29 @@ class ProtTableDB(ResultLookupInterface):
             'amount_psms_name) VALUES (?, ?, ?)',
             quantchannels)
 
-    def get_protein_data(self, protein_acc):
-        fields = ['psm.psm_id', 'psm.sequence', 'pgc.master',
-                  'pgc.protein_acc', 'pcov.coverage', 'pd.description']
-        joins = [('psm_protein_groups', 'ppg', 'master'),
-                 ('protein_coverage', 'pcov', 'protein_acc'),
-                 ('prot_desc', 'pd', 'protein_acc'),
+    def get_all_protein_psms_with_sets(self):
+        fields = ['ppg.master', 'sets.set_name',
+                  'psm.sequence', 'psm.psm_id',
+#                  'pgc.protein_acc', 'pcov.coverage', 'pd.description'
+                  ]
+        joins = [#('psm_protein_groups', 'ppg', 'master'),
                  ('psms', 'psm', 'psm_id'),
+                 ('mzml', 'sp', 'spectra_id'),
+                 ('mzmlfiles', 'mzfn', 'mzmlfile_id'),
+                 ('biosets', 'sets', 'set_id'),
+#                 ('protein_coverage', 'pcov', 'protein_acc'),
+#                 ('prot_desc', 'pd', 'protein_acc'),
                  ]
-        join_sql = '\n'.join(['JOIN {0} AS {1} USING({2})'.format(
+        sql = 'SELECT {} FROM psm_protein_groups AS ppg'.format(', '.join(fields))
+        join_sql = ' '.join(['JOIN {} AS {} USING({})'.format(
             j[0], j[1], j[2]) for j in joins])
-        sql = ('SELECT {0} FROM protein_group_content AS pgc {1}'
-               'WHERE protein_acc="{2}"'.format(', '.join(fields),
-                                                join_sql,
-                                                protein_acc))
+        sql = '{} {} ORDER BY ppg.master, sets.set_name'.format(sql, join_sql)
+#        sql = ('SELECT {0} FROM protein_group_content AS pgc {1}'
+#               'WHERE protein_acc="{2}"'.format(', '.join(fields),
+#                                                join_sql,
+#                                                protein_acc))
         cursor = self.get_cursor()
-        return cursor.execute(sql).fetchall()
+        return cursor.execute(sql)
 
     def prepare_mergetable_sql(self, precursor=False, isobaric=False, probability=False):
         selects = ['pq.protein_acc']
