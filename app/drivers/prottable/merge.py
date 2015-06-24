@@ -1,10 +1,10 @@
 import os
 
 from app.actions.prottable import merge as preparation
-from app.drivers.prottable.base import ProttableDriver
+from app.drivers.prottable.base import ProttableMergeDriver
 
 
-class BuildProteinTableDriver(ProttableDriver):
+class BuildProteinTableDriver(ProttableMergeDriver):
     outsuffix = ''
     lookuptype = 'prottable'
 
@@ -18,16 +18,6 @@ class BuildProteinTableDriver(ProttableDriver):
         self.isobaric = kwargs.get('isobaric', False)
         self.precursorarea = kwargs.get('precursor', False)
         self.probability = True
-
-    def initialize_output(self):
-        """Defines quantchannels from lookup table for header"""
-        self.quantchannels = preparation.get_quantchannels(self.lookup)
-        self.prottable_filenames = preparation.get_precursorquant_headerfields(self.lookup)
-        super().initialize_output()
-
-    def initialize_input(self):
-        """Not using input protein tables"""
-        pass
 
     def set_protein_generator(self):
         """Generates proteins with quant from the lookup table"""

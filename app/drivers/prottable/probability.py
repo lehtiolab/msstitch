@@ -1,9 +1,9 @@
-from app.drivers.prottable.base import ProttableDriver
+from app.drivers.prottable.base import ProttableAddData
 from app.actions.prottable import probability as preparation
 from app.readers import tsv as reader
 
 
-class AddProteinProbability(ProttableDriver):
+class AddProteinProbability(ProttableAddData):
     outsuffix = '_protprob.txt'
 
     def __init__(self, **kwargs):

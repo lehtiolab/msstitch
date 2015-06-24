@@ -1,8 +1,8 @@
 from app.actions.prottable import info as preparation
-from app.drivers.prottable.base import ProttableDriver
+from app.drivers.prottable.base import ProttableAddData
 
 
-class AddProteinInfoDriver(ProttableDriver):
+class AddProteinInfoDriver(ProttableAddData):
     outsuffix = '_proteindata.txt'
     lookuptype = 'prottable'
 

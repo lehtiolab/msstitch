@@ -22,17 +22,25 @@ class ProttableDriver(BaseDriver):
         self.write()
         self.finish()
 
-    def initialize_input(self):
-        self.oldheader = reader.get_tsv_header(self.fn)
-        self.in_proteins = reader.generate_tsv_proteins(self.fn, self.oldheader)
-
     def initialize_output(self):
         self.header = preparation.get_header(self.oldheader,
                                              self.quantchannels, self.protdata,
                                              self.prottable_filenames,
                                              self.precursorarea, self.probability)
 
-
     def write(self):
         outfn = self.create_outfilepath(self.fn, self.outsuffix)
         writers.write_prottable(self.header, self.proteins, outfn)
+
+
+class ProttableAddData(ProttableDriver):
+    def initialize_input(self):
+        self.oldheader = reader.get_tsv_header(self.fn)
+        self.in_proteins = reader.generate_tsv_proteins(self.fn, self.oldheader)
+
+
+class ProttableMergeDriver(ProttableDriver):
+    def initialize_input(self):
+        self.quantchannels = preparation.get_quantchannels(self.lookup)
+        self.prottable_filenames = preparation.get_precursorquant_headerfields(self.lookup)
+

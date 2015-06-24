@@ -1,9 +1,9 @@
 from app.readers import tsv as reader
 from app.actions.prottable import precursorarea as preparation
-from app.drivers.prottable.base import ProttableDriver
+from app.drivers.prottable.base import ProttableAddData
 
 
-class AddPrecursorAreaDriver(ProttableDriver):
+class AddPrecursorAreaDriver(ProttableAddData):
     outsuffix = '_ms1q.txt'
 
     def __init__(self, **kwargs):
