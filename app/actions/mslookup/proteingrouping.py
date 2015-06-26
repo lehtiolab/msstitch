@@ -87,30 +87,52 @@ def build_content_db(pgdb):
     for master, masterpsm in all_master_psms:
         # outer loop gets all master PSMs
         if master != lastpsmmaster:
-            for contentmaster, contentpsm, protein, pepseq, score in \
-                    all_master_psm_proteins:
-                # Inner loop gets protein group content from DB join table
-                if contentmaster != lastcontentmaster:
-                    p_group = filter_proteins_with_missing_psms(content,
-                                                                master_psms)
-                    lastcontentmaster, content = contentmaster, dict()
-                    content = add_protein_psm_to_pre_proteingroup(content,
-                                                                  protein,
-                                                                  pepseq,
-                                                                  contentpsm,
-                                                                  score)
-                    break
-                content = add_protein_psm_to_pre_proteingroup(content, protein,
-                                                              pepseq,
-                                                              contentpsm,
-                                                              score)
-            protein_groups.extend(get_protein_group_content(p_group,
-                                                            lastpsmmaster))
+            lastcontentmaster, pgroup, content = fetch_pg_content(
+                all_master_psm_proteins, lastcontentmaster, lastpsmmaster,
+                content, master_psms)
+            protein_groups.extend(pgroup)
+
             master_psms = set()
             lastpsmmaster = master
         master_psms.add(masterpsm)
+    lastcontentmaster, pgroup, content = fetch_pg_content(
+        all_master_psm_proteins, lastcontentmaster,
+        lastpsmmaster, content, master_psms)
+    protein_groups.extend(pgroup)
     pgdb.store_protein_group_content(protein_groups)
     pgdb.index_protein_group_content()
+
+
+def fetch_pg_content(all_master_psm_proteins, lastcontentmaster, psmmaster,
+                     content, master_psms):
+    for contentmaster, contentpsm, protein, pepseq, score in \
+            all_master_psm_proteins:
+        # Inner loop gets protein group content from DB join table
+        if contentmaster != lastcontentmaster:
+            p_group = filter_proteins_with_missing_psms(content,
+                                                        master_psms)
+            lastcontentmaster, content = contentmaster, dict()
+            content = add_protein_psm_to_pre_proteingroup(content,
+                                                          protein,
+                                                          pepseq,
+                                                          contentpsm,
+                                                          score)
+            filtered = True
+            break
+        filtered = False
+        content = add_protein_psm_to_pre_proteingroup(content, protein,
+                                                      pepseq,
+                                                      contentpsm,
+                                                      score)
+    # The last protein-psm will not be caught by the if statement and thus
+    # will there be one missing. But the break-construction makes that breaking
+    # from the loop and loop exiting with StopIteration will both come to the
+    # same point. Therefore we check if filtering has occurred before returning
+    if not filtered:
+        p_group = filter_proteins_with_missing_psms(content,
+                                                    master_psms)
+    pgroup_out = get_protein_group_content(p_group, psmmaster)
+    return lastcontentmaster, pgroup_out, content
 
 
 def add_protein_psm_to_pre_proteingroup(prepgmap, protein, pepseq,
