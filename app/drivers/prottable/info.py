@@ -8,10 +8,11 @@ class AddProteinInfoDriver(ProttableAddData):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.protdata = True
-        self.samplepool = kwargs.get('samplepool', False)
+        self.headertypes = ['proteindata']
+        self.poolnames = [kwargs.get('setname')]
 
     def set_protein_generator(self):
         self.proteins = preparation.add_protein_data(self.in_proteins,
                                                      self.lookup,
-                                                     self.samplepool)
+                                                     self.headerfields,
+                                                     )

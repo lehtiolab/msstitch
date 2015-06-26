@@ -23,7 +23,7 @@ def count_peps_psms(proteindata, p_acc, pool):
     proteindata[p_acc][pool]['peptides'] = len(data['peptides'])
 
 
-def add_protein_data(proteins, pgdb, pool_to_output=False):
+def add_protein_data(proteins, pgdb, headerfields, pool_to_output=False):
     """First creates a map with all master proteins with data,
     then outputs protein data dicts for rows of a tsv. If a pool
     is given then only output for that pool will be shown in the
@@ -46,12 +46,16 @@ def add_protein_data(proteins, pgdb, pool_to_output=False):
     for protein in proteins:
         outprotein = {k: v for k, v in protein.items()}
         protein_acc = protein[prottabledata.HEADER_PROTEIN]
-        outprotein.update(get_protein_data(proteindata, protein_acc, pool_to_output))
+        if not protein_acc in proteindata:
+            continue
+        outprotein.update(get_protein_data(proteindata, protein_acc, headerfields))
         outprotein = {k: str(v) for k, v in outprotein.items()}
         yield outprotein
 
 
-def get_protein_data(proteindata, p_acc, singlepool=False):
+def get_protein_data(proteindata, p_acc, headerfields):
+    """Parses protein data for a certain protein into tsv output
+    dictionary"""
     description = 'na'
     coverage = 'na'
     unipepcount = 'na'
@@ -61,25 +65,17 @@ def get_protein_data(proteindata, p_acc, singlepool=False):
                prottabledata.HEADER_NO_PEPTIDE,
                prottabledata.HEADER_NO_PSM,
                ]
-    if not singlepool:
-        hfields = ['{}_{}'.format(pool, hfield)
-                   for (pool, hfield) in zip(proteindata[p_acc].keys(), hfields)]
     for pool, pdata in proteindata[p_acc].items():
         pepcount = pdata['peptides']
         psmcount = pdata['psms']
         pool_values = [unipepcount, pepcount, psmcount]
-        outdict.update({hfield: val for (hfield, val) in zip(hfields, pool_values)})
+        outdict.update({headerfields['proteindata'][hfield][pool]: val
+                        for (hfield, val) in zip(hfields, pool_values)})
     outdict.update({prottabledata.HEADER_DESCRIPTION: description,
                     prottabledata.HEADER_COVERAGE: coverage,
                     prottabledata.HEADER_NO_PROTEIN: proteincount,
                     })
     return outdict
-##            prottabledata.HEADER_NO_PROTEIN: proteincount,
-##            prottabledata.HEADER_NO_UNIPEP: unipepcount,
-##            prottabledata.HEADER_NO_PEPTIDE: pepcount,
-##            prottabledata.HEADER_NO_PSM: psmcount,
-##            }
-    
 
 
 def old_get_protein_data(protein_acc):

@@ -19,11 +19,11 @@ class ProtTableDB(ResultLookupInterface):
             quantchannels)
 
     def get_all_protein_psms_with_sets(self):
-        fields = ['ppg.master', 'sets.set_name',
+        fields = ['pgm.protein_acc', 'sets.set_name',
                   'psm.sequence', 'psm.psm_id',
 #                  'pgc.protein_acc', 'pcov.coverage', 'pd.description'
                   ]
-        joins = [#('psm_protein_groups', 'ppg', 'master'),
+        joins = [('psm_protein_groups', 'ppg', 'master_id'),
                  ('psms', 'psm', 'psm_id'),
                  ('mzml', 'sp', 'spectra_id'),
                  ('mzmlfiles', 'mzfn', 'mzmlfile_id'),
@@ -31,10 +31,10 @@ class ProtTableDB(ResultLookupInterface):
 #                 ('protein_coverage', 'pcov', 'protein_acc'),
 #                 ('prot_desc', 'pd', 'protein_acc'),
                  ]
-        sql = 'SELECT {} FROM psm_protein_groups AS ppg'.format(', '.join(fields))
+        sql = 'SELECT {} FROM protein_group_master AS pgm'.format(', '.join(fields))
         join_sql = ' '.join(['JOIN {} AS {} USING({})'.format(
             j[0], j[1], j[2]) for j in joins])
-        sql = '{} {} ORDER BY ppg.master, sets.set_name'.format(sql, join_sql)
+        sql = '{} {} ORDER BY pgm.protein_acc, sets.set_name'.format(sql, join_sql)
 #        sql = ('SELECT {0} FROM protein_group_content AS pgc {1}'
 #               'WHERE protein_acc="{2}"'.format(', '.join(fields),
 #                                                join_sql,
@@ -72,13 +72,6 @@ class ProtTableDB(ResultLookupInterface):
     def get_merged_proteins(self, sql):
         cursor = self.get_cursor()
         cursor.execute(sql)
-        return cursor
-
-    def get_quantchannel_headerfields(self):
-        cursor = self.get_cursor()
-        cursor.execute(
-            'SELECT prottable_id, channel_name, amount_psms_name '
-            'FROM protquant_channels')
         return cursor
 
     def get_precursorquant_headerfields(self):
