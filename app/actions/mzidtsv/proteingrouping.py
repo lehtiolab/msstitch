@@ -21,8 +21,6 @@ def generate_psms_with_proteingroups(fn, oldheader, newheader, pgdb, confkey,
     all_protein_group_content = pgdb.get_all_psms_proteingroups(coverage)
     protein = next(all_protein_group_content)
     for psm in tsvreader.generate_tsv_psms(fn, oldheader):
-        #if rownr % 10000 == 0 and rownr != 0:
-        #    break
         if not conffilt.passes_filter(psm, conflvl, confkey, lower_is_better):
             rownr += 1
             continue

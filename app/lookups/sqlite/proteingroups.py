@@ -1,6 +1,8 @@
 from app.lookups.sqlite.base import ResultLookupInterface
 
 
+# Indices that belong to positions of these features in output from 
+# function get_all_psms_proteingroups:
 MASTER_INDEX = 1
 PROTEIN_ACC_INDEX = 2
 PEPTIDE_COUNT_INDEX = 3
@@ -77,13 +79,10 @@ class ProteinGroupDB(ResultLookupInterface):
         cur.executemany(sql, new_masters)
         self.conn.commit()
 
-    def get_master_ids(self, invert=False):
+    def get_master_ids(self):
         cur = self.get_cursor()
         cur.execute('SELECT protein_acc, master_id FROM protein_group_master')
-        if invert:
-            return {p_acc: master_id for (p_acc, master_id) in cur}
-        else:
-            return {master_id: p_acc for (p_acc, master_id) in cur}
+        return {p_acc: master_id for (p_acc, master_id) in cur}
 
     def store_coverage(self, coverage):
         cursor = self.get_cursor()
@@ -147,10 +146,12 @@ class ProteinGroupDB(ResultLookupInterface):
 
     def get_master_contentproteins_psms(self):
         sql = ('SELECT ppg.master_id, ppg.psm_id, pp.protein_acc, p.sequence, '
-               'p.score '
+               'p.score, pev.evidence_lvl, pc.coverage '
                'FROM psm_protein_groups AS ppg '
                'JOIN protein_psm AS pp USING(psm_id) '
                'JOIN psms AS p USING(psm_id) '
+               'JOIN protein_evidence AS pev USING(protein_acc) '
+               'JOIN protein_coverage AS pc USING(protein_acc) '
                'ORDER BY ppg.master_id'
                )
         cursor = self.get_cursor()
@@ -166,10 +167,11 @@ class ProteinGroupDB(ResultLookupInterface):
                 for master, psm in cursor.execute(sql).fetchall())
 
     def get_all_psms_proteingroups(self, coverage):
-        fields = ['pr.rownr', 'ppg.master_id', 'pgc.protein_acc',
+        fields = ['pr.rownr', 'pgm.protein_acc', 'pgc.protein_acc',
                   'pgc.peptide_count', 'pgc.psm_count', 'pgc.protein_score',
                   'pev.evidence_lvl']
         joins = [('psm_protein_groups', 'ppg', 'psm_id'),
+                 ('protein_group_master', 'pgm', 'master_id'),
                  ('protein_group_content', 'pgc', 'master_id'),
                  ('protein_evidence', 'pev', 'protein_acc')]
         if coverage:

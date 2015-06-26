@@ -78,11 +78,12 @@ def build_content_db(pgdb, coverage):
     all_master_psm_proteins = pgdb.get_master_contentproteins_psms()
     all_master_psms = pgdb.get_all_master_psms()
     lastpsmmaster, masterpsm = next(all_master_psms)
-    lastcontentmaster, contentpsm, protein, pepseq, score = next(
-        all_master_psm_proteins)
     master_psms = {masterpsm}
+    (lastcontentmaster, contentpsm, protein, 
+     pepseq, score, evid, cover) = next(all_master_psm_proteins)
     content = add_protein_psm_to_pre_proteingroup(dict(), protein, pepseq,
-                                                  contentpsm, score)
+                                                  contentpsm, score, evid,
+                                                  cover)
     protein_groups = []
     new_masters = {}
     for master, masterpsm in all_master_psms:
@@ -91,20 +92,21 @@ def build_content_db(pgdb, coverage):
             lastcontentmaster, pgroup, content = fetch_pg_content(
                 all_master_psm_proteins, lastcontentmaster, lastpsmmaster,
                 content, master_psms)
-            protein_groups.extend(pgroup)
-
             new_master = sorters.sort_to_get_master(pgroup, coverage)
             new_masters[new_master['master_id']] = new_master['protein_acc']
+            pgroup = [[pg[2], pg[1], pg[3], pg[4], pg[5]] for pg in pgroup]
+            protein_groups.extend(pgroup)
             master_psms = set()
             lastpsmmaster = master
         master_psms.add(masterpsm)
     lastcontentmaster, pgroup, content = fetch_pg_content(
         all_master_psm_proteins, lastcontentmaster,
         lastpsmmaster, content, master_psms)
-    protein_groups.extend(pgroup)
     new_master = sorters.sort_to_get_master(pgroup, coverage)
     new_masters[new_master['master_id']] = new_master['protein_acc']
     new_masters = ((acc, mid) for mid, acc in new_masters.items())
+    pgroup = [[pg[2], pg[1], pg[3], pg[4], pg[5]] for pg in pgroup]
+    protein_groups.extend(pgroup)
     pgdb.update_master_proteins(new_masters)
     pgdb.store_protein_group_content(protein_groups)
     pgdb.index_protein_group_content()
@@ -112,8 +114,8 @@ def build_content_db(pgdb, coverage):
 
 def fetch_pg_content(all_master_psm_proteins, lastcontentmaster, psmmaster,
                      content, master_psms):
-    for contentmaster, contentpsm, protein, pepseq, score in \
-            all_master_psm_proteins:
+    for (contentmaster, contentpsm, protein, pepseq, 
+         score, evid, cover) in all_master_psm_proteins:
         # Inner loop gets protein group content from DB join table
         if contentmaster != lastcontentmaster:
             p_group = filter_proteins_with_missing_psms(content,
@@ -123,14 +125,16 @@ def fetch_pg_content(all_master_psm_proteins, lastcontentmaster, psmmaster,
                                                           protein,
                                                           pepseq,
                                                           contentpsm,
-                                                          score)
+                                                          score,
+                                                          evid,
+                                                          cover)
             filtered = True
             break
         filtered = False
         content = add_protein_psm_to_pre_proteingroup(content, protein,
                                                       pepseq,
                                                       contentpsm,
-                                                      score)
+                                                      score, evid, cover)
     # The last protein-psm will not be caught by the if statement and thus
     # will there be one missing. But the break-construction makes that breaking
     # from the loop and loop exiting with StopIteration will both come to the
@@ -143,15 +147,15 @@ def fetch_pg_content(all_master_psm_proteins, lastcontentmaster, psmmaster,
 
 
 def add_protein_psm_to_pre_proteingroup(prepgmap, protein, pepseq,
-                                        psm_id, score):
-    score = float(score)
+                                        psm_id, score, evid, cover):
+    protpsm_unit = (psm_id, float(score), evid, cover)
     try:
-        prepgmap[protein][pepseq].add((psm_id, score))
+        prepgmap[protein][pepseq].add(protpsm_unit)
     except KeyError:
         try:
-            prepgmap[protein][pepseq] = {(psm_id, score)}
+            prepgmap[protein][pepseq] = {protpsm_unit}
         except KeyError:
-            prepgmap[protein] = {pepseq: {(psm_id, score)}}
+            prepgmap[protein] = {pepseq: {protpsm_unit}}
     return prepgmap
 
 
@@ -159,7 +163,7 @@ def filter_proteins_with_missing_psms(proteins, pg_psms):
     filtered_protein_map = {}
     for protein, protein_psms in proteins.items():
         filter_out = False
-        for psm_id, score in [psm for peptide in protein_psms.values()
+        for psm_id in [psm[0] for peptide in protein_psms.values()
                               for psm in peptide]:
             if psm_id not in pg_psms:
                 filter_out = True
@@ -246,9 +250,15 @@ def get_protein_group_content(pgmap, master):
     Returns a list of [protein, master, pep_hits, psm_hits, protein_score],
     which is ready to enter the DB table.
     """
-    pg_content = [[protein, master, len(peptides), len([psm for pgpsms in
+    # first item (0) is only a placeholder so the lookup.INDEX things get the
+    # correct number. Would be nice with a solution, but the INDEXes were 
+    # originally made for mzidtsv protein group adding.
+    pg_content = [[0, master, protein, len(peptides), len([psm for pgpsms in
                                                         peptides.values()
                                                         for psm in pgpsms]),
-                   sum([psm[1] for pgpsms in peptides.values() for psm in pgpsms])]
+                   sum([psm[1] for pgpsms in peptides.values() for psm in pgpsms]), # score
+                   next(iter(next(iter(peptides.values()))))[2], # evidence level
+                   next(iter(next(iter(peptides.values()))))[3] # coverage 
+                   ]
                   for protein, peptides in pgmap.items()]
     return pg_content
