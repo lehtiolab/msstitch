@@ -71,6 +71,12 @@ class ProteinGroupDB(ResultLookupInterface):
         self.conn.commit()
         self.index_column('psm_pg_index', 'psm_protein_groups', 'master_id')
 
+    def update_master_proteins(self, new_masters):
+        cur = self.get_cursor()
+        sql = 'UPDATE protein_group_master SET protein_acc=? WHERE master_id=?'
+        cur.executemany(sql, new_masters)
+        self.conn.commit()
+
     def get_master_ids(self, invert=False):
         cur = self.get_cursor()
         cur.execute('SELECT protein_acc, master_id FROM protein_group_master')

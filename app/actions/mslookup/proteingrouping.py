@@ -7,6 +7,7 @@ from collections import OrderedDict
 from app.readers import tsv as tsvreader
 from app.readers import fasta as fastareader
 from app.actions.mzidtsv import confidencefilters as conffilt
+from app.actions.mzidtsv import proteingroup_sorters as sorters
 
 
 def create_protein_pep_lookup(fn, header, pgdb, confkey, conflvl,
@@ -45,12 +46,11 @@ def create_protein_pep_lookup(fn, header, pgdb, confkey, conflvl,
     return allpsms
 
 
-def build_proteingroup_db(pgdb, allpsms,
-                          coverage):
+def build_proteingroup_db(pgdb, allpsms, coverage):
     build_master_db(pgdb, allpsms)
-    build_content_db(pgdb)
     if coverage:
         build_coverage(pgdb)
+    build_content_db(pgdb, coverage)
 
 
 def build_master_db(pgdb, allpsms):
@@ -74,7 +74,7 @@ def build_master_db(pgdb, allpsms):
     pgdb.store_masters(allmasters, psm_masters)
 
 
-def build_content_db(pgdb):
+def build_content_db(pgdb, coverage):
     all_master_psm_proteins = pgdb.get_master_contentproteins_psms()
     all_master_psms = pgdb.get_all_master_psms()
     lastpsmmaster, masterpsm = next(all_master_psms)
@@ -84,6 +84,7 @@ def build_content_db(pgdb):
     content = add_protein_psm_to_pre_proteingroup(dict(), protein, pepseq,
                                                   contentpsm, score)
     protein_groups = []
+    new_masters = {}
     for master, masterpsm in all_master_psms:
         # outer loop gets all master PSMs
         if master != lastpsmmaster:
@@ -92,6 +93,8 @@ def build_content_db(pgdb):
                 content, master_psms)
             protein_groups.extend(pgroup)
 
+            new_master = sorters.sort_to_get_master(pgroup, coverage)
+            new_masters[new_master['master_id']] = new_master['protein_acc']
             master_psms = set()
             lastpsmmaster = master
         master_psms.add(masterpsm)
@@ -99,6 +102,10 @@ def build_content_db(pgdb):
         all_master_psm_proteins, lastcontentmaster,
         lastpsmmaster, content, master_psms)
     protein_groups.extend(pgroup)
+    new_master = sorters.sort_to_get_master(pgroup, coverage)
+    new_masters[new_master['master_id']] = new_master['protein_acc']
+    new_masters = ((acc, mid) for mid, acc in new_masters.items())
+    pgdb.update_master_proteins(new_masters)
     pgdb.store_protein_group_content(protein_groups)
     pgdb.index_protein_group_content()
 
