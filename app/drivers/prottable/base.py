@@ -9,13 +9,11 @@ class ProttableDriver(BaseDriver):
     """Base class for prottable.py"""
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.protdata = kwargs.get('proteindata', False)
         self.precursorarea = False
         self.prottable_filenames = False
-        self.quantchannels = False 
         self.oldheader = False
         self.probability = False
-        self.samplepool = False
+        self.poolnames = False
 
     def run(self):
         self.initialize_input()
@@ -25,11 +23,9 @@ class ProttableDriver(BaseDriver):
         self.finish()
 
     def create_header(self):
-        self.header = headers.get_header(self.oldheader,
-                                         self.quantchannels, self.protdata,
-                                         self.prottable_filenames,
-                                         self.precursorarea, self.probability,
-                                         self.samplepool)
+        self.headerfields = headers.get_headerfields(self.headertypes, self.lookup,
+                                                     self.poolnames)
+        self.header = headers.generate_header(self.headerfields, self.oldheader)
 
     def write(self):
         outfn = self.create_outfilepath(self.fn, self.outsuffix)

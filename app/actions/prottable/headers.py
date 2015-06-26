@@ -1,51 +1,80 @@
-def get_header(oldheader=False, quant_psm_channels=False, addprotein_data=False,
-               prottable_filenames=False, precursorarea=False, probability=False):
+from app.dataformats import prottable as prottabledata
+
+
+def get_headerfields(headertypes, lookup=False, poolnames=False):
+    hfields = {}
+    type_functions = {'isoquant': get_isoquant_fields,
+                      'precursorquant': get_precursorquant_fields,
+                      'probability': get_probability_fields,
+                      'proteindata': get_proteininfo_fields,
+                      }
+    for fieldtype in headertypes:
+        hfields[fieldtype] = type_functions[fieldtype](lookup, poolnames) 
+    return hfields
+
+
+def get_header_field(field, poolnames=False):
+    if poolnames:
+        return {pool: '{}_{}'.format(pool, field) for pool in poolnames}
+    else:
+        return {None: field}
+
+
+def get_precursorquant_fields(pqdb=False, poolnames=False):
+    return get_header_field(prottabledata.HEADER_AREA, poolnames)
+
+
+def get_probability_fields(pqdb=False, poolnames=False):
+    return get_header_field(prottabledata.HEADER_PROBABILITY, poolnames)
+
+
+def get_proteininfo_fields(pqdb=False, poolnames=False):
+    """Returns header fields for protein (group) information.
+    Some fields are shared between pools, others are specific
+    for a pool"""
+    allfields = {}
+    basefields = [prottabledata.HEADER_DESCRIPTION,
+                  prottabledata.HEADER_COVERAGE,
+                  prottabledata.HEADER_NO_PROTEIN,
+                  ]
+    poolfields = [prottabledata.HEADER_NO_UNIPEP,
+                  prottabledata.HEADER_NO_PEPTIDE,
+                  prottabledata.HEADER_NO_PSM,
+                  ]
+    for field in basefields:
+        allfields[field] = get_header_field(field)
+    for field in poolfields:
+        allfields[field] = get_header_field(field, poolnames)
+    return allfields 
+
+
+def get_isoquant_fields(pqdb=False, poolnames=False):
+    """Returns a headerfield dict for isobaric quant channels. Channels are taken
+    from DB and there isn't a pool-independent version of this yet"""
+    quantheader = {}
+    for fn, chan_name, amnt_psms_name in pqdb.get_quantchannel_headerfields():
+        quantheader[channel] = get_header_field(chan_name, poolnames)
+        quantheader[amnt_psms_name] = get_header_field(amnt_psms_name, poolnames)
+    return quantheader 
+
+
+def generate_header(headerfields, oldheader=False):
     if not oldheader:
         header = [prottabledata.HEADER_PROTEIN]
     else:
         header = oldheader[:]
-    if quant_psm_channels:
-        header.extend(quant_psm_channels)
-    if addprotein_data:
-        header = get_header_with_proteindata(header, prottable_filenames)
-    if prottable_filenames or precursorarea:
-        header = get_header_with_precursorarea(header, prottable_filenames)
-    if probability:
-        header = get_header_with_prot_probability(header, prottable_filenames)
+    for fieldtype in ['proteindata', 'probability', 'precursorquant', 'isoquant']:
+        try:
+            fields = headerfields[fieldtype]
+        except KeyError:
+            continue
+        if type(fields) == list:
+            header.extend(fields)
+        else:
+            for pools in fields.values():
+                header.extend(pools.values())
     return header
 
 
 def build_pool_header_field(pool, field):
     return '{}_{}'.format(pool, field)
-
-
-def get_header_with_proteindata(header):
-    ix = header.index(prottabledata.HEADER_PROTEIN) + 1
-    new_data = [prottabledata.HEADER_DESCRIPTION,
-                prottabledata.HEADER_COVERAGE,
-                prottabledata.HEADER_NO_PROTEIN,
-                prottabledata.HEADER_NO_UNIPEP,
-                prottabledata.HEADER_NO_PEPTIDE,
-                prottabledata.HEADER_NO_PSM,
-                #prottabledata.HEADER_NO_QUANT_PSM,
-                #prottabledata.HEADER_CV_QUANT_PSM,
-                ]
-    return header[:ix] + new_data + header[ix:]
-
-
-def get_header_with_prot_probability(header, fns=False):
-    ix = header.index(prottabledata.HEADER_PROTEIN) + 1
-    if fns:
-        new_data = [build_pool_header_field(fn, prottabledata.HEADER_PROBABILITY) for fn in fns]
-    else:
-        new_data = [prottabledata.HEADER_PROBABILITY]
-    return header[:ix] + new_data + header[ix:]
-
-
-def get_header_with_precursorarea(header, fns=False):
-    ix = header.index(prottabledata.HEADER_PROTEIN) + 1
-    if fns:
-        quant_fields = [build_pool_header_field(fn, prottabledata.HEADER_AREA) for fn in fns]
-    else:
-        quant_fields = [prottabledata.HEADER_AREA]
-    return header[:ix] + quant_fields + header[ix:]
