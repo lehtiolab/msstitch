@@ -57,17 +57,27 @@ class ProteinGroupDB(ResultLookupInterface):
 
     def store_masters(self, allmasters, psm_masters):
         allmasters = ((x,) for x in allmasters)
-        psms = ((psm_id, master) for psm_id, masters in psm_masters.items()
-                for master in masters)
         cursor = self.get_cursor()
         cursor.executemany(
             'INSERT INTO protein_group_master(protein_acc) VALUES(?)',
             allmasters)
+        master_ids = self.get_master_ids()
+        psms = ((psm_id, master_ids[master])
+                for psm_id, masters in psm_masters.items()
+                for master in masters)
         cursor.executemany(
-            'INSERT INTO psm_protein_groups(psm_id, master) '
+            'INSERT INTO psm_protein_groups(psm_id, master_id) '
             'VALUES(?, ?)', psms)
         self.conn.commit()
-        self.index_column('psm_pg_index', 'psm_protein_groups', 'master')
+        self.index_column('psm_pg_index', 'psm_protein_groups', 'master_id')
+
+    def get_master_ids(self, invert=False):
+        cur = self.get_cursor()
+        cur.execute('SELECT protein_acc, master_id FROM protein_group_master')
+        if invert:
+            return {p_acc: master_id for (p_acc, master_id) in cur}
+        else:
+            return {master_id: p_acc for (p_acc, master_id) in cur}
 
     def store_coverage(self, coverage):
         cursor = self.get_cursor()
@@ -80,7 +90,7 @@ class ProteinGroupDB(ResultLookupInterface):
     def store_protein_group_content(self, protein_groups):
         cursor = self.get_cursor()
         cursor.executemany('INSERT INTO protein_group_content('
-                           'protein_acc, master, peptide_count, '
+                           'protein_acc, master_id, peptide_count, '
                            'psm_count, protein_score) '
                            'VALUES(?, ?, ?, ?, ?)', protein_groups)
         self.conn.commit()
@@ -130,19 +140,20 @@ class ProteinGroupDB(ResultLookupInterface):
         return cursor.execute(sql)
 
     def get_master_contentproteins_psms(self):
-        sql = ('SELECT ppg.master, ppg.psm_id, pp.protein_acc, p.sequence, p.score '
+        sql = ('SELECT ppg.master_id, ppg.psm_id, pp.protein_acc, p.sequence, '
+               'p.score '
                'FROM psm_protein_groups AS ppg '
                'JOIN protein_psm AS pp USING(psm_id) '
                'JOIN psms AS p USING(psm_id) '
-               'ORDER BY ppg.master'
+               'ORDER BY ppg.master_id'
                )
         cursor = self.get_cursor()
         return cursor.execute(sql)
 
     def get_all_master_psms(self):
-        sql = ('SELECT master, psm_id '
+        sql = ('SELECT master_id, psm_id '
                'FROM psm_protein_groups '
-               'ORDER BY master'
+               'ORDER BY master_id'
                )
         cursor = self.get_cursor()
         return ((master, psm)

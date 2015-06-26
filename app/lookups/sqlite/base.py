@@ -113,29 +113,30 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                         'FOREIGN KEY(protein_acc) '
                                         'REFERENCES '
                                         'proteins(protein_acc)'],
-                   'protein_group_master': ['protein_acc TEXT',
+                   'protein_group_master': ['master_id INTEGER PRIMARY KEY',
+                                            'protein_acc TEXT',
                                             'FOREIGN KEY(protein_acc) '
                                             'REFERENCES '
                                             'proteins(protein_acc)'],
                    'protein_group_content': ['protein_acc TEXT',
-                                             'master TEXT',
+                                             'master_id INTEGER',
                                              'peptide_count INTEGER',
                                              'psm_count INTEGER',
                                              'protein_score INTEGER',
                                              'FOREIGN KEY(protein_acc) '
                                              'REFERENCES '
                                              'proteins(protein_acc) '
-                                             'FOREIGN KEY(master) '
+                                             'FOREIGN KEY(master_id) '
                                              'REFERENCES '
-                                             'proteins'
-                                             '(protein_acc)'
+                                             'protein_group_master'
+                                             '(master_id)'
                                              ],
                    'psm_protein_groups': ['psm_id TEXT',
-                                          'master TEXT',
+                                          'master_id INTEGER',
                                           'FOREIGN KEY(psm_id) REFERENCES'
                                           ' psms(psm_id)',
-                                          'FOREIGN KEY(master) REFERENCES'
-                                          ' proteins(protein_acc)'],
+                                          'FOREIGN KEY(master_id) REFERENCES'
+                                          ' protein_group_master(master_id)'],
                    'prot_desc': ['protein_acc TEXT',
                                  'description TEXT',
                                  'FOREIGN KEY(protein_acc) '
