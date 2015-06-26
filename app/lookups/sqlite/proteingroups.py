@@ -41,8 +41,8 @@ class ProteinGroupDB(ResultLookupInterface):
 
     def store_peptides_proteins(self, allpepprot, psmids_to_store):
         ppmap = {psm_id: allpepprot[psm_id] for psm_id in psmids_to_store}
-        prot_psm_ids = ((prot_acc, psm_id) 
-                        for psm_id, prots in ppmap.items() 
+        prot_psm_ids = ((prot_acc, psm_id)
+                        for psm_id, prots in ppmap.items()
                         for prot_acc in prots)
         cursor = self.get_cursor()
         cursor.executemany(
@@ -128,7 +128,7 @@ class ProteinGroupDB(ResultLookupInterface):
                )
         cursor = self.get_cursor()
         return cursor.execute(sql)
-    
+
     def get_master_contentproteins_psms(self):
         sql = ('SELECT ppg.master, ppg.psm_id, pp.protein_acc, p.sequence, p.score '
                'FROM psm_protein_groups AS ppg '
@@ -138,15 +138,16 @@ class ProteinGroupDB(ResultLookupInterface):
                )
         cursor = self.get_cursor()
         return cursor.execute(sql)
-      
+
     def get_all_master_psms(self):
         sql = ('SELECT master, psm_id '
                'FROM psm_protein_groups '
                'ORDER BY master'
                )
         cursor = self.get_cursor()
-        return ((master, psm) for master, psm in cursor.execute(sql).fetchall())
-    
+        return ((master, psm)
+                for master, psm in cursor.execute(sql).fetchall())
+
     def get_all_psms_proteingroups(self, coverage):
         fields = ['pr.rownr', 'ppg.master', 'pgc.protein_acc',
                   'pgc.peptide_count', 'pgc.psm_count', 'pgc.protein_score',

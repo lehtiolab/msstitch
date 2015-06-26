@@ -80,7 +80,8 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                           'channel_name TEXT',
                                           'amount_psms_name TEXT',
                                           'FOREIGN KEY(prottable_id) '
-                                          'REFERENCES protein_tables(prottable_id)'
+                                          'REFERENCES '
+                                          'protein_tables(prottable_id)'
                                           ],
                    'protein_probability': ['protein_acc TEXT',
                                            'prottable_id INTEGER',
@@ -88,8 +89,9 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                            'FOREIGN KEY(protein_acc) '
                                            'REFERENCES proteins(protein_acc) '
                                            'FOREIGN KEY(prottable_id) '
-                                           'REFERENCES protein_tables(prottable_id)'
-                                          ],
+                                           'REFERENCES '
+                                           'protein_tables(prottable_id)'
+                                           ],
                    'protein_psm': ['protein_acc TEXT',
                                    'psm_id TEXT',
                                    'FOREIGN KEY(protein_acc) '

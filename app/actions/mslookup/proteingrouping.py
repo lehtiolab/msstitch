@@ -68,7 +68,8 @@ def build_master_db(pgdb, allpsms):
             allmasters[master] = 1
             if psm in allpsms:
                 del(allpsms[psm])
-    print('Collected {0} masters, {1} PSM-master mappings'.format(len(allmasters), len(psm_masters)))
+    print('Collected {0} masters, {1} PSM-master mappings'.format(
+        len(allmasters), len(psm_masters)))
     pgdb.store_masters(allmasters, psm_masters)
 
 
@@ -76,22 +77,34 @@ def build_content_db(pgdb):
     all_master_psm_proteins = pgdb.get_master_contentproteins_psms()
     all_master_psms = pgdb.get_all_master_psms()
     lastpsmmaster, masterpsm = next(all_master_psms)
-    lastcontentmaster, contentpsm, protein, pepseq, score = next(all_master_psm_proteins)
+    lastcontentmaster, contentpsm, protein, pepseq, score = next(
+        all_master_psm_proteins)
     master_psms = {masterpsm}
-    contentmap = add_protein_psm_to_pre_proteingroup(dict(), protein, pepseq, contentpsm, score)
+    content = add_protein_psm_to_pre_proteingroup(dict(), protein, pepseq,
+                                                  contentpsm, score)
     protein_groups = []
     for master, masterpsm in all_master_psms:
         # outer loop gets all master PSMs
         if master != lastpsmmaster:
-            for contentmaster, contentpsm, protein, pepseq, score in all_master_psm_proteins:
-                # Inner loop gets protein group content from another DB join table
+            for contentmaster, contentpsm, protein, pepseq, score in \
+                    all_master_psm_proteins:
+                # Inner loop gets protein group content from DB join table
                 if contentmaster != lastcontentmaster:
-                    proteingroup = filter_proteins_with_missing_psms(contentmap, master_psms)
-                    lastcontentmaster, contentmap = contentmaster, dict()
-                    contentmap = add_protein_psm_to_pre_proteingroup(contentmap, protein, pepseq, contentpsm, score)
-                    break 
-                contentmap = add_protein_psm_to_pre_proteingroup(contentmap, protein, pepseq, contentpsm, score)
-            protein_groups.extend(get_protein_group_content(proteingroup, lastpsmmaster))
+                    p_group = filter_proteins_with_missing_psms(content,
+                                                                master_psms)
+                    lastcontentmaster, content = contentmaster, dict()
+                    content = add_protein_psm_to_pre_proteingroup(content,
+                                                                  protein,
+                                                                  pepseq,
+                                                                  contentpsm,
+                                                                  score)
+                    break
+                content = add_protein_psm_to_pre_proteingroup(content, protein,
+                                                              pepseq,
+                                                              contentpsm,
+                                                              score)
+            protein_groups.extend(get_protein_group_content(p_group,
+                                                            lastpsmmaster))
             master_psms = set()
             lastpsmmaster = master
         master_psms.add(masterpsm)
@@ -140,7 +153,7 @@ def build_coverage(pgdb):
 def get_masters(ppgraph):
     """From a protein-peptide graph dictionary (keys proteins,
     values peptides), return master proteins aka those which
-    have no proteins whose peptides are supersets of them. 
+    have no proteins whose peptides are supersets of them.
     If shared master proteins are found, report only the first,
     we will sort the whole proteingroup later anyway. In that
     case, the master reported here may be temporary."""
