@@ -4,7 +4,6 @@ DB_STORE_CHUNK = 100000
 
 from collections import OrderedDict
 
-from app.lookups.sqlite.proteingroups import ProteinGroupDB
 from app.readers import tsv as tsvreader
 from app.readers import fasta as fastareader
 from app.actions.mzidtsv import confidencefilters as conffilt
@@ -20,7 +19,8 @@ def create_protein_pep_lookup(fn, header, pgdb, confkey, conflvl,
     pgdb.store_proteins(proteins, evidences, sequences)
     protein_descriptions = fastareader.get_proteins_descriptions(fastafn)
     pgdb.store_descriptions(protein_descriptions)
-    # TODO do we need an OrderedDict or is regular dict enough? Sorting for psm_id useful? 
+    # TODO do we need an OrderedDict or is regular dict enough?
+    # Sorting for psm_id useful?
     allpsms = OrderedDict()
     last_id, psmids_to_store = None, set()
     store_soon = False
@@ -60,7 +60,8 @@ def build_master_db(pgdb, allpsms):
         psm_id, proteins = allpsms.popitem()
         pepprotmap = pgdb.get_protpepmap_from_proteins(proteins)
         masters = get_masters(pepprotmap)
-        for psm, master in [(p, m) for p, masters in masters.items() for m in masters]:
+        for psm, master in [(p, m) for p, pmasters in masters.items()
+                            for m in pmasters]:
             try:
                 psm_masters[psm].add(master)
             except KeyError:
@@ -112,7 +113,8 @@ def build_content_db(pgdb):
     pgdb.index_protein_group_content()
 
 
-def add_protein_psm_to_pre_proteingroup(prepgmap, protein, pepseq, psm_id, score):
+def add_protein_psm_to_pre_proteingroup(prepgmap, protein, pepseq,
+                                        psm_id, score):
     score = float(score)
     try:
         prepgmap[protein][pepseq].add((psm_id, score))
@@ -122,13 +124,14 @@ def add_protein_psm_to_pre_proteingroup(prepgmap, protein, pepseq, psm_id, score
         except KeyError:
             prepgmap[protein] = {pepseq: {(psm_id, score)}}
     return prepgmap
-                
+
 
 def filter_proteins_with_missing_psms(proteins, pg_psms):
     filtered_protein_map = {}
     for protein, protein_psms in proteins.items():
         filter_out = False
-        for psm_id, score in [psm for peptide in protein_psms.values() for psm in peptide]:
+        for psm_id, score in [psm for peptide in protein_psms.values()
+                              for psm in peptide]:
             if psm_id not in pg_psms:
                 filter_out = True
                 break

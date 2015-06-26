@@ -97,7 +97,7 @@ class ProteinGroupDB(ResultLookupInterface):
 
     def index_protein_group_content(self):
         self.index_column('pgc_master_index', 'protein_group_content',
-                          'master')
+                          'master_id')
 
     def get_allpsms_masters(self):
         sql = ('SELECT pgm.protein_acc, pp.psm_id FROM protein_group_master '
@@ -160,11 +160,11 @@ class ProteinGroupDB(ResultLookupInterface):
                 for master, psm in cursor.execute(sql).fetchall())
 
     def get_all_psms_proteingroups(self, coverage):
-        fields = ['pr.rownr', 'ppg.master', 'pgc.protein_acc',
+        fields = ['pr.rownr', 'ppg.master_id', 'pgc.protein_acc',
                   'pgc.peptide_count', 'pgc.psm_count', 'pgc.protein_score',
                   'pev.evidence_lvl']
         joins = [('psm_protein_groups', 'ppg', 'psm_id'),
-                 ('protein_group_content', 'pgc', 'master'),
+                 ('protein_group_content', 'pgc', 'master_id'),
                  ('protein_evidence', 'pev', 'protein_acc')]
         if coverage:
             fields.append('pc.coverage')
