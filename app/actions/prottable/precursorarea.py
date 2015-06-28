@@ -2,7 +2,7 @@ from app.dataformats import prottable as prottabledata
 from app.dataformats import mzidtsv as mzidtsvdata
 
 
-def add_ms1_quant_from_top3_mzidtsv(proteins, psms):
+def add_ms1_quant_from_top3_mzidtsv(proteins, psms, headerfields):
     """Collects PSMs with the highes precursor quant values,
     adds sum of the top 3 of these to a protein table"""
     top_ms1_psms = {}
@@ -32,5 +32,5 @@ def add_ms1_quant_from_top3_mzidtsv(proteins, psms):
         else:
             amounts = [x for x in amounts if x > 0]
             prec_area = sum(amounts) / len(amounts)
-        outprotein[prottabledata.HEADER_AREA] = str(prec_area)
+        outprotein[headerfields['precursorquant'][prottabledata.HEADER_AREA][None]] = str(prec_area)
         yield outprotein

@@ -21,11 +21,11 @@ def get_header_field(field, poolnames=False):
 
 
 def get_precursorquant_fields(pqdb=False, poolnames=False):
-    return get_header_field(prottabledata.HEADER_AREA, poolnames)
+    return {prottabledata.HEADER_AREA: get_header_field(prottabledata.HEADER_AREA, poolnames)}
 
 
 def get_probability_fields(pqdb=False, poolnames=False):
-    return get_header_field(prottabledata.HEADER_PROBABILITY, poolnames)
+    return {prottabledata.HEADER_PROBABILITY: get_header_field(prottabledata.HEADER_PROBABILITY, poolnames)}
 
 
 def get_proteininfo_fields(pqdb=False, poolnames=False):

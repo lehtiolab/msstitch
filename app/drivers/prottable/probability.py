@@ -9,7 +9,7 @@ class AddProteinProbability(ProttableAddData):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.pepfile = kwargs.get('pepfile', False)
-        self.probability = True
+        self.headertypes = ['probability']
 
     def initialize_input(self):
         super().initialize_input()
@@ -17,4 +17,4 @@ class AddProteinProbability(ProttableAddData):
 
     def set_protein_generator(self):
         self.proteins = preparation.add_nesvi_protein_probability(
-            self.in_proteins, self.in_peptides)
+            self.in_proteins, self.in_peptides, self.headerfields)

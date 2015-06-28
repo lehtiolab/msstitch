@@ -8,8 +8,8 @@ class AddPrecursorAreaDriver(ProttableAddData):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.precursorarea = True
         self.pepfile = kwargs.get('psmfile', False)
+        self.headertypes = ['precursorquant']
 
     def initialize_input(self):
         super().initialize_input()
@@ -17,4 +17,4 @@ class AddPrecursorAreaDriver(ProttableAddData):
 
     def set_protein_generator(self):
         self.proteins = preparation.add_ms1_quant_from_top3_mzidtsv(
-            self.in_proteins, self.in_peptides)
+            self.in_proteins, self.in_peptides, self.headerfields)
