@@ -65,6 +65,10 @@ parser.add_argument('--peptable', dest='pepfile', help='Peptide table file '
                     'containing data for protein table, for example '
                     'peptide probabilities.',
                     type=lambda x: parser_file_exists(parser, x))
+parser.add_argument('--setname', dest='setname', help='Name of biological '
+                    'set which to use when adding protein info to table. '
+                    'Must be used with addprotdata.',
+                    default=False, type=str)
 parser.add_argument('--proteindata', dest='proteindata', help='Include '
                     'protein group data such as coverage in output. Flag.',
                     action='store_const', default=False, const=True)
