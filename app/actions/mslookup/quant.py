@@ -71,10 +71,11 @@ def align_quants_psms(quantdb, rt_tolerance, mz_tolerance, mz_toltype):
     featwindow_max_mz = -1
     spec_feat_store = []
     for spec_id, fn_id, charge, mz, rt in allspectra:
-        minmz, maxmz = get_minmax(mz, mz_tolerance, mz_toltype) 
+        minmz, maxmz = get_minmax(mz, mz_tolerance, mz_toltype)
         if maxmz > featwindow_max_mz:
-            feature_map, featwindow_max_mz = get_precursors_from_window(quantdb, minmz)
-        best_feat_id = align_psm(mz, rt, fn_id, charge, feature_map, rt_tolerance)
+            feat_map, featwindow_max_mz = get_precursors_from_window(quantdb,
+                                                                     minmz)
+        best_feat_id = align_psm(mz, rt, fn_id, charge, feat_map, rt_tolerance)
         if not best_feat_id:
             continue
         spec_feat_store.append((spec_id, best_feat_id))
@@ -82,8 +83,7 @@ def align_quants_psms(quantdb, rt_tolerance, mz_tolerance, mz_toltype):
             quantdb.store_ms1_alignments(spec_feat_store)
             spec_feat_store = []
     quantdb.store_ms1_alignments(spec_feat_store)
-    
-            
+
 
 def align_psm(psm_mz, psm_rt, fn_id, charge, featmap, rttol):
     minrt, maxrt = get_minmax(psm_rt, rttol / 60)
@@ -103,11 +103,12 @@ def align_psm(psm_mz, psm_rt, fn_id, charge, featmap, rttol):
 
 
 def get_precursors_from_window(quantdb, minmz):
-    """Returns a dict of a specified amount of features from the 
+    """Returns a dict of a specified amount of features from the
     ms1 quant database, and the highest mz of those features"""
     featmap = {}
     mz = False
-    features = quantdb.get_precursor_quant_window(FEATURE_ALIGN_WINDOW_AMOUNT, minmz)
+    features = quantdb.get_precursor_quant_window(FEATURE_ALIGN_WINDOW_AMOUNT,
+                                                  minmz)
     for feat_id, fn_id, charge, mz, rt in features:
         try:
             featmap[fn_id][charge].append((mz, rt, feat_id))

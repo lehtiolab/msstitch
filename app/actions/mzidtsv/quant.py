@@ -1,10 +1,9 @@
-from app.lookups.sqlite import quant as sqlite
 from app.readers import tsv as readers
 from app.dataformats import mzidtsv as mzidtsvdata
 
 
 def generate_psms_quanted(quantdb, tsvfn, isob_header, oldheader,
-                          is_ibariq=False, precursor=False): 
+                          is_ibariq=False, precursor=False):
     """Takes dbfn and connects, gets quants for each line in tsvfn, sorts
     them in line by using keys in quantheader list."""
     allquants = quantdb.select_all_psm_quants()
@@ -17,8 +16,8 @@ def generate_psms_quanted(quantdb, tsvfn, isob_header, oldheader,
             outpsm.update({mzidtsvdata.HEADER_PRECURSOR_QUANT: 'NA'})
         isoquants = {}
         while quant[0] == rownr:
-             isoquants.update({quant[1]: str(quant[2])})
-             quant = next(allquants)
+            isoquants.update({quant[1]: str(quant[2])})
+            quant = next(allquants)
         outpsm.update(get_quant_NAs(isoquants, isob_header))
         yield outpsm
 

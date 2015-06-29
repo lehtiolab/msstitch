@@ -53,7 +53,7 @@ class PrecursorQuantDB(QuantDB):
         self.store_many(
             'INSERT INTO ms1_quant(mzmlfile_id, retention_time, mz, '
             'charge, intensity) VALUES (?, ?, ?, ?, ?)', quants)
-    
+
     def store_ms1_alignments(self, aligns):
         self.store_many(
             'INSERT INTO ms1_align(spectra_id, feature_id) '
