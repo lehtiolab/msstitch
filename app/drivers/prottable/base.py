@@ -40,5 +40,8 @@ class ProttableAddData(ProttableDriver):
 
 class ProttableMergeDriver(ProttableDriver):
     def initialize_input(self):
-        self.quantchannels = preparation.get_quantchannels(self.lookup)
-        self.prottable_filenames = preparation.get_precursorquant_headerfields(self.lookup)
+        self.headertypes = []
+        for inflag, htype in zip([self.proteindata, self.probability, self.precursorquant, self.isobaricquant], ['proteindata', 'probability', 'precursorquant', 'isoquant']):
+            if inflag:
+                self.headertypes.append(htype)
+        self.poolnames = [x[0] for x in self.lookup.get_all_poolnames()]

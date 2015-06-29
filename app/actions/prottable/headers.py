@@ -52,8 +52,8 @@ def get_isoquant_fields(pqdb=False, poolnames=False):
     """Returns a headerfield dict for isobaric quant channels. Channels are taken
     from DB and there isn't a pool-independent version of this yet"""
     quantheader = {}
-    for fn, chan_name, amnt_psms_name in pqdb.get_quantchannel_headerfields():
-        quantheader[channel] = get_header_field(chan_name, poolnames)
+    for chan_name, amnt_psms_name in pqdb.get_isoquant_amountpsms_channels():
+        quantheader[chan_name] = get_header_field(chan_name, poolnames)
         quantheader[amnt_psms_name] = get_header_field(amnt_psms_name, poolnames)
     return quantheader 
 

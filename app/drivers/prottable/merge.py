@@ -15,14 +15,17 @@ class BuildProteinTableDriver(ProttableMergeDriver):
         kwargs['infile'] = os.path.join(os.getcwd(),
                                         'built_protein_table.txt')
         super().__init__(**kwargs)
-        self.isobaric = kwargs.get('isobaric', False)
-        self.precursorarea = kwargs.get('precursor', False)
-        self.probability = True
+        self.isobaricquant = kwargs.get('isobaric', False)
+        self.precursorquant = kwargs.get('precursor', False)
+        self.probability = kwargs.get('probability', False)
+        self.proteindata = kwargs.get('proteindata', False)
 
     def set_protein_generator(self):
         """Generates proteins with quant from the lookup table"""
         self.proteins = preparation.build_proteintable(self.lookup,
-                                                       self.header,
-                                                       self.isobaric,
-                                                       self.precursorarea,
-                                                       self.probability)
+                                                       self.header,  # FIXME?
+                                                       self.headerfields,
+                                                       self.isobaricquant,
+                                                       self.precursorquant,
+                                                       self.probability,
+                                                       self.proteindata)

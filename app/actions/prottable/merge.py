@@ -1,28 +1,35 @@
 from app.dataformats import prottable as prottabledata
 
 
-def build_proteintable(pqdb, header, isobaric=False, precursor=False, probability=False):
+def build_proteintable(pqdb, header, headerfields, isobaric=False, precursor=False, probability=False, proteindata=False):
     """Fetches proteins and quants from joined lookup table, loops through
     them and when all of a protein's quants have been collected, yields the
     protein quant information."""
-    iso_quant_map = {True: get_isobaric_quant, False: lambda x, y, z: {}}
-    ms1_quant_map = {True: get_precursor_quant, False: lambda x, y, z: {}}
-    prob_map = {True: get_prot_probability, False: lambda x, y, z: {}}
-    inv_prottable_map = get_inverted_prottable_map(pqdb)
+    print(isobaric, precursor, probability, proteindata)
+    iso_fun = {True: get_isobaric_quant, False: lambda x, y, z: {}}[isobaric]
+    ms1_fun = {True: get_precursor_quant, False: lambda x, y, z: {}}[precursor]
+    prob_fun = {True: get_prot_probability, False: lambda x, y, z: {}}[probability]
+    #pdata_fun = {True: get_proteindata, False: lambda x: {}}[proteindata]
     protein_sql, sqlfieldmap = pqdb.prepare_mergetable_sql(precursor, isobaric, probability)
     proteins = pqdb.get_merged_proteins(protein_sql)
     protein = next(proteins)
+    print(protein)
     outprotein = {prottabledata.HEADER_PROTEIN: protein[sqlfieldmap['p_acc']]}
-    outprotein.update(iso_quant_map[isobaric](protein, sqlfieldmap, inv_prottable_map))
-    outprotein.update(ms1_quant_map[precursor](protein, sqlfieldmap, inv_prottable_map))
-    outprotein.update(prob_map[probability](protein, sqlfieldmap, inv_prottable_map))
+    fill_outprotein(outprotein, iso_fun, ms1_fun, prob_fun, protein, sqlfieldmap, headerfields)
     for protein in proteins:
         if protein[sqlfieldmap['p_acc']] != outprotein[prottabledata.HEADER_PROTEIN]:
-            yield parse_NA(next(add_protein_data([outprotein], pqdb)), header)
+            #yield parse_NA(next(add_protein_data([outprotein], pqdb)), header)
+            yield parse_NA(outprotein, header)
             outprotein = {prottabledata.HEADER_PROTEIN: protein[sqlfieldmap['p_acc']]}
-        outprotein.update(iso_quant_map[isobaric](protein, sqlfieldmap, inv_prottable_map))
-        outprotein.update(ms1_quant_map[precursor](protein, sqlfieldmap, inv_prottable_map))
-    yield parse_NA(next(add_protein_data([outprotein], pqdb)), header)
+        fill_outprotein(outprotein, iso_fun, ms1_fun, prob_fun, protein, sqlfieldmap, headerfields)
+    #yield parse_NA(next(add_protein_data([outprotein], pqdb)), header)
+    yield parse_NA(outprotein, header)
+
+
+def fill_outprotein(outprotein, iso_fun, ms1_fun, prob_fun, protein, sqlfieldmap, headerfields):
+    outprotein.update(iso_fun(protein, sqlfieldmap, headerfields))
+    outprotein.update(ms1_fun(protein, sqlfieldmap, headerfields))
+    outprotein.update(prob_fun(protein, sqlfieldmap, headerfields))
 
 
 def add_protein_data(proteins, pgdb):
@@ -36,88 +43,62 @@ def add_protein_data(proteins, pgdb):
         yield outprotein
 
 
-def get_protein_data(protein_acc, pgdb):
-    """Parses protein data that is fetched from the database."""
-    #protein data is ((psm_id, psmseq, fakemaster, all_group_proteins_acc,
-    #                   coverage, description),)
-    protein_data = pgdb.get_protein_data(protein_acc)
-    description = protein_data[0][5]
-    coverage = protein_data[0][4]
-    psmcount = len(set([x[0] for x in protein_data]))
-    pepcount = len(set([x[1] for x in protein_data]))
-    proteincount = len(set([x[3] for x in protein_data]))
-    peptides_master_map = {}
-    for psm in protein_data:
-        try:
-            peptides_master_map[psm[1]].add(psm[2])
-        except KeyError:
-            peptides_master_map[psm[1]] = {psm[2]}
-    unipepcount = len([x for x in peptides_master_map
-                       if len(peptides_master_map[x]) == 1])
-    return {prottabledata.HEADER_DESCRIPTION: description,
-            prottabledata.HEADER_COVERAGE: coverage,
-            prottabledata.HEADER_NO_PROTEIN: proteincount,
-            prottabledata.HEADER_NO_UNIPEP: unipepcount,
-            prottabledata.HEADER_NO_PEPTIDE: pepcount,
-            prottabledata.HEADER_NO_PSM: psmcount,
-            #prottabledata.HEADER_AREA: area,
-            #prottabledata.HEADER_NO_QUANT_PSM: quantcount,
-            #prottabledata.HEADER_CV_QUANT_PSM: quantcv,
-            }
+#def get_protein_data(protein_acc, pgdb):
+#    """Parses protein data that is fetched from the database."""
+#    #protein data is ((psm_id, psmseq, fakemaster, all_group_proteins_acc,
+#    #                   coverage, description),)
+#    protein_data = pgdb.get_protein_data(protein_acc)
+#    description = protein_data[0][5]
+#    coverage = protein_data[0][4]
+#    psmcount = len(set([x[0] for x in protein_data]))
+#    pepcount = len(set([x[1] for x in protein_data]))
+#    proteincount = len(set([x[3] for x in protein_data]))
+#    peptides_master_map = {}
+#    for psm in protein_data:
+#        try:
+#            peptides_master_map[psm[1]].add(psm[2])
+#        except KeyError:
+#            peptides_master_map[psm[1]] = {psm[2]}
+#    unipepcount = len([x for x in peptides_master_map
+#                       if len(peptides_master_map[x]) == 1])
+#    return {prottabledata.HEADER_DESCRIPTION: description,
+#            prottabledata.HEADER_COVERAGE: coverage,
+#            prottabledata.HEADER_NO_PROTEIN: proteincount,
+#            prottabledata.HEADER_NO_UNIPEP: unipepcount,
+#            prottabledata.HEADER_NO_PEPTIDE: pepcount,
+#            prottabledata.HEADER_NO_PSM: psmcount,
+#            #prottabledata.HEADER_AREA: area,
+#            #prottabledata.HEADER_NO_QUANT_PSM: quantcount,
+#            #prottabledata.HEADER_CV_QUANT_PSM: quantcv,
+#            }
+#
 
-
-def get_isobaric_quant(protein, sqlmap, prottable_map):
+def get_isobaric_quant(protein, sqlmap, headerfields):
     chan = protein[sqlmap['channel']]
-    fn = prottable_map[protein[sqlmap['isoq_fnid']]]
+    pool = protein[sqlmap['isoq_poolname']]
     psmfield = protein[sqlmap['isoq_psmsfield']]
     quant = protein[sqlmap['isoq_val']]
     nopsms = protein[sqlmap['isoq_psms']]
-    quantheadfield = build_quantchan_header_field(fn, chan)
-    amntpsm_headfld = build_quantchan_header_field(fn, psmfield)
-    return {quantheadfield: quant, amntpsm_headfld: nopsms}
+    return {headerfields['isoquant'][chan][pool]: quant,
+            headerfields['isoquant'][psmfield][pool]: nopsms}
 
 
-def get_precursor_quant(protein, sqlmap, prottable_map):
-    fn = prottable_map[protein[sqlmap['preq_fnid']]]
-    quantheadfield = build_quantchan_header_field(fn, prottabledata.HEADER_AREA)
+def get_precursor_quant(protein, sqlmap, headerfields):
+    pool = protein[sqlmap['preq_poolname']]
+    quantheadfield = headerfields['precursorquant'][prottabledata.HEADER_AREA][pool]
     return {quantheadfield: protein[sqlmap['preq_val']]}
 
 
-def get_prot_probability(protein, sqlmap, prottable_map):
-    fn = prottable_map[protein[sqlmap['prob_fnid']]]
-    headfield = build_quantchan_header_field(fn, prottabledata.HEADER_PROBABILITY)
+def get_prot_probability(protein, sqlmap, headerfields):
+    pool = protein[sqlmap['prob_poolname']]
+    headfield = headerfields['probability'][prottabledata.HEADER_PROBABILITY][pool]
     return {headfield: protein[sqlmap['prob_val']]}
-
-
-def get_precursorquant_headerfields(pqdb):
-    prottable_map = get_inverted_prottable_map(pqdb)
-    fnids = pqdb.get_precursorquant_headerfields()
-    return [prottable_map[fnid[0]] for fnid in fnids]
-
-
-def build_quantchan_header_field(fn, channame):
-    # FIXME should be in header module
-    return '{}_{}'.format(fn, channame)
-
-
-def get_inverted_prottable_map(pqdb):
-    prottable_map = pqdb.get_protein_table_map()
-    return {v: k for k, v in prottable_map.items()}
-
-def get_quantchannels(pqdb):
-    # FIXME should be in header module
-    quantheader = []
-    prottable_map = get_inverted_prottable_map(pqdb)
-    for fnid, chan_name, amnt_psms_name in pqdb.get_quantchannel_headerfields():
-        quantheader.append(build_quantchan_header_field(prottable_map[fnid], chan_name))
-        quantheader.append(build_quantchan_header_field(prottable_map[fnid], amnt_psms_name))
-    return sorted(quantheader)
 
 
 def parse_NA(protein, header):
     for field in header:
         try:
-            protein[field]
+            protein[field] = str(protein[field])
         except KeyError:
             protein[field] = 'NA'
     return protein

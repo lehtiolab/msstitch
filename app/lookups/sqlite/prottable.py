@@ -50,20 +50,29 @@ class ProtTableDB(ResultLookupInterface):
         selectfieldcount = max(selectmap.values()) + 1
         joins = []
         if isobaric:
-            selects.extend(['pc.channel_name', 'pc.prottable_id',
+            selects.extend(['pc.channel_name', 'bs.set_name',
                             'pc.amount_psms_name', 'pq.quantvalue', 'pq.amount_psms'])
-            joins.extend([('protquant_channels', 'pc', 'channel_id')])
-            selectmap.update({field: i + selectfieldcount for i, field in enumerate(['channel', 'isoq_fnid', 'isoq_psmsfield', 'isoq_val', 'isoq_psms'])})
+            joins.extend([('protquant_channels', 'pc', 'channel_id'),
+                          ('protein_tables', 'pt', 'prottable_id'),
+                          ('biosets', 'bs', 'set_id')
+                          ])
+            selectmap.update({field: i + selectfieldcount for i, field in enumerate(['channel', 'isoq_poolname', 'isoq_psmsfield', 'isoq_val', 'isoq_psms'])})
             selectfieldcount = max(selectmap.values()) + 1
         if precursor:
-            selects.extend(['preq.prottable_id', 'preq.quantvalue'])
-            joins.extend([('protein_precur_quanted', 'preq', 'protein_acc')])
-            selectmap.update({field: i + selectfieldcount for i, field in enumerate(['preq_fnid', 'preq_val'])})
+            selects.extend(['prqbs.set_name', 'preq.quantvalue'])
+            joins.extend([('protein_precur_quanted', 'preq', 'protein_acc'),
+                          ('protein_tables', 'prqpt', 'prottable_id'),
+                          ('biosets', 'prqbs', 'set_id')
+                          ])
+            selectmap.update({field: i + selectfieldcount for i, field in enumerate(['preq_poolname', 'preq_val'])})
             selectfieldcount = max(selectmap.values()) + 1
         if probability:
-            selects.extend(['pprob.prottable_id', 'pprob.probability'])
-            joins.extend([('protein_probability', 'pprob', 'protein_acc')])
-            selectmap.update({field: i + selectfieldcount for i, field in enumerate(['prob_fnid', 'prob_val'])})
+            selects.extend(['probbs.set_name', 'pprob.probability'])
+            joins.extend([('protein_probability', 'pprob', 'protein_acc'),
+                          ('protein_tables', 'probpt', 'prottable_id'),
+                          ('biosets', 'probbs', 'set_id')
+                          ])
+            selectmap.update({field: i + selectfieldcount for i, field in enumerate(['prob_poolname', 'prob_val'])})
             selectfieldcount = max(selectmap.values()) + 1
 
         sql = 'SELECT {} FROM protein_quanted AS pq'.format(', '.join(selects))
@@ -74,6 +83,13 @@ class ProtTableDB(ResultLookupInterface):
     def get_merged_proteins(self, sql):
         cursor = self.get_cursor()
         cursor.execute(sql)
+        return cursor
+
+    def get_isoquant_amountpsms_channels(self):
+        cursor = self.get_cursor()
+        cursor.execute(
+            'SELECT DISTINCT channel_name, amount_psms_name '
+            'FROM protquant_channels')
         return cursor
 
     def get_precursorquant_headerfields(self):

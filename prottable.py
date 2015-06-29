@@ -73,10 +73,13 @@ parser.add_argument('--proteindata', dest='proteindata', help='Include '
                     'protein group data such as coverage in output. Flag.',
                     action='store_const', default=False, const=True)
 parser.add_argument('--precursor', dest='precursor', help='Build protein '
-                    'which contains precursor quant data. Flag.',
+                    'table which contains precursor quant data. Flag.',
                     action='store_const', default=False, const=True)
 parser.add_argument('--isobaric', dest='isobaric', help='Build protein '
-                    'which contains isobaric quant data. Flag.',
+                    'table which contains isobaric quant data. Flag.',
+                    action='store_const', default=False, const=True)
+parser.add_argument('--probability', dest='probability', help='Build protein '
+                    'table which contains probability data. Flag.',
                     action='store_const', default=False, const=True)
 
 args = parser.parse_args()
