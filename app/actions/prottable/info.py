@@ -2,7 +2,7 @@ from app.dataformats import prottable as prottabledata
 
 
 def add_record_to_proteindata(proteindata, p_acc, pool, psmdata):
-    seq, psm_id = psmdata[2], psmdata[3]
+    seq, psm_id, desc, cov = psmdata[2], psmdata[3], psmdata[4], psmdata[5]
     try:
         proteindata[p_acc][pool]['psms'].add(psm_id)
     except KeyError:
@@ -10,7 +10,7 @@ def add_record_to_proteindata(proteindata, p_acc, pool, psmdata):
         try:
             proteindata[p_acc][pool] = emptyinfo
         except KeyError:
-            proteindata[p_acc] = {pool: emptyinfo}
+            proteindata[p_acc] = {pool: emptyinfo, 'desc': desc, 'cov': cov}
     proteindata[p_acc][pool]['psms'].add(psm_id)
     proteindata[p_acc][pool]['peptides'].add(seq)
     #proteindata[p_acc][pool]['proteins'].add(pg_content)
@@ -71,8 +71,8 @@ def get_protein_data(proteindata, p_acc, headerfields):
         pool_values = [unipepcount, pepcount, psmcount]
         outdict.update({headerfields['proteindata'][hfield][pool]: val
                         for (hfield, val) in zip(hfields, pool_values)})
-    outdict.update({prottabledata.HEADER_DESCRIPTION: description,
-                    prottabledata.HEADER_COVERAGE: coverage,
+    outdict.update({prottabledata.HEADER_DESCRIPTION: pdata[p_acc]['desc'],
+                    prottabledata.HEADER_COVERAGE: pdata[p_acc]['cov'],
                     prottabledata.HEADER_NO_PROTEIN: proteincount,
                     })
     return outdict
