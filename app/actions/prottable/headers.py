@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 from app.dataformats import prottable as prottabledata
 
 
@@ -9,30 +11,33 @@ def get_headerfields(headertypes, lookup=False, poolnames=False):
                       'proteindata': get_proteininfo_fields,
                       }
     for fieldtype in headertypes:
-        hfields[fieldtype] = type_functions[fieldtype](lookup, poolnames) 
+        hfields[fieldtype] = type_functions[fieldtype](lookup, poolnames)
     return hfields
 
 
 def get_header_field(field, poolnames=False):
     if poolnames:
-        return {pool: '{}_{}'.format(pool, field) for pool in poolnames}
+        return OrderedDict([(pool, '{}_{}'.format(pool, field))
+                            for pool in poolnames])
     else:
         return {None: field}
 
 
 def get_precursorquant_fields(pqdb=False, poolnames=False):
-    return {prottabledata.HEADER_AREA: get_header_field(prottabledata.HEADER_AREA, poolnames)}
+    return {prottabledata.HEADER_AREA:
+            get_header_field(prottabledata.HEADER_AREA, poolnames)}
 
 
 def get_probability_fields(pqdb=False, poolnames=False):
-    return {prottabledata.HEADER_PROBABILITY: get_header_field(prottabledata.HEADER_PROBABILITY, poolnames)}
+    return {prottabledata.HEADER_PROBABILITY:
+            get_header_field(prottabledata.HEADER_PROBABILITY, poolnames)}
 
 
 def get_proteininfo_fields(pqdb=False, poolnames=False):
     """Returns header fields for protein (group) information.
     Some fields are shared between pools, others are specific
     for a pool"""
-    allfields = {}
+    allfields = OrderedDict()
     basefields = [prottabledata.HEADER_DESCRIPTION,
                   prottabledata.HEADER_COVERAGE,
                   prottabledata.HEADER_NO_PROTEIN,
@@ -45,17 +50,18 @@ def get_proteininfo_fields(pqdb=False, poolnames=False):
         allfields[field] = get_header_field(field)
     for field in poolfields:
         allfields[field] = get_header_field(field, poolnames)
-    return allfields 
+    return allfields
 
 
 def get_isoquant_fields(pqdb=False, poolnames=False):
-    """Returns a headerfield dict for isobaric quant channels. Channels are taken
-    from DB and there isn't a pool-independent version of this yet"""
-    quantheader = {}
+    """Returns a headerfield dict for isobaric quant channels. Channels are
+    taken from DB and there isn't a pool-independent version of this yet"""
+    quantheader = OrderedDict()
     for chan_name, amnt_psms_name in pqdb.get_isoquant_amountpsms_channels():
         quantheader[chan_name] = get_header_field(chan_name, poolnames)
-        quantheader[amnt_psms_name] = get_header_field(amnt_psms_name, poolnames)
-    return quantheader 
+        quantheader[amnt_psms_name] = get_header_field(amnt_psms_name,
+                                                       poolnames)
+    return quantheader
 
 
 def generate_header(headerfields, oldheader=False):
@@ -63,7 +69,8 @@ def generate_header(headerfields, oldheader=False):
         header = [prottabledata.HEADER_PROTEIN]
     else:
         header = oldheader[:]
-    for fieldtype in ['proteindata', 'probability', 'precursorquant', 'isoquant']:
+    for fieldtype in ['proteindata', 'probability', 'precursorquant',
+                      'isoquant']:
         try:
             fields = headerfields[fieldtype]
         except KeyError:
