@@ -1,17 +1,17 @@
 from app.lookups.sqlite.base import ResultLookupInterface
-    
+
 
 class QuantDB(ResultLookupInterface):
 
     def select_all_psm_quants(self):
-        sql = (
-    'SELECT pr.rownr, iq.quantmap, iq.intensity, pq.intensity '
-    'FROM psmrows AS pr '
-    'JOIN psms USING(psm_id) '
-    'JOIN mzml USING(spectra_id) '
-    'JOIN isobaric_quant AS iq USING(spectra_id) '
-    'LEFT OUTER JOIN ms1_align USING(spectra_id) '
-    'LEFT OUTER JOIN ms1_quant AS pq USING(feature_id)'
+        sql = ('SELECT pr.rownr, ic.channel_name, iq.intensity, pq.intensity '
+               'FROM psmrows AS pr '
+               'JOIN psms USING(psm_id) '
+               'JOIN mzml USING(spectra_id) '
+               'JOIN isobaric_quant AS iq USING(spectra_id) '
+               'JOIN isobaric_channels AS ic USING(channel_id) '
+               'LEFT OUTER JOIN ms1_align USING(spectra_id) '
+               'LEFT OUTER JOIN ms1_quant AS pq USING(feature_id)'
                )
         cursor = self.get_cursor()
         return cursor.execute(sql)
@@ -28,13 +28,13 @@ class QuantDB(ResultLookupInterface):
         """Returns all unique quant channels from lookup as list"""
         cursor = self.get_cursor()
         cursor.execute(
-            'SELECT DISTINCT quantmap FROM isobaric_quant')
+            'SELECT channel_name FROM isobaric_channels')
         return cursor.fetchall()
 
 
 class IsobaricQuantDB(QuantDB):
     def add_tables(self):
-        self.create_tables(['isobaric_quant'])
+        self.create_tables(['isobaric_quant', 'isobaric_channels'])
 
     def store_isobaric_quants(self, quants):
         self.store_many(

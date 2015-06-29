@@ -40,8 +40,7 @@ def get_full_and_isobaric_headers(oldheader, quantdb, isobaric=False,
     if precursor:
         fullheader += [mzidtsvdata.HEADER_PRECURSOR_QUANT]
     if isobaric:
-        quantmap = quantdb.get_all_quantmaps()
-        isob_header = sorted([x[0] for x in quantmap])
+        isob_header = [x[0] for x in quantdb.get_all_quantmaps()]
         fullheader += isob_header
     else:
         isob_header = None

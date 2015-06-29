@@ -43,13 +43,13 @@ def get_feature_info(feature):
 
 
 def get_quantmap(consfile):
-    """Returns map of isobaric quant channel names as values, channel numbers
-    from consensus XML.
-    E.g. {'0': '113',
-          '1': '114',}
+    """Returns map of isobaric quant channel names as keys, channel numbers
+    values from consensus XML.
+    E.g. {'113': '0',
+          '114': '1',}
     """
     quantmap = {}
     maplist = basereader.get_element(consfile, 'mapList')
     for mapitem in maplist:
-        quantmap[mapitem.attrib['id']] = mapitem.attrib['label']
+        quantmap[mapitem.attrib['label']] = mapitem.attrib['id']
     return quantmap

@@ -17,11 +17,15 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                             'retention_time DOUBLE',
                             'FOREIGN KEY(mzmlfile_id)'
                             'REFERENCES mzmlfiles'],
+                   'isobaric_channels': ['channel_id INTEGER PRIMARY KEY',
+                                         'channel_name TEXT'],
                    'isobaric_quant': ['spectra_id INTEGER',
-                                      'quantmap TEXT',
+                                      'channel_id INTEGER',
                                       'intensity REAL',
                                       'FOREIGN KEY(spectra_id)'
-                                      'REFERENCES mzml'
+                                      'REFERENCES mzml',
+                                      'FOREIGN KEY(channel_id)'
+                                      'REFERENCES isobaric_channels'
                                       ],
                    # ms1_quant has no spectra_id reference since it contains
                    # features and Im not sure if they can be linked to

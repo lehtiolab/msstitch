@@ -11,6 +11,11 @@ def create_isobaric_quant_lookup(quantdb, specfn_consensus_els, channelmap):
 
     spectra - an iterable of tupled (filename, spectra)
     consensus_els - a iterable with consensusElements"""
+    # store quantchannels in lookup and generate a db_id vs channel map
+    channels_store = ((x,) for x in sorted(channelmap))
+    quantdb.store_channelmap(channels_store)
+    channelmap_dbid = {channelmap[ch_name]: ch_id for ch_id, ch_name in
+                       quantdb.get_channelmap()}
     quants = []
     mzmlmap = quantdb.get_mzmlfile_map()
     for specfn, consensus_el in specfn_consensus_els:
@@ -20,7 +25,7 @@ def create_isobaric_quant_lookup(quantdb, specfn_consensus_els, channelmap):
         spectra_id = quantdb.get_spectra_id(mzmlmap[specfn],
                                             retention_time=rt)
         for channel_no in sorted(qdata.keys()):
-            quants.append((spectra_id, channelmap[channel_no],
+            quants.append((spectra_id, channelmap_dbid[channel_no],
                            qdata[channel_no]))
             if len(quants) == DB_STORE_CHUNK:
                 quantdb.store_isobaric_quants(quants)
@@ -56,7 +61,7 @@ def get_minmax(center, tolerance, toltype=None):
     center = float(center)
     if toltype == 'ppm':
         tolerance = int(tolerance) / 1000000 * center
-    else: 
+    else:
         tolerance = float(tolerance)
     return center - tolerance, center + tolerance
 
