@@ -23,7 +23,7 @@ def count_peps_psms(proteindata, p_acc, pool):
     proteindata[p_acc][pool]['peptides'] = len(data['peptides'])
 
 
-def create_proteindata_map(pgdb, pool_to_output):
+def create_proteindata_map(pgdb, pool_to_output=False):
     protein_psms_data = pgdb.get_all_protein_psms_with_sets()
     proteindata = {}
     psmdata = next(protein_psms_data)
