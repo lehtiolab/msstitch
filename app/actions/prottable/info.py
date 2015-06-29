@@ -6,7 +6,8 @@ def add_record_to_proteindata(proteindata, p_acc, pool, psmdata):
     try:
         proteindata[p_acc][pool]['psms'].add(psm_id)
     except KeyError:
-        emptyinfo = {'psms': set(), 'peptides': set(), 'proteins': set()}
+        emptyinfo = {'psms': set(), 'peptides': set(), 'proteins': set(),
+                     'unipeps': 0}
         try:
             proteindata[p_acc][pool] = emptyinfo
         except KeyError:
@@ -38,6 +39,7 @@ def create_proteindata_map(pgdb, pool_to_output=False):
             last_pool, last_prot = samplepool, p_acc
         add_record_to_proteindata(proteindata, p_acc, samplepool, psmdata)
     count_peps_psms(proteindata, last_prot, last_pool)
+    get_unique_peptides(proteindata)
     return proteindata
 
 
@@ -61,7 +63,6 @@ def add_protein_data(proteins, pgdb, headerfields, pool_to_output=False):
 def get_protein_data(proteindata, p_acc, headerfields):
     """Parses protein data for a certain protein into tsv output
     dictionary"""
-    unipepcount = 'na'
     proteincount = 'na'
     outdict = {}
     hfields = [prottabledata.HEADER_NO_UNIPEP,
@@ -69,9 +70,7 @@ def get_protein_data(proteindata, p_acc, headerfields):
                prottabledata.HEADER_NO_PSM,
                ]
     for pool, pdata in proteindata[p_acc].items():
-        pepcount = pdata['peptides']
-        psmcount = pdata['psms']
-        pool_values = [unipepcount, pepcount, psmcount]
+        pool_values = [pdata['unipeps'], pdata['peptides'], pdata['psms']]
         outdict.update({headerfields['proteindata'][hfield][pool]: val
                         for (hfield, val) in zip(hfields, pool_values)})
     outdict.update({prottabledata.HEADER_DESCRIPTION: pdata[p_acc]['desc'],
@@ -81,31 +80,23 @@ def get_protein_data(proteindata, p_acc, headerfields):
     return outdict
 
 
-def old_get_protein_data(protein_acc):
-    """Parses protein data from ."""
-    #protein data is ((psm_id, psmseq, fakemaster, all_group_proteins_acc,
-    #                   coverage, description),)
-#    protein_data = pgdb.get_protein_data(protein_acc)
-    description = protein_data[0][5]
-    coverage = protein_data[0][4]
-    psmcount = len(set([x[0] for x in protein_data]))
-    pepcount = len(set([x[1] for x in protein_data]))
-    proteincount = len(set([x[3] for x in protein_data]))
-    peptides_master_map = {}
-    for psm in protein_data:
-        try:
-            peptides_master_map[psm[1]].add(psm[2])
-        except KeyError:
-            peptides_master_map[psm[1]] = {psm[2]}
-    unipepcount = len([x for x in peptides_master_map
-                       if len(peptides_master_map[x]) == 1])
-    return {prottabledata.HEADER_DESCRIPTION: description,
-            prottabledata.HEADER_COVERAGE: coverage,
-            prottabledata.HEADER_NO_PROTEIN: proteincount,
-            prottabledata.HEADER_NO_UNIPEP: unipepcount,
-            prottabledata.HEADER_NO_PEPTIDE: pepcount,
-            prottabledata.HEADER_NO_PSM: psmcount,
-            #prottabledata.HEADER_AREA: area,
-            #prottabledata.HEADER_NO_QUANT_PSM: quantcount,
-            #prottabledata.HEADER_CV_QUANT_PSM: quantcv,
-            }
+def get_pep_prot_map(proteindata):
+    seq_protein_map = {}
+    for protein, pools in proteindata.items():
+        for pool, pooldata in pools.items():
+            seqs = pooldata['peptides']
+        for seq in seqs:
+            try:
+                seq_protein_map[seq][pool].add(protein)
+            except KeyError:
+                seq_protein_map[seq][pool] = {protein}
+            except KeyError:
+                seq_protein_map[seq] = {pool: {protein}}
+
+
+def get_unique_peptides(proteindata):
+    seq_protein_map = get_pep_prot_map(proteindata)
+    for seq, pools in seq_protein_map.items():
+        for pool, proteins in pools.items():
+            if len(proteins) == 1:
+                proteindata[next(iter(proteins))][pool]['unipeps'] += 1
