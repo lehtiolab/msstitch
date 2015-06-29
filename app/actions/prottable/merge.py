@@ -5,7 +5,6 @@ def build_proteintable(pqdb, header, headerfields, isobaric=False, precursor=Fal
     """Fetches proteins and quants from joined lookup table, loops through
     them and when all of a protein's quants have been collected, yields the
     protein quant information."""
-    print(isobaric, precursor, probability, proteindata)
     iso_fun = {True: get_isobaric_quant, False: lambda x, y, z: {}}[isobaric]
     ms1_fun = {True: get_precursor_quant, False: lambda x, y, z: {}}[precursor]
     prob_fun = {True: get_prot_probability, False: lambda x, y, z: {}}[probability]
@@ -13,7 +12,6 @@ def build_proteintable(pqdb, header, headerfields, isobaric=False, precursor=Fal
     protein_sql, sqlfieldmap = pqdb.prepare_mergetable_sql(precursor, isobaric, probability)
     proteins = pqdb.get_merged_proteins(protein_sql)
     protein = next(proteins)
-    print(protein)
     outprotein = {prottabledata.HEADER_PROTEIN: protein[sqlfieldmap['p_acc']]}
     fill_outprotein(outprotein, iso_fun, ms1_fun, prob_fun, protein, sqlfieldmap, headerfields)
     for protein in proteins:

@@ -74,7 +74,3 @@ def generate_header(headerfields, oldheader=False):
             for pools in fields.values():
                 header.extend(pools.values())
     return header
-
-
-def build_pool_header_field(pool, field):
-    return '{}_{}'.format(pool, field)
