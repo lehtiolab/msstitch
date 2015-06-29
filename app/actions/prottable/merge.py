@@ -2,7 +2,8 @@ from app.dataformats import prottable as prottabledata
 from app.actions.prottable import info as pdatagenerator
 
 
-def build_proteintable(pqdb, header, headerfields, isobaric=False, precursor=False, probability=False, proteindata=False):
+def build_proteintable(pqdb, header, headerfields, isobaric=False,
+                       precursor=False, probability=False, proteindata=False):
     """Fetches proteins and quants from joined lookup table, loops through
     them and when all of a protein's quants have been collected, yields the
     protein quant information."""
@@ -53,16 +54,20 @@ def get_isobaric_quant(protein, sqlmap, headerfields):
             headerfields['isoquant'][psmfield][pool]: nopsms}
 
 
+def simple_val_fetch(protein, sqlmap, headerfields, poolkey, fieldkey, valkey):
+    pool = protein[sqlmap[poolkey]]
+    hfield = headerfields[fieldkey][prottabledata.HEADER_AREA][pool]
+    return {hfield: protein[sqlmap[valkey]]}
+
+
 def get_precursor_quant(protein, sqlmap, headerfields):
-    pool = protein[sqlmap['preq_poolname']]
-    quantheadfield = headerfields['precursorquant'][prottabledata.HEADER_AREA][pool]
-    return {quantheadfield: protein[sqlmap['preq_val']]}
+    return simple_val_fetch(protein, sqlmap, headerfields, 'preq_poolname',
+                            'precursorquant', 'preq_val')
 
 
 def get_prot_probability(protein, sqlmap, headerfields):
-    pool = protein[sqlmap['prob_poolname']]
-    headfield = headerfields['probability'][prottabledata.HEADER_PROBABILITY][pool]
-    return {headfield: protein[sqlmap['prob_val']]}
+    return simple_val_fetch(protein, sqlmap, headerfields, 'prob_poolname',
+                            'probability', 'prob_val')
 
 
 def parse_NA(protein, header):
