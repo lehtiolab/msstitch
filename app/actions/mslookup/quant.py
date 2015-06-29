@@ -12,7 +12,7 @@ def create_isobaric_quant_lookup(quantdb, specfn_consensus_els, channelmap):
     spectra - an iterable of tupled (filename, spectra)
     consensus_els - a iterable with consensusElements"""
     # store quantchannels in lookup and generate a db_id vs channel map
-    channels_store = ((x,) for x in sorted(channelmap))
+    channels_store = ((name,) for name, c_id in sorted(channelmap.items(), key=lambda x: x[1]))
     quantdb.store_channelmap(channels_store)
     channelmap_dbid = {channelmap[ch_name]: ch_id for ch_id, ch_name in
                        quantdb.get_channelmap()}

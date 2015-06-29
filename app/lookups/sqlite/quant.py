@@ -36,13 +36,23 @@ class IsobaricQuantDB(QuantDB):
     def add_tables(self):
         self.create_tables(['isobaric_quant', 'isobaric_channels'])
 
+    def store_channelmap(self, channels):
+        self.store_many(
+            'INSERT INTO isobaric_channels(channel_name) VALUES(?)', channels)
+
     def store_isobaric_quants(self, quants):
         self.store_many(
-            'INSERT INTO isobaric_quant(spectra_id, quantmap, intensity) '
+            'INSERT INTO isobaric_quant(spectra_id, channel_id, intensity) '
             'VALUES (?, ?, ?)', quants)
 
     def index_isobaric_quants(self):
         self.index_column('spectraid_index', 'isobaric_quant', 'spectra_id')
+        self.index_column('channel_id_index', 'isobaric_quant', 'channel_id')
+
+    def get_channelmap(self):
+        cursor = self.get_cursor()
+        cursor.execute('SELECT channel_id, channel_name FROM isobaric_channels')
+        return cursor
 
 
 class PrecursorQuantDB(QuantDB):
