@@ -23,11 +23,7 @@ def count_peps_psms(proteindata, p_acc, pool):
     proteindata[p_acc][pool]['peptides'] = len(data['peptides'])
 
 
-def add_protein_data(proteins, pgdb, headerfields, pool_to_output=False):
-    """First creates a map with all master proteins with data,
-    then outputs protein data dicts for rows of a tsv. If a pool
-    is given then only output for that pool will be shown in the
-    protein table."""
+def create_proteindata_map(pgdb, pool_to_output):
     protein_psms_data = pgdb.get_all_protein_psms_with_sets()
     proteindata = {}
     psmdata = next(protein_psms_data)
@@ -42,13 +38,22 @@ def add_protein_data(proteins, pgdb, headerfields, pool_to_output=False):
             last_pool, last_prot = samplepool, p_acc
         add_record_to_proteindata(proteindata, p_acc, samplepool, psmdata)
     count_peps_psms(proteindata, last_prot, last_pool)
-    # now generate tsv output    
+    return proteindata
+
+
+def add_protein_data(proteins, pgdb, headerfields, pool_to_output=False):
+    """First creates a map with all master proteins with data,
+    then outputs protein data dicts for rows of a tsv. If a pool
+    is given then only output for that pool will be shown in the
+    protein table."""
+    proteindata = create_proteindata_map(pgdb, pool_to_output)
     for protein in proteins:
         outprotein = {k: v for k, v in protein.items()}
         protein_acc = protein[prottabledata.HEADER_PROTEIN]
         if not protein_acc in proteindata:
             continue
-        outprotein.update(get_protein_data(proteindata, protein_acc, headerfields))
+        outprotein.update(get_protein_data(proteindata, protein_acc,
+                                           headerfields))
         outprotein = {k: str(v) for k, v in outprotein.items()}
         yield outprotein
 
@@ -56,8 +61,6 @@ def add_protein_data(proteins, pgdb, headerfields, pool_to_output=False):
 def get_protein_data(proteindata, p_acc, headerfields):
     """Parses protein data for a certain protein into tsv output
     dictionary"""
-    description = 'na'
-    coverage = 'na'
     unipepcount = 'na'
     proteincount = 'na'
     outdict = {}
