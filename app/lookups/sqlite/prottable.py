@@ -9,7 +9,7 @@ class ProtTableDB(ResultLookupInterface):
     
     def store_protein_tables(self, tables):
         self.store_many(
-            'INSERT INTO protein_tables(prottable_file) VALUES(?)',
+            'INSERT INTO protein_tables(set_id, prottable_file) VALUES(?, ?)',
             tables)
     
     def store_quant_channels(self, quantchannels):
@@ -79,6 +79,13 @@ class ProtTableDB(ResultLookupInterface):
         cursor.execute(
             'SELECT DISTINCT prottable_id '
             'FROM protein_precur_quanted')
+        return cursor
+
+    def get_all_poolnames(self):
+        cursor = self.get_cursor()
+        cursor.execute(
+            'SELECT DISTINCT set_name, set_id '
+            'FROM biosets')
         return cursor
 
     def get_protein_table_map(self):

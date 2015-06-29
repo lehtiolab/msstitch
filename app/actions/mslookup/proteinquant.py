@@ -3,10 +3,12 @@ import os
 from app.readers import tsv as tsvreader
 
 
-def create_proteinquant_lookup(fns, pqdb, protacc_colnr,
+def create_proteinquant_lookup(fns, pqdb, poolnames, protacc_colnr,
                                ms1_qcolpattern=None, isobqcolpattern=None,
                                psmnrpattern=None, probcolpattern=None):
-    pqdb.store_protein_tables([(os.path.basename(fn),) for fn in fns])
+    poolmap = {name: pid for (name, pid) in pqdb.get_all_poolnames()}
+    pqdb.store_protein_tables([(poolmap[pool], os.path.basename(fn)) 
+                               for fn, pool in zip(fns, poolnames)])
     prottable_map = pqdb.get_protein_table_map()
     iso_quantcols, psmnrcolmap = {}, {}
     precur_quantcols, probcol = {}, {}

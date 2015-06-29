@@ -8,6 +8,8 @@ class ProteinQuantLookupDriver(base.LookupDriver):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.poolnames = [x.replace('"', '') for x in kwargs.get('setnames')]
+        # FIXME need check to see same poolnames correlate with self.fn len
         self.quantcolpattern = kwargs.get('quantcolpattern', None)
         self.psmnrcolpattern = kwargs.get('psmnrcolpattern', None)
         self.precursorquantcolpattern = kwargs.get('precursorquantcolpattern', None)
@@ -16,6 +18,7 @@ class ProteinQuantLookupDriver(base.LookupDriver):
 
     def create_lookup(self):
         lookups.create_proteinquant_lookup(self.fn, self.lookup,
+                                           self.poolnames,
                                            self.proteincols,
                                            self.precursorquantcolpattern,
                                            self.quantcolpattern,
