@@ -3,15 +3,15 @@ from app.lookups.sqlite.base import ResultLookupInterface
 
 class ProtTableDB(ResultLookupInterface):
     def add_tables(self):
-        self.create_tables(['protein_tables', 'protein_quanted', 
+        self.create_tables(['protein_tables', 'protein_quanted',
                             'protquant_channels', 'protein_precur_quanted',
                             'protein_probability'])
-    
+
     def store_protein_tables(self, tables):
         self.store_many(
             'INSERT INTO protein_tables(set_id, prottable_file) VALUES(?, ?)',
             tables)
-    
+
     def store_quant_channels(self, quantchannels):
         self.store_many(
             'INSERT INTO protquant_channels(prottable_id, channel_name, '
@@ -21,13 +21,15 @@ class ProtTableDB(ResultLookupInterface):
     def get_all_protein_psms_with_sets(self):
         fields = ['pgm.protein_acc', 'sets.set_name',
                   'psm.sequence', 'psm.psm_id',
-#                  'pgc.protein_acc', 'pcov.coverage', 'pd.description'
+                  'pd.description', 'pcov.coverage'
                   ]
         joins = [('psm_protein_groups', 'ppg', 'master_id'),
                  ('psms', 'psm', 'psm_id'),
                  ('mzml', 'sp', 'spectra_id'),
                  ('mzmlfiles', 'mzfn', 'mzmlfile_id'),
                  ('biosets', 'sets', 'set_id'),
+                 ('prot_desc', 'pd', 'protein_acc'),
+                 ('protein_coverage', 'pcov', 'protein_acc'),
 #                 ('protein_coverage', 'pcov', 'protein_acc'),
 #                 ('prot_desc', 'pd', 'protein_acc'),
                  ]
@@ -63,7 +65,7 @@ class ProtTableDB(ResultLookupInterface):
             joins.extend([('protein_probability', 'pprob', 'protein_acc')])
             selectmap.update({field: i + selectfieldcount for i, field in enumerate(['prob_fnid', 'prob_val'])})
             selectfieldcount = max(selectmap.values()) + 1
-           
+
         sql = 'SELECT {} FROM protein_quanted AS pq'.format(', '.join(selects))
         if joins:
             sql = '{} {}'.format(sql, ' '.join(['JOIN {} AS {} USING({})'.format(j[0], j[1], j[2]) for j in joins]))
@@ -115,7 +117,7 @@ class ProtTableDB(ResultLookupInterface):
         self.store_many(
             'INSERT INTO protein_precur_quanted(protein_acc, prottable_id, quantvalue) '
             'VALUES (?, ?, ?)', quants)
-    
+
     def store_protprob(self, probabilities):
         self.store_many(
             'INSERT INTO protein_probability(protein_acc, prottable_id, probability) '
