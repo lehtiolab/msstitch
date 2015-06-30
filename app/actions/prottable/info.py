@@ -39,7 +39,7 @@ def create_proteindata_map(pgdb, pool_to_output=False):
             last_pool, last_prot = samplepool, p_acc
         add_record_to_proteindata(proteindata, p_acc, samplepool, psmdata)
     count_peps_psms(proteindata, last_prot, last_pool)
-    get_unique_peptides(proteindata)
+    get_unique_peptides(pgdb, proteindata)
     return proteindata
 
 
@@ -80,23 +80,22 @@ def get_protein_data(proteindata, p_acc, headerfields):
     return outdict
 
 
-def get_pep_prot_map(proteindata):
+def get_pep_prot_map(pgdb):
     seq_protein_map = {}
-    for protein, pools in proteindata.items():
-        for pool, pooldata in pools.items():
-            seqs = pooldata['peptides']
-        for seq in seqs:
+    for p_acc, pool, seq in pgdb.get_all_proteins_psms_for_unipeps():
+        try:
+            seq_protein_map[pool][seq].add(p_acc)
+        except KeyError:
             try:
-                seq_protein_map[seq][pool].add(protein)
+                seq_protein_map[pool][seq] = {p_acc}
             except KeyError:
-                seq_protein_map[seq][pool] = {protein}
-            except KeyError:
-                seq_protein_map[seq] = {pool: {protein}}
+                seq_protein_map[pool] = {seq: {p_acc}}
+    return seq_protein_map
 
 
-def get_unique_peptides(proteindata):
-    seq_protein_map = get_pep_prot_map(proteindata)
-    for seq, pools in seq_protein_map.items():
-        for pool, proteins in pools.items():
+def get_unique_peptides(pgdb, proteindata):
+    seq_protein_map = get_pep_prot_map(pgdb)
+    for pool, peptides in seq_protein_map.items():
+        for proteins in peptides.values():
             if len(proteins) == 1:
                 proteindata[next(iter(proteins))][pool]['unipeps'] += 1
