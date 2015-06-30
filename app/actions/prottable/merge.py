@@ -54,20 +54,22 @@ def get_isobaric_quant(protein, sqlmap, headerfields):
             headerfields['isoquant'][psmfield][pool]: nopsms}
 
 
-def simple_val_fetch(protein, sqlmap, headerfields, poolkey, fieldkey, valkey):
+def simple_val_fetch(protein, sqlmap, headerfields, poolkey, valkey):
     pool = protein[sqlmap[poolkey]]
-    hfield = headerfields[fieldkey][prottabledata.HEADER_AREA][pool]
+    hfield = headerfields[pool]
     return {hfield: protein[sqlmap[valkey]]}
 
 
 def get_precursor_quant(protein, sqlmap, headerfields):
-    return simple_val_fetch(protein, sqlmap, headerfields, 'preq_poolname',
-                            'precursorquant', 'preq_val')
+    return simple_val_fetch(protein, sqlmap, 
+                            headerfields['precursorquant'][prottabledata.HEADER_AREA], 
+                            'preq_poolname', 'preq_val')
 
 
 def get_prot_probability(protein, sqlmap, headerfields):
-    return simple_val_fetch(protein, sqlmap, headerfields, 'prob_poolname',
-                            'probability', 'prob_val')
+    return simple_val_fetch(protein, sqlmap, 
+                            headerfields['probability'][prottabledata.HEADER_PROBABILITY],
+                            'prob_poolname', 'prob_val')
 
 
 def parse_NA(protein, header):
