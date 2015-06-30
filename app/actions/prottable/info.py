@@ -4,24 +4,24 @@ from app.dataformats import prottable as prottabledata
 def add_record_to_proteindata(proteindata, p_acc, pool, psmdata):
     seq, psm_id, desc, cov = psmdata[2], psmdata[3], psmdata[4], psmdata[5]
     try:
-        proteindata[p_acc][pool]['psms'].add(psm_id)
+        proteindata[p_acc]['pools'][pool]['psms'].add(psm_id)
     except KeyError:
         emptyinfo = {'psms': set(), 'peptides': set(), 'proteins': set(),
                      'unipeps': 0}
         try:
-            proteindata[p_acc][pool] = emptyinfo
+            proteindata[p_acc]['pools'][pool] = emptyinfo
         except KeyError:
-            proteindata[p_acc] = {pool: emptyinfo, 'desc': desc, 'cov': cov}
-    proteindata[p_acc][pool]['psms'].add(psm_id)
-    proteindata[p_acc][pool]['peptides'].add(seq)
+            proteindata[p_acc] = {'pools': {pool: emptyinfo}, 'desc': desc, 'cov': cov}
+    proteindata[p_acc]['pools'][pool]['psms'].add(psm_id)
+    proteindata[p_acc]['pools'][pool]['peptides'].add(seq)
     #proteindata[p_acc][pool]['proteins'].add(pg_content)
 
 
 def count_peps_psms(proteindata, p_acc, pool):
-    data = proteindata[p_acc][pool]
-    proteindata[p_acc][pool]['psms'] = len(data['psms'])
+    data = proteindata[p_acc]['pools'][pool]
+    proteindata[p_acc]['pools'][pool]['psms'] = len(data['psms'])
     #proteindata[prot][pool]['proteins'] = len(data['proteins'])
-    proteindata[p_acc][pool]['peptides'] = len(data['peptides'])
+    proteindata[p_acc]['pools'][pool]['peptides'] = len(data['peptides'])
 
 
 def create_proteindata_map(pgdb, pool_to_output=False):
@@ -69,12 +69,12 @@ def get_protein_data(proteindata, p_acc, headerfields):
                prottabledata.HEADER_NO_PEPTIDE,
                prottabledata.HEADER_NO_PSM,
                ]
-    for pool, pdata in proteindata[p_acc].items():
+    for pool, pdata in proteindata[p_acc]['pools'].items():
         pool_values = [pdata['unipeps'], pdata['peptides'], pdata['psms']]
         outdict.update({headerfields['proteindata'][hfield][pool]: val
                         for (hfield, val) in zip(hfields, pool_values)})
-    outdict.update({prottabledata.HEADER_DESCRIPTION: pdata[p_acc]['desc'],
-                    prottabledata.HEADER_COVERAGE: pdata[p_acc]['cov'],
+    outdict.update({prottabledata.HEADER_DESCRIPTION: proteindata[p_acc]['desc'],
+                    prottabledata.HEADER_COVERAGE: proteindata[p_acc]['cov'],
                     prottabledata.HEADER_NO_PROTEIN: proteincount,
                     })
     return outdict
@@ -98,4 +98,4 @@ def get_unique_peptides(pgdb, proteindata):
     for pool, peptides in seq_protein_map.items():
         for proteins in peptides.values():
             if len(proteins) == 1:
-                proteindata[next(iter(proteins))][pool]['unipeps'] += 1
+                proteindata[next(iter(proteins))]['pools'][pool]['unipeps'] += 1
