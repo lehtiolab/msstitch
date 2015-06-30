@@ -173,13 +173,16 @@ class ProteinGroupDB(ResultLookupInterface):
         joins = [('psm_protein_groups', 'ppg', 'psm_id'),
                  ('protein_group_master', 'pgm', 'master_id'),
                  ('protein_group_content', 'pgc', 'master_id'),
-                 ('protein_evidence', 'pev', 'protein_acc')]
+                ]
+        specialjoin = [('protein_evidence', 'pev')]
         if coverage:
             fields.append('pc.coverage')
-            joins.append(('protein_coverage', 'pc', 'protein_acc'))
+            specialjoin.append(('protein_coverage', 'pc'))
         join_sql = '\n'.join(['JOIN {0} AS {1} USING({2})'.format(
             j[0], j[1], j[2]) for j in joins])
-        sql = 'SELECT {0} FROM psmrows AS pr {1} ORDER BY pr.rownr'.format(
-            ', '.join(fields), join_sql)
+        sql = 'SELECT {0} FROM psmrows AS pr {1}\n{2}\n{2}'.format(
+            ', '.join(fields), join_sql, '{}')
+        specialjoin = '\n'.join(['JOIN {0} AS {1} ON pgc.protein_acc={1}.protein_acc'.format(j[0], j[1]) for j in specialjoin])
+        sql = sql.format(specialjoin, 'ORDER BY pr.rownr')
         cursor = self.get_cursor()
         return cursor.execute(sql)
