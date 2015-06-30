@@ -24,20 +24,6 @@ def get_splitcolnr(header, bioset, splitcol):
         raise RuntimeError('Must specify either --bioset or --splitcol')
 
 
-def get_splitheader(oldheader, rename_cols=None, renamepattern=None):
-    """Returns header for split files, adds a formatting string to
-    certain columns if user has asked for this"""
-    header = oldheader[:]
-    if rename_cols is not None:
-        for colnr in rename_cols:
-            header[colnr - 1] = '{0}_' + header[colnr - 1]
-    if renamepattern is not None:
-        for colnr, col in enumerate(oldheader):
-            if re.match('^{0}'.format(renamepattern), col):
-                header[colnr] = '{0}_' + header[colnr]
-    return header
-
-
 def generate_psms_split(fn, oldheader, bioset, splitcol):
     """Loops PSMs and outputs dictionaries passed to writer. Dictionaries
     contain the PSMs and info to which split pool the

@@ -28,12 +28,9 @@ class MzidTSVSplitDriver(MzidTSVDriver):
         super().__init__(**kwargs)
         self.bioset = kwargs.get('bioset', None)
         self.splitcol = kwargs.get('splitcol', None)
-        self.renamecols = kwargs.get('renamecols', None)
-        self.renamecolpattern = kwargs.get('renamecolpattern', None)
 
     def get_psms(self):
-        self.header = prep.get_splitheader(self.oldheader, self.renamecols,
-                                           self.renamecolpattern)
+        self.header = self.oldheader[:]
         self.psms = prep.generate_psms_split(self.fn, self.oldheader,
                                              self.bioset, self.splitcol)
 
