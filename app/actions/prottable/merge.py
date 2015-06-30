@@ -25,8 +25,8 @@ def build_proteintable(pqdb, header, headerfields, isobaric=False,
         if p_acc != outprotein[prottabledata.HEADER_PROTEIN]:
             yield parse_NA(outprotein, header)
             outprotein = {prottabledata.HEADER_PROTEIN: p_acc}
-        fill_outprotein(outprotein, iso_fun, ms1_fun, prob_fun, protein,
-                        sqlfieldmap, headerfields)
+        fill_outprotein(outprotein, iso_fun, ms1_fun, prob_fun, pdata_fun,
+                        protein, sqlfieldmap, headerfields, proteindatamap)
     yield parse_NA(outprotein, header)
 
 
