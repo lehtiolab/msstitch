@@ -6,8 +6,8 @@ prottable -- Creating and modifying protein tables
 
 import argparse
 import os
-import app.drivers.prottable as driver
-from app.drivers.prottable import probability, info, merge, precursorarea
+from app.drivers.prottable import (probability, info, merge, precursorarea,
+                                   create_labelfree)
 
 
 def parser_file_exists(currentparser, fn):
@@ -39,7 +39,7 @@ parser.add_argument('-c', dest='command', type=str,
                     'but NOT with -i.\n\n'
                     'addms1quant - Add MS1 quantification data from a\n'
                     'PSM table containing precursor quant areas. Needs\n'
-                    '--psmtable.\n\n'
+                    'a psmtable specified with -i.\n\n'
                     'createlabelfree - Create protein table from PSM table\n'
                     'containing precursor area quant information. Needs\n'
                     'input from --psmtable.\n\n'
@@ -92,7 +92,7 @@ commandmap = {
     'buildquant': merge.BuildProteinTableDriver,
     'addms1quant': precursorarea.AddPrecursorAreaDriver,
     'addprob': probability.AddProteinProbability,
-    #'createprottable': drivers.CreateProteinTableDriver,
+    'createlabelfree': create_labelfree.CreateLabelfreeProteinDriver,
 }
 
 command = commandmap[args.command](**vars(args))

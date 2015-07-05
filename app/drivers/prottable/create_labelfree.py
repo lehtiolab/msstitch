@@ -8,11 +8,10 @@ class CreateLabelfreeProteinDriver(ProttableDriver):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.psmfile = kwargs.get('psmfile', False)
         self.headertypes = ['precursorquant']
 
     def initialize_input(self):
-        self.in_psms = reader.generate_tsv_peptides(self.psmfile)
+        self.in_psms = reader.generate_tsv_peptides(self.fn)
 
     def set_protein_generator(self):
         self.proteins = preparation.create_protein_table_with_precursor_quant(
