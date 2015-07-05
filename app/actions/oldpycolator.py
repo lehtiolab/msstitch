@@ -37,13 +37,6 @@ def split_target_decoy(elements, ns, filter_type):
     return feats_to_process
 
 
-def get_score(elements, ns, scoretype='svm_score'):
-    for el in elements:
-        score = el.xpath('xmlns:{0}'.format(scoretype), namespaces=ns)[0].text
-        formatting.clear_el(el)
-        yield score
-
-
 def filter_peptide_length(features, elementtype, ns, minlen=0, maxlen=None):
     minlen = int(minlen)
     if maxlen is None:

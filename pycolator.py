@@ -16,6 +16,7 @@ from app.drivers.pycolator import filters
 from app.drivers.pycolator import lookup
 from app.drivers.pycolator import stats
 from app.drivers.pycolator import converters
+from app.drivers.pycolator import qvality
 
 
 def parser_file_exists(currentparser, fn):
@@ -109,18 +110,17 @@ parser.add_argument('-q', dest='qvalityout', help='Qvality output file. '
 args = parser.parse_args()
 
 commandmap = {
-    'splittd'    : splitmerge.SplitDriver,
-    'merge'      : splitmerge.MergeDriver,
+    'splittd': splitmerge.SplitDriver,
+    'merge': splitmerge.MergeDriver,
     'trypticlookup': lookup.CreateLookup,
-    'filteruni'  : filters.FilterUniquePeptides,
-    'filterlen'  : filters.FilterPeptideLength,
+    'filteruni': filters.FilterUniquePeptides,
+    'filterlen': filters.FilterPeptideLength,
     'filterknown': filters.FilterKnownPeptides,
-    'qvality'    : stats.QvalityDriver,
-    'reassign'   : stats.ReassignmentDriver,
-    'pout2tsv'   : converters.Pout2TSVDriver,
-    }
+    'qvality': qvality.QvalityDriver,
+    'reassign': stats.ReassignmentDriver,
+    'pout2tsv': converters.Pout2TSVDriver,
+}
 
 
 command = commandmap[args.command](**vars(args))
 command.run()
-
