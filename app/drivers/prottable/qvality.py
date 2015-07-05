@@ -7,6 +7,8 @@ class ProttableQvalityDriver(QvalityDriver):
     def __init__(self, **kwargs):
         super(ProttableQvalityDriver).__init__(**kwargs)
         self.score_get_fun = preparation.prepare_qvality_input
+        if '***reverse' not in self.qvalityoptions:
+            self.qvalityoptions.extend(['***reverse'])
 
     def set_features(self):
         targetheader = tsv.get_tsv_header(self.fn)
