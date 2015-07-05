@@ -7,7 +7,7 @@ prottable -- Creating and modifying protein tables
 import argparse
 import os
 from app.drivers.prottable import (probability, info, merge, precursorarea,
-                                   create_labelfree)
+                                   create_labelfree, qvality)
 
 
 def parser_file_exists(currentparser, fn):
@@ -46,7 +46,9 @@ parser.add_argument('-c', dest='command', type=str,
                     'addprob - Add protein probabilities from a\n'
                     'peptide table posterior error probabilities. Needs\n'
                     '--peptable, and probabilities are calculated \n'
-                    'as in Nesvizhskii et al. (2003) Anal.Chem., eq 3.',
+                    'as in Nesvizhskii et al. (2003) Anal.Chem., eq 3.\n\n',
+                    'qvality - Run qvality on protein tables containing \n'
+                    'target (-i) proteins and decoy (--decoy) proteins.',
                     required=True
                     )
 parser.add_argument('-i', dest='infile',
@@ -67,6 +69,9 @@ parser.add_argument('--psmtable', dest='psmfile', help='PSM table file '
 parser.add_argument('--peptable', dest='pepfile', help='Peptide table file '
                     'containing data for protein table, for example '
                     'peptide probabilities.',
+                    type=lambda x: parser_file_exists(parser, x))
+parser.add_argument('--decoy', dest='decoyfn', help='Protein table containing '
+                    'decoy proteins for running qvality',
                     type=lambda x: parser_file_exists(parser, x))
 parser.add_argument('--setname', dest='setname', help='Name of biological '
                     'set which to use when adding protein info to table. '
@@ -93,6 +98,7 @@ commandmap = {
     'addms1quant': precursorarea.AddPrecursorAreaDriver,
     'addprob': probability.AddProteinProbability,
     'createlabelfree': create_labelfree.CreateLabelfreeProteinDriver,
+    'qvality': qvality.QvalityDriver,
 }
 
 command = commandmap[args.command](**vars(args))
