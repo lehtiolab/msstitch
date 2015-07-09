@@ -9,6 +9,8 @@ def get_headerfields(headertypes, lookup=False, poolnames=False):
                       'precursorquant': get_precursorquant_fields,
                       'probability': get_probability_fields,
                       'proteindata': get_proteininfo_fields,
+                      'proteinfdr': get_proteinfdr_fields,
+                      'proteinpep': get_proteinpep_fields,
                       }
     for fieldtype in headertypes:
         hfields[fieldtype] = type_functions[fieldtype](lookup, poolnames)
@@ -31,6 +33,16 @@ def get_precursorquant_fields(pqdb=False, poolnames=False):
 def get_probability_fields(pqdb=False, poolnames=False):
     return {prottabledata.HEADER_PROBABILITY:
             get_header_field(prottabledata.HEADER_PROBABILITY, poolnames)}
+
+
+def get_proteinfdr_fields(pqbd=False, poolnames=False):
+    return {prottabledata.HEADER_QVAL:
+            get_header_field(prottabledata.HEADER_QVAL, poolnames)}
+
+
+def get_proteinpep_fields(pqbd=False, poolnames=False):
+    return {prottabledata.HEADER_PEP:
+            get_header_field(prottabledata.HEADER_PEP, poolnames)}
 
 
 def get_proteininfo_fields(pqdb=False, poolnames=False):

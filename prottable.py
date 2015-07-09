@@ -7,7 +7,7 @@ prottable -- Creating and modifying protein tables
 import argparse
 import os
 from app.drivers.prottable import (probability, info, merge, precursorarea,
-                                   create_labelfree, qvality)
+                                   create_labelfree, qvality, fdr)
 
 
 def parser_file_exists(currentparser, fn):
@@ -46,9 +46,12 @@ parser.add_argument('-c', dest='command', type=str,
                     'addprob - Add protein probabilities from a\n'
                     'peptide table posterior error probabilities. Needs\n'
                     '--peptable, and probabilities are calculated \n'
-                    'as in Nesvizhskii et al. (2003) Anal.Chem., eq 3.\n\n',
+                    'as in Nesvizhskii et al. (2003) Anal.Chem., eq 3.\n\n'
                     'qvality - Run qvality on protein tables containing \n'
-                    'target (-i) proteins and decoy (--decoy) proteins.',
+                    'target (-i) proteins and decoy (--decoy) proteins.\n\n'
+                    'addfdr - Add protein FDR to protein table by comparing\n'
+                    'protein probability with qvality lookup table. Needs \n'
+                    'to have qvality output file specified with --qvality',
                     required=True
                     )
 parser.add_argument('-i', dest='infile',
@@ -72,6 +75,9 @@ parser.add_argument('--peptable', dest='pepfile', help='Peptide table file '
                     type=lambda x: parser_file_exists(parser, x))
 parser.add_argument('--decoy', dest='decoyfn', help='Protein table containing '
                     'decoy proteins for running qvality',
+                    type=lambda x: parser_file_exists(parser, x))
+parser.add_argument('--qvality', dest='qvalityfile', help='Qvality output '
+                    'table where q value and PEP can be looked up in.',
                     type=lambda x: parser_file_exists(parser, x))
 parser.add_argument('--setname', dest='setname', help='Name of biological '
                     'set which to use when adding protein info to table. '
@@ -99,6 +105,7 @@ commandmap = {
     'addprob': probability.AddProteinProbability,
     'createlabelfree': create_labelfree.CreateLabelfreeProteinDriver,
     'qvality': qvality.QvalityDriver,
+    'fdr': fdr.ProttableFDRDriver,
 }
 
 command = commandmap[args.command](**vars(args))
