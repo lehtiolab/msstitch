@@ -20,9 +20,11 @@ class ProttableDriver(BaseDriver):
         self.finish()
 
     def create_header(self):
-        self.headerfields = headers.get_headerfields(self.headertypes, self.lookup,
+        self.headerfields = headers.get_headerfields(self.headertypes,
+                                                     self.lookup,
                                                      self.poolnames)
-        self.header = headers.generate_header(self.headerfields, self.oldheader)
+        self.header = headers.generate_header(self.headerfields,
+                                              self.oldheader)
 
     def write(self):
         outfn = self.create_outfilepath(self.fn, self.outsuffix)

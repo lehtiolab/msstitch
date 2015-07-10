@@ -1,5 +1,5 @@
 from app.drivers.pycolator import base
-from app import modifiers
+from app.actions.pycolator import reassign
 
 
 class ReassignmentDriver(base.PycolatorDriver):
@@ -12,16 +12,16 @@ class ReassignmentDriver(base.PycolatorDriver):
         self.reassign_feats = kwargs['feattype']
 
     def set_features(self):
-        stats = modifiers.parse_qvality_output(self.qvalityout)
+        stats = reassign.parse_qvality_output(self.qvalityout)
         if self.reassign_feats == 'psm':
             self.features = {
-                'psm': modifiers.reassign_elements(self.allpsms, stats,
-                                                   self.ns),
+                'psm': reassign.reassign_elements(self.allpsms, stats,
+                                                  self.ns),
                 'peptide': self.get_all_peptides_strings(),
             }
         elif self.reassign_feats == 'peptide':
             self.features = {
-                'peptide': modifiers.reassign_elements(self.allpeps, stats,
-                                                       self.ns),
+                'peptide': reassign.reassign_elements(self.allpeps, stats,
+                                                      self.ns),
                 'psm': self.get_all_psms_strings(),
             }
