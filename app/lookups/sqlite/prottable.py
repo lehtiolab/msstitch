@@ -93,6 +93,7 @@ class ProtTableDB(ResultLookupInterface):
             sql = '{} {}'.format(sql, ' '.join(
                 ['JOIN {} AS {} USING({})'.format(j[0], j[1], j[2])
                  for j in joins]))
+        sql = '{0} ORDER BY pq.protein_acc'.format(sql)
         return sql, selectmap
 
     def get_merged_proteins(self, sql):
