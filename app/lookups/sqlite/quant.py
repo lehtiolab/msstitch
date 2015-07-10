@@ -3,18 +3,28 @@ from app.lookups.sqlite.base import ResultLookupInterface
 
 class QuantDB(ResultLookupInterface):
 
-    def select_all_psm_quants(self):
-        sql = ('SELECT pr.rownr, ic.channel_name, iq.intensity, pq.intensity '
-               'FROM psmrows AS pr '
-               'JOIN psms USING(psm_id) '
-               'JOIN mzml USING(spectra_id) '
-               'JOIN isobaric_quant AS iq USING(spectra_id) '
-               'JOIN isobaric_channels AS ic USING(channel_id) '
-               'LEFT OUTER JOIN ms1_align USING(spectra_id) '
-               'LEFT OUTER JOIN ms1_quant AS pq USING(feature_id)'
-               )
+    def select_all_psm_quants(self, isobaric=False, precursor=False):
+        selects = ['pr.rownr']
+        joins = ['JOIN psms USING(psm_id)', 'JOIN mzml USING(spectra_id)']
+        sqlfields, fieldcount = {}, 1
+        if isobaric:
+            selects.extend(['ic.channel_name', 'iq.intensity'])
+            joins.extend(['JOIN isobaric_quant AS iq USING(spectra_id)',
+                          'JOIN isobaric_channels AS ic USING(channel_id)'])
+            sqlfields['isochan'] = fieldcount
+            sqlfields['isoquant'] = fieldcount + 1
+            fieldcount += 2
+        if precursor:
+            selects.extend(['pq.intensity'])
+            joins.extend(['LEFT OUTER JOIN ms1_align USING(spectra_id)',
+                          'LEFT OUTER JOIN ms1_quant AS pq USING(feature_id)'])
+            sqlfields['precursor'] = fieldcount
+        if not precursor and not isobaric:
+            raise RuntimeError('Cannot add quantification data, neither isobaric, '
+                               'nor precursor have been specified.')
+        sql = 'SELECT {} FROM psmrows as pr {}'.format(', '.join(selects), ' '.join(joins))
         cursor = self.get_cursor()
-        return cursor.execute(sql)
+        return cursor.execute(sql), sqlfields
 
     def get_precursor_quant_window(self, windowsize, minmz):
         cursor = self.get_cursor()

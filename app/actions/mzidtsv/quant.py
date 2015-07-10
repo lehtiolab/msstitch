@@ -3,22 +3,27 @@ from app.dataformats import mzidtsv as mzidtsvdata
 
 
 def generate_psms_quanted(quantdb, tsvfn, isob_header, oldheader,
-                          is_ibariq=False, precursor=False):
+                          isobaric=False, precursor=False):
     """Takes dbfn and connects, gets quants for each line in tsvfn, sorts
     them in line by using keys in quantheader list."""
-    allquants = quantdb.select_all_psm_quants()
+    allquants, sqlfields = quantdb.select_all_psm_quants(isobaric, precursor)
     quant = next(allquants)
     for rownr, psm in enumerate(readers.generate_tsv_psms(tsvfn, oldheader)):
         outpsm = {x: y for x, y in psm.items()}
-        if quant[3] is not None:
-            outpsm.update({mzidtsvdata.HEADER_PRECURSOR_QUANT: str(quant[3])})
+        if precursor:
+            pquant = quant[sqlfields['precursor']]
+            if pquant is None:
+                pquant = 'NA'
+            outpsm.update({mzidtsvdata.HEADER_PRECURSOR_QUANT: str(pquant)})
+        if isobaric:
+            isoquants = {}
+            while quant[0] == rownr:
+                isoquants.update({quant[sqlfields['isochan']]: 
+                                  str(quant[sqlfields['isoquant']])})
+                quant = next(allquants)
+            outpsm.update(get_quant_NAs(isoquants, isob_header))
         else:
-            outpsm.update({mzidtsvdata.HEADER_PRECURSOR_QUANT: 'NA'})
-        isoquants = {}
-        while quant[0] == rownr:
-            isoquants.update({quant[1]: str(quant[2])})
             quant = next(allquants)
-        outpsm.update(get_quant_NAs(isoquants, isob_header))
         yield outpsm
 
 
