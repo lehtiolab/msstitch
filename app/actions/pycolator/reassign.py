@@ -1,6 +1,6 @@
 import sys
 
-from . import formatting
+from app import formatting
 
 
 def parse_qvality_output(fn):

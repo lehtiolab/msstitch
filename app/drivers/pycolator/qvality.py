@@ -47,6 +47,6 @@ class QvalityDriver(base.PycolatorDriver):
         outfn = self.create_outfilepath(self.fn, '_qvalityout.txt')
         command = ['qvality']
         command.extend(self.qvalityoptions)
-        command.extend([self.scores['target'], self.scores['decoy']])
+        command.extend([self.scores['target']['fn'], self.scores['decoy']['fn']])
         command.extend(['-o', outfn])
         subprocess.call(command)
