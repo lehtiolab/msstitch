@@ -9,5 +9,5 @@ def create_protein_table_with_precursor_quant(psms, headerfields):
                                                                  protacc)
         outprotein = {prottabledata.HEADER_PROTEIN: protacc,
                       headerfields['precursorquant'][
-                          prottabledata.HEADER_AREA][None]: amount}
+                          prottabledata.HEADER_AREA][None]: str(amount)}
         yield outprotein
