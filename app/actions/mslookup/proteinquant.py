@@ -7,7 +7,7 @@ def create_proteinquant_lookup(fns, pqdb, poolnames, protacc_colnr,
                                ms1_qcolpattern=None, isobqcolpattern=None,
                                psmnrpattern=None, probcolpattern=None):
     poolmap = {name: pid for (name, pid) in pqdb.get_all_poolnames()}
-    pqdb.store_protein_tables([(poolmap[pool], os.path.basename(fn)) 
+    pqdb.store_protein_tables([(poolmap[pool], os.path.basename(fn))
                                for fn, pool in zip(fns, poolnames)])
     prottable_map = pqdb.get_protein_table_map()
     iso_quantcols, psmnrcolmap = {}, {}
@@ -15,7 +15,7 @@ def create_proteinquant_lookup(fns, pqdb, poolnames, protacc_colnr,
     for fn in fns:
         header = tsvreader.get_tsv_header(fn)
         basefn = os.path.basename(fn)
-        for colmap, pattern in zip([iso_quantcols, psmnrcolmap], 
+        for colmap, pattern in zip([iso_quantcols, psmnrcolmap],
                                    [isobqcolpattern, psmnrpattern]):
             get_cols_in_file(colmap, pattern, basefn, header)
         for colmap, pattern in zip([precur_quantcols, probcol],
@@ -24,7 +24,7 @@ def create_proteinquant_lookup(fns, pqdb, poolnames, protacc_colnr,
     if iso_quantcols and psmnrcolmap:
         create_isobaric_proteinquant_lookup(fns, prottable_map, pqdb, protacc_colnr,
                                             iso_quantcols, psmnrcolmap)
-    if precur_quantcols: 
+    if precur_quantcols:
         create_precursor_proteinquant_lookup(fns, prottable_map, pqdb, protacc_colnr,
                                              precur_quantcols)
     if probcol:
@@ -75,7 +75,7 @@ def create_isobaric_proteinquant_lookup(fns, prottable_map, pqdb, protacc_colnr,
             to_store = []
     pqdb.store_isobaric_protquants(to_store)
 
-        
+
 def get_cols_in_file(column_map, pattern, fn, header, single_col=False):
     if pattern is None:
         return {}
