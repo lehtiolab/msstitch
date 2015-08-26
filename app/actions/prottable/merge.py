@@ -8,11 +8,12 @@ def build_proteintable(pqdb, header, headerfields, isobaric=False,
     them and when all of a protein's quants have been collected, yields the
     protein quant information."""
     proteindatamap = pdatagenerator.create_proteindata_map(pqdb)
-    iso_fun = {True: get_isobaric_quant, False: lambda x, y, z: {}}[isobaric]
-    ms1_fun = {True: get_precursor_quant, False: lambda x, y, z: {}}[precursor]
+    empty_return = lambda x, y, z: {}
+    iso_fun = {True: get_isobaric_quant, False: empty_return}[isobaric]
+    ms1_fun = {True: get_precursor_quant, False: empty_return}[precursor]
     prob_fun = {True: get_prot_probability,
-                False: lambda x, y, z: {}}[probability]
-    pdata_fun = {True: get_protein_data, False: lambda x: {}}[proteindata]
+                False: empty_return}[probability]
+    pdata_fun = {True: get_protein_data, False: empty_return}[proteindata]
     protein_sql, sqlfieldmap = pqdb.prepare_mergetable_sql(precursor, isobaric,
                                                            probability)
     proteins = pqdb.get_merged_proteins(protein_sql)
