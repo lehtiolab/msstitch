@@ -57,9 +57,9 @@ class ProtTableDB(ResultLookupInterface):
             selects.extend(['pc.channel_name', 'bs.set_name',
                             'pc.amount_psms_name', 'pq.quantvalue',
                             'pq.amount_psms'])
-            joins.extend([('protquant_channels', 'pc', 'channel_id'),
-                          ('protein_tables', 'pt', 'prottable_id'),
-                          ('biosets', 'bs', 'set_id')
+            joins.extend([('protquant_channels', 'pc', 'pq', 'channel_id'),
+                          ('protein_tables', 'pt', 'pc', 'prottable_id'),
+                          ('biosets', 'bs', 'pt', 'set_id')
                           ])
             selectmap.update({field: i + selectfieldcount
                               for i, field in enumerate(
@@ -69,9 +69,9 @@ class ProtTableDB(ResultLookupInterface):
             selectfieldcount = max(selectmap.values()) + 1
         if precursor:
             selects.extend(['prqbs.set_name', 'preq.quantvalue'])
-            joins.extend([('protein_precur_quanted', 'preq', 'protein_acc'),
-                          ('protein_tables', 'prqpt', 'prottable_id'),
-                          ('biosets', 'prqbs', 'set_id')
+            joins.extend([('protein_precur_quanted', 'preq', 'pq', 'protein_acc'),
+                          ('protein_tables', 'prqpt', 'preq', 'prottable_id'),
+                          ('biosets', 'prqbs', 'prqpt', 'set_id')
                           ])
             selectmap.update({field: i + selectfieldcount
                               for i, field in enumerate(['preq_poolname',
@@ -79,9 +79,9 @@ class ProtTableDB(ResultLookupInterface):
             selectfieldcount = max(selectmap.values()) + 1
         if probability:
             selects.extend(['probbs.set_name', 'pprob.probability'])
-            joins.extend([('protein_probability', 'pprob', 'protein_acc'),
-                          ('protein_tables', 'probpt', 'prottable_id'),
-                          ('biosets', 'probbs', 'set_id')
+            joins.extend([('protein_probability', 'pprob', 'pq', 'protein_acc'),
+                          ('protein_tables', 'probpt', 'pprob', 'prottable_id'),
+                          ('biosets', 'probbs', 'probpt', 'set_id')
                           ])
             selectmap.update({field: i + selectfieldcount
                               for i, field in enumerate(['prob_poolname',
@@ -91,7 +91,7 @@ class ProtTableDB(ResultLookupInterface):
         sql = 'SELECT {} FROM protein_quanted AS pq'.format(', '.join(selects))
         if joins:
             sql = '{} {}'.format(sql, ' '.join(
-                ['JOIN {} AS {} USING({})'.format(j[0], j[1], j[2])
+                ['JOIN {0} AS {1} ON {2}.{3}={1}.{3}'.format(j[0], j[1], j[2], j[3])
                  for j in joins]))
         sql = '{0} ORDER BY pq.protein_acc'.format(sql)
         return sql, selectmap
