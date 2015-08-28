@@ -10,10 +10,14 @@ class ProttableQvalityDriver(QvalityDriver):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.score_get_fun = preparation.prepare_qvality_input
-        if '***reverse' not in self.qvalityoptions:
-            self.qvalityoptions.extend(['***reverse'])
+        if '--reverse' not in self.qvalityoptions:
+            self.qvalityoptions.extend(['--reverse'])
+        if self.featuretype not in ['probability']:
+            raise Exception('Featuretype (-f) should be proteinprobability.')
+        self.score_get_fun = preparation.prepare_qvality_input
 
     def set_features(self):
+        """Creates scorefiles for qvality's target and decoy distributions"""
         targetheader = tsv.get_tsv_header(self.fn)
         self.target = tsv.generate_tsv_proteins(self.fn, targetheader)
         decoyheader = tsv.get_tsv_header(self.decoy)

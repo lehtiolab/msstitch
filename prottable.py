@@ -51,7 +51,7 @@ parser.add_argument('-c', dest='command', type=str,
                     'peptide table posterior error probabilities. Needs\n'
                     '--peptable, and probabilities are calculated \n'
                     'as in Nesvizhskii et al. (2003) Anal.Chem., eq 3.\n\n'
-                    'qvality - Run qvality on protein tables containing \n'
+                    'protqvality - Run qvality on protein tables containing \n'
                     'target (-i) proteins and decoy (--decoy) proteins.\n\n'
                     'addfdr - Add protein FDR to protein table by comparing\n'
                     'protein probability with qvality lookup table. Needs \n'
@@ -80,6 +80,9 @@ parser.add_argument('--peptable', dest='pepfile', help='Peptide table file '
 parser.add_argument('--decoy', dest='decoyfn', help='Protein table containing '
                     'decoy proteins for running qvality',
                     type=lambda x: parser_file_exists(parser, x))
+parser.add_argument('-o', dest='options', nargs='+',
+                    help='Extra options that may be passed to qvality.'
+                    'Option form: -o ***flag value ***flag ***flag value')
 parser.add_argument('--qvality', dest='qvalityfile', help='Qvality output '
                     'table where q value and PEP can be looked up in.',
                     type=lambda x: parser_file_exists(parser, x))
