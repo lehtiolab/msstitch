@@ -7,7 +7,8 @@ prottable -- Creating and modifying protein tables
 import argparse
 import os
 from app.drivers.prottable import (probability, info, merge, precursorarea,
-                                   create_labelfree, qvality, fdr)
+                                   create_empty, create_labelfree, qvality,
+                                   fdr)
 
 
 def parser_file_exists(currentparser, fn):
@@ -43,6 +44,9 @@ parser.add_argument('-c', dest='command', type=str,
                     'createlabelfree - Create protein table from PSM table\n'
                     'containing precursor area quant information. Needs\n'
                     'input from --psmtable.\n\n'
+                    'emptyprottable - Create protein table from PSM table\n'
+                    'containing no quant data, resulting in one column with\n'
+                    'master proteins only.\n\n'
                     'addprob - Add protein probabilities from a\n'
                     'peptide table posterior error probabilities. Needs\n'
                     '--peptable, and probabilities are calculated \n'
@@ -104,8 +108,9 @@ commandmap = {
     'addms1quant': precursorarea.AddPrecursorAreaDriver,
     'addprob': probability.AddProteinProbability,
     'createlabelfree': create_labelfree.CreateLabelfreeProteinDriver,
-    'qvality': qvality.QvalityDriver,
-    'fdr': fdr.ProttableFDRDriver,
+    'emptyprottable': create_empty.CreateEmptyDriver,
+    'protqvality': qvality.QvalityDriver,
+    'protfdr': fdr.ProttableFDRDriver,
 }
 
 command = commandmap[args.command](**vars(args))
