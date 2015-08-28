@@ -1,4 +1,5 @@
 from app.dataformats import mzidtsv as mzidtsvdata
+from app.dataformats import prottable as prottabledata
 
 
 def generate_master_proteins(psms):
@@ -10,5 +11,5 @@ def generate_master_proteins(psms):
         if ';' in protacc:
             continue
         master_proteins[protacc] = 1
-    master_proteins = (x for x in master_proteins)
-    return master_proteins
+    for protacc in master_proteins:
+        yield {prottabledata.HEADER_PROTEIN: protacc}
