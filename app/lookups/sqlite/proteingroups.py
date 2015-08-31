@@ -33,6 +33,7 @@ class ProteinGroupDB(ResultLookupInterface):
                 'INSERT INTO protein_seq(protein_acc, sequence) '
                 'VALUES(?, ?)', sequences)
         self.conn.commit()
+        self.index_column('proteins_index', 'proteins', 'protein_acc')
 
     def store_descriptions(self, descriptions):
         cursor = self.get_cursor()

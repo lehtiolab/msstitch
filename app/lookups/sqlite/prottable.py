@@ -3,7 +3,7 @@ from app.lookups.sqlite.base import ResultLookupInterface
 
 class ProtTableDB(ResultLookupInterface):
     def add_tables(self):
-        self.create_tables(['protein_tables', 'protein_quanted',
+        self.create_tables(['protein_tables', 'protein_iso_quanted',
                             'protquant_channels', 'protein_precur_quanted',
                             'protein_probability', 'protein_fdr',
                             'protein_pep'])
@@ -109,7 +109,8 @@ class ProtTableDB(ResultLookupInterface):
                                                          'pep_val'])})
             selectfieldcount = max(selectmap.values()) + 1
 
-        sql = 'SELECT {} FROM protein_quanted AS pq'.format(', '.join(selects))
+        sql = 'SELECT {} FROM protein_iso_quanted AS pq'.format(
+            ', '.join(selects))
         if joins:
             sql = '{} {}'.format(sql, ' '.join(
                 ['JOIN {0} AS {1} ON {2}.{3}={1}.{3}'.format(
@@ -150,6 +151,12 @@ class ProtTableDB(ResultLookupInterface):
                        'FROM protein_tables')
         return {fn: table_id for (table_id, fn) in cursor}
 
+    def get_protein_acc_map(self):
+        cursor = self.get_cursor()
+        cursor.execute('SELECT pacc_id, protein_acc'
+                       'FROM proteins')
+        return {acc: table_id for (table_id, acc) in cursor}
+
     def get_quantchannel_map(self):
         outdict = {}
         cursor = self.get_cursor()
@@ -165,8 +172,8 @@ class ProtTableDB(ResultLookupInterface):
 
     def store_isobaric_protquants(self, quants):
         self.store_many(
-            'INSERT INTO protein_quanted(protein_acc, channel_id, quantvalue, '
-            'amount_psms) '
+            'INSERT INTO protein_iso_quanted(protein_acc, channel_id, '
+            'quantvalue, amount_psms) '
             'VALUES (?, ?, ?, ?)', quants)
 
     def store_precursor_protquants(self, quants):

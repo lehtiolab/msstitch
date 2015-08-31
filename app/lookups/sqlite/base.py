@@ -55,7 +55,8 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                'rownr INTEGER',
                                'FOREIGN KEY(psm_id) '
                                'REFERENCES psms(psm_id)'],
-                   'proteins': ['protein_acc TEXT PRIMARY KEY NOT NULL'],
+                   'proteins': ['pacc_id INTEGER PRIMARY KEY',
+                                'protein_acc TEXT'],
                    'protein_tables': ['prottable_id INTEGER PRIMARY KEY',
                                       'set_id INTEGER',
                                       'prottable_file TEXT',
@@ -63,25 +64,26 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                       'REFERENCES biosets'],
                    'protein_precur_quanted':
                    ['prot_precquant_id INTEGER PRIMARY KEY',
-                    'protein_acc TEXT',
+                    'pacc_id TEXT',
                     'prottable_id INTEGER',
                     'quantvalue REAL',
-                    'FOREIGN KEY(protein_acc) '
-                    'REFERENCES proteins(protein_acc) '
+                    'FOREIGN KEY(pacc_id) '
+                    'REFERENCES proteins(pacc_id) '
                     'FOREIGN KEY(prottable_id) '
                     'REFERENCES protein_tables(prottable_id)'
                     ],
-                   'protein_quanted': ['proteinquant_id INTEGER PRIMARY KEY',
-                                       'protein_acc TEXT',
-                                       'channel_id INTEGER',
-                                       'quantvalue REAL',
-                                       'amount_psms INTEGER',
-                                       'FOREIGN KEY(protein_acc) '
-                                       'REFERENCES proteins(protein_acc) '
-                                       'FOREIGN KEY(channel_id) '
-                                       'REFERENCES '
-                                       'protquant_channels(channel_id)'
-                                       ],
+                   'protein_iso_quanted': ['proteinquant_id '
+                                           'INTEGER PRIMARY KEY',
+                                           'pacc_id INTEGER',
+                                           'channel_id INTEGER',
+                                           'quantvalue REAL',
+                                           'amount_psms INTEGER',
+                                           'FOREIGN KEY(pacc_id) '
+                                           'REFERENCES proteins(pacc_id) '
+                                           'FOREIGN KEY(channel_id) '
+                                           'REFERENCES '
+                                           'protquant_channels(channel_id)'
+                                           ],
                    'protquant_channels': ['channel_id INTEGER PRIMARY KEY',
                                           'prottable_id INTEGER',
                                           'channel_name TEXT',

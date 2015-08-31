@@ -11,6 +11,7 @@ def create_proteinquant_lookup(fns, pqdb, poolnames, protacc_colnr,
     pqdb.store_protein_tables([(poolmap[pool], os.path.basename(fn))
                                for fn, pool in zip(fns, poolnames)])
     prottable_map = pqdb.get_protein_table_map()
+    protein_acc_map = pqdb.get_protein_acc_map()
     iso_quantcols, psmnrcolmap = {}, {}
     precur_quantcols, probcol, fdrcol, pepcol = {}, {}, {}, {}
     for fn in fns:
@@ -24,31 +25,34 @@ def create_proteinquant_lookup(fns, pqdb, poolnames, protacc_colnr,
                                     fdrcolpattern, pepcolpattern]):
             get_cols_in_file(colmap, pattern, basefn, header, single_col=True)
     if iso_quantcols and psmnrcolmap:
-        create_isobaric_proteinquant_lookup(fns, prottable_map, pqdb,
+        create_isobaric_proteinquant_lookup(fns, prottable_map,
+                                            protein_acc_map, pqdb,
                                             protacc_colnr,
                                             iso_quantcols, psmnrcolmap)
     if precur_quantcols:
-        create_precursor_proteinquant_lookup(fns, prottable_map, pqdb,
+        create_precursor_proteinquant_lookup(fns, prottable_map,
+                                             protein_acc_map, pqdb,
                                              protacc_colnr, precur_quantcols)
     if probcol:
-        create_probability_proteinquant_lookup(fns, prottable_map, pqdb,
+        create_probability_proteinquant_lookup(fns, prottable_map,
+                                               protein_acc_map, pqdb,
                                                protacc_colnr, probcol)
     if fdrcol:
-        create_fdr_proteinquant_lookup(fns, prottable_map, pqdb,
-                                       protacc_colnr, fdrcol)
+        create_fdr_proteinquant_lookup(fns, prottable_map, protein_acc_map,
+                                       pqdb, protacc_colnr, fdrcol)
     if pepcol:
-        create_pep_proteinquant_lookup(fns, prottable_map, pqdb,
-                                       protacc_colnr, pepcol)
+        create_pep_proteinquant_lookup(fns, prottable_map, protein_acc_map,
+                                       pqdb, protacc_colnr, pepcol)
 
 
-def create_protein_lookup(fns, prottable_id_map, pqdbmethod, protacc_colnr,
-                          colmap):
+def create_protein_lookup(fns, prottable_id_map, pacc_map, pqdbmethod,
+                          protacc_colnr, colmap):
     """General method to store single column data from protein tables
     in lookup"""
     to_store = []
     for fn, header, pquant in tsvreader.generate_tsv_protein_quants(fns):
-        pqdata = (pquant[header[protacc_colnr]], prottable_id_map[fn],
-                  pquant[colmap[fn]])
+        pacc_id = pacc_map[pquant[header[protacc_colnr]]]
+        pqdata = (pacc_id, prottable_id_map[fn], pquant[colmap[fn]])
         to_store.append(pqdata)
         if len(to_store) > 10000:
             pqdbmethod(to_store)
@@ -56,35 +60,35 @@ def create_protein_lookup(fns, prottable_id_map, pqdbmethod, protacc_colnr,
     pqdbmethod(to_store)
 
 
-def create_probability_proteinquant_lookup(fns, prottable_map, pqdb,
+def create_probability_proteinquant_lookup(fns, prottable_map, pacc_map, pqdb,
                                            protacc_colnr, probcolmap):
     """Stores protein probability"""
-    create_protein_lookup(fns, prottable_map, pqdb.store_protprob,
+    create_protein_lookup(fns, prottable_map, pacc_map, pqdb.store_protprob,
                           protacc_colnr, probcolmap)
 
 
-def create_fdr_proteinquant_lookup(fns, prottable_map, pqdb,
+def create_fdr_proteinquant_lookup(fns, prottable_map, pacc_map, pqdb,
                                    protacc_colnr, fdrcolmap):
     """Stores protein FDR"""
-    create_protein_lookup(fns, prottable_map, pqdb.store_protfdr,
+    create_protein_lookup(fns, prottable_map, pacc_map, pqdb.store_protfdr,
                           protacc_colnr, fdrcolmap)
 
 
-def create_pep_proteinquant_lookup(fns, prottable_map, pqdb,
+def create_pep_proteinquant_lookup(fns, prottable_map, pacc_map, pqdb,
                                    protacc_colnr, pepcolmap):
     """Stores protein PEP"""
-    create_protein_lookup(fns, prottable_map, pqdb.store_protpep,
+    create_protein_lookup(fns, prottable_map, pacc_map, pqdb.store_protpep,
                           protacc_colnr, pepcolmap)
 
 
-def create_precursor_proteinquant_lookup(fns, prottable_map, pqdb,
+def create_precursor_proteinquant_lookup(fns, prottable_map, pacc_map, pqdb,
                                          protacc_colnr, quantcolmap):
     """Stores protein precursor quant data"""
     create_protein_lookup(fns, prottable_map, pqdb.store_precursor_protquants,
                           protacc_colnr, quantcolmap)
 
 
-def create_isobaric_proteinquant_lookup(fns, prottable_map, pqdb,
+def create_isobaric_proteinquant_lookup(fns, prottable_map, pacc_map, pqdb,
                                         protacc_colnr, allquantcols,
                                         psmnrcolmap):
     """Creates a lookup dict from protein quant input files and some
@@ -97,7 +101,7 @@ def create_isobaric_proteinquant_lookup(fns, prottable_map, pqdb,
     to_store = []
     for fn, header, pquant in tsvreader.generate_tsv_protein_quants(fns):
         pqdata = get_isob_protquant_data(pquant, header, prottable_map[fn],
-                                         protacc_colnr, quantmap)
+                                         pacc_map, protacc_colnr, quantmap)
         to_store.extend(pqdata)
         if len(to_store) > 10000:
             pqdb.store_isobaric_protquants(to_store)
@@ -132,10 +136,10 @@ def map_psmnrcol_to_quantcol(quantcols, psmcols, prottable_map):
             yield (prottable_map[fn], qcol, psmcol)
 
 
-def get_isob_protquant_data(pquant, header, fnid, acccol, qmap):
+def get_isob_protquant_data(pquant, header, fnid, pacc_map, acccol, qmap):
     # (protein_acc, quantmap[qcol], quantvalue, amount_peptides)
     """Turns a dict from a line of protein quant data into a set of
     tuples that can be stored in db"""
-    protacc = pquant[header[acccol]]
+    protacc_id = pacc_map[pquant[header[acccol]]]
     for channel_name, (channel_id, psmfield) in qmap[fnid].items():
-        yield (protacc, channel_id, pquant[channel_name], pquant[psmfield])
+        yield (protacc_id, channel_id, pquant[channel_name], pquant[psmfield])
