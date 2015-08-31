@@ -20,7 +20,7 @@ def parse_qvality_output(fn):
 
 def reassign_elements(elements, stats, ns):
     for el in elements:
-        score = el.xpath('xmlns:svm_score', namespaces=ns)[0]
+        score = float(el.xpath('xmlns:svm_score', namespaces=ns)[0].text)
         oldq = el.xpath('xmlns:q_value', namespaces=ns)[0]
         oldpep = el.xpath('xmlns:pep', namespaces=ns)[0]
         newq, newpep, warning = lookup_statistic(score, stats)
@@ -30,11 +30,10 @@ def reassign_elements(elements, stats, ns):
         yield formatting.string_and_clear(el, ns)
 
 
-def lookup_statistic(element, stats):
+def lookup_statistic(score, stats):
     """ Finds statistics that correspond to PSM/peptide/protein feature's
     score. Loops through list of qvality generated scores until it finds
     values closest to the feature's svm_score."""
-    score = float(element.text)
     if score in stats:
         return stats[score]['q'], stats[score]['PEP'], None
 

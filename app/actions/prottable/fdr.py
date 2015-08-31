@@ -9,7 +9,7 @@ def assign_protein_fdr(qvalityfn, proteins, headerfields):
     pepheader = headerfields['proteinpep'][prottabledata.HEADER_PEP][None]
     for protein in proteins:
         outprotein = {k: v for k, v in protein.items()}
-        pprob = outprotein[prottabledata.HEADER_PROBABILITY]
+        pprob = float(outprotein[prottabledata.HEADER_PROBABILITY])
         qval, pep, warning = pyreassign.lookup_statistic(pprob, qvalityout)
         outprotein.update({fdrheader: qval, pepheader: pep})
         yield outprotein
