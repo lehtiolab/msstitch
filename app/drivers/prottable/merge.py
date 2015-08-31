@@ -18,6 +18,8 @@ class BuildProteinTableDriver(ProttableMergeDriver):
         self.isobaricquant = kwargs.get('isobaric', False)
         self.precursorquant = kwargs.get('precursor', False)
         self.probability = kwargs.get('probability', False)
+        self.fdr = kwargs.get('fdr', False)
+        self.pep = kwargs.get('pep', False)
         self.proteindata = kwargs.get('proteindata', False)
 
     def set_protein_generator(self):
@@ -28,4 +30,5 @@ class BuildProteinTableDriver(ProttableMergeDriver):
                                                        self.isobaricquant,
                                                        self.precursorquant,
                                                        self.probability,
+                                                       self.fdr, self.pep,
                                                        self.proteindata)

@@ -49,7 +49,7 @@ class ProtTableDB(ResultLookupInterface):
         return cursor.execute(sql)
 
     def prepare_mergetable_sql(self, precursor=False, isobaric=False,
-                               probability=False):
+                               probability=False, fdr=False, pep=False):
         selects = ['pq.protein_acc']
         selectmap = {'p_acc': 0}
         selectfieldcount = max(selectmap.values()) + 1
@@ -88,11 +88,32 @@ class ProtTableDB(ResultLookupInterface):
                               for i, field in enumerate(['prob_poolname',
                                                          'prob_val'])})
             selectfieldcount = max(selectmap.values()) + 1
+        if fdr:
+            selects.extend(['fdrbs.set_name', 'pfdr.fdr'])
+            joins.extend([('protein_fdr', 'pfdr', 'pq', 'protein_acc'),
+                          ('protein_tables', 'fdrpt', 'pfdr', 'prottable_id'),
+                          ('biosets', 'fdrbs', 'fdrpt', 'set_id')
+                          ])
+            selectmap.update({field: i + selectfieldcount
+                              for i, field in enumerate(['fdr_poolname',
+                                                         'fdr_val'])})
+            selectfieldcount = max(selectmap.values()) + 1
+        if pep:
+            selects.extend(['pepbs.set_name', 'ppep.pep'])
+            joins.extend([('protein_pep', 'ppep', 'pq', 'protein_acc'),
+                          ('protein_tables', 'peppt', 'ppep', 'prottable_id'),
+                          ('biosets', 'pepbs', 'peppt', 'set_id')
+                          ])
+            selectmap.update({field: i + selectfieldcount
+                              for i, field in enumerate(['pep_poolname',
+                                                         'pep_val'])})
+            selectfieldcount = max(selectmap.values()) + 1
 
         sql = 'SELECT {} FROM protein_quanted AS pq'.format(', '.join(selects))
         if joins:
             sql = '{} {}'.format(sql, ' '.join(
-                ['JOIN {0} AS {1} ON {2}.{3}={1}.{3}'.format(j[0], j[1], j[2], j[3])
+                ['JOIN {0} AS {1} ON {2}.{3}={1}.{3}'.format(
+                    j[0], j[1], j[2], j[3])
                  for j in joins]))
         sql = '{0} ORDER BY pq.protein_acc'.format(sql)
         return sql, selectmap

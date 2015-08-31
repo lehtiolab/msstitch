@@ -105,6 +105,12 @@ parser.add_argument('--isobaric', dest='isobaric', help='Build protein '
 parser.add_argument('--probability', dest='probability', help='Build protein '
                     'table which contains probability data. Flag.',
                     action='store_const', default=False, const=True)
+parser.add_argument('--fdr', dest='fdr', help='Build protein '
+                    'table which contains protein FDR data. Flag.',
+                    action='store_const', default=False, const=True)
+parser.add_argument('--pep', dest='pep', help='Build protein '
+                    'table which contains protein PEP data. Flag.',
+                    action='store_const', default=False, const=True)
 
 args = parser.parse_args()
 
