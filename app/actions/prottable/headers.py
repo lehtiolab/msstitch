@@ -81,8 +81,8 @@ def generate_header(headerfields, oldheader=False):
         header = [prottabledata.HEADER_PROTEIN]
     else:
         header = oldheader[:]
-    for fieldtype in ['proteindata', 'probability', 'precursorquant',
-                      'isoquant']:
+    for fieldtype in ['proteindata', 'probability', 'proteinfdr', 
+                      'proteinpep', 'precursorquant', 'isoquant']:
         try:
             fields = headerfields[fieldtype]
         except KeyError:
