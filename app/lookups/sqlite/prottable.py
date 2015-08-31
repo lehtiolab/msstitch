@@ -50,15 +50,16 @@ class ProtTableDB(ResultLookupInterface):
 
     def prepare_mergetable_sql(self, precursor=False, isobaric=False,
                                probability=False, fdr=False, pep=False):
-        selects = ['pq.protein_acc']
+        selects = ['p.protein_acc']
         selectmap = {'p_acc': 0}
         selectfieldcount = max(selectmap.values()) + 1
         joins = []
         if isobaric:
             selects.extend(['pc.channel_name', 'bs.set_name',
-                            'pc.amount_psms_name', 'pq.quantvalue',
-                            'pq.amount_psms'])
-            joins.extend([('protquant_channels', 'pc', 'pq', 'channel_id'),
+                            'pc.amount_psms_name', 'piq.quantvalue',
+                            'piq.amount_psms'])
+            joins.extend([('protein_iso_quanted', 'piq', 'p', 'pacc_id'),
+                          ('protquant_channels', 'pc', 'piq', 'channel_id'),
                           ('protein_tables', 'pt', 'pc', 'prottable_id'),
                           ('biosets', 'bs', 'pt', 'set_id')
                           ])
@@ -70,7 +71,7 @@ class ProtTableDB(ResultLookupInterface):
             selectfieldcount = max(selectmap.values()) + 1
         if precursor:
             selects.extend(['prqbs.set_name', 'preq.quantvalue'])
-            joins.extend([('protein_precur_quanted', 'preq', 'pq', 'protein_acc'),
+            joins.extend([('protein_precur_quanted', 'preq', 'p', 'pacc_id'),
                           ('protein_tables', 'prqpt', 'preq', 'prottable_id'),
                           ('biosets', 'prqbs', 'prqpt', 'set_id')
                           ])
@@ -80,7 +81,7 @@ class ProtTableDB(ResultLookupInterface):
             selectfieldcount = max(selectmap.values()) + 1
         if probability:
             selects.extend(['probbs.set_name', 'pprob.probability'])
-            joins.extend([('protein_probability', 'pprob', 'pq', 'protein_acc'),
+            joins.extend([('protein_probability', 'pprob', 'p', 'pacc_id'),
                           ('protein_tables', 'probpt', 'pprob', 'prottable_id'),
                           ('biosets', 'probbs', 'probpt', 'set_id')
                           ])
@@ -90,7 +91,7 @@ class ProtTableDB(ResultLookupInterface):
             selectfieldcount = max(selectmap.values()) + 1
         if fdr:
             selects.extend(['fdrbs.set_name', 'pfdr.fdr'])
-            joins.extend([('protein_fdr', 'pfdr', 'pq', 'protein_acc'),
+            joins.extend([('protein_fdr', 'pfdr', 'p', 'pacc_id'),
                           ('protein_tables', 'fdrpt', 'pfdr', 'prottable_id'),
                           ('biosets', 'fdrbs', 'fdrpt', 'set_id')
                           ])
@@ -100,7 +101,7 @@ class ProtTableDB(ResultLookupInterface):
             selectfieldcount = max(selectmap.values()) + 1
         if pep:
             selects.extend(['pepbs.set_name', 'ppep.pep'])
-            joins.extend([('protein_pep', 'ppep', 'pq', 'protein_acc'),
+            joins.extend([('protein_pep', 'ppep', 'p', 'pacc_id'),
                           ('protein_tables', 'peppt', 'ppep', 'prottable_id'),
                           ('biosets', 'pepbs', 'peppt', 'set_id')
                           ])
@@ -109,14 +110,16 @@ class ProtTableDB(ResultLookupInterface):
                                                          'pep_val'])})
             selectfieldcount = max(selectmap.values()) + 1
 
-        sql = 'SELECT {} FROM protein_iso_quanted AS pq'.format(
+        sql = 'SELECT {} FROM proteins AS p'.format(
             ', '.join(selects))
+        # NB Use full outer joins or left outer joins here on the stuff you
+        # join to the proteins AS p table
         if joins:
             sql = '{} {}'.format(sql, ' '.join(
                 ['JOIN {0} AS {1} ON {2}.{3}={1}.{3}'.format(
                     j[0], j[1], j[2], j[3])
                  for j in joins]))
-        sql = '{0} ORDER BY pq.protein_acc'.format(sql)
+        sql = '{0} ORDER BY p.protein_acc'.format(sql)
         return sql, selectmap
 
     def get_merged_proteins(self, sql):
