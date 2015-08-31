@@ -22,22 +22,25 @@ def create_proteinquant_lookup(fns, pqdb, poolnames, protacc_colnr,
                                    [ms1_qcolpattern, probcolpattern]):
             get_cols_in_file(colmap, pattern, basefn, header, single_col=True)
     if iso_quantcols and psmnrcolmap:
-        create_isobaric_proteinquant_lookup(fns, prottable_map, pqdb, protacc_colnr,
+        create_isobaric_proteinquant_lookup(fns, prottable_map, pqdb,
+                                            protacc_colnr,
                                             iso_quantcols, psmnrcolmap)
     if precur_quantcols:
-        create_precursor_proteinquant_lookup(fns, prottable_map, pqdb, protacc_colnr,
-                                             precur_quantcols)
+        create_precursor_proteinquant_lookup(fns, prottable_map, pqdb,
+                                             protacc_colnr, precur_quantcols)
     if probcol:
         create_probability_proteinquant_lookup(fns, prottable_map, pqdb, protacc_colnr,
                                                probcol)
 
 
-def create_protein_lookup(fns, prottable_id_map, pqdbmethod, protacc_colnr, colmap):
+def create_protein_lookup(fns, prottable_id_map, pqdbmethod, protacc_colnr,
+                          colmap):
     """General method to store single column data from protein tables
     in lookup"""
     to_store = []
     for fn, header, pquant in tsvreader.generate_tsv_protein_quants(fns):
-        pqdata = (pquant[header[protacc_colnr]], prottable_id_map[fn], pquant[colmap[fn]])
+        pqdata = (pquant[header[protacc_colnr]], prottable_id_map[fn],
+                  pquant[colmap[fn]])
         to_store.append(pqdata)
         if len(to_store) > 10000:
             pqdbmethod(to_store)
@@ -45,19 +48,23 @@ def create_protein_lookup(fns, prottable_id_map, pqdbmethod, protacc_colnr, colm
     pqdbmethod(to_store)
 
 
-def create_probability_proteinquant_lookup(fns, prottable_map, pqdb, protacc_colnr, probcolmap):
+def create_probability_proteinquant_lookup(fns, prottable_map, pqdb,
+                                           protacc_colnr, probcolmap):
     """Stores protein probability"""
-    create_protein_lookup(fns, prottable_map, pqdb.store_protprob, protacc_colnr, probcolmap)
+    create_protein_lookup(fns, prottable_map, pqdb.store_protprob,
+                          protacc_colnr, probcolmap)
 
 
 def create_precursor_proteinquant_lookup(fns, prottable_map, pqdb, protacc_colnr,
                                          quantcolmap):
     """Stores protein precursor quant data"""
-    create_protein_lookup(fns, prottable_map, pqdb.store_precursor_protquants, protacc_colnr, quantcolmap)
+    create_protein_lookup(fns, prottable_map, pqdb.store_precursor_protquants,
+                          protacc_colnr, quantcolmap)
 
 
-def create_isobaric_proteinquant_lookup(fns, prottable_map, pqdb, protacc_colnr,
-                                        allquantcols, psmnrcolmap):
+def create_isobaric_proteinquant_lookup(fns, prottable_map, pqdb,
+                                        protacc_colnr, allquantcols,
+                                        psmnrcolmap):
     """Creates a lookup dict from protein quant input files and some
     input parameters. This assumes the order of quant columns and
     number-of-PSM columns is the same."""
@@ -92,7 +99,8 @@ def get_columns_by_pattern(header, pattern):
         if re.search(pattern, field) is not None:
             columns.append(field)
     if not columns:
-        raise RuntimeError('Could not find fieldname in header with pattern: {}'.format(pattern))
+        raise RuntimeError('Could not find fieldname in header with '
+                           'pattern: {}'.format(pattern))
     return columns
 
 

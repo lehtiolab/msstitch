@@ -12,7 +12,8 @@ class ProteinQuantLookupDriver(base.LookupDriver):
         # FIXME need check to see same poolnames correlate with self.fn len
         self.quantcolpattern = kwargs.get('quantcolpattern', None)
         self.psmnrcolpattern = kwargs.get('psmnrcolpattern', None)
-        self.precursorquantcolpattern = kwargs.get('precursorquantcolpattern', None)
+        self.precursorquantcolpattern = kwargs.get('precursorquantcolpattern',
+                                                   None)
         self.proteincols = kwargs.get('protcol', None) - 1
         self.probcolpattern = kwargs.get('probcolpattern', None)
 
