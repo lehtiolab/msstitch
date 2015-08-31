@@ -25,6 +25,9 @@ class ProteinGroupDB(ResultLookupInterface):
         cursor.executemany(
             'INSERT INTO proteins(protein_acc) '
             'VALUES(?)', proteins)
+        self.conn.commit()
+        self.index_column('proteins_index', 'proteins', 'protein_acc')
+        cursor = self.get_cursor()
         cursor.executemany(
             'INSERT INTO protein_evidence(protein_acc, evidence_lvl) '
             'VALUES(?, ?)', evidence_lvls)
@@ -33,7 +36,6 @@ class ProteinGroupDB(ResultLookupInterface):
                 'INSERT INTO protein_seq(protein_acc, sequence) '
                 'VALUES(?, ?)', sequences)
         self.conn.commit()
-        self.index_column('proteins_index', 'proteins', 'protein_acc')
 
     def store_descriptions(self, descriptions):
         cursor = self.get_cursor()
