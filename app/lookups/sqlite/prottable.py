@@ -158,3 +158,9 @@ class ProtTableDB(ResultLookupInterface):
             'INSERT INTO protein_probability(protein_acc, prottable_id, '
             'probability) '
             'VALUES (?, ?, ?)', probabilities)
+
+    def store_protfdr(self, fdr):
+        self.store_many(
+            'INSERT INTO protein_fdr(protein_acc, prottable_id, '
+            'fdr) '
+            'VALUES (?, ?, ?)', fdr)

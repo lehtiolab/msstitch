@@ -16,6 +16,7 @@ class ProteinQuantLookupDriver(base.LookupDriver):
                                                    None)
         self.proteincols = kwargs.get('protcol', None) - 1
         self.probcolpattern = kwargs.get('probcolpattern', None)
+        self.fdrcolpattern = kwargs.get('fdrcolpattern', None)
 
     def create_lookup(self):
         lookups.create_proteinquant_lookup(self.fn, self.lookup,
@@ -24,4 +25,5 @@ class ProteinQuantLookupDriver(base.LookupDriver):
                                            self.precursorquantcolpattern,
                                            self.quantcolpattern,
                                            self.psmnrcolpattern,
-                                           self.probcolpattern)
+                                           self.probcolpattern,
+                                           self.fdrcolpattern)
