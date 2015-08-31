@@ -86,13 +86,13 @@ def get_prot_probability(protein, sqlmap, headerfields):
 
 def get_prot_fdr(protein, sqlmap, headerfields):
     return simple_val_fetch(protein, sqlmap,
-                            headerfields['proteinfdr'][prottabledata.HEADER_PROBABILITY],
+                            headerfields['proteinfdr'][prottabledata.HEADER_QVAL],
                             'fdr_poolname', 'fdr_val')
 
 
 def get_prot_pep(protein, sqlmap, headerfields):
     return simple_val_fetch(protein, sqlmap,
-                            headerfields['proteinpep'][prottabledata.HEADER_PROBABILITY],
+                            headerfields['proteinpep'][prottabledata.HEADER_PEP],
                             'pep_poolname', 'pep_val')
 
 

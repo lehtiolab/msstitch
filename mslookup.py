@@ -137,6 +137,14 @@ parser.add_argument('--probcolpattern', dest='probcolpattern',
                     help='Unique text pattern to identify protein probability\n'
                     'column in protein table.',
                     type=str, required=False)
+parser.add_argument('--fdrcolpattern', dest='fdrcolpattern',
+                    help='Unique text pattern to identify protein FDR\n'
+                    'column in protein table.',
+                    type=str, required=False)
+parser.add_argument('--pepcolpattern', dest='pepcolpattern',
+                    help='Unique text pattern to identify protein PEP\n'
+                    'column in protein table.',
+                    type=str, required=False)
 parser.add_argument('--quanttype', dest='quanttype',
                     help='Filetype of precursor quants to store. Choose from\n'
                     'kronik or openms.',
