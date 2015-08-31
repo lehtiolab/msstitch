@@ -5,7 +5,8 @@ class ProtTableDB(ResultLookupInterface):
     def add_tables(self):
         self.create_tables(['protein_tables', 'protein_quanted',
                             'protquant_channels', 'protein_precur_quanted',
-                            'protein_probability'])
+                            'protein_probability', 'protein_fdr',
+                            'protein_pep'])
 
     def store_protein_tables(self, tables):
         self.store_many(
@@ -164,3 +165,9 @@ class ProtTableDB(ResultLookupInterface):
             'INSERT INTO protein_fdr(protein_acc, prottable_id, '
             'fdr) '
             'VALUES (?, ?, ?)', fdr)
+
+    def store_protpep(self, pep):
+        self.store_many(
+            'INSERT INTO protein_pep(protein_acc, prottable_id, '
+            'pep) '
+            'VALUES (?, ?, ?)', pep)

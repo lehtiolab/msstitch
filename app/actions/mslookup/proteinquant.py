@@ -6,22 +6,22 @@ from app.readers import tsv as tsvreader
 def create_proteinquant_lookup(fns, pqdb, poolnames, protacc_colnr,
                                ms1_qcolpattern=None, isobqcolpattern=None,
                                psmnrpattern=None, probcolpattern=None,
-                               fdrcolpattern=None):
+                               fdrcolpattern=None, pepcolpattern=None):
     poolmap = {name: pid for (name, pid) in pqdb.get_all_poolnames()}
     pqdb.store_protein_tables([(poolmap[pool], os.path.basename(fn))
                                for fn, pool in zip(fns, poolnames)])
     prottable_map = pqdb.get_protein_table_map()
     iso_quantcols, psmnrcolmap = {}, {}
-    precur_quantcols, probcol, fdrcol = {}, {}, {}
+    precur_quantcols, probcol, fdrcol, pepcol = {}, {}, {}, {}
     for fn in fns:
         header = tsvreader.get_tsv_header(fn)
         basefn = os.path.basename(fn)
         for colmap, pattern in zip([iso_quantcols, psmnrcolmap],
                                    [isobqcolpattern, psmnrpattern]):
             get_cols_in_file(colmap, pattern, basefn, header)
-        for colmap, pattern in zip([precur_quantcols, probcol, fdrcol],
+        for colmap, pattern in zip([precur_quantcols, probcol, fdrcol, pepcol],
                                    [ms1_qcolpattern, probcolpattern,
-                                    fdrcolpattern]):
+                                    fdrcolpattern, pepcolpattern]):
             get_cols_in_file(colmap, pattern, basefn, header, single_col=True)
     if iso_quantcols and psmnrcolmap:
         create_isobaric_proteinquant_lookup(fns, prottable_map, pqdb,
@@ -36,6 +36,9 @@ def create_proteinquant_lookup(fns, pqdb, poolnames, protacc_colnr,
     if fdrcol:
         create_fdr_proteinquant_lookup(fns, prottable_map, pqdb,
                                        protacc_colnr, fdrcol)
+    if pepcol:
+        create_pep_proteinquant_lookup(fns, prottable_map, pqdb,
+                                       protacc_colnr, pepcol)
 
 
 def create_protein_lookup(fns, prottable_id_map, pqdbmethod, protacc_colnr,
@@ -65,6 +68,13 @@ def create_fdr_proteinquant_lookup(fns, prottable_map, pqdb,
     """Stores protein FDR"""
     create_protein_lookup(fns, prottable_map, pqdb.store_protfdr,
                           protacc_colnr, fdrcolmap)
+
+
+def create_pep_proteinquant_lookup(fns, prottable_map, pqdb,
+                                   protacc_colnr, pepcolmap):
+    """Stores protein PEP"""
+    create_protein_lookup(fns, prottable_map, pqdb.store_protpep,
+                          protacc_colnr, pepcolmap)
 
 
 def create_precursor_proteinquant_lookup(fns, prottable_map, pqdb,
