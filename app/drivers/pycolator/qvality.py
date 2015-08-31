@@ -44,7 +44,7 @@ class QvalityDriver(base.PycolatorDriver):
 
     def write(self):
         """This actually runs the qvality program from PATH."""
-        outfn = self.create_outfilepath(self.fn, '_qvalityout.txt')
+        outfn = self.create_outfilepath(self.fn, self.outsuffix)
         command = ['qvality']
         command.extend(self.qvalityoptions)
         command.extend([self.scores['target']['fn'], self.scores['decoy']['fn']])

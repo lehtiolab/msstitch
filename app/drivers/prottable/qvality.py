@@ -15,6 +15,10 @@ class ProttableQvalityDriver(QvalityDriver):
         if self.featuretype not in ['probability']:
             raise Exception('Featuretype (-f) should be proteinprobability.')
         self.score_get_fun = preparation.prepare_qvality_input
+    
+    def prepare(self):
+        """No percolator XML for protein tables"""
+        pass
 
     def set_features(self):
         """Creates scorefiles for qvality's target and decoy distributions"""

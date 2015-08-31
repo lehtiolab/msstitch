@@ -80,6 +80,9 @@ parser.add_argument('--peptable', dest='pepfile', help='Peptide table file '
 parser.add_argument('--decoy', dest='decoyfn', help='Protein table containing '
                     'decoy proteins for running qvality',
                     type=lambda x: parser_file_exists(parser, x))
+parser.add_argument('--feattype', dest='feattype', help='Score type to use for '
+                    'qvality, reassign features or pout2tsv. Can either be '
+                    'psm or peptide.')
 parser.add_argument('-o', dest='options', nargs='+',
                     help='Extra options that may be passed to qvality.'
                     'Option form: -o ***flag value ***flag ***flag value')
@@ -112,7 +115,7 @@ commandmap = {
     'addprob': probability.AddProteinProbability,
     'createlabelfree': create_labelfree.CreateLabelfreeProteinDriver,
     'emptyprottable': create_empty.CreateEmptyDriver,
-    'protqvality': qvality.QvalityDriver,
+    'protqvality': qvality.ProttableQvalityDriver,
     'protfdr': fdr.ProttableFDRDriver,
 }
 
