@@ -156,7 +156,7 @@ class ProtTableDB(ResultLookupInterface):
 
     def get_protein_acc_map(self):
         cursor = self.get_cursor()
-        cursor.execute('SELECT pacc_id, protein_acc'
+        cursor.execute('SELECT pacc_id, protein_acc '
                        'FROM proteins')
         return {acc: table_id for (table_id, acc) in cursor}
 
@@ -175,30 +175,30 @@ class ProtTableDB(ResultLookupInterface):
 
     def store_isobaric_protquants(self, quants):
         self.store_many(
-            'INSERT INTO protein_iso_quanted(protein_acc, channel_id, '
+            'INSERT INTO protein_iso_quanted(pacc_id, channel_id, '
             'quantvalue, amount_psms) '
             'VALUES (?, ?, ?, ?)', quants)
 
     def store_precursor_protquants(self, quants):
         self.store_many(
-            'INSERT INTO protein_precur_quanted(protein_acc, prottable_id, '
+            'INSERT INTO protein_precur_quanted(pacc_id, prottable_id, '
             'quantvalue) '
             'VALUES (?, ?, ?)', quants)
 
     def store_protprob(self, probabilities):
         self.store_many(
-            'INSERT INTO protein_probability(protein_acc, prottable_id, '
+            'INSERT INTO protein_probability(pacc_id, prottable_id, '
             'probability) '
             'VALUES (?, ?, ?)', probabilities)
 
     def store_protfdr(self, fdr):
         self.store_many(
-            'INSERT INTO protein_fdr(protein_acc, prottable_id, '
+            'INSERT INTO protein_fdr(pacc_id, prottable_id, '
             'fdr) '
             'VALUES (?, ?, ?)', fdr)
 
     def store_protpep(self, pep):
         self.store_many(
-            'INSERT INTO protein_pep(protein_acc, prottable_id, '
+            'INSERT INTO protein_pep(pacc_id, prottable_id, '
             'pep) '
             'VALUES (?, ?, ?)', pep)

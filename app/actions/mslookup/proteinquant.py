@@ -84,7 +84,7 @@ def create_pep_proteinquant_lookup(fns, prottable_map, pacc_map, pqdb,
 def create_precursor_proteinquant_lookup(fns, prottable_map, pacc_map, pqdb,
                                          protacc_colnr, quantcolmap):
     """Stores protein precursor quant data"""
-    create_protein_lookup(fns, prottable_map, pqdb.store_precursor_protquants,
+    create_protein_lookup(fns, prottable_map, pacc_map, pqdb.store_precursor_protquants,
                           protacc_colnr, quantcolmap)
 
 

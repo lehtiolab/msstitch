@@ -92,29 +92,29 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                           'REFERENCES '
                                           'protein_tables(prottable_id)'
                                           ],
-                   'protein_probability': ['protein_acc TEXT',
+                   'protein_probability': ['pacc_id TEXT',
                                            'prottable_id INTEGER',
                                            'probability DOUBLE',
-                                           'FOREIGN KEY(protein_acc) '
-                                           'REFERENCES proteins(protein_acc) '
+                                           'FOREIGN KEY(pacc_id) '
+                                           'REFERENCES proteins(pacc_id) '
                                            'FOREIGN KEY(prottable_id) '
                                            'REFERENCES '
                                            'protein_tables(prottable_id)'
                                            ],
-                   'protein_fdr': ['protein_acc TEXT',
+                   'protein_fdr': ['pacc_id TEXT',
                                    'prottable_id INTEGER',
                                    'fdr DOUBLE',
-                                   'FOREIGN KEY(protein_acc) '
-                                   'REFERENCES proteins(protein_acc) '
+                                   'FOREIGN KEY(pacc_id) '
+                                   'REFERENCES proteins(pacc_id) '
                                    'FOREIGN KEY(prottable_id) '
                                    'REFERENCES '
                                    'protein_tables(prottable_id)'
                                    ],
-                   'protein_pep': ['protein_acc TEXT',
+                   'protein_pep': ['pacc_id TEXT',
                                    'prottable_id INTEGER',
                                    'pep DOUBLE',
-                                   'FOREIGN KEY(protein_acc) '
-                                   'REFERENCES proteins(protein_acc) '
+                                   'FOREIGN KEY(pacc_id) '
+                                   'REFERENCES proteins(pacc_id) '
                                    'FOREIGN KEY(prottable_id) '
                                    'REFERENCES '
                                    'protein_tables(prottable_id)'
