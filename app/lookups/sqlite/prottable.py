@@ -58,7 +58,7 @@ class ProtTableDB(ResultLookupInterface):
             selects.extend(['pc.channel_name', 'bs.set_name',
                             'pc.amount_psms_name', 'piq.quantvalue',
                             'piq.amount_psms'])
-            joins.extend([('protein_iso_quanted', 'piq', 'p', 'pacc_id'),
+            joins.extend([('protein_iso_quanted', 'piq', 'p', 'pacc_id', True),
                           ('protquant_channels', 'pc', 'piq', 'channel_id'),
                           ('protein_tables', 'pt', 'pc', 'prottable_id'),
                           ('biosets', 'bs', 'pt', 'set_id')
@@ -71,7 +71,8 @@ class ProtTableDB(ResultLookupInterface):
             selectfieldcount = max(selectmap.values()) + 1
         if precursor:
             selects.extend(['prqbs.set_name', 'preq.quantvalue'])
-            joins.extend([('protein_precur_quanted', 'preq', 'p', 'pacc_id'),
+            joins.extend([('protein_precur_quanted', 'preq', 'p', 'pacc_id',
+                           True),
                           ('protein_tables', 'prqpt', 'preq', 'prottable_id'),
                           ('biosets', 'prqbs', 'prqpt', 'set_id')
                           ])
@@ -81,8 +82,10 @@ class ProtTableDB(ResultLookupInterface):
             selectfieldcount = max(selectmap.values()) + 1
         if probability:
             selects.extend(['probbs.set_name', 'pprob.probability'])
-            joins.extend([('protein_probability', 'pprob', 'p', 'pacc_id'),
-                          ('protein_tables', 'probpt', 'pprob', 'prottable_id'),
+            joins.extend([('protein_probability', 'pprob', 'p', 'pacc_id',
+                           True),
+                          ('protein_tables', 'probpt', 'pprob',
+                           'prottable_id'),
                           ('biosets', 'probbs', 'probpt', 'set_id')
                           ])
             selectmap.update({field: i + selectfieldcount
@@ -91,7 +94,7 @@ class ProtTableDB(ResultLookupInterface):
             selectfieldcount = max(selectmap.values()) + 1
         if fdr:
             selects.extend(['fdrbs.set_name', 'pfdr.fdr'])
-            joins.extend([('protein_fdr', 'pfdr', 'p', 'pacc_id'),
+            joins.extend([('protein_fdr', 'pfdr', 'p', 'pacc_id', True),
                           ('protein_tables', 'fdrpt', 'pfdr', 'prottable_id'),
                           ('biosets', 'fdrbs', 'fdrpt', 'set_id')
                           ])
@@ -101,7 +104,7 @@ class ProtTableDB(ResultLookupInterface):
             selectfieldcount = max(selectmap.values()) + 1
         if pep:
             selects.extend(['pepbs.set_name', 'ppep.pep'])
-            joins.extend([('protein_pep', 'ppep', 'p', 'pacc_id'),
+            joins.extend([('protein_pep', 'ppep', 'p', 'pacc_id', True),
                           ('protein_tables', 'peppt', 'ppep', 'prottable_id'),
                           ('biosets', 'pepbs', 'peppt', 'set_id')
                           ])
@@ -115,10 +118,14 @@ class ProtTableDB(ResultLookupInterface):
         # NB Use full outer joins or left outer joins here on the stuff you
         # join to the proteins AS p table
         if joins:
-            sql = '{} {}'.format(sql, ' '.join(
-                ['JOIN {0} AS {1} ON {2}.{3}={1}.{3}'.format(
-                    j[0], j[1], j[2], j[3])
-                 for j in joins]))
+            joinsql = ''
+            for j in joins:
+                joincmd = 'JOIN'
+                if True in joins:
+                    joincmd = 'LEFT OUTER {}'.format(joincmd)
+                joinsql = '{5} {0} {1} AS {2} ON {3}.{4}={2}.{4}'.format(
+                    joincmd, j[0], j[1], j[2], j[3], joinsql)
+            sql = '{} {}'.format(sql, joinsql)
         sql = '{0} ORDER BY p.protein_acc'.format(sql)
         return sql, selectmap
 
