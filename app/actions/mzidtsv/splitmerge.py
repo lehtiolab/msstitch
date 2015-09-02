@@ -1,5 +1,3 @@
-import re
-
 from app.readers import tsv as tsvreader
 from app.dataformats import mzidtsv as mzidtsvdata
 
