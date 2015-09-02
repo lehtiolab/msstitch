@@ -20,7 +20,9 @@ def generate_peptides(tsvfn, oldheader, scorecol, fncol=False,
             add_peptide(peptides, psm, fncol, scorecol,
                         new=True)
         else:
-            if higherbetter and existing_score < psm[scorecol]:
+            if higherbetter and psm[scorecol] > existing_score:
+                add_peptide(peptides, psm, fncol, scorecol)
+            elif not higherbetter and psm[scorecol] < existing_score:
                 add_peptide(peptides, psm, fncol, scorecol)
     for peptide in peptides.values():
         peptide['line'][mzidtsvdata.HEADER_LINKED_PSMS] = '; '.join(
