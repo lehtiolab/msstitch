@@ -13,9 +13,19 @@ class MzidTSVPeptableDriver(MzidTSVDriver):
         super().__init__(**kwargs)
         self.fncol = kwargs.get('fncol', None)
         self.scorecol = kwargs.get('scorecol', None)
+        self.quantcolpattern = kwargs.get('quantcolpattern', None)
+        self.precursorquantcolpattern = kwargs.get('precursorquantcolpattern',
+                                                   None)
 
     def get_psms(self):
-        self.header = prep.get_peptable_header(self.oldheader)
+        isobfieldmap = prep.get_quantcols(self.quantcolpattern,
+                                          self.oldheader, 'isob')
+        precurquantcol = prep.get_quantcols(self.precursorquantcolpattern,
+                                            self.oldheader, 'precur')
+        self.header = prep.get_peptable_header(self.oldheader, isobfieldmap,
+                                               precurquantcol)
         self.get_column_header_for_number(['fncol', 'scorecol'])
-        self.psms = prep.generate_peptides(self.fn, self.oldheader, self.scorecol,
+        self.psms = prep.generate_peptides(self.fn, self.oldheader,
+                                           self.scorecol,
+                                           isobfieldmap, precurquantcol,
                                            self.fncol)

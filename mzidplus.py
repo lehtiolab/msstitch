@@ -137,6 +137,14 @@ parser.add_argument('--fncol', dest='fncol', help='Column number in which '
 parser.add_argument('--scorecol', dest='scorecol', help='Column number in '
                     'which score to filter on is written.',
                     type=int, required=False)
+parser.add_argument('--ms1quantcolpattern', dest='precursorquantcolpattern',
+                    help='Unique text pattern to identify precursor quant \n'
+                    'column in PSM table for peptide quanting.',
+                    type=str, required=False)
+parser.add_argument('--isobquantcolpattern', dest='quantcolpattern',
+                    help='Unique text pattern to identify isobaric quant \n'
+                    'column in PSM table for peptide quant.',
+                    type=str, required=False)
 
 
 # not supported yet
