@@ -19,13 +19,13 @@ def create_proteinquant_lookup(fns, pqdb, poolnames, protacc_colnr,
         basefn = os.path.basename(fn)
         for colmap, pattern in zip([iso_quantcols, psmnrcolmap],
                                    [isobqcolpattern, psmnrpattern]):
-            cols = get_cols_in_file(colmap, pattern, header)
+            cols = get_cols_in_file(pattern, header)
             if cols:
                 colmap[basefn] = cols
         for colmap, pattern in zip([precur_quantcols, probcol, fdrcol, pepcol],
                                    [ms1_qcolpattern, probcolpattern,
                                     fdrcolpattern, pepcolpattern]):
-            cols = get_cols_in_file(colmap, pattern, header, single_col=True)
+            cols = get_cols_in_file(pattern, header, single_col=True)
             if cols:
                 colmap[basefn] = cols
     if iso_quantcols and psmnrcolmap:
