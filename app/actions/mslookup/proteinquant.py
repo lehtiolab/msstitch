@@ -19,11 +19,15 @@ def create_proteinquant_lookup(fns, pqdb, poolnames, protacc_colnr,
         basefn = os.path.basename(fn)
         for colmap, pattern in zip([iso_quantcols, psmnrcolmap],
                                    [isobqcolpattern, psmnrpattern]):
-            get_cols_in_file(colmap, pattern, basefn, header)
+            cols = get_cols_in_file(colmap, pattern, header)
+            if cols:
+                colmap[basefn] = cols
         for colmap, pattern in zip([precur_quantcols, probcol, fdrcol, pepcol],
                                    [ms1_qcolpattern, probcolpattern,
                                     fdrcolpattern, pepcolpattern]):
-            get_cols_in_file(colmap, pattern, basefn, header, single_col=True)
+            cols = get_cols_in_file(colmap, pattern, header, single_col=True)
+            if cols:
+                colmap[basefn] = cols
     if iso_quantcols and psmnrcolmap:
         create_isobaric_proteinquant_lookup(fns, prottable_map,
                                             protein_acc_map, pqdb,
@@ -109,14 +113,13 @@ def create_isobaric_proteinquant_lookup(fns, prottable_map, pacc_map, pqdb,
     pqdb.store_isobaric_protquants(to_store)
 
 
-def get_cols_in_file(column_map, pattern, fn, header, single_col=False):
+def get_cols_in_file(pattern, header, single_col=False):
     if pattern is None:
-        return {}
+        return False
     cols_found = get_columns_by_pattern(header, pattern)
     if single_col:
         cols_found = cols_found[0]
-    column_map.update({fn: cols_found})
-    return column_map
+    return cols_found
 
 
 def get_columns_by_pattern(header, pattern):
