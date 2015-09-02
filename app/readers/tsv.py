@@ -121,3 +121,23 @@ def strip_modifications(seq):
     nomodseq = re.sub('\d+', '', seq)
     nomodseq = re.sub('\+\.', '', nomodseq)
     return nomodseq
+
+
+def get_cols_in_file(pattern, header, single_col=False):
+    if pattern is None:
+        return False
+    cols_found = get_columns_by_pattern(header, pattern)
+    if single_col:
+        cols_found = cols_found[0]
+    return cols_found
+
+
+def get_columns_by_pattern(header, pattern):
+    columns = []
+    for field in header:
+        if re.search(pattern, field) is not None:
+            columns.append(field)
+    if not columns:
+        raise RuntimeError('Could not find fieldname in header with '
+                           'pattern: {}'.format(pattern))
+    return columns

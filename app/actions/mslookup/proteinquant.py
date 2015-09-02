@@ -19,13 +19,13 @@ def create_proteinquant_lookup(fns, pqdb, poolnames, protacc_colnr,
         basefn = os.path.basename(fn)
         for colmap, pattern in zip([iso_quantcols, psmnrcolmap],
                                    [isobqcolpattern, psmnrpattern]):
-            cols = get_cols_in_file(pattern, header)
+            cols = tsvreader.get_cols_in_file(pattern, header)
             if cols:
                 colmap[basefn] = cols
         for colmap, pattern in zip([precur_quantcols, probcol, fdrcol, pepcol],
                                    [ms1_qcolpattern, probcolpattern,
                                     fdrcolpattern, pepcolpattern]):
-            cols = get_cols_in_file(pattern, header, single_col=True)
+            cols = tsvreader.get_cols_in_file(pattern, header, single_col=True)
             if cols:
                 colmap[basefn] = cols
     if iso_quantcols and psmnrcolmap:
@@ -111,26 +111,6 @@ def create_isobaric_proteinquant_lookup(fns, prottable_map, pacc_map, pqdb,
             pqdb.store_isobaric_protquants(to_store)
             to_store = []
     pqdb.store_isobaric_protquants(to_store)
-
-
-def get_cols_in_file(pattern, header, single_col=False):
-    if pattern is None:
-        return False
-    cols_found = get_columns_by_pattern(header, pattern)
-    if single_col:
-        cols_found = cols_found[0]
-    return cols_found
-
-
-def get_columns_by_pattern(header, pattern):
-    columns = []
-    for field in header:
-        if re.search(pattern, field) is not None:
-            columns.append(field)
-    if not columns:
-        raise RuntimeError('Could not find fieldname in header with '
-                           'pattern: {}'.format(pattern))
-    return columns
 
 
 def map_psmnrcol_to_quantcol(quantcols, psmcols, prottable_map):
