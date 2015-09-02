@@ -19,9 +19,9 @@ def get_peptable_header(oldheader, isobqfieldmap=False, precurqfield=False):
     header = oldheader[:]
     if isobqfieldmap:
         for field, medianfield in isobqfieldmap.items():
-            header.replace(field, medianfield)
+            header = [medianfield if x==field else x for x in header]
     if precurqfield:
-        header.replace(precurqfield, mzidtsvdata.HEADER_PRECURSOR_QUANT_MEDIAN)
+        header = [mzidtsvdata.HEADER_PRECURSOR_QUANT_MEDIAN if x==precurqfield else x for x in header]
     peptable_header = [mzidtsvdata.HEADER_LINKED_PSMS]
     ix = header.index(mzidtsvdata.HEADER_PEPTIDE)
     return header[:ix] + peptable_header + header[ix:]
@@ -47,7 +47,7 @@ def generate_peptides(tsvfn, oldheader, scorecol, isofieldmap,
     for peptide in peptides.values():
         peptide['line'][mzidtsvdata.HEADER_LINKED_PSMS] = '; '.join(
             peptide['psms'])
-        for qtype, pepquant in peptide['quant']:
+        for qtype, pepquant in peptide['quant'].items():
             peptide['line'].update(parse_quant_data(qtype, pepquant,
                                                     isofieldmap))
         yield peptide['line']
@@ -68,9 +68,11 @@ def get_median(quantdata):
     for q in quantdata:
         try:
             quantfloats.append(float(q))
-        except TypeError:
+        except(TypeError, ValueError):
             pass
-    return median(quantfloats)
+    if not quantfloats:
+        return 'NA'
+    return str(median(quantfloats))
 
 
 def add_peptide(allpeps, psm, fncol, scorecol=False, new=False):
