@@ -98,11 +98,16 @@ def get_psm(line, unroll=False, specfncol=None):
     specfn = line[specfncol]
     psm_id = get_psm_id(line)
     scan = line[mzidtsvdata.HEADER_SCANNR]
+    peptideseq = get_psm_sequence(line, unroll)
+    score = line[mzidtsvdata.HEADER_MSGFSCORE]
+    return specfn, psm_id, scan, peptideseq, score
+
+
+def get_psm_sequence(line, unroll=False):
     peptideseq = line[mzidtsvdata.HEADER_PEPTIDE]
     if unroll and '.' in peptideseq:
         peptideseq = peptideseq.split('.')[1]
-    score = line[mzidtsvdata.HEADER_MSGFSCORE]
-    return specfn, psm_id, scan, peptideseq, score
+    return peptideseq
 
 
 def get_pepproteins(line):

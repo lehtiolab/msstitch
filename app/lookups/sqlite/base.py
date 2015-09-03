@@ -43,11 +43,15 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                  'FOREIGN KEY(feature_id) '
                                  'REFERENCES ms1_quant',
                                  ],
-
+                   'peptide_sequences': ['pep_id INTEGER PRIMARY KEY',
+                                         'sequence TEXT',
+                                         ],
                    'psms': ['psm_id TEXT PRIMARY KEY NOT NULL',
-                            'sequence TEXT',
+                            'pep_id INTEGER',
                             'score TEXT',
                             'spectra_id INTEGER',
+                            'FOREIGN KEY(pep_id)'
+                            'REFERENCES peptide_sequences '
                             'FOREIGN KEY(spectra_id)'
                             'REFERENCES mzml'
                             ],

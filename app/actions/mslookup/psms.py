@@ -6,6 +6,12 @@ def create_psm_lookup(fn, header, pgdb, unroll=False, specfncol=None):
     """Reads PSMs from file, stores them to a database backend in chunked PSMs.
     """
     mzmlmap = pgdb.get_mzmlfile_map()
+    sequences = {}
+    for psm in tsvreader.generate_tsv_lines_multifile(fn, header):
+        seq = tsvreader.get_psm_sequence(psm, unroll)
+        sequences[seq] = 1
+    pgdb.store_pepseqs(((seq,) for seq in sequences))
+    pepseqmap = pgdb.get_peptide_seq_map()
     psms = []
     for rownr, psm in enumerate(tsvreader.generate_tsv_lines_multifile(fn, header)):
         specfn, psm_id, scan, seq, score = tsvreader.get_psm(psm, unroll, specfncol)
@@ -14,7 +20,7 @@ def create_psm_lookup(fn, header, pgdb, unroll=False, specfncol=None):
             psms = []
         psms.append({'rownr': rownr,
                      'psm_id': psm_id,
-                     'seq': seq,
+                     'seq': pepseqmap[seq],
                      'score': score,
                      'specfn': mzmlmap[specfn],
                      'scannr': scan,

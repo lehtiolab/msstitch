@@ -138,21 +138,23 @@ class ProteinGroupDB(ResultLookupInterface):
         return outmap
 
     def get_all_proteins_psms_seq(self):
-        sql = ('SELECT p.protein_acc, ps.sequence, pp.psm_id, psms.sequence '
+        sql = ('SELECT p.protein_acc, ps.sequence, pp.psm_id, peps.sequence '
                'FROM proteins AS p '
                'JOIN protein_seq AS ps USING(protein_acc) '
                'JOIN protein_psm AS pp USING(protein_acc) '
-               'JOIN psms AS psms USING(psm_id)'
+               'JOIN psms AS psms USING(psm_id) '
+               'JOIN peptide_sequences AS peps USING(pep_id)'
                )
         cursor = self.get_cursor()
         return cursor.execute(sql)
 
     def get_master_contentproteins_psms(self):
-        sql = ('SELECT ppg.master_id, ppg.psm_id, pp.protein_acc, p.sequence, '
-               'p.score, pev.evidence_lvl, pc.coverage '
+        sql = ('SELECT ppg.master_id, ppg.psm_id, pp.protein_acc, '
+               'peps.sequence, p.score, pev.evidence_lvl, pc.coverage '
                'FROM psm_protein_groups AS ppg '
                'JOIN protein_psm AS pp USING(psm_id) '
                'JOIN psms AS p USING(psm_id) '
+               'JOIN peptide_sequences AS peps USING(pep_id) '
                'JOIN protein_evidence AS pev USING(protein_acc) '
                'JOIN protein_coverage AS pc USING(protein_acc) '
                'ORDER BY ppg.master_id'
