@@ -3,7 +3,7 @@ from app.lookups.sqlite.base import ResultLookupInterface
 
 class PSMDB(ResultLookupInterface):
     def add_tables(self):
-        self.create_tables(['psms', 'psmrows'])
+        self.create_tables(['psms', 'psmrows', 'peptide_sequences'])
 
     def store_pepseqs(self, sequences):
         cursor = self.get_cursor()
@@ -14,7 +14,7 @@ class PSMDB(ResultLookupInterface):
     def store_psms(self, psms):
         cursor = self.get_cursor()
         cursor.executemany(
-            'INSERT INTO psms(psm_id, sequence, score, spectra_id) '
+            'INSERT INTO psms(psm_id, pep_id, score, spectra_id) '
             'VALUES(?, ?, ?, ?)', ((psm['psm_id'], psm['seq'], psm['score'],
                                     self.get_spectra_id(psm['specfn'],
                                                         scan_nr=psm['scannr']))
@@ -27,7 +27,7 @@ class PSMDB(ResultLookupInterface):
     def get_peptide_seq_map(self):
         cursor = self.get_cursor()
         seqs = cursor.execute('SELECT pep_id, sequence FROM peptide_sequences')
-        return {seq: pepid for seq, pepid in seqs.fetchall()}
+        return {seq: pepid for pepid, seq in seqs.fetchall()}
 
     def index_psms(self):
         self.index_column('psmid_index', 'psms', 'psm_id')
