@@ -25,7 +25,7 @@ def create_proteinquant_lookup(fns, pqdb, poolnames, protacc_colnr,
                                psmnrpattern=None, probcolpattern=None,
                                fdrcolpattern=None, pepcolpattern=None):
     prottable_map = create_tablefn_map(fns, pqdb, poolnames)
-    protein_acc_map = pqdb.get_protein_acc_map()
+    protein_acc_map = pqdb.get_feature_map()
     patterns = [ms1_qcolpattern, probcolpattern, fdrcolpattern, pepcolpattern]
     storefuns = [pqdb.store_precursor_protquants, pqdb.store_protprob,
                  pqdb.store_protfdr, pqdb.store_protpep]

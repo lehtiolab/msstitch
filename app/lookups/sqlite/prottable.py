@@ -23,10 +23,10 @@ class ProtPepTable(ResultLookupInterface):
         return {fn: table_id for (table_id, setid, fn) in cursor}
 
     def get_feature_map(self):
-        columns = {'proteins': ['pacc_id', 'protein_acc'],
-                   'peptide_sequences': ['pepid', 'sequence']
+        columns = {'protein': ['pacc_id', 'protein_acc'],
+                   'peptide': ['pepid', 'sequence']
                    }
-        table = self.table_map[self.datatype]
+        table = self.table_map[self.datatype]['feattable']
         columns = columns[self.datatype]
         cursor = self.get_cursor()
         cursor.execute('SELECT {}, {} FROM {}'.format(columns[0], columns[1],
