@@ -1,52 +1,49 @@
-import re
 import os
 from app.readers import tsv as tsvreader
+
+
+def create_tablefn_map(fns, pqdb, poolnames):
+    poolmap = {name: pid for (name, pid) in pqdb.get_all_poolnames()}
+    pqdb.store_table_files([(poolmap[pool], os.path.basename(fn))
+                            for fn, pool in zip(fns, poolnames)])
+    return pqdb.get_tablefn_map()
+
+
+def get_colmap(fns, pattern, single_col=False):
+    colmap = {}
+    for fn in fns:
+        header = tsvreader.get_tsv_header(fn)
+        basefn = os.path.basename(fn)
+        cols = tsvreader.get_cols_in_file(pattern, header, single_col)
+        if cols:
+            colmap[basefn] = cols
+    return colmap
 
 
 def create_proteinquant_lookup(fns, pqdb, poolnames, protacc_colnr,
                                ms1_qcolpattern=None, isobqcolpattern=None,
                                psmnrpattern=None, probcolpattern=None,
                                fdrcolpattern=None, pepcolpattern=None):
-    poolmap = {name: pid for (name, pid) in pqdb.get_all_poolnames()}
-    pqdb.store_protein_tables([(poolmap[pool], os.path.basename(fn))
-                               for fn, pool in zip(fns, poolnames)])
-    prottable_map = pqdb.get_protein_table_map()
+    prottable_map = create_tablefn_map(fns, pqdb, poolnames)
     protein_acc_map = pqdb.get_protein_acc_map()
-    iso_quantcols, psmnrcolmap = {}, {}
-    precur_quantcols, probcol, fdrcol, pepcol = {}, {}, {}, {}
-    for fn in fns:
-        header = tsvreader.get_tsv_header(fn)
-        basefn = os.path.basename(fn)
-        for colmap, pattern in zip([iso_quantcols, psmnrcolmap],
-                                   [isobqcolpattern, psmnrpattern]):
-            cols = tsvreader.get_cols_in_file(pattern, header)
-            if cols:
-                colmap[basefn] = cols
-        for colmap, pattern in zip([precur_quantcols, probcol, fdrcol, pepcol],
-                                   [ms1_qcolpattern, probcolpattern,
-                                    fdrcolpattern, pepcolpattern]):
-            cols = tsvreader.get_cols_in_file(pattern, header, single_col=True)
-            if cols:
-                colmap[basefn] = cols
-    if iso_quantcols and psmnrcolmap:
-        create_isobaric_proteinquant_lookup(fns, prottable_map,
-                                            protein_acc_map, pqdb,
-                                            protacc_colnr,
-                                            iso_quantcols, psmnrcolmap)
-    if precur_quantcols:
-        create_precursor_proteinquant_lookup(fns, prottable_map,
-                                             protein_acc_map, pqdb,
-                                             protacc_colnr, precur_quantcols)
-    if probcol:
-        create_probability_proteinquant_lookup(fns, prottable_map,
-                                               protein_acc_map, pqdb,
-                                               protacc_colnr, probcol)
-    if fdrcol:
-        create_fdr_proteinquant_lookup(fns, prottable_map, protein_acc_map,
-                                       pqdb, protacc_colnr, fdrcol)
-    if pepcol:
-        create_pep_proteinquant_lookup(fns, prottable_map, protein_acc_map,
-                                       pqdb, protacc_colnr, pepcol)
+    patterns = [ms1_qcolpattern, probcolpattern, fdrcolpattern, pepcolpattern]
+    storefuns = [pqdb.store_precursor_protquants, pqdb.store_protprob,
+                 pqdb.store_protfdr, pqdb.store_protpep]
+    for pattern, storefun in zip(patterns, storefuns):
+        if pattern is None:
+            continue
+        colmap = get_colmap(fns, pattern, single_col=True)
+        if colmap:
+            create_protein_lookup(fns, prottable_map, protein_acc_map,
+                                  storefun, protacc_colnr, colmap)
+    if isobqcolpattern is not None and psmnrpattern is not None:
+        isocolmap = get_colmap(fns, isobqcolpattern)
+        psmcolmap = get_colmap(fns, psmnrpattern)
+        if isocolmap and psmcolmap:
+            create_isobaric_proteinquant_lookup(fns, prottable_map,
+                                                protein_acc_map, pqdb,
+                                                protacc_colnr,
+                                                isocolmap, psmcolmap)
 
 
 def create_protein_lookup(fns, prottable_id_map, pacc_map, pqdbmethod,
@@ -62,34 +59,6 @@ def create_protein_lookup(fns, prottable_id_map, pacc_map, pqdbmethod,
             pqdbmethod(to_store)
             to_store = []
     pqdbmethod(to_store)
-
-
-def create_probability_proteinquant_lookup(fns, prottable_map, pacc_map, pqdb,
-                                           protacc_colnr, probcolmap):
-    """Stores protein probability"""
-    create_protein_lookup(fns, prottable_map, pacc_map, pqdb.store_protprob,
-                          protacc_colnr, probcolmap)
-
-
-def create_fdr_proteinquant_lookup(fns, prottable_map, pacc_map, pqdb,
-                                   protacc_colnr, fdrcolmap):
-    """Stores protein FDR"""
-    create_protein_lookup(fns, prottable_map, pacc_map, pqdb.store_protfdr,
-                          protacc_colnr, fdrcolmap)
-
-
-def create_pep_proteinquant_lookup(fns, prottable_map, pacc_map, pqdb,
-                                   protacc_colnr, pepcolmap):
-    """Stores protein PEP"""
-    create_protein_lookup(fns, prottable_map, pacc_map, pqdb.store_protpep,
-                          protacc_colnr, pepcolmap)
-
-
-def create_precursor_proteinquant_lookup(fns, prottable_map, pacc_map, pqdb,
-                                         protacc_colnr, quantcolmap):
-    """Stores protein precursor quant data"""
-    create_protein_lookup(fns, prottable_map, pacc_map, pqdb.store_precursor_protquants,
-                          protacc_colnr, quantcolmap)
 
 
 def create_isobaric_proteinquant_lookup(fns, prottable_map, pacc_map, pqdb,

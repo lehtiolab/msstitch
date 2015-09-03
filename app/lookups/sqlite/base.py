@@ -63,7 +63,7 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                 'protein_acc TEXT UNIQUE'],
                    'protein_tables': ['prottable_id INTEGER PRIMARY KEY',
                                       'set_id INTEGER',
-                                      'prottable_file TEXT',
+                                      'filename TEXT',
                                       'FOREIGN KEY(set_id)'
                                       'REFERENCES biosets'],
                    'protein_precur_quanted':

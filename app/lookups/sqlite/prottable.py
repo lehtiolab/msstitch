@@ -1,17 +1,47 @@
 from app.lookups.sqlite.base import ResultLookupInterface
 
 
-class ProtTableDB(ResultLookupInterface):
+class ProtPepTable(ResultLookupInterface):
+    table_map = {'protein': {'fntable': 'protein_tables',
+                             'feattable': 'proteins',
+                             },
+                 'peptide': {'fntable': 'peptide_tables',
+                             'feattable': 'peptide_sequences'
+                             }
+                 }
+
+    def store_table_files(self, tables):
+        self.store_many(
+            'INSERT INTO {}(set_id, filename) VALUES(?, ?)'.format(
+                self.table_map[self.datatype]['fntable']),
+            tables)
+
+    def get_tablefn_map(self):
+        table = self.table_map[self.datatype]['fntable']
+        cursor = self.get_cursor()
+        cursor.execute('SELECT * FROM {} '.format(table))
+        return {fn: table_id for (table_id, setid, fn) in cursor}
+
+    def get_feature_map(self):
+        columns = {'proteins': ['pacc_id', 'protein_acc'],
+                   'peptide_sequences': ['pepid', 'sequence']
+                   }
+        table = self.table_map[self.datatype]
+        columns = columns[self.datatype]
+        cursor = self.get_cursor()
+        cursor.execute('SELECT {}, {} FROM {}'.format(columns[0], columns[1],
+                                                      table))
+        return {acc: table_id for (table_id, acc) in cursor}
+
+
+class ProtTableDB(ProtPepTable):
+    datatype = 'protein'
+
     def add_tables(self):
         self.create_tables(['protein_tables', 'protein_iso_quanted',
                             'protquant_channels', 'protein_precur_quanted',
                             'protein_probability', 'protein_fdr',
                             'protein_pep'])
-
-    def store_protein_tables(self, tables):
-        self.store_many(
-            'INSERT INTO protein_tables(set_id, prottable_file) VALUES(?, ?)',
-            tables)
 
     def store_quant_channels(self, quantchannels):
         self.store_many(
@@ -154,18 +184,6 @@ class ProtTableDB(ResultLookupInterface):
             'SELECT DISTINCT set_name, set_id '
             'FROM biosets')
         return cursor
-
-    def get_protein_table_map(self):
-        cursor = self.get_cursor()
-        cursor.execute('SELECT prottable_id, prottable_file '
-                       'FROM protein_tables')
-        return {fn: table_id for (table_id, fn) in cursor}
-
-    def get_protein_acc_map(self):
-        cursor = self.get_cursor()
-        cursor.execute('SELECT pacc_id, protein_acc '
-                       'FROM proteins')
-        return {acc: table_id for (table_id, acc) in cursor}
 
     def get_quantchannel_map(self):
         outdict = {}
