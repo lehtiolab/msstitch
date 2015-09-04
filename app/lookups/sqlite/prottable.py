@@ -41,7 +41,10 @@ class ProtPepTable(ResultLookupInterface):
 
     def store_singlecol(self, tablekey, vals):
         table = self.table_map[self.datatype][tablekey]
-        self.store_many('INSERT INTO {} VALUES (?, ?, ?)'.format(table), vals)
+        cols = self.colmap[table]
+        self.store_many('INSERT INTO {}({}, {}, {}) '
+                        'VALUES (?, ?, ?)'.format(table, cols[0], cols[1],
+                                                  cols[2]), vals)
 
     def store_precursor_quants(self, quants):
         self.store_singlecol('prectable', quants)
@@ -55,6 +58,10 @@ class ProtPepTable(ResultLookupInterface):
 
 class PepTableDB(ProtPepTable):
     datatype = 'peptide'
+    colmap = {'peptide_precur_quanted': ['pep_id', 'peptable_id', 'quant'],
+              'peptide_fdr': ['pep_id', 'peptable_id', 'fdr'],
+              'peptide_pep': ['pep_id', 'peptable_id', 'pep'],
+              }
 
     def add_tables(self):
         self.create_tables(['peptide_tables', 'pepquant_channels',
@@ -89,6 +96,12 @@ class PepTableDB(ProtPepTable):
 
 class ProtTableDB(ProtPepTable):
     datatype = 'protein'
+    colmap = {'protein_precur_quanted': ['pacc_id', 'prottable_id', 'quant'],
+              'protein_fdr': ['pacc_id', 'prottable_id', 'fdr'],
+              'protein_pep': ['pacc_id', 'prottable_id', 'pep'],
+              'protein_probability': ['pacc_id', 'prottable_id',
+                                      'probability'],
+              }
 
     def add_tables(self):
         self.create_tables(['protein_tables', 'protein_iso_quanted',

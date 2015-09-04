@@ -93,13 +93,13 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                    ['pep_precquant_id INTEGER PRIMARY KEY',
                     'pep_id TEXT',
                     'peptable_id INTEGER',
-                    'quantvalue REAL',
+                    'quant REAL',
                     'FOREIGN KEY(pep_id) '
                     'REFERENCES peptide_sequences(pep_id) '
                     'FOREIGN KEY(peptable_id) '
                     'REFERENCES peptide_tables(peptable_id)'
                     ],
-                   'protein_fdr': ['pep_id TEXT',
+                   'peptide_fdr': ['pep_id TEXT',
                                    'peptable_id INTEGER',
                                    'fdr DOUBLE',
                                    'FOREIGN KEY(pep_id) '
@@ -121,7 +121,7 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                    ['prot_precquant_id INTEGER PRIMARY KEY',
                     'pacc_id TEXT',
                     'prottable_id INTEGER',
-                    'quantvalue REAL',
+                    'quant REAL',
                     'FOREIGN KEY(pacc_id) '
                     'REFERENCES proteins(pacc_id) '
                     'FOREIGN KEY(prottable_id) '
