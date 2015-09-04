@@ -16,6 +16,12 @@ class ProtPepTable(ResultLookupInterface):
                              }
                  }
 
+    def get_all_poolnames(self):
+        cursor = self.get_cursor()
+        cursor.execute(
+            'SELECT DISTINCT set_name, set_id FROM biosets')
+        return cursor
+
     def store_table_files(self, tables):
         self.store_many(
             'INSERT INTO {}(set_id, filename) VALUES(?, ?)'.format(
@@ -30,7 +36,7 @@ class ProtPepTable(ResultLookupInterface):
 
     def get_feature_map(self):
         columns = {'protein': ['pacc_id', 'protein_acc'],
-                   'peptide': ['pepid', 'sequence']
+                   'peptide': ['pep_id', 'sequence']
                    }
         table = self.table_map[self.datatype]['feattable']
         columns = columns[self.datatype]
@@ -65,8 +71,8 @@ class PepTableDB(ProtPepTable):
 
     def add_tables(self):
         self.create_tables(['peptide_tables', 'pepquant_channels',
-                            'peptide_iso_quanted', 'peptide_fdr',
-                            'peptide_pep'])
+                            'peptide_iso_quanted', 'peptide_precur_quanted',
+                            'peptide_fdr', 'peptide_pep'])
 
     def store_quant_channels(self, quantchannels):
         self.store_many(
@@ -242,13 +248,6 @@ class ProtTableDB(ProtPepTable):
         cursor.execute(
             'SELECT DISTINCT prottable_id '
             'FROM protein_precur_quanted')
-        return cursor
-
-    def get_all_poolnames(self):
-        cursor = self.get_cursor()
-        cursor.execute(
-            'SELECT DISTINCT set_name, set_id '
-            'FROM biosets')
         return cursor
 
     def get_quantchannel_map(self):

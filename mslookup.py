@@ -7,7 +7,7 @@ mslookup - Creating SQLite lookups for internal and external use
 import argparse
 import os
 from app.drivers.mslookup import (spectra, quant, proteingroups, biosets,
-                                  proteinquant, psms)
+                                  proteinquant, pepquant, psms)
 
 
 def parser_file_exists(currentparser, fn):
@@ -121,6 +121,10 @@ parser.add_argument('--protcol', dest='protcol', help='Column number\n'
                     'of protein table in which protein accessions are \n'
                     'stored. First column number is 1.',
                     type=int, required=False)
+parser.add_argument('--pepcol', dest='pepcol', help='Column number\n'
+                    'of peptide table in which peptide sequences are \n'
+                    'stored. First column number is 1.',
+                    type=int, required=False)
 parser.add_argument('--ms1quantcolpattern', dest='precursorquantcolpattern',
                     help='Unique text pattern to identify precursor quant \n'
                     'column in protein table.',
@@ -171,6 +175,7 @@ commandmap = {
     'isoquant': quant.IsobaricQuantLookupDriver,
     'ms1quant': quant.PrecursorQuantLookupDriver,
     'proteingrouplookup': proteingroups.ProteinGroupLookupDriver,
+    'pepquant': pepquant.PeptideQuantLookupDriver,
     'protquant': proteinquant.ProteinQuantLookupDriver,
 }
 
