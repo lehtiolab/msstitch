@@ -18,7 +18,7 @@ def generate_tsv_proteins(fn, header):
     return generate_split_tsv_lines(fn, header)
 
 
-def generate_tsv_protein_quants(fns):
+def generate_tsv_pep_protein_quants(fns):
     """Unlike generate_tsv_lines_multifile, this generates tsv lines
     from multiple files that may have different headers. Yields
     fn, header as well as quant data for each protein quant"""

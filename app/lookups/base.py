@@ -11,6 +11,7 @@ def get_lookup(fn, lookuptype):
                  'isoquant': quant.IsobaricQuantDB,
                  'ms1quant': quant.PrecursorQuantDB,
                  'searchspace': searchspace.SearchSpaceDB,
+                 'peptidetable': prottable.PepTableDB,
                  'prottable': prottable.ProtTableDB,
                  }
     return lookupmap[lookuptype](fn)

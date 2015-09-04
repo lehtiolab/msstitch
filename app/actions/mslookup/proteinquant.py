@@ -2,7 +2,60 @@ import os
 from app.readers import tsv as tsvreader
 
 
+def create_peptidequant_lookup(fns, pqdb, poolnames, pepseq_colnr,
+                               ms1_qcolpattern=None, isobqcolpattern=None,
+                               fdrcolpattern=None, pepcolpattern=None):
+    """Calls lower level function to create a peptide quant lookup"""
+    patterns = [ms1_qcolpattern, fdrcolpattern, pepcolpattern]
+    storefuns = [pqdb.store_precursor_quants, pqdb.store_fdr,
+                 pqdb.store_pep]
+    create_pep_protein_quant_lookup(fns, pqdb, poolnames, pepseq_colnr,
+                                    patterns, storefuns)
+
+
+def create_proteinquant_lookup(fns, pqdb, poolnames, protacc_colnr,
+                               ms1_qcolpattern=None, isobqcolpattern=None,
+                               psmnrpattern=None, probcolpattern=None,
+                               fdrcolpattern=None, pepcolpattern=None):
+    """Calls lower level function to create a protein quant lookup"""
+    patterns = [ms1_qcolpattern, probcolpattern, fdrcolpattern, pepcolpattern]
+    storefuns = [pqdb.store_precursor_quants, pqdb.store_protprob,
+                 pqdb.store_fdr, pqdb.store_pep]
+    create_pep_protein_quant_lookup(fns, pqdb, poolnames, protacc_colnr,
+                                    patterns, storefuns)
+
+
+def create_pep_protein_quant_lookup(fns, pqdb, poolnames, featcolnr, patterns,
+                                    storefuns, isobqcolpattern=None,
+                                    psmnrpattern=None):
+    """Does the work when creating peptide and protein quant lookups. This
+    loops through storing options and parses columns, passing on to the
+    storing functions"""
+    tablefn_map = create_tablefn_map(fns, pqdb, poolnames)
+    feat_map = pqdb.get_feature_map()
+    for pattern, storefun in zip(patterns, storefuns):
+        if pattern is None:
+            continue
+        colmap = get_colmap(fns, pattern, single_col=True)
+        if colmap:
+            store_single_col_data(fns, tablefn_map, feat_map,
+                                  storefun, featcolnr, colmap)
+    isocolmap, psmcolmap = {}, {}
+    for pattern, colmap in zip([isobqcolpattern, psmnrpattern],
+                               [isocolmap, psmcolmap]):
+        if pattern is not None:
+            continue
+        colmap = get_colmap(fns, pattern)
+    if isocolmap:
+        create_isobaric_quant_lookup(fns, tablefn_map,
+                                     feat_map, pqdb,
+                                     featcolnr,
+                                     isocolmap, psmcolmap)
+
+
 def create_tablefn_map(fns, pqdb, poolnames):
+    """Stores protein/peptide table names in DB, returns a map with their
+    respective DB IDs"""
     poolmap = {name: pid for (name, pid) in pqdb.get_all_poolnames()}
     pqdb.store_table_files([(poolmap[pool], os.path.basename(fn))
                             for fn, pool in zip(fns, poolnames)])
@@ -10,6 +63,9 @@ def create_tablefn_map(fns, pqdb, poolnames):
 
 
 def get_colmap(fns, pattern, single_col=False):
+    """For table files, loops through headers and checks which column(s)
+    match a passed pattern. Those column(s) names are returned in a map with
+    filenames as keys"""
     colmap = {}
     for fn in fns:
         header = tsvreader.get_tsv_header(fn)
@@ -20,38 +76,12 @@ def get_colmap(fns, pattern, single_col=False):
     return colmap
 
 
-def create_proteinquant_lookup(fns, pqdb, poolnames, protacc_colnr,
-                               ms1_qcolpattern=None, isobqcolpattern=None,
-                               psmnrpattern=None, probcolpattern=None,
-                               fdrcolpattern=None, pepcolpattern=None):
-    prottable_map = create_tablefn_map(fns, pqdb, poolnames)
-    protein_acc_map = pqdb.get_feature_map()
-    patterns = [ms1_qcolpattern, probcolpattern, fdrcolpattern, pepcolpattern]
-    storefuns = [pqdb.store_precursor_protquants, pqdb.store_protprob,
-                 pqdb.store_protfdr, pqdb.store_protpep]
-    for pattern, storefun in zip(patterns, storefuns):
-        if pattern is None:
-            continue
-        colmap = get_colmap(fns, pattern, single_col=True)
-        if colmap:
-            create_protein_lookup(fns, prottable_map, protein_acc_map,
-                                  storefun, protacc_colnr, colmap)
-    if isobqcolpattern is not None and psmnrpattern is not None:
-        isocolmap = get_colmap(fns, isobqcolpattern)
-        psmcolmap = get_colmap(fns, psmnrpattern)
-        if isocolmap and psmcolmap:
-            create_isobaric_proteinquant_lookup(fns, prottable_map,
-                                                protein_acc_map, pqdb,
-                                                protacc_colnr,
-                                                isocolmap, psmcolmap)
-
-
-def create_protein_lookup(fns, prottable_id_map, pacc_map, pqdbmethod,
+def store_single_col_data(fns, prottable_id_map, pacc_map, pqdbmethod,
                           protacc_colnr, colmap):
     """General method to store single column data from protein tables
     in lookup"""
     to_store = []
-    for fn, header, pquant in tsvreader.generate_tsv_protein_quants(fns):
+    for fn, header, pquant in tsvreader.generate_tsv_pep_protein_quants(fns):
         pacc_id = pacc_map[pquant[header[protacc_colnr]]]
         pqdata = (pacc_id, prottable_id_map[fn], pquant[colmap[fn]])
         to_store.append(pqdata)
@@ -61,37 +91,45 @@ def create_protein_lookup(fns, prottable_id_map, pacc_map, pqdbmethod,
     pqdbmethod(to_store)
 
 
-def create_isobaric_proteinquant_lookup(fns, prottable_map, pacc_map, pqdb,
-                                        protacc_colnr, allquantcols,
-                                        psmnrcolmap):
-    """Creates a lookup dict from protein quant input files and some
+def create_isobaric_quant_lookup(fns, tablefn_map, featmap, pqdb,
+                                 featcolnr, allquantcols, psmcolmap):
+    """Creates a lookup dict from peptide/protein quant input files and some
     input parameters. This assumes the order of quant columns and
     number-of-PSM columns is the same."""
     pqdb.store_quant_channels(map_psmnrcol_to_quantcol(allquantcols,
-                                                       psmnrcolmap,
-                                                       prottable_map))
+                                                       psmcolmap,
+                                                       tablefn_map))
     quantmap = pqdb.get_quantchannel_map()
     to_store = []
-    for fn, header, pquant in tsvreader.generate_tsv_protein_quants(fns):
-        pqdata = get_isob_protquant_data(pquant, header, prottable_map[fn],
-                                         pacc_map, protacc_colnr, quantmap)
+    for fn, header, pquant in tsvreader.generate_tsv_pep_protein_quants(fns):
+        pqdata = get_isob_quant_data(pquant, header, tablefn_map[fn],
+                                     featmap, featcolnr, quantmap)
         to_store.extend(pqdata)
         if len(to_store) > 10000:
-            pqdb.store_isobaric_protquants(to_store)
+            pqdb.store_isobaric_quants(to_store)
             to_store = []
-    pqdb.store_isobaric_protquants(to_store)
+    pqdb.store_isobaric_quants(to_store)
 
 
-def map_psmnrcol_to_quantcol(quantcols, psmcols, prottable_map):
-    for fn in quantcols:
-        for qcol, psmcol in zip(quantcols[fn], psmcols[fn]):
-            yield (prottable_map[fn], qcol, psmcol)
+def map_psmnrcol_to_quantcol(quantcols, psmcols, tablefn_map):
+    """This function yields tuples of table filename, isobaric quant column
+    and if necessary number-of-PSM column"""
+    if not psmcols:
+        for fn, qcol in quantcols.items():
+            yield (tablefn_map[fn], qcol)
+    else:
+        for fn in quantcols:
+            for qcol, psmcol in zip(quantcols[fn], psmcols[fn]):
+                yield (tablefn_map[fn], qcol, psmcol)
 
 
-def get_isob_protquant_data(pquant, header, fnid, pacc_map, acccol, qmap):
-    # (protein_acc, quantmap[qcol], quantvalue, amount_peptides)
-    """Turns a dict from a line of protein quant data into a set of
+def get_isob_quant_data(pquant, header, fnid, featmap, featcol, qmap):
+    """Turns a dict from a line of protein/peptide quant data into a set of
     tuples that can be stored in db"""
-    protacc_id = pacc_map[pquant[header[acccol]]]
+    feat_dbid = featmap[pquant[header[featcol]]]
     for channel_name, (channel_id, psmfield) in qmap[fnid].items():
-        yield (protacc_id, channel_id, pquant[channel_name], pquant[psmfield])
+        if psmfield is None:
+            yield (feat_dbid, channel_id, pquant[channel_name])
+        else:
+            yield (feat_dbid, channel_id, pquant[channel_name],
+                   pquant[psmfield])

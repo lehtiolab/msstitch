@@ -66,6 +66,57 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                       'filename TEXT',
                                       'FOREIGN KEY(set_id)'
                                       'REFERENCES biosets'],
+                   'peptide_tables': ['peptable_id INTEGER PRIMARY KEY',
+                                      'set_id INTEGER',
+                                      'filename TEXT',
+                                      'FOREIGN KEY(set_id)'
+                                      'REFERENCES biosets'],
+                   'pepquant_channels': ['channel_id INTEGER PRIMARY KEY',
+                                         'peptable_id INTEGER',
+                                         'channel_name TEXT',
+                                         'FOREIGN KEY(peptable_id) '
+                                         'REFERENCES '
+                                         'peptide_tables(peptable_id)'
+                                         ],
+                   'peptide_iso_quanted': ['peptidequant_id'
+                                           'INTEGER PRIMARY KEY',
+                                           'pep_id INTEGER',
+                                           'channel_id INTEGER',
+                                           'quantvalue REAL',
+                                           'FOREIGN KEY(pep_id) '
+                                           'REFERENCES peptide_sequences(pep_id) '
+                                           'FOREIGN KEY(channel_id) '
+                                           'REFERENCES '
+                                           'pepquant_channels(channel_id)'
+                                           ],
+                   'peptide_precur_quanted':
+                   ['pep_precquant_id INTEGER PRIMARY KEY',
+                    'pep_id TEXT',
+                    'peptable_id INTEGER',
+                    'quantvalue REAL',
+                    'FOREIGN KEY(pep_id) '
+                    'REFERENCES peptide_sequences(pep_id) '
+                    'FOREIGN KEY(peptable_id) '
+                    'REFERENCES peptide_tables(peptable_id)'
+                    ],
+                   'protein_fdr': ['pep_id TEXT',
+                                   'peptable_id INTEGER',
+                                   'fdr DOUBLE',
+                                   'FOREIGN KEY(pep_id) '
+                                   'REFERENCES peptide_sequences(pep_id) '
+                                   'FOREIGN KEY(peptable_id) '
+                                   'REFERENCES '
+                                   'peptide_tables(peptable_id)'
+                                   ],
+                   'peptide_pep': ['pep_id TEXT',
+                                   'peptable_id INTEGER',
+                                   'pep DOUBLE',
+                                   'FOREIGN KEY(pep_id) '
+                                   'REFERENCES peptide_sequences(pep_id) '
+                                   'FOREIGN KEY(peptable_id) '
+                                   'REFERENCES '
+                                   'peptide_tables(peptable_id)'
+                                   ],
                    'protein_precur_quanted':
                    ['prot_precquant_id INTEGER PRIMARY KEY',
                     'pacc_id TEXT',

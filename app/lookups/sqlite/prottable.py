@@ -4,9 +4,15 @@ from app.lookups.sqlite.base import ResultLookupInterface
 class ProtPepTable(ResultLookupInterface):
     table_map = {'protein': {'fntable': 'protein_tables',
                              'feattable': 'proteins',
+                             'prectable': 'protein_precur_quanted',
+                             'fdrtable': 'protein_fdr',
+                             'peptable': 'protein_pep',
                              },
                  'peptide': {'fntable': 'peptide_tables',
-                             'feattable': 'peptide_sequences'
+                             'feattable': 'peptide_sequences',
+                             'prectable': 'peptide_precur_quanted',
+                             'fdrtable': 'peptide_fdr',
+                             'peptable': 'peptide_pep',
                              }
                  }
 
@@ -32,6 +38,53 @@ class ProtPepTable(ResultLookupInterface):
         cursor.execute('SELECT {}, {} FROM {}'.format(columns[0], columns[1],
                                                       table))
         return {acc: table_id for (table_id, acc) in cursor}
+
+    def store_singlecol(self, tablekey, vals):
+        table = self.table_map[self.datatype][tablekey]
+        self.store_many('INSERT INTO {} VALUES (?, ?, ?)'.format(table), vals)
+
+    def store_precursor_quants(self, quants):
+        self.store_singlecol('prectable', quants)
+
+    def store_fdr(self, fdr):
+        self.store_singlecol('fdrtable', fdr)
+
+    def store_pep(self, pep):
+        self.store_singlecol('peptable', pep)
+
+
+class PepTableDB(ProtPepTable):
+    datatype = 'peptide'
+
+    def add_tables(self):
+        self.create_tables(['peptide_tables', 'pepquant_channels',
+                            'peptide_iso_quanted', 'peptide_fdr',
+                            'peptide_pep'])
+
+    def store_quant_channels(self, quantchannels):
+        self.store_many(
+            'INSERT INTO pepquant_channels(peptable_id, channel_name) '
+            'VALUES (?, ?)',
+            quantchannels)
+
+    def store_isobaric_quants(self, quants):
+        self.store_many(
+            'INSERT INTO peptide_iso_quanted(pacc_id, channel_id, quantvalue) '
+            'VALUES (?, ?, ?)', quants)
+
+    def get_quantchannel_map(self):
+        outdict = {}
+        amount_psms_name = None
+        cursor = self.get_cursor()
+        cursor.execute(
+            'SELECT channel_id, prottable_id, channel_name '
+            'FROM protquant_channels')
+        for channel_id, fnid, channel_name in cursor:
+            try:
+                outdict[fnid][channel_name] = (channel_id, amount_psms_name)
+            except KeyError:
+                outdict[fnid] = {channel_name: (channel_id, amount_psms_name)}
+        return outdict
 
 
 class ProtTableDB(ProtPepTable):
@@ -198,32 +251,14 @@ class ProtTableDB(ProtPepTable):
                 outdict[fnid] = {channel_name: (channel_id, amount_psms_name)}
         return outdict
 
-    def store_isobaric_protquants(self, quants):
+    def store_isobaric_quants(self, quants):
         self.store_many(
             'INSERT INTO protein_iso_quanted(pacc_id, channel_id, '
             'quantvalue, amount_psms) '
             'VALUES (?, ?, ?, ?)', quants)
-
-    def store_precursor_protquants(self, quants):
-        self.store_many(
-            'INSERT INTO protein_precur_quanted(pacc_id, prottable_id, '
-            'quantvalue) '
-            'VALUES (?, ?, ?)', quants)
 
     def store_protprob(self, probabilities):
         self.store_many(
             'INSERT INTO protein_probability(pacc_id, prottable_id, '
             'probability) '
             'VALUES (?, ?, ?)', probabilities)
-
-    def store_protfdr(self, fdr):
-        self.store_many(
-            'INSERT INTO protein_fdr(pacc_id, prottable_id, '
-            'fdr) '
-            'VALUES (?, ?, ?)', fdr)
-
-    def store_protpep(self, pep):
-        self.store_many(
-            'INSERT INTO protein_pep(pacc_id, prottable_id, '
-            'pep) '
-            'VALUES (?, ?, ?)', pep)
