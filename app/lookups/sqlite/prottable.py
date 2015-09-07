@@ -129,9 +129,10 @@ class ProtTableDB(ProtPepTable):
 
     def get_proteins_psms(self, extended=False):
         fields = ['pgm.protein_acc', 'sets.set_name',
-                  'psm.sequence']
+                  'pep.sequence']
         joins = [('psm_protein_groups', 'ppg', 'master_id'),
                  ('psms', 'psm', 'psm_id'),
+                 ('peptide_sequences', 'pep', 'pep_id'),
                  ('mzml', 'sp', 'spectra_id'),
                  ('mzmlfiles', 'mzfn', 'mzmlfile_id'),
                  ('biosets', 'sets', 'set_id'),

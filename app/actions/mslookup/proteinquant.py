@@ -22,7 +22,8 @@ def create_proteinquant_lookup(fns, pqdb, poolnames, protacc_colnr,
     storefuns = [pqdb.store_precursor_quants, pqdb.store_protprob,
                  pqdb.store_fdr, pqdb.store_pep]
     create_pep_protein_quant_lookup(fns, pqdb, poolnames, protacc_colnr,
-                                    patterns, storefuns)
+                                    patterns, storefuns, isobqcolpattern,
+                                    psmnrpattern)
 
 
 def create_pep_protein_quant_lookup(fns, pqdb, poolnames, featcolnr, patterns,
@@ -43,9 +44,9 @@ def create_pep_protein_quant_lookup(fns, pqdb, poolnames, featcolnr, patterns,
     isocolmap, psmcolmap = {}, {}
     for pattern, colmap in zip([isobqcolpattern, psmnrpattern],
                                [isocolmap, psmcolmap]):
-        if pattern is not None:
+        if pattern is None:
             continue
-        colmap = get_colmap(fns, pattern)
+        colmap.update(get_colmap(fns, pattern))
     if isocolmap:
         create_isobaric_quant_lookup(fns, tablefn_map,
                                      feat_map, pqdb,
