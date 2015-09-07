@@ -151,11 +151,16 @@ class ProtTableDB(ProtPepTable):
         cursor = self.get_cursor()
         return cursor.execute(sql)
 
+    def update_selects(selectmap, fields, fieldcount):
+        selectmap.update({field: i + fieldcount
+                          for i, field in enumerate(fields)})
+        fieldcount = max(selectmap.values()) + 1
+        return selectmap, fieldcount
+
     def prepare_mergetable_sql(self, precursor=False, isobaric=False,
                                probability=False, fdr=False, pep=False):
         selects = ['p.protein_acc']
-        selectmap = {'p_acc': 0}
-        selectfieldcount = max(selectmap.values()) + 1
+        selectmap, count = self.update_selects({}, ['p_acc'], 0)
         joins = []
         if isobaric:
             selects.extend(['pc.channel_name', 'bs.set_name',
@@ -166,12 +171,9 @@ class ProtTableDB(ProtPepTable):
                           ('protein_tables', 'pt', 'pc', 'prottable_id'),
                           ('biosets', 'bs', 'pt', 'set_id')
                           ])
-            selectmap.update({field: i + selectfieldcount
-                              for i, field in enumerate(
-                                  ['channel', 'isoq_poolname',
-                                   'isoq_psmsfield', 'isoq_val',
-                                   'isoq_psms'])})
-            selectfieldcount = max(selectmap.values()) + 1
+            fld = ['channel', 'isoq_poolname', 'isoq_psmsfield', 'isoq_val',
+                   'isoq_psms']
+            selectmap, count = self.update_selects(selectmap, fld, count)
         if precursor:
             selects.extend(['prqbs.set_name', 'preq.quant'])
             joins.extend([('protein_precur_quanted', 'preq', 'p', 'pacc_id',
@@ -179,10 +181,8 @@ class ProtTableDB(ProtPepTable):
                           ('protein_tables', 'prqpt', 'preq', 'prottable_id'),
                           ('biosets', 'prqbs', 'prqpt', 'set_id')
                           ])
-            selectmap.update({field: i + selectfieldcount
-                              for i, field in enumerate(['preq_poolname',
-                                                         'preq_val'])})
-            selectfieldcount = max(selectmap.values()) + 1
+            fld = ['preq_poolname', 'preq_val']
+            selectmap, count = self.update_selects(selectmap, fld, count)
         if probability:
             selects.extend(['probbs.set_name', 'pprob.probability'])
             joins.extend([('protein_probability', 'pprob', 'p', 'pacc_id',
@@ -191,35 +191,31 @@ class ProtTableDB(ProtPepTable):
                            'prottable_id'),
                           ('biosets', 'probbs', 'probpt', 'set_id')
                           ])
-            selectmap.update({field: i + selectfieldcount
-                              for i, field in enumerate(['prob_poolname',
-                                                         'prob_val'])})
-            selectfieldcount = max(selectmap.values()) + 1
+            fld = ['prob_poolname', 'prob_val']
+            selectmap, count = self.update_selects(selectmap, fld, count)
         if fdr:
             selects.extend(['fdrbs.set_name', 'pfdr.fdr'])
             joins.extend([('protein_fdr', 'pfdr', 'p', 'pacc_id', True),
                           ('protein_tables', 'fdrpt', 'pfdr', 'prottable_id'),
                           ('biosets', 'fdrbs', 'fdrpt', 'set_id')
                           ])
-            selectmap.update({field: i + selectfieldcount
-                              for i, field in enumerate(['fdr_poolname',
-                                                         'fdr_val'])})
-            selectfieldcount = max(selectmap.values()) + 1
+            fld = ['fdr_poolname', 'fdr_val']
+            selectmap, count = self.update_selects(selectmap, fld, count)
         if pep:
             selects.extend(['pepbs.set_name', 'ppep.pep'])
             joins.extend([('protein_pep', 'ppep', 'p', 'pacc_id', True),
                           ('protein_tables', 'peppt', 'ppep', 'prottable_id'),
                           ('biosets', 'pepbs', 'peppt', 'set_id')
                           ])
-            selectmap.update({field: i + selectfieldcount
-                              for i, field in enumerate(['pep_poolname',
-                                                         'pep_val'])})
-            selectfieldcount = max(selectmap.values()) + 1
+            fld = ['pep_poolname', 'pep_val']
+            selectmap, count = self.update_selects(selectmap, fld, count)
 
         sql = 'SELECT {} FROM proteins AS p'.format(
             ', '.join(selects))
-        # NB Use full outer joins or left outer joins here on the stuff you
-        # join to the proteins AS p table
+        sql = self.get_sql_joins_mergetable(sql, joins)
+        return sql, selectmap
+
+    def get_sql_joins_mergetable(self, sql, joins):
         if joins:
             joinsql = ''
             for j in joins:
@@ -230,7 +226,7 @@ class ProtTableDB(ProtPepTable):
                     joincmd, j[0], j[1], j[2], j[3], joinsql)
             sql = '{} {}'.format(sql, joinsql)
         sql = '{0} ORDER BY p.protein_acc'.format(sql)
-        return sql, selectmap
+        return sql
 
     def get_merged_proteins(self, sql):
         cursor = self.get_cursor()
