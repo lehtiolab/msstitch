@@ -151,7 +151,7 @@ class ProtTableDB(ProtPepTable):
         cursor = self.get_cursor()
         return cursor.execute(sql)
 
-    def update_selects(selectmap, fields, fieldcount):
+    def update_selects(self, selectmap, fields, fieldcount):
         selectmap.update({field: i + fieldcount
                           for i, field in enumerate(fields)})
         fieldcount = max(selectmap.values()) + 1
