@@ -172,7 +172,7 @@ class ProtTableDB(ProtPepTable):
                                    'isoq_psms'])})
             selectfieldcount = max(selectmap.values()) + 1
         if precursor:
-            selects.extend(['prqbs.set_name', 'preq.quantvalue'])
+            selects.extend(['prqbs.set_name', 'preq.quant'])
             joins.extend([('protein_precur_quanted', 'preq', 'p', 'pacc_id',
                            True),
                           ('protein_tables', 'prqpt', 'preq', 'prottable_id'),

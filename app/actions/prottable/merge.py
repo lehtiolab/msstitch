@@ -1,5 +1,7 @@
 from app.dataformats import prottable as prottabledata
 from app.actions.prottable import info as pdatagenerator
+from app.actions.mergetable import (simple_val_fetch, fill_mergefeature,
+                                    parse_NA)
 
 
 def build_proteintable(pqdb, header, headerfields, isobaric=False,
@@ -25,29 +27,18 @@ def build_proteintable(pqdb, header, headerfields, isobaric=False,
     proteins = pqdb.get_merged_proteins(protein_sql)
     protein = next(proteins)
     outprotein = {prottabledata.HEADER_PROTEIN: protein[sqlfieldmap['p_acc']]}
-    fill_outprotein(outprotein, iso_fun, ms1_fun, prob_fun, fdr_fun, pep_fun,
-                    pdata_fun, protein, sqlfieldmap, headerfields,
-                    proteindatamap)
+    fill_mergefeature(outprotein, iso_fun, ms1_fun, prob_fun, fdr_fun, pep_fun,
+                      pdata_fun, protein, sqlfieldmap, headerfields,
+                      proteindatamap)
     for protein in proteins:
         p_acc = protein[sqlfieldmap['p_acc']]
         if p_acc != outprotein[prottabledata.HEADER_PROTEIN]:
             yield parse_NA(outprotein, header)
             outprotein = {prottabledata.HEADER_PROTEIN: p_acc}
-        fill_outprotein(outprotein, iso_fun, ms1_fun, prob_fun, fdr_fun,
-                        pep_fun, pdata_fun, protein, sqlfieldmap, headerfields,
-                        proteindatamap)
+        fill_mergefeature(outprotein, iso_fun, ms1_fun, prob_fun, fdr_fun,
+                          pep_fun, pdata_fun, protein, sqlfieldmap,
+                          headerfields, proteindatamap)
     yield parse_NA(outprotein, header)
-
-
-def fill_outprotein(outprotein, iso_fun, ms1_fun, prob_fun, fdr_fun, pep_fun,
-                    pdata_fun, protein, sqlfieldmap, headerfields,
-                    proteindata_map):
-    outprotein.update(iso_fun(protein, sqlfieldmap, headerfields))
-    outprotein.update(ms1_fun(protein, sqlfieldmap, headerfields))
-    outprotein.update(prob_fun(protein, sqlfieldmap, headerfields))
-    outprotein.update(fdr_fun(protein, sqlfieldmap, headerfields))
-    outprotein.update(pep_fun(protein, sqlfieldmap, headerfields))
-    outprotein.update(pdata_fun(outprotein, proteindata_map, headerfields))
 
 
 def get_protein_data(outprotein, proteindata_map, headerfields):
@@ -64,12 +55,6 @@ def get_isobaric_quant(protein, sqlmap, headerfields):
     nopsms = protein[sqlmap['isoq_psms']]
     return {headerfields['isoquant'][chan][pool]: quant,
             headerfields['isoquant'][psmfield][pool]: nopsms}
-
-
-def simple_val_fetch(protein, sqlmap, headerfields, poolkey, valkey):
-    pool = protein[sqlmap[poolkey]]
-    hfield = headerfields[pool]
-    return {hfield: protein[sqlmap[valkey]]}
 
 
 def get_precursor_quant(protein, sqlmap, headerfields):
@@ -94,12 +79,3 @@ def get_prot_pep(protein, sqlmap, headerfields):
     return simple_val_fetch(protein, sqlmap,
                             headerfields['proteinpep'][prottabledata.HEADER_PEP],
                             'pep_poolname', 'pep_val')
-
-
-def parse_NA(protein, header):
-    for field in header:
-        try:
-            protein[field] = str(protein[field])
-        except KeyError:
-            protein[field] = 'NA'
-    return protein
