@@ -10,7 +10,7 @@ def create_peptidequant_lookup(fns, pqdb, poolnames, pepseq_colnr,
     storefuns = [pqdb.store_precursor_quants, pqdb.store_fdr,
                  pqdb.store_pep]
     create_pep_protein_quant_lookup(fns, pqdb, poolnames, pepseq_colnr,
-                                    patterns, storefuns)
+                                    patterns, storefuns, isobqcolpattern)
 
 
 def create_proteinquant_lookup(fns, pqdb, poolnames, protacc_colnr,
@@ -116,8 +116,9 @@ def map_psmnrcol_to_quantcol(quantcols, psmcols, tablefn_map):
     """This function yields tuples of table filename, isobaric quant column
     and if necessary number-of-PSM column"""
     if not psmcols:
-        for fn, qcol in quantcols.items():
-            yield (tablefn_map[fn], qcol)
+        for fn in quantcols:
+            for qcol in quantcols[fn]:
+                yield (tablefn_map[fn], qcol)
     else:
         for fn in quantcols:
             for qcol, psmcol in zip(quantcols[fn], psmcols[fn]):

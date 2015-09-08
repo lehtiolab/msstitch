@@ -21,7 +21,7 @@ class PepTableDB(ProtPepTable):
 
     def store_isobaric_quants(self, quants):
         self.store_many(
-            'INSERT INTO peptide_iso_quanted(pacc_id, channel_id, quantvalue) '
+            'INSERT INTO peptide_iso_quanted(pep_id, channel_id, quantvalue) '
             'VALUES (?, ?, ?)', quants)
 
     def get_quantchannel_map(self):
@@ -29,8 +29,8 @@ class PepTableDB(ProtPepTable):
         amount_psms_name = None
         cursor = self.get_cursor()
         cursor.execute(
-            'SELECT channel_id, prottable_id, channel_name '
-            'FROM protquant_channels')
+            'SELECT channel_id, peptable_id, channel_name '
+            'FROM pepquant_channels')
         for channel_id, fnid, channel_name in cursor:
             try:
                 outdict[fnid][channel_name] = (channel_id, amount_psms_name)
