@@ -129,7 +129,7 @@ parser.add_argument('--ms1quantcolpattern', dest='precursorquantcolpattern',
                     help='Unique text pattern to identify precursor quant \n'
                     'column in protein table.',
                     type=str, required=False)
-parser.add_argument('--isobquantcolpattern', dest='quantcolpattern',
+parser.add_argument('--isobquantcolpattern', dest='isobquantcolpattern',
                     help='Unique text pattern to identify isobaric quant \n'
                     'column in protein table.',
                     type=str, required=False)
