@@ -77,5 +77,8 @@ class ProtPepTable(ResultLookupInterface):
                 joinsql = '{5} {0} {1} AS {2} ON {3}.{4}={2}.{4}'.format(
                     joincmd, j[0], j[1], j[2], j[3], joinsql)
             sql = '{} {}'.format(sql, joinsql)
-        sql = '{0} ORDER BY p.protein_acc'.format(sql)
         return sql
+    
+    def get_merged_features(self, sql):
+        return self.execute_sql(sql)
+

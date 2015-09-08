@@ -108,12 +108,8 @@ class ProtTableDB(ProtPepTable):
         sql = 'SELECT {} FROM proteins AS p'.format(
             ', '.join(selects))
         sql = self.get_sql_joins_mergetable(sql, joins)
+        sql = '{0} ORDER BY p.protein_acc'.format(sql)
         return sql, selectmap
-
-    def get_merged_proteins(self, sql):
-        cursor = self.get_cursor()
-        cursor.execute(sql)
-        return cursor
 
     def get_isoquant_amountpsms_channels(self):
         cursor = self.get_cursor()

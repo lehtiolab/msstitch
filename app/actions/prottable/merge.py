@@ -24,7 +24,7 @@ def build_proteintable(pqdb, header, headerfields, isobaric=False,
     protein_sql, sqlfieldmap = pqdb.prepare_mergetable_sql(precursor, isobaric,
                                                            probability, fdr,
                                                            pep)
-    proteins = pqdb.get_merged_proteins(protein_sql)
+    proteins = pqdb.get_merged_features(protein_sql)
     protein = next(proteins)
     outprotein = {prottabledata.HEADER_PROTEIN: protein[sqlfieldmap['p_acc']]}
     fill_mergefeature(outprotein, iso_fun, ms1_fun, prob_fun, fdr_fun, pep_fun,

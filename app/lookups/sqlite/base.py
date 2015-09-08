@@ -283,6 +283,12 @@ class DatabaseConnection(object):
         cursor.executemany(sql, values)
         self.conn.commit()
 
+    def execute_sql(self, sql):
+        """Executes SQL and returns cursor for it"""
+        cursor = self.get_cursor()
+        cursor.execute(sql)
+        return cursor
+
 
 class ResultLookupInterface(DatabaseConnection):
     """Connection subclass shared by result lookup interfaces that need

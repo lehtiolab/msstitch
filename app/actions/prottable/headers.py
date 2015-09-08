@@ -71,14 +71,15 @@ def get_isoquant_fields(pqdb=False, poolnames=False):
     quantheader = OrderedDict()
     for chan_name, amnt_psms_name in pqdb.get_isoquant_amountpsms_channels():
         quantheader[chan_name] = get_header_field(chan_name, poolnames)
-        quantheader[amnt_psms_name] = get_header_field(amnt_psms_name,
-                                                       poolnames)
+        if amnt_psms_name:
+            quantheader[amnt_psms_name] = get_header_field(amnt_psms_name,
+                                                           poolnames)
     return quantheader
 
 
-def generate_header(headerfields, oldheader=False):
+def generate_general_header(headerfields, firstfield, oldheader=False):
     if not oldheader:
-        header = [prottabledata.HEADER_PROTEIN]
+        header = [firstfield]
     else:
         header = oldheader[:]
     for fieldtype in ['proteindata', 'probability', 'proteinfdr', 
@@ -93,3 +94,8 @@ def generate_header(headerfields, oldheader=False):
             for pools in fields.values():
                 header.extend(pools.values())
     return header
+
+
+def generate_header(headerfields, oldheader=False):
+    return generate_general_header(headerfield, prottabledata.HEADER_PROTEIN,
+                                   oldheader)
