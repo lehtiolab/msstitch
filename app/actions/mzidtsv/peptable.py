@@ -16,19 +16,6 @@ def get_quantcols(pattern, oldheader, coltype):
         return reader.get_cols_in_file(pattern, oldheader, single_col=True)
 
 
-def get_peptable_header(oldheader, isobqfieldmap=False, precurqfield=False):
-    header = oldheader[:]
-    if isobqfieldmap:
-        for field, medianfield in isobqfieldmap.items():
-            header = [medianfield if x == field else x for x in header]
-    if precurqfield:
-        header = [peptabledata.HEADER_AREA if x == precurqfield
-                  else x for x in header]
-    peptable_header = [peptabledata.HEADER_LINKED_PSMS]
-    ix = header.index(peptabledata.HEADER_PEPTIDE)
-    return header[:ix] + peptable_header + header[ix:]
-
-
 def generate_peptides(tsvfn, oldheader, scorecol, isofieldmap,
                       precurquantcol, fncol=None, higherbetter=True):
     if fncol is None:

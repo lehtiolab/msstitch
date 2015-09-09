@@ -5,6 +5,19 @@ from app.actions.headers.base import (generate_general_header,
 from app.dataformats import peptable as peptabledata
 
 
+def get_pepquant_header(oldheader, isobqfieldmap=False, precurqfield=False):
+    header = oldheader[:]
+    if isobqfieldmap:
+        for field, medianfield in isobqfieldmap.items():
+            header = [medianfield if x == field else x for x in header]
+    if precurqfield:
+        header = [peptabledata.HEADER_AREA if x == precurqfield
+                  else x for x in header]
+    peptable_header = [peptabledata.HEADER_LINKED_PSMS]
+    ix = header.index(peptabledata.HEADER_PEPTIDE)
+    return header[:ix] + peptable_header + header[ix:]
+
+
 def generate_header(headerfields, oldheader=False):
     """Returns a header as a list, ready to write to TSV file"""
     fieldtypes = ['peptidefdr', 'peptidepep',

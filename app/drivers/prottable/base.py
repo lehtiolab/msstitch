@@ -4,7 +4,7 @@ from app.writers import prottable as writers
 from app.drivers.base import BaseDriver
 
 
-class ProttableDriver(BaseDriver):
+class PepProttableDriver(BaseDriver):
     """Base class for prottable.py"""
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -29,6 +29,23 @@ class ProttableDriver(BaseDriver):
     def write(self):
         outfn = self.create_outfilepath(self.fn, self.outsuffix)
         writers.write_prottable(self.header, self.proteins, outfn)
+
+
+class ProttableDriver(PepProttableDriver):
+    """Just here to not break dependencies"""
+    pass
+
+
+class PeptableMergeDriver(PepProttableDriver):
+    def initialize_input(self):
+        self.headertypes = []
+        for inflag, htype in zip([self.fdr, self.pep, self.precursorquant,
+                                  self.isobaricquant],
+                                 ['proteinfdr', 'proteinpep', 'precursorquant',
+                                  'isoquant']):
+            if inflag:
+                self.headertypes.append(htype)
+        self.poolnames = [x[0] for x in self.lookup.get_all_poolnames()]
 
 
 class ProttableAddData(ProttableDriver):
