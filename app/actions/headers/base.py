@@ -22,7 +22,7 @@ def generate_general_header(headerfields, fieldtypes, firstfield,
     return header
 
 
-def generate_headerfields(headertypes, allfield_defs, lookup, poolnames):
+def generate_headerfields(headertypes, allfield_defs, poolnames):
     """Returns a headerfields object (dict) which contains information on
     fields of the header, including optional pool names"""
     hfields = {}
@@ -30,7 +30,7 @@ def generate_headerfields(headertypes, allfield_defs, lookup, poolnames):
         hfields[fieldtype] = OrderedDict()
         hfield_definitions = allfield_defs[fieldtype]
         for fieldname, poolnames in hfield_definitions.items():
-            hfields[fieldtype][fieldname] = get_header_field(lookup, poolnames)
+            hfields[fieldtype][fieldname] = get_header_field(fieldname, poolnames)
     return hfields
 
 
