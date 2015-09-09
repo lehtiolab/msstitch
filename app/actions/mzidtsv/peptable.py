@@ -1,6 +1,7 @@
 from statistics import median
 
-from app.dataformats import mzidtsv as mzidtsvdata
+from app.dataformats import mzidstv as mzidtsvdata
+from app.dataformats import peptable as peptabledata
 from app.readers import tsv as reader
 
 
@@ -19,11 +20,12 @@ def get_peptable_header(oldheader, isobqfieldmap=False, precurqfield=False):
     header = oldheader[:]
     if isobqfieldmap:
         for field, medianfield in isobqfieldmap.items():
-            header = [medianfield if x==field else x for x in header]
+            header = [medianfield if x == field else x for x in header]
     if precurqfield:
-        header = [mzidtsvdata.HEADER_PRECURSOR_QUANT_MEDIAN if x==precurqfield else x for x in header]
-    peptable_header = [mzidtsvdata.HEADER_LINKED_PSMS]
-    ix = header.index(mzidtsvdata.HEADER_PEPTIDE)
+        header = [peptabledata.HEADER_AREA if x == precurqfield
+                  else x for x in header]
+    peptable_header = [peptabledata.HEADER_LINKED_PSMS]
+    ix = header.index(peptabledata.HEADER_PEPTIDE)
     return header[:ix] + peptable_header + header[ix:]
 
 
@@ -45,7 +47,7 @@ def generate_peptides(tsvfn, oldheader, scorecol, isofieldmap,
         finally:
             add_quant_values(peptides, psm, isofieldmap, precurquantcol)
     for peptide in peptides.values():
-        peptide['line'][mzidtsvdata.HEADER_LINKED_PSMS] = '; '.join(
+        peptide['line'][peptabledata.HEADER_LINKED_PSMS] = '; '.join(
             peptide['psms'])
         for qtype, pepquant in peptide['quant'].items():
             peptide['line'].update(parse_quant_data(qtype, pepquant,
@@ -57,7 +59,7 @@ def parse_quant_data(qtype, pepquant, fieldmap=None):
     if qtype == 'isob':
         quants = {fieldmap[x]: get_median(pepquant[x]) for x in fieldmap}
     elif qtype == 'precur':
-        quants = {mzidtsvdata.HEADER_PRECURSOR_QUANT_MEDIAN: get_median(
+        quants = {peptabledata.HEADER_AREA: get_median(
             pepquant)}
     return quants
 
