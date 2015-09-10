@@ -34,3 +34,4 @@ class PSMDB(ResultLookupInterface):
         self.index_column('psmspecid_index', 'psms', 'spectra_id')
         self.index_column('psmrowid_index', 'psmrows', 'psm_id')
         self.index_column('psmrow_index', 'psmrows', 'rownr')
+        self.index_column('pepseq_index', 'peptide_sequences', 'sequence')
