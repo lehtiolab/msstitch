@@ -13,5 +13,5 @@ class CreateEmptyDriver(ProttableDriver):
     def initialize_input(self):
         self.in_psms = reader.generate_tsv_peptides(self.fn)
 
-    def set_protein_generator(self):
-        self.proteins = preparation.generate_master_proteins(self.in_psms)
+    def set_feature_generator(self):
+        self.features = preparation.generate_master_proteins(self.in_psms)

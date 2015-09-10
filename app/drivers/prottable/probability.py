@@ -15,6 +15,6 @@ class AddProteinProbability(ProttableAddData):
         super().initialize_input()
         self.in_peptides = reader.generate_tsv_peptides(self.pepfile)
 
-    def set_protein_generator(self):
-        self.proteins = preparation.add_nesvi_protein_probability(
+    def set_feature_generator(self):
+        self.features = preparation.add_nesvi_protein_probability(
             self.in_proteins, self.in_peptides, self.headerfields)

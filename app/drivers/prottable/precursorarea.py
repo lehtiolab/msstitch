@@ -15,6 +15,6 @@ class AddPrecursorAreaDriver(ProttableAddData):
         super().initialize_input()
         self.in_peptides = reader.generate_tsv_peptides(self.pepfile)
 
-    def set_protein_generator(self):
-        self.proteins = preparation.add_ms1_quant_from_top3_mzidtsv(
+    def set_feature_generator(self):
+        self.features = preparation.add_ms1_quant_from_top3_mzidtsv(
             self.in_proteins, self.in_peptides, self.headerfields)

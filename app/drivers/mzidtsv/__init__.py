@@ -24,12 +24,3 @@ class MzidTSVDriver(base.BaseDriver):
     def write(self):
         outfn = self.create_outfilepath(self.fn, self.outsuffix)
         writers.write_mzid_tsv(self.header, self.psms, outfn)
-
-    def get_column_header_for_number(self, column_var_names):
-        convert_columns = ['confcol', 'spec_column']
-        convert_columns.extend(column_var_names)
-        for col in convert_columns:
-            value = getattr(self, col)
-            if value is None:
-                continue
-            setattr(self, col, self.oldheader[int(value) - 1])

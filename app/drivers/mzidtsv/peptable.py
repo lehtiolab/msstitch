@@ -1,5 +1,6 @@
-from app.drivers.prottable import PepProttableDriver
+from app.drivers.prottable.base import PepProttableDriver
 from app.actions.headers import peptable as head
+from app.readers import tsv as tsvreader
 import app.actions.mzidtsv.peptable as prep
 
 
@@ -19,6 +20,7 @@ class MzidTSVPeptableDriver(PepProttableDriver):
                                                    None)
 
     def initialize_input(self):
+        self.oldheader = tsvreader.get_tsv_header(self.fn)
         self.get_column_header_for_number(['fncol', 'scorecol'])
         self.isobfieldmap = prep.get_quantcols(self.quantcolpattern,
                                                self.oldheader, 'isob')
@@ -34,15 +36,13 @@ class MzidTSVPeptableDriver(PepProttableDriver):
         """This function subtracts 1 from inputted column number to comply
         with programmers counting (i.e. from 0, not from 1). Could possibly
         made more TSV general"""
-        convert_columns = ['confcol', 'spec_column']
-        convert_columns.extend(column_var_names)
-        for col in convert_columns:
+        for col in column_var_names:
             value = getattr(self, col)
             if value is None:
                 continue
             setattr(self, col, self.oldheader[int(value) - 1])
 
-    def get_psms(self):
-        self.psms = prep.generate_peptides(self.fn, self.oldheader,
-                                           self.scorecol, self.isobfieldmap,
-                                           self.precurquantcol, self.fncol)
+    def set_feature_generator(self):
+        self.features = prep.generate_peptides(self.fn, self.oldheader,
+                                               self.scorecol, self.isobfieldmap,
+                                               self.precurquantcol, self.fncol)

@@ -22,9 +22,9 @@ class BuildProteinTableDriver(ProttableMergeDriver):
         self.pep = kwargs.get('pep', False)
         self.proteindata = kwargs.get('proteindata', False)
 
-    def set_protein_generator(self):
+    def set_feature_generator(self):
         """Generates proteins with quant from the lookup table"""
-        self.proteins = preparation.build_proteintable(self.lookup,
+        self.features = preparation.build_proteintable(self.lookup,
                                                        self.header,  # FIXME?
                                                        self.headerfields,
                                                        self.isobaricquant,

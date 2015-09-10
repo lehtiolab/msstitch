@@ -11,8 +11,8 @@ class AddProteinInfoDriver(ProttableAddData):
         self.headertypes = ['proteindata']
         self.poolnames = [kwargs.get('setname')]
 
-    def set_protein_generator(self):
-        self.proteins = preparation.add_protein_data(self.in_proteins,
+    def set_feature_generator(self):
+        self.features = preparation.add_protein_data(self.in_proteins,
                                                      self.lookup,
                                                      self.headerfields,
                                                      )

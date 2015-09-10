@@ -1,6 +1,6 @@
 from statistics import median
 
-from app.dataformats import mzidstv as mzidtsvdata
+from app.dataformats import mzidtsv as mzidtsvdata
 from app.dataformats import peptable as peptabledata
 from app.readers import tsv as reader
 

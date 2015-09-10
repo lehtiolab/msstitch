@@ -15,7 +15,7 @@ class PepProttableDriver(BaseDriver):
     def run(self):
         self.initialize_input()
         self.create_header()
-        self.set_protein_generator()
+        self.set_feature_generator()
         self.write()
         self.finish()
 
@@ -28,7 +28,7 @@ class PepProttableDriver(BaseDriver):
 
     def write(self):
         outfn = self.create_outfilepath(self.fn, self.outsuffix)
-        writers.write_prottable(self.header, self.proteins, outfn)
+        writers.write_prottable(self.header, self.features, outfn)
 
 
 class ProttableDriver(PepProttableDriver):

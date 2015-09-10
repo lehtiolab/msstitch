@@ -3,6 +3,7 @@ from collections import OrderedDict
 from app.actions.headers.base import (generate_general_header,
                                       generate_headerfields)
 from app.dataformats import peptable as peptabledata
+from app.dataformats import mzidtsv as mzidtsvdata 
 
 
 def get_pepquant_header(oldheader, isobqfieldmap=False, precurqfield=False):
@@ -14,7 +15,7 @@ def get_pepquant_header(oldheader, isobqfieldmap=False, precurqfield=False):
         header = [peptabledata.HEADER_AREA if x == precurqfield
                   else x for x in header]
     peptable_header = [peptabledata.HEADER_LINKED_PSMS]
-    ix = header.index(peptabledata.HEADER_PEPTIDE)
+    ix = header.index(mzidtsvdata.HEADER_PEPTIDE)
     return header[:ix] + peptable_header + header[ix:]
 
 

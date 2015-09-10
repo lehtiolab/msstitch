@@ -12,7 +12,7 @@ class ProttableFDRDriver(ProttableAddData):
         self.qvalityfn = kwargs.get('qvalityfile')
         self.headertypes = ['proteinfdr', 'proteinpep']
 
-    def set_protein_generator(self):
-        self.proteins = action.assign_protein_fdr(self.qvalityfn,
+    def set_feature_generator(self):
+        self.features = action.assign_protein_fdr(self.qvalityfn,
                                                   self.in_proteins,
                                                   self.headerfields)
