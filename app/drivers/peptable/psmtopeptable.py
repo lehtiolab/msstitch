@@ -1,7 +1,7 @@
 from app.drivers.prottable.base import PepProttableDriver
 from app.actions.headers import peptable as head
 from app.readers import tsv as tsvreader
-import app.actions.mzidtsv.peptable as prep
+import app.actions.peptable.psmtopeptable as prep
 
 
 class MzidTSVPeptableDriver(PepProttableDriver):
@@ -44,5 +44,6 @@ class MzidTSVPeptableDriver(PepProttableDriver):
 
     def set_feature_generator(self):
         self.features = prep.generate_peptides(self.fn, self.oldheader,
-                                               self.scorecol, self.isobfieldmap,
+                                               self.scorecol,
+                                               self.isobfieldmap,
                                                self.precurquantcol, self.fncol)

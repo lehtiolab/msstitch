@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # FIXME docstring wrong
 """
-mzidplus -- Modifying MSGF+ mzIdentML output
+mzidplus -- Modifying MSGF+ TSV output
 
 USAGE:
    mzidplus.py [option] [input files]
@@ -16,7 +16,6 @@ import app.drivers.mzidtsv.percolator as percodrivers
 import app.drivers.mzidtsv.proteingrouping as pgdrivers
 import app.drivers.mzidtsv.quant as quantdrivers
 import app.drivers.mzidtsv.splitmerge as splitmergedrivers
-import app.drivers.mzidtsv.peptable as pepdrivers
 
 
 def parser_file_exists(currentparser, fn):
@@ -60,10 +59,6 @@ parser.add_argument('-c', dest='command', type=str,
                     'multiple new tables based. Use with flags --bioset or\n'
                     '--splitcol, and optionally --set-rename and\n'
                     '--rename-cols.\n\n'
-                    'peptsv         - Creates a peptide table from a TSV PSM\n'
-                    'table. Filters out the best peptide option for each \n'
-                    'PSM based on the highest score. Options are --fncol and\n'
-                    '--scorecol\n\n'
                     '',
                     required=True
                     )
@@ -131,20 +126,6 @@ parser.add_argument('--rename-col-startswith', dest='renamecolpattern',
                     help='Rename column headings that start with the pattern '
                     'specified here. Renaming is done as follows: '
                     'setname_oldcolumnname.')
-parser.add_argument('--fncol', dest='fncol', help='Column number in which '
-                    'spectra filenames are written, overrides standard '
-                    'column number 1', type=int, required=False)
-parser.add_argument('--scorecol', dest='scorecol', help='Column number in '
-                    'which score to filter on is written.',
-                    type=int, required=False)
-parser.add_argument('--ms1quantcolpattern', dest='precursorquantcolpattern',
-                    help='Unique text pattern to identify precursor quant \n'
-                    'column in PSM table for peptide quanting.',
-                    type=str, required=False)
-parser.add_argument('--isobquantcolpattern', dest='quantcolpattern',
-                    help='Unique text pattern to identify isobaric quant \n'
-                    'column in PSM table for peptide quant.',
-                    type=str, required=False)
 
 
 # not supported yet
@@ -161,7 +142,6 @@ commandmap = {
     'splittsv': splitmergedrivers.MzidTSVSplitDriver,
     'quanttsv': quantdrivers.TSVQuantDriver,
     'proteingroup': pgdrivers.ProteinGroupDriver,
-    'peptable': pepdrivers.MzidTSVPeptableDriver,
 }
 
 command = commandmap[args.command](**vars(args))
