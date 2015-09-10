@@ -12,6 +12,7 @@ EXAMPLE:
 import argparse
 import os
 import app.drivers.peptable.psmtopeptable as psm2pepdrivers
+import app.drivers.peptable.merge as mergedrivers
 
 
 def parser_file_exists(currentparser, fn):
@@ -37,6 +38,9 @@ parser.add_argument('-c', dest='command', type=str,
                     'uses best scoring PSM for each peptide and medians of\n'
                     'quant information. Use with --spectracol, --scorecol,\n'
                     '--ms1quantcolpattern, --isobquantcolpattern.\n\n'
+                    'buildpep - Build peptide table from data stored in a\n'
+                    'lookup DB object created with mslookup.py. Use with\n'
+                    '--isobaric, --precursor, --fdr, --pep.\n\n'
                     '',
                     required=True
                     )
@@ -68,6 +72,22 @@ parser.add_argument('--isobquantcolpattern', dest='quantcolpattern',
                     help='Unique text pattern to identify isobaric quant \n'
                     'column in PSM table for peptide quant.',
                     type=str, required=False)
+parser.add_argument('--isobaric', dest='isobaric',
+                    help='Flag. Instructs buildpep to include isobaric quant\n'
+                    'data in peptide table.'
+                    action='store_const', const=True, default=False)
+parser.add_argument('--precursor', dest='precursor',
+                    help='Flag. Instructs buildpep to include precursor quant\n'
+                    'data in peptide table.'
+                    action='store_const', const=True, default=False)
+parser.add_argument('--fdr', dest='fdr',
+                    help='Flag. Instructs buildpep to include FDR\n'
+                    'data in peptide table.'
+                    action='store_const', const=True, default=False)
+parser.add_argument('--pep', dest='pep',
+                    help='Flag. Instructs buildpep to include posterior error\n'
+                    'data in peptide table.'
+                    action='store_const', const=True, default=False)
 #parser.add_argument('--dbfile', dest='lookup', help='Lookup database in '
 #                    'SQLite format, to be created using mslookup.py.',
 #                    type=lambda x: parser_file_exists(parser, x))
@@ -104,6 +124,7 @@ args = parser.parse_args()
 
 commandmap = {
     'psm2pep': psm2pepdrivers.MzidTSVPeptableDriver,
+    'buildpep': mergedrivers.BuildPeptideTableDriver,
 }
 
 command = commandmap[args.command](**vars(args))
