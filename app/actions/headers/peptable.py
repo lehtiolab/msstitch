@@ -27,7 +27,7 @@ def generate_header(headerfields, oldheader=False):
                                    peptabledata.HEADER_PEPTIDE, oldheader)
 
 
-def get_prottable_headerfields(headertypes, lookup=False, poolnames=False):
+def get_peptable_headerfields(headertypes, lookup=False, poolnames=False):
     """Called by driver to generate headerfields object"""
     field_defs = {'isoquant': get_isoquant_fields(lookup, poolnames),
                   'precursorquant': get_precursorquant_fields(poolnames),

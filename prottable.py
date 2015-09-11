@@ -65,7 +65,7 @@ parser.add_argument('-i', dest='infile',
 parser.add_argument('-d', dest='outdir', required=True,
                     help='Directory to output in',
                     type=lambda x: parser_file_exists(parser, x))
-parser.add_argument('--dbfile', dest='lookup', help='Protein group '
+parser.add_argument('--dbfile', dest='lookup', help='File containing a'
                     'lookup database in SQLite format. Can be created using '
                     'mslookup.py command.',
                     type=lambda x: parser_file_exists(parser, x))

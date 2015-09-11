@@ -46,10 +46,13 @@ parser.add_argument('-c', dest='command', type=str,
                     )
 parser.add_argument('-i', dest='infile', help='TSV table containing PSMs or '
                     'peptides',
-                    type=lambda x: parser_file_exists(parser, x),
-                    required=True)
+                    type=lambda x: parser_file_exists(parser, x))
 parser.add_argument('-d', dest='outdir', required=True,
                     help='Directory to output in',
+                    type=lambda x: parser_file_exists(parser, x))
+parser.add_argument('--dbfile', dest='lookup', help='File containing a'
+                    'lookup database in SQLite format. Can be created using '
+                    'mslookup.py command.',
                     type=lambda x: parser_file_exists(parser, x))
 #parser.add_argument('--confidence-better', dest='conftype', help='Confidence '
 #                    'type to define if higher or lower score is better. One '
@@ -74,19 +77,19 @@ parser.add_argument('--isobquantcolpattern', dest='quantcolpattern',
                     type=str, required=False)
 parser.add_argument('--isobaric', dest='isobaric',
                     help='Flag. Instructs buildpep to include isobaric quant\n'
-                    'data in peptide table.'
+                    'data in peptide table.',
                     action='store_const', const=True, default=False)
 parser.add_argument('--precursor', dest='precursor',
                     help='Flag. Instructs buildpep to include precursor quant\n'
-                    'data in peptide table.'
+                    'data in peptide table.',
                     action='store_const', const=True, default=False)
 parser.add_argument('--fdr', dest='fdr',
                     help='Flag. Instructs buildpep to include FDR\n'
-                    'data in peptide table.'
+                    'data in peptide table.',
                     action='store_const', const=True, default=False)
 parser.add_argument('--pep', dest='pep',
                     help='Flag. Instructs buildpep to include posterior error\n'
-                    'data in peptide table.'
+                    'data in peptide table.',
                     action='store_const', const=True, default=False)
 #parser.add_argument('--dbfile', dest='lookup', help='Lookup database in '
 #                    'SQLite format, to be created using mslookup.py.',

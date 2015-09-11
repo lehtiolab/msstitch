@@ -1,10 +1,10 @@
 import os
 
 from app.actions.peptable import merge as preparation
-from app.drivers.prottable.base import ProttableMergeDriver
+from app.drivers.peptable.base import PeptableMergeDriver
 
 
-class BuildPeptideTableDriver(ProttableMergeDriver):
+class BuildPeptideTableDriver(PeptableMergeDriver):
     outsuffix = ''
     lookuptype = 'peptidetable'
 

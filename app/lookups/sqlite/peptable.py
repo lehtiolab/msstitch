@@ -13,6 +13,13 @@ class PepTableDB(ProtPepTable):
                             'peptide_iso_quanted', 'peptide_precur_quanted',
                             'peptide_fdr', 'peptide_pep'])
 
+    def get_isoquant_channels(self):
+        cursor = self.get_cursor()
+        cursor.execute(
+            'SELECT DISTINCT channel_name '
+            'FROM pepquant_channels')
+        return (x[0] for x in cursor)
+
     def store_quant_channels(self, quantchannels):
         self.store_many(
             'INSERT INTO pepquant_channels(peptable_id, channel_name) '
@@ -41,7 +48,7 @@ class PepTableDB(ProtPepTable):
     def prepare_mergetable_sql(self, precursor=False, isobaric=False,
                                fdr=False, pep=False):
         selects = ['p.sequence']
-        selectmap, count = self.update_selects({}, 'p_seq', 0)
+        selectmap, count = self.update_selects({}, ['p_seq'], 0)
         joins = []
         if isobaric:
             selects.extend(['pc.channel_name', 'bs.set_name',
@@ -82,4 +89,5 @@ class PepTableDB(ProtPepTable):
         sql = 'SELECT {} FROM peptide_sequences AS p'.format(
             ', '.join(selects))
         sql = self.get_sql_joins_mergetable(sql, joins)
+        sql = '{0} ORDER BY p.sequence'.format(sql)
         return sql, selectmap

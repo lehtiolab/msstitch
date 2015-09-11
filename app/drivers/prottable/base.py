@@ -1,51 +1,15 @@
 from app.readers import tsv as reader
 from app.actions.headers import prottable as head
-from app.writers import prottable as writers
-from app.drivers.base import BaseDriver
+from app.drivers.pepprottable import PepProttableDriver
 
 
-class PepProttableDriver(BaseDriver):
-    """Base class for prottable.py"""
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.oldheader = False
-        self.probability = False
-        self.poolnames = False
-
-    def run(self):
-        self.initialize_input()
-        self.create_header()
-        self.set_feature_generator()
-        self.write()
-        self.finish()
-
+class ProttableDriver(PepProttableDriver):
     def create_header(self):
         self.headerfields = head.get_prottable_headerfields(self.headertypes,
                                                             self.lookup,
                                                             self.poolnames)
         self.header = head.generate_header(self.headerfields,
                                            self.oldheader)
-
-    def write(self):
-        outfn = self.create_outfilepath(self.fn, self.outsuffix)
-        writers.write_prottable(self.header, self.features, outfn)
-
-
-class ProttableDriver(PepProttableDriver):
-    """Just here to not break dependencies"""
-    pass
-
-
-class PeptableMergeDriver(PepProttableDriver):
-    def initialize_input(self):
-        self.headertypes = []
-        for inflag, htype in zip([self.fdr, self.pep, self.precursorquant,
-                                  self.isobaricquant],
-                                 ['proteinfdr', 'proteinpep', 'precursorquant',
-                                  'isoquant']):
-            if inflag:
-                self.headertypes.append(htype)
-        self.poolnames = [x[0] for x in self.lookup.get_all_poolnames()]
 
 
 class ProttableAddData(ProttableDriver):
