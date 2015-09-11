@@ -67,6 +67,30 @@ class ProtPepTable(ResultLookupInterface):
         fieldcount = max(selectmap.values()) + 1
         return selectmap, fieldcount
 
+    def get_proteins_psms(self, extended=False):
+        fields = ['pgm.protein_acc', 'sets.set_name',
+                  'pep.sequence']
+        joins = [('psm_protein_groups', 'ppg', 'master_id'),
+                 ('psms', 'psm', 'psm_id'),
+                 ('peptide_sequences', 'pep', 'pep_id'),
+                 ('mzml', 'sp', 'spectra_id'),
+                 ('mzmlfiles', 'mzfn', 'mzmlfile_id'),
+                 ('biosets', 'sets', 'set_id'),
+                 ]
+        if extended:
+            fields.extend(['psm.psm_id', 'pd.description', 'pcov.coverage'])
+            joins.extend([('prot_desc', 'pd', 'protein_acc'),
+                          ('protein_coverage', 'pcov', 'protein_acc'),
+                          ])
+        sql = ('SELECT {} FROM protein_group_master '
+               'AS pgm'.format(', '.join(fields)))
+        join_sql = ' '.join(['JOIN {} AS {} USING({})'.format(
+            j[0], j[1], j[2]) for j in joins])
+        sql = '{} {} ORDER BY pgm.protein_acc, sets.set_name'.format(sql,
+                                                                     join_sql)
+        cursor = self.get_cursor()
+        return cursor.execute(sql)
+
     def get_sql_joins_mergetable(self, sql, joins):
         if joins:
             joinsql = ''

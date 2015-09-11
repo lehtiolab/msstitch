@@ -19,7 +19,7 @@ class BuildPeptideTableDriver(PeptableMergeDriver):
         self.precursorquant = kwargs.get('precursor', False)
         self.fdr = kwargs.get('fdr', False)
         self.pep = kwargs.get('pep', False)
-        self.proteindata = kwargs.get('proteindata', False)
+        self.peptidedata = kwargs.get('peptidedata', False)
 
     def set_feature_generator(self):
         """Generates proteins with quant from the lookup table"""
@@ -28,5 +28,5 @@ class BuildPeptideTableDriver(PeptableMergeDriver):
                                                        self.headerfields,
                                                        self.isobaricquant,
                                                        self.precursorquant,
-                                                       self.fdr, self.pep)
-                                                       #self.proteindata)
+                                                       self.fdr, self.pep,
+                                                       self.peptidedata)

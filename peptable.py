@@ -91,6 +91,10 @@ parser.add_argument('--pep', dest='pep',
                     help='Flag. Instructs buildpep to include posterior error\n'
                     'data in peptide table.',
                     action='store_const', const=True, default=False)
+parser.add_argument('--peptidedata', dest='peptidedata',
+                    help='Flag. Instructs buildpep to include data such as \n'
+                    '# PSMs, coverage, descriptions in peptide table.',
+                    action='store_const', const=True, default=False)
 #parser.add_argument('--dbfile', dest='lookup', help='Lookup database in '
 #                    'SQLite format, to be created using mslookup.py.',
 #                    type=lambda x: parser_file_exists(parser, x))

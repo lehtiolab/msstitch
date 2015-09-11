@@ -10,7 +10,8 @@ def build_peptidetable(pqdb, header, headerfields, isobaric=False,
     """Fetches peptides and quants from joined lookup table, loops through
     them and when all of a peptides quants/data have been collected, yields
     peptide quant information."""
-    peptidedatamap = create_featuredata_map(pqdb)
+    peptidedatamap = create_featuredata_map(pqdb, add_record_to_peptidedata, 
+                                            get_uniques=False)
     count_psms(peptidedatamap)
     empty_return = lambda x, y, z: {}
     iso_fun = {True: get_isobaric_quant, False: empty_return}[isobaric]
@@ -73,15 +74,15 @@ def get_peptide_data(peptide, pdata, headerfields):
     # first the header fields that are pool-dependent
     hfields = [peptabledata.HEADER_NO_PSM,
                ]
-    for pool, psms in pdata[seq]['pools'].items():
+    for pool, psms in pdata[seq]['psms'].items():
         pool_values = [psms]
-        outdict.update({headerfields['proteindata'][hfield][pool]: val
+        outdict.update({headerfields['peptidedata'][hfield][pool]: val
                         for (hfield, val) in zip(hfields, pool_values)})
     # Now the pool-independent fields
     for idx, key in enumerate([peptabledata.HEADER_PROTEINS,
                                peptabledata.HEADER_DESCRIPTIONS,
                                peptabledata.HEADER_COVERAGES]):
-        outdict[key] = ';'.join([x[idx] for x in pdata[seq]['proteins']])
+        outdict[key] = ';'.join([str(x[idx]) for x in pdata[seq]['proteins']])
     return outdict
 
 
@@ -102,4 +103,4 @@ def add_record_to_peptidedata(peptidedata, p_acc, pool, psmdata):
             peptidedata[seq] = {'psms': {pool: set()},
                                 'proteins': set()}
         peptidedata[seq]['psms'][pool].add(psm_id)
-    peptidedata[seq]['proteins'].add(p_acc, desc, cov)
+    peptidedata[seq]['proteins'].add((p_acc, desc, cov))
