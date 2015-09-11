@@ -91,7 +91,7 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                            ],
                    'peptide_precur_quanted':
                    ['pep_precquant_id INTEGER PRIMARY KEY',
-                    'pep_id TEXT',
+                    'pep_id INTEGER',
                     'peptable_id INTEGER',
                     'quant REAL',
                     'FOREIGN KEY(pep_id) '
@@ -99,7 +99,7 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                     'FOREIGN KEY(peptable_id) '
                     'REFERENCES peptide_tables(peptable_id)'
                     ],
-                   'peptide_fdr': ['pep_id TEXT',
+                   'peptide_fdr': ['pep_id INTEGER',
                                    'peptable_id INTEGER',
                                    'fdr DOUBLE',
                                    'FOREIGN KEY(pep_id) '
@@ -108,7 +108,7 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                    'REFERENCES '
                                    'peptide_tables(peptable_id)'
                                    ],
-                   'peptide_pep': ['pep_id TEXT',
+                   'peptide_pep': ['pep_id INTEGER',
                                    'peptable_id INTEGER',
                                    'pep DOUBLE',
                                    'FOREIGN KEY(pep_id) '
