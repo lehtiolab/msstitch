@@ -40,10 +40,10 @@ def build_peptidetable(pqdb, header, headerfields, isobaric=False,
     yield parse_NA(outpeptide, header)
 
 
-def get_isobaric_quant(protein, sqlmap, headerfields):
-    chan = protein[sqlmap['channel']]
-    pool = protein[sqlmap['isoq_poolname']]
-    quant = protein[sqlmap['isoq_val']]
+def get_isobaric_quant(peptide, sqlmap, headerfields):
+    chan = peptide[sqlmap['channel']]
+    pool = peptide[sqlmap['isoq_poolname']]
+    quant = peptide[sqlmap['isoq_val']]
     return {headerfields['isoquant'][chan][pool]: quant}
 
 
