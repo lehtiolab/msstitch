@@ -6,12 +6,12 @@ from app.actions.mergetable import (simple_val_fetch, fill_mergefeature,
 
 def build_proteintable(pqdb, header, headerfields, isobaric=False,
                        precursor=False, probability=False, fdr=False,
-                       pep=False, proteindata=False):
+                       pep=False, nopsms=False, proteindata=False):
     """Fetches proteins and quants from joined lookup table, loops through
     them and when all of a protein's quants have been collected, yields the
     protein quant information."""
-    pdmap = create_featuredata_map(pqdb, pinfo.count_peps_psms,
-                                   pinfo.add_record_to_proteindata)
+    pdmap = create_featuredata_map(pqdb, pinfo.add_record_to_proteindata,
+                                   pinfo.count_peps_psms)
     empty_return = lambda x, y, z: {}
     iso_fun = {True: get_isobaric_quant, False: empty_return}[isobaric]
     ms1_fun = {True: get_precursor_quant, False: empty_return}[precursor]
@@ -21,6 +21,7 @@ def build_proteintable(pqdb, header, headerfields, isobaric=False,
                False: empty_return}[fdr]
     pep_fun = {True: get_prot_pep,
                False: empty_return}[pep]
+    psms_fun = {True: get_nopsms, False: empty_return}[nopsms]
     pdata_fun = {True: get_protein_data, False: empty_return}[proteindata]
     protein_sql, sqlfieldmap = pqdb.prepare_mergetable_sql(precursor, isobaric,
                                                            probability, fdr,
@@ -29,7 +30,7 @@ def build_proteintable(pqdb, header, headerfields, isobaric=False,
     protein = next(proteins)
     outprotein = {prottabledata.HEADER_PROTEIN: protein[sqlfieldmap['p_acc']]}
     fill_mergefeature(outprotein, iso_fun, ms1_fun, prob_fun, fdr_fun, pep_fun,
-                      pdata_fun, protein, sqlfieldmap, headerfields,
+                      psms_fun, pdata_fun, protein, sqlfieldmap, headerfields,
                       pdmap)
     for protein in proteins:
         p_acc = protein[sqlfieldmap['p_acc']]
@@ -37,9 +38,13 @@ def build_proteintable(pqdb, header, headerfields, isobaric=False,
             yield parse_NA(outprotein, header)
             outprotein = {prottabledata.HEADER_PROTEIN: p_acc}
         fill_mergefeature(outprotein, iso_fun, ms1_fun, prob_fun, fdr_fun,
-                          pep_fun, pdata_fun, protein, sqlfieldmap,
+                          pep_fun, psms_fun, pdata_fun, protein, sqlfieldmap,
                           headerfields, pdmap)
     yield parse_NA(outprotein, header)
+
+
+def get_nopsms(outprotein, proteindata_map, headerfields):
+    pass
 
 
 def get_protein_data(outprotein, proteindata_map, headerfields):

@@ -20,6 +20,7 @@ class BuildProteinTableDriver(ProttableMergeDriver):
         self.probability = kwargs.get('probability', False)
         self.fdr = kwargs.get('fdr', False)
         self.pep = kwargs.get('pep', False)
+        self.nopsms = False
         self.proteindata = kwargs.get('proteindata', False)
 
     def set_feature_generator(self):
@@ -31,4 +32,5 @@ class BuildProteinTableDriver(ProttableMergeDriver):
                                                        self.precursorquant,
                                                        self.probability,
                                                        self.fdr, self.pep,
+                                                       self.nopsms,
                                                        self.proteindata)
