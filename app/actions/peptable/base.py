@@ -22,10 +22,10 @@ def evaluate_peptide(peptides, psm, key, higherbetter, scorecol, fncol=None,
     except KeyError:
         add_peptide(peptides, psm, key, scorecol, fncol, True, track_psms)
     else:
-        if higherbetter and psm[scorecol] > existing_score:
+        if higherbetter and float(psm[scorecol]) > existing_score:
             add_peptide(peptides, psm, key, scorecol, fncol,
                         track_psms=track_psms)
-        elif not higherbetter and psm[scorecol] < existing_score:
+        elif not higherbetter and float(psm[scorecol]) < existing_score:
             add_peptide(peptides, psm, key, scorecol, fncol,
                         track_psms=track_psms)
     return peptides
