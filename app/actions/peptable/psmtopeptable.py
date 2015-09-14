@@ -3,6 +3,7 @@ from statistics import median
 from app.dataformats import mzidtsv as mzidtsvdata
 from app.dataformats import peptable as peptabledata
 from app.readers import tsv as reader
+from app.actions.peptable.base import evaluate_peptide
 
 
 def get_quantcols(pattern, oldheader, coltype):
@@ -22,17 +23,10 @@ def generate_peptides(tsvfn, oldheader, scorecol, isofieldmap,
         fncol = mzidtsvdata.HEADER_SPECFILE
     peptides = {}
     for psm in reader.generate_tsv_psms(tsvfn, oldheader):
-        try:
-            existing_score = peptides[psm[mzidtsvdata.HEADER_PEPTIDE]]['score']
-        except KeyError:
-            add_peptide(peptides, psm, fncol, scorecol, new=True)
-        else:
-            if higherbetter and psm[scorecol] > existing_score:
-                add_peptide(peptides, psm, fncol, scorecol)
-            elif not higherbetter and psm[scorecol] < existing_score:
-                add_peptide(peptides, psm, fncol, scorecol)
-        finally:
-            add_quant_values(peptides, psm, isofieldmap, precurquantcol)
+        pepseq = psm[mzidtsvdata.HEADER_PEPTIDE]
+        peptides = evaluate_peptide(peptides, psm, pepseq, higherbetter,
+                                    scorecol, fncol)
+        add_quant_values(peptides, psm, isofieldmap, precurquantcol)
     for peptide in peptides.values():
         peptide['line'][peptabledata.HEADER_LINKED_PSMS] = '; '.join(
             peptide['psms'])
@@ -62,18 +56,6 @@ def get_median(quantdata):
     if not quantfloats:
         return 'NA'
     return str(median(quantfloats))
-
-
-def add_peptide(allpeps, psm, fncol, scorecol=False, new=False):
-    peptide = {'score': psm[scorecol],
-               'line': psm,
-               'psms': []
-               }
-    if not new:
-        peptide['psms'] = allpeps[psm[mzidtsvdata.HEADER_PEPTIDE]]['psms']
-    peptide['psms'].append('{0}_{1}'.format(psm[fncol],
-                                            psm[mzidtsvdata.HEADER_SCANNR]))
-    allpeps[psm[mzidtsvdata.HEADER_PEPTIDE]] = peptide
 
 
 def add_quant_values(allpeps, psm, isobq_fieldmap, precurq_field):
