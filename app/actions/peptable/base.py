@@ -3,7 +3,7 @@ from app.dataformats import mzidtsv as psmtsvdata
 
 def add_peptide(allpeps, psm, key, scorecol=False, fncol=None, new=False,
                 track_psms=True):
-    peptide = {'score': psm[scorecol],
+    peptide = {'score': float(psm[scorecol]),
                'line': psm,
                'psms': []
                }
@@ -23,9 +23,9 @@ def evaluate_peptide(peptides, psm, key, higherbetter, scorecol, fncol=None,
         add_peptide(peptides, psm, key, scorecol, fncol, True, track_psms)
     else:
         if higherbetter and psm[scorecol] > existing_score:
-            add_peptide(peptides, psm, key, scorecol, fncol, 
+            add_peptide(peptides, psm, key, scorecol, fncol,
                         track_psms=track_psms)
         elif not higherbetter and psm[scorecol] < existing_score:
-            add_peptide(peptides, psm, key, scorecol, fncol, 
+            add_peptide(peptides, psm, key, scorecol, fncol,
                         track_psms=track_psms)
     return peptides
