@@ -69,7 +69,7 @@ def add_percolator_to_mzidtsv(mzidfn, tsvfn, multipsm,
 
 
 def get_header_with_percolator(oldheader, multipsm=False):
-    percoheader = readers.PERCO_HEADER
+    percoheader = mzidtsvdata.PERCO_HEADER
     if multipsm is True:
         # FIXME should this be here???
         percoheader.append('rank')

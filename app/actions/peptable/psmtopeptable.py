@@ -4,6 +4,7 @@ from app.dataformats import mzidtsv as mzidtsvdata
 from app.dataformats import peptable as peptabledata
 from app.readers import tsv as reader
 from app.actions.peptable.base import evaluate_peptide
+from app.actions.headers.peptable import switch_psm_to_peptable_fields
 
 
 def get_quantcols(pattern, oldheader, coltype):
@@ -22,8 +23,14 @@ def generate_peptides(tsvfn, oldheader, scorecol, isofieldmap,
     if fncol is None:
         fncol = mzidtsvdata.HEADER_SPECFILE
     peptides = {}
+    switch_map = switch_psm_to_peptable_fields(oldheader)
     for psm in reader.generate_tsv_psms(tsvfn, oldheader):
-        pepseq = psm[mzidtsvdata.HEADER_PEPTIDE]
+        for oldkey, newkey in switch_map.items():
+            try:
+                psm[newkey] = psm.pop(oldkey)
+            except KeyError:
+                pass
+        pepseq = psm[peptabledata.HEADER_PEPTIDE]
         peptides = evaluate_peptide(peptides, psm, pepseq, higherbetter,
                                     scorecol, fncol)
         add_quant_values(peptides, psm, isofieldmap, precurquantcol)
@@ -60,7 +67,7 @@ def get_median(quantdata):
 
 def add_quant_values(allpeps, psm, isobq_fieldmap, precurq_field):
     try:
-        quants = allpeps[psm[mzidtsvdata.HEADER_PEPTIDE]]['quant']
+        quants = allpeps[psm[peptabledata.HEADER_PEPTIDE]]['quant']
     except KeyError:
         quants = {}
     if isobq_fieldmap:
@@ -74,4 +81,4 @@ def add_quant_values(allpeps, psm, isobq_fieldmap, precurq_field):
             quants['precur'].append(psm[precurq_field])
         except KeyError:
             quants['precur'] = [psm[precurq_field]]
-    allpeps[psm[mzidtsvdata.HEADER_PEPTIDE]]['quant'] = quants
+    allpeps[psm[peptabledata.HEADER_PEPTIDE]]['quant'] = quants

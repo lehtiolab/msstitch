@@ -11,7 +11,6 @@ P_PEPTIDEQ = ('percolator:peptide_q_value', 'peptide q-value')
 P_PEPTIDEPEP = ('percolator:peptide_pep', 'peptide PEP')
 
 PERCO_ORDER = [P_SVM, P_PSMP, P_PSMQ, P_PSMPEP, P_PEPTIDEQ, P_PEPTIDEPEP]
-PERCO_HEADER = [x[1] for x in PERCO_ORDER]
 PERCO_HEADERMAP = {x[0]: x[1] for x in PERCO_ORDER}
 
 

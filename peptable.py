@@ -13,6 +13,7 @@ import argparse
 import os
 import app.drivers.peptable.psmtopeptable as psm2pepdrivers
 import app.drivers.peptable.merge as mergedrivers
+from app.drivers.peptable import proteinbest
 
 
 def parser_file_exists(currentparser, fn):
@@ -143,6 +144,7 @@ args = parser.parse_args()
 
 commandmap = {
     'psm2pep': psm2pepdrivers.MzidTSVPeptableDriver,
+    'proteinbest': proteinbest.BestPeptidePerProtein,
     'buildpep': mergedrivers.BuildPeptideTableDriver,
 }
 

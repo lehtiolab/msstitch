@@ -10,7 +10,7 @@ def generate_peptides(tsvfn, oldheader, scorecol, minlog, higherbetter=True):
     if minlog:
         higherbetter = False
     for psm in reader.generate_tsv_psms(tsvfn, oldheader):
-        p_acc = psm[peptabledata.HEADER_PROTEINS]
+        p_acc = psm[peptabledata.HEADER_MASTERPROTEINS]
         if ';' in p_acc:
             continue
         protein_peptides = evaluate_peptide(protein_peptides, psm, p_acc,
@@ -22,7 +22,7 @@ def generate_peptides(tsvfn, oldheader, scorecol, minlog, higherbetter=True):
         nextbestscore = log(nextbestscore, 10)
     for peptide in protein_peptides.values():
         if minlog:
-            log_score(peptide[scorecol], nextbestscore)
+            peptide['line'][scorecol] = str(log_score(peptide['score'], nextbestscore))
         yield peptide['line']
 
 

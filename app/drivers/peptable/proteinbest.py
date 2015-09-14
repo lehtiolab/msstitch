@@ -7,7 +7,7 @@ class BestPeptidePerProtein(PepProttableDriver):
     """Filters peptide table to contain only the best scoring peptide for
     each protein in the set.
     """
-    outsuffix = '_peptable.tsv'
+    outsuffix = '_bestpep_perprotein.tsv'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

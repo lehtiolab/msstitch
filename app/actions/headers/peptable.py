@@ -6,6 +6,18 @@ from app.dataformats import peptable as peptabledata
 from app.dataformats import mzidtsv as mzidtsvdata 
 
 
+def switch_psm_to_peptable_fields(oldheader):
+    """Returns a dict map with old to new header fields"""
+    return {old: new for old, new in zip([mzidtsvdata.HEADER_PEPTIDE,
+                                          mzidtsvdata.HEADER_PROTEIN,
+                                          mzidtsvdata.HEADER_PEPTIDE_Q,
+                                          mzidtsvdata.HEADER_PEPTIDE_PEP],
+                                         [peptabledata.HEADER_PEPTIDE, 
+                                          peptabledata.HEADER_PROTEINS,
+                                          peptabledata.HEADER_QVAL,
+                                          peptabledata.HEADER_PEP])}
+        
+
 def get_pepquant_header(oldheader, isobqfieldmap=False, precurqfield=False):
     header = oldheader[:]
     if isobqfieldmap:
@@ -16,7 +28,9 @@ def get_pepquant_header(oldheader, isobqfieldmap=False, precurqfield=False):
                   else x for x in header]
     peptable_header = [peptabledata.HEADER_LINKED_PSMS]
     ix = header.index(mzidtsvdata.HEADER_PEPTIDE)
-    return header[:ix] + peptable_header + header[ix:]
+    header = header[:ix] + peptable_header + header[ix:]
+    switch_map = switch_psm_to_peptable_fields(header)
+    return [switch_map[field] if field in switch_map else field for field in header]
 
 
 def generate_header(headerfields, oldheader=False):
