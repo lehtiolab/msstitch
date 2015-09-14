@@ -32,16 +32,6 @@ class MzidTSVPeptableDriver(PepProttableDriver):
                                                self.isobfieldmap,
                                                self.precurquantcol)
 
-    def get_column_header_for_number(self, column_var_names):
-        """This function subtracts 1 from inputted column number to comply
-        with programmers counting (i.e. from 0, not from 1). Could possibly
-        made more TSV general"""
-        for col in column_var_names:
-            value = getattr(self, col)
-            if value is None:
-                continue
-            setattr(self, col, self.oldheader[int(value) - 1])
-
     def set_feature_generator(self):
         self.features = prep.generate_peptides(self.fn, self.oldheader,
                                                self.scorecol,
