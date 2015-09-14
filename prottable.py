@@ -51,10 +51,11 @@ parser.add_argument('-c', dest='command', type=str,
                     'peptide table posterior error probabilities. Needs\n'
                     '--peptable, and probabilities are calculated \n'
                     'as in Nesvizhskii et al. (2003) Anal.Chem., eq 3.\n\n'
-                    'protqvality - Run qvality on protein tables containing \n'
-                    'target (-i) proteins and decoy (--decoy) proteins.\n\n'
+                    'protqvality - Run qvality on protein (or peptide) tables\n'
+                    'containing target (-i) proteins and decoy (--decoy) proteins.\n\n'
                     'addfdr - Add protein FDR to protein table by comparing\n'
-                    'protein probability with qvality lookup table. Needs \n'
+                    'score (peptide q-value, protein probability, etc)\n'
+                    'with qvality lookup table. Needs \n'
                     'to have qvality output file specified with --qvality',
                     required=True
                     )
@@ -81,8 +82,7 @@ parser.add_argument('--decoy', dest='decoyfn', help='Protein table containing '
                     'decoy proteins for running qvality',
                     type=lambda x: parser_file_exists(parser, x))
 parser.add_argument('--feattype', dest='feattype', help='Score type to use for '
-                    'qvality, reassign features or pout2tsv. Can either be '
-                    'psm or peptide.')
+                    'qvality. Can either be probability or qvalue.')
 parser.add_argument('-o', dest='options', nargs='+',
                     help='Extra options that may be passed to qvality.'
                     'Option form: -o ***flag value ***flag ***flag value')
