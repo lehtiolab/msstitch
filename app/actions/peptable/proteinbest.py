@@ -19,7 +19,7 @@ def generate_peptides(tsvfn, oldheader, scorecol, minlog, higherbetter=True):
     if minlog:
         nextbestscore = min([pep['score'] for pep in protein_peptides.values()
                              if pep['score'] > 0])
-        nextbestscore = log(nextbestscore, 10)
+        nextbestscore = -log(nextbestscore, 10)
     for peptide in protein_peptides.values():
         if minlog:
             peptide['line'][scorecol] = str(log_score(peptide['score'], nextbestscore))
