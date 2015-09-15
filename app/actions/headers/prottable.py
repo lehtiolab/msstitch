@@ -8,7 +8,7 @@ from app.dataformats import prottable as prottabledata
 def generate_header(headerfields, oldheader=False):
     """Returns a header as a list, ready to write to TSV file"""
     fieldtypes = ['proteindata', 'probability', 'proteinfdr', 'proteinpep',
-                  'precursorquant', 'isoquant']
+                  'precursorquant', 'isoquant', 'bestpepscore']
     return generate_general_header(headerfields, fieldtypes,
                                    prottabledata.HEADER_PROTEIN, oldheader)
 
@@ -65,6 +65,8 @@ def get_proteininfo_fields(poolnames=False):
 def get_isoquant_fields(pqdb=False, poolnames=False):
     """Returns a headerfield dict for isobaric quant channels. Channels are
     taken from DB and there isn't a pool-independent version of this yet"""
+    if not pqdb:
+        return {}
     quantheader = OrderedDict()
     for chan_name, amnt_psms_name in pqdb.get_isoquant_amountpsms_channels():
         quantheader[chan_name] = poolnames

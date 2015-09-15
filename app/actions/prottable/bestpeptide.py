@@ -5,13 +5,13 @@ from app.actions.peptable.base import evaluate_peptide
 from math import log
 
 
-def generate_proteins(tsvfn, proteins, oldheader, scorecol, minlog,
+def generate_proteins(pepfn, proteins, pepheader, scorecol, minlog,
                       higherbetter=True):
     """Best peptide for each protein in a table"""
     protein_peptides = {}
     if minlog:
         higherbetter = False
-    for psm in reader.generate_tsv_psms(tsvfn, oldheader):
+    for psm in reader.generate_tsv_psms(pepfn, pepheader):
         p_acc = psm[peptabledata.HEADER_MASTERPROTEINS]
         if ';' in p_acc:
             continue
@@ -26,8 +26,9 @@ def generate_proteins(tsvfn, proteins, oldheader, scorecol, minlog,
         peptide = protein_peptides[protein[prottabledata.HEADER_PROTEIN]]
         if minlog:
             peptide['score'] = log_score(peptide['score'], nextbestscore)
-        protein[prottabledata.HEADER_HEADER_BEST_PEPTIDE_Q] = str(
+        protein[prottabledata.HEADER_BEST_PEPTIDE_Q] = str(
             peptide['score'])
+        yield protein
 
 
 def log_score(score, nextbestscore):
