@@ -47,8 +47,7 @@ def parse_quant_data(qtype, pepquant, fieldmap=None):
     if qtype == 'isob':
         quants = {fieldmap[x]: get_median(pepquant[x]) for x in fieldmap}
     elif qtype == 'precur':
-        quants = {peptabledata.HEADER_AREA: get_median(
-            pepquant)}
+        quants = {peptabledata.HEADER_AREA: max([float(x) for x in pepquant])}
     return quants
 
 
