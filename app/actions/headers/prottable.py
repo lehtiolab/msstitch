@@ -15,13 +15,14 @@ def generate_header(headerfields, oldheader=False):
 
 def get_prottable_headerfields(headertypes, lookup=False, poolnames=False):
     """Called by driver to generate headerfields object"""
-    field_defs= {'isoquant': get_isoquant_fields(lookup, poolnames),
-                 'precursorquant': get_precursorquant_fields(poolnames),
-                 'probability': get_probability_fields(poolnames),
-                 'proteindata': get_proteininfo_fields(poolnames),
-                 'proteinfdr': get_proteinfdr_fields(poolnames),
-                 'proteinpep': get_proteinpep_fields(poolnames),
-                 }
+    field_defs = {'isoquant': get_isoquant_fields(lookup, poolnames),
+                  'precursorquant': get_precursorquant_fields(poolnames),
+                  'probability': get_probability_fields(poolnames),
+                  'proteindata': get_proteininfo_fields(poolnames),
+                  'proteinfdr': get_proteinfdr_fields(poolnames),
+                  'proteinpep': get_proteinpep_fields(poolnames),
+                  'bestpepscore': get_bestpeptide_fields(poolnames),
+                  }
     return generate_headerfields(headertypes, field_defs, poolnames)
 
 
@@ -70,3 +71,7 @@ def get_isoquant_fields(pqdb=False, poolnames=False):
         if amnt_psms_name:
             quantheader[amnt_psms_name] = poolnames
     return quantheader
+
+
+def get_bestpeptide_fields(poolnames=False):
+    return {prottabledata.HEADER_BEST_PEPTIDE_Q: poolnames}

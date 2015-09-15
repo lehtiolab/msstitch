@@ -13,7 +13,6 @@ import argparse
 import os
 import app.drivers.peptable.psmtopeptable as psm2pepdrivers
 import app.drivers.peptable.merge as mergedrivers
-from app.drivers.peptable import proteinbest
 
 
 def parser_file_exists(currentparser, fn):
@@ -42,10 +41,6 @@ parser.add_argument('-c', dest='command', type=str,
                     'buildpep - Build peptide table from data stored in a\n'
                     'lookup DB object created with mslookup.py. Use with\n'
                     '--isobaric, --precursor, --fdr, --pep.\n\n'
-                    'proteinbest - Filter existing peptide table to only\n'
-                    'contain the single best peptide for each protein.\n'
-                    'Peptides matching multiple protein(groups) are removed,\n'
-                    'use with --scorecol and --logscore.\n\n'
                     '',
                     required=True
                     )
@@ -80,10 +75,6 @@ parser.add_argument('--isobquantcolpattern', dest='quantcolpattern',
                     help='Unique text pattern to identify isobaric quant \n'
                     'column in PSM table for peptide quant.',
                     type=str, required=False)
-parser.add_argument('--logscore', dest='logscore',
-                    help='Flag. When using proteinbest, e.g. q-values will\n'
-                    'be converted to -log10 values.',
-                    action='store_const', const=True, default=False)
 parser.add_argument('--isobaric', dest='isobaric',
                     help='Flag. Instructs buildpep to include isobaric quant\n'
                     'data in peptide table.',
@@ -144,7 +135,6 @@ args = parser.parse_args()
 
 commandmap = {
     'psm2pep': psm2pepdrivers.MzidTSVPeptableDriver,
-    'proteinbest': proteinbest.BestPeptidePerProtein,
     'buildpep': mergedrivers.BuildPeptideTableDriver,
 }
 

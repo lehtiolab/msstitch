@@ -1,10 +1,12 @@
 from app.dataformats import peptable as peptabledata
+from app.dataformats import prottable as prottabledata
 from app.readers import tsv as reader
 from app.actions.peptable.base import evaluate_peptide
 from math import log
 
 
-def generate_peptides(tsvfn, oldheader, scorecol, minlog, higherbetter=True):
+def generate_proteins(tsvfn, proteins, oldheader, scorecol, minlog,
+                      higherbetter=True):
     """Best peptide for each protein in a table"""
     protein_peptides = {}
     if minlog:
@@ -20,10 +22,12 @@ def generate_peptides(tsvfn, oldheader, scorecol, minlog, higherbetter=True):
         nextbestscore = min([pep['score'] for pep in protein_peptides.values()
                              if pep['score'] > 0])
         nextbestscore = -log(nextbestscore, 10)
-    for peptide in protein_peptides.values():
+    for protein in proteins:
+        peptide = protein_peptides[protein[prottabledata.HEADER_PROTEIN]]
         if minlog:
-            peptide['line'][scorecol] = str(log_score(peptide['score'], nextbestscore))
-        yield peptide['line']
+            peptide['score'] = log_score(peptide['score'], nextbestscore)
+        protein[prottabledata.HEADER_HEADER_BEST_PEPTIDE_Q] = str(
+            peptide['score'])
 
 
 def log_score(score, nextbestscore):

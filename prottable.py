@@ -8,7 +8,7 @@ import argparse
 import os
 from app.drivers.prottable import (probability, info, merge, precursorarea,
                                    create_empty, create_labelfree, qvality,
-                                   fdr)
+                                   bestpeptide, fdr)
 
 
 def parser_file_exists(currentparser, fn):
@@ -51,8 +51,13 @@ parser.add_argument('-c', dest='command', type=str,
                     'peptide table posterior error probabilities. Needs\n'
                     '--peptable, and probabilities are calculated \n'
                     'as in Nesvizhskii et al. (2003) Anal.Chem., eq 3.\n\n'
-                    'protqvality - Run qvality on protein (or peptide) tables\n'
-                    'containing target (-i) proteins and decoy (--decoy) proteins.\n\n'
+                    'bestpeptide - Given the protein table and corresponding\n'
+                    'peptide table, fetch the best scoring peptide for each\n'
+                    'protein and annotates that score in the protein table.\n'
+                    'Use with --scorecol, --peptable, --logscore.\n\n'
+                    'protqvality - Run qvality on protein (or tsv) tables\n'
+                    'containing target (-i) proteins and decoy (--decoy)\n'
+                    'proteins.\n\n'
                     'addfdr - Add protein FDR to protein table by comparing\n'
                     'score (peptide q-value, protein probability, etc)\n'
                     'with qvality lookup table. Needs \n'
@@ -78,11 +83,18 @@ parser.add_argument('--peptable', dest='pepfile', help='Peptide table file '
                     'containing data for protein table, for example '
                     'peptide probabilities.',
                     type=lambda x: parser_file_exists(parser, x))
+parser.add_argument('--scorecol', dest='scorecol', help='Column number in '
+                    'which score to filter on is written.',
+                    type=int, required=False)
+parser.add_argument('--logscore', dest='logscore',
+                    help='Flag. When using proteinbest, e.g. q-values will\n'
+                    'be converted to -log10 values.',
+                    action='store_const', const=True, default=False)
 parser.add_argument('--decoy', dest='decoyfn', help='Protein table containing '
                     'decoy proteins for running qvality',
                     type=lambda x: parser_file_exists(parser, x))
-parser.add_argument('--feattype', dest='feattype', help='Score type to use for '
-                    'qvality. Can either be probability or qvalue.')
+parser.add_argument('--feattype', dest='feattype', help='Score type to use for'
+                    ' qvality. Can either be probability or qvalue.')
 parser.add_argument('-o', dest='options', nargs='+',
                     help='Extra options that may be passed to qvality.'
                     'Option form: -o ***flag value ***flag ***flag value')
@@ -121,6 +133,7 @@ commandmap = {
     'addprob': probability.AddProteinProbability,
     'createlabelfree': create_labelfree.CreateLabelfreeProteinDriver,
     'emptyprottable': create_empty.CreateEmptyDriver,
+    'bestpeptide': bestpeptide.BestPeptidePerProtein,
     'protqvality': qvality.ProttableQvalityDriver,
     'protfdr': fdr.ProttableFDRDriver,
 }
