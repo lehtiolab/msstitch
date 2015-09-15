@@ -7,7 +7,7 @@ prottable -- Creating and modifying protein tables
 import argparse
 import os
 from app.drivers.prottable import (probability, info, merge, isoquant,
-                                   precursorarea, create_empty,
+                                   precursorarea, create_empty, bestpeptide,
                                    qvality, fdr)
 
 
