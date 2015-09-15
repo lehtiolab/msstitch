@@ -38,6 +38,9 @@ parser.add_argument('-c', dest='command', type=str,
                     'been read into the lookup and will be combined. Use \n'
                     'with --dbfile, --proteindata, --precursor, --isobaric\n'
                     'but NOT with -i.\n\n'
+                    'addisoquant - Add isobaric quantification data from a\n'
+                    'proteintable containing this. Needs a second table\n'
+                    'specified with --quantfile and --isobquantcolpattern\n\n'
                     'addms1quant - Add MS1 quantification data from a\n'
                     'PSM table containing precursor quant areas. Needs\n'
                     'a psmtable specified with --psmtable.\n\n'
@@ -80,6 +83,13 @@ parser.add_argument('--peptable', dest='pepfile', help='Peptide table file '
                     'containing data for protein table, for example '
                     'peptide probabilities.',
                     type=lambda x: parser_file_exists(parser, x))
+parser.add_argument('--quantfile', dest='quantfile', help='Protein table file '
+                    'containing isobaric quant data to add to protein table.',
+                    type=lambda x: parser_file_exists(parser, x))
+parser.add_argument('--isobquantcolpattern', dest='isobquantcolpattern',
+                    help='Unique text pattern to identify isobaric quant \n'
+                    'columns in protein table.',
+                    type=str, required=False)
 parser.add_argument('--scorecol', dest='scorecol', help='Column number in '
                     'which score to filter on is written.',
                     type=int, required=False)
@@ -126,6 +136,7 @@ args = parser.parse_args()
 commandmap = {
     'addprotdata': info.AddProteinInfoDriver,
     'buildquant': merge.BuildProteinTableDriver,
+    'addisoquant': isoquant.AddIsobaricQuantDriver,
     'addms1quant': precursorarea.AddPrecursorAreaDriver,
     'addprob': probability.AddProteinProbability,
     'emptyprottable': create_empty.CreateEmptyDriver,
