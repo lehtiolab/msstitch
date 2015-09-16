@@ -1,12 +1,12 @@
-from app.dataformats import mzidtsv as mzidtsvdata
+from app.dataformats import peptable as peptabledata 
 from app.dataformats import prottable as prottabledata 
 
 
 def add_nesvi_protein_probability(proteins, peptides, headerfields):
     protein_probs = {}
     for peptide in peptides:
-        protacc = peptide[mzidtsvdata.HEADER_MASTER_PROT]
-        pep = peptide[mzidtsvdata.HEADER_PEPTIDE_PEP]
+        protacc = peptide[peptabledata.HEADER_MASTERPROTEINS]
+        pep = peptide[peptabledata.HEADER_PEP]
         if ';' in protacc or pep in ['NA', False]:
             continue
         pep = float(pep)
