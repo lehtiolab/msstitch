@@ -11,6 +11,8 @@ def get_quantcols(pattern, oldheader, coltype):
     """Searches for quantification columns using pattern and header list.
     Calls reader function to do regexp. Returns either a single column for
     precursor quant, or a list of columns for isobaric quant."""
+    if pattern is None:
+       return False
     if coltype == 'isob':
         oldcols = reader.get_cols_in_file(pattern, oldheader)
         return {col: 'PSM median {0}'.format(col) for col in oldcols}
