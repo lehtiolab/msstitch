@@ -114,6 +114,7 @@ def build_content_db(pgdb, coverage):
 
 def fetch_pg_content(all_master_psm_proteins, lastcontentmaster, psmmaster,
                      content, master_psms):
+    filtered = False
     for (contentmaster, contentpsm, protein, pepseq, 
          score, evid, cover) in all_master_psm_proteins:
         # Inner loop gets protein group content from DB join table
@@ -130,7 +131,6 @@ def fetch_pg_content(all_master_psm_proteins, lastcontentmaster, psmmaster,
                                                           cover)
             filtered = True
             break
-        filtered = False
         content = add_protein_psm_to_pre_proteingroup(content, protein,
                                                       pepseq,
                                                       contentpsm,
