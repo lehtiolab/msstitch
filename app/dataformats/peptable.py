@@ -1,6 +1,6 @@
 HEADER_PEPTIDE = 'Peptide sequence'
 HEADER_NO_PSM = '# PSMs'
-HEADER_AREA = 'MS1 area (median of PSMs)'
+HEADER_AREA = 'MS1 area (highest of all PSMs)'
 HEADER_QVAL = 'q-value'
 HEADER_PEP = 'PEP'
 HEADER_LINKED_PSMS = 'Files/scans for peptide'

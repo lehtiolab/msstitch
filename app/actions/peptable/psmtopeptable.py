@@ -47,14 +47,15 @@ def generate_peptides(tsvfn, oldheader, scorecol, isofieldmap,
 
 def parse_quant_data(qtype, pepquant, fieldmap=None):
     if qtype == 'isob':
-        quants = {fieldmap[x]: get_median(pepquant[x]) for x in fieldmap}
+        quants = {fieldmap[x]: get_peptide_quant(pepquant[x],'isob') for x in fieldmap}
     elif qtype == 'precur':
-        quants = {peptabledata.HEADER_AREA: max([float(x) for x in pepquant])}
+        quants = {peptabledata.HEADER_AREA: get_peptide_quant(pepquant, 'precur')}
     return quants
 
 
-def get_median(quantdata):
+def get_peptide_quant(quantdata, quanttype):
     """Parses lists of quantdata and gets the median from them. Stirps NA"""
+    parsefnx = {'isob': median, 'precur': max} 
     quantfloats = []
     for q in quantdata:
         try:
@@ -63,7 +64,7 @@ def get_median(quantdata):
             pass
     if not quantfloats:
         return 'NA'
-    return str(median(quantfloats))
+    return str(parsefnx[quanttype](quantfloats))
 
 
 def add_quant_values(allpeps, psm, isobq_fieldmap, precurq_field):
