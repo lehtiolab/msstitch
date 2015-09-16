@@ -65,7 +65,7 @@ def get_proteininfo_fields(poolnames=False):
 def get_isoquant_fields(pqdb=False, poolnames=False):
     """Returns a headerfield dict for isobaric quant channels. Channels are
     taken from DB and there isn't a pool-independent version of this yet"""
-    if not pqdb:
+    if pqdb is None:
         return {}
     quantheader = OrderedDict()
     for chan_name, amnt_psms_name in pqdb.get_isoquant_amountpsms_channels():
