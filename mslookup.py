@@ -7,7 +7,7 @@ mslookup - Creating SQLite lookups for internal and external use
 import argparse
 import os
 from app.drivers.mslookup import (spectra, quant, proteingroups, biosets,
-                                  proteinquant, pepquant, psms)
+                                  proteinquant, pepquant, psms, seqspace)
 
 
 def parser_file_exists(currentparser, fn):
@@ -66,7 +66,11 @@ parser.add_argument('-c', dest='command', type=str,
                     'quantification channel names, and if possible the\n'
                     'number of peptides quantified for each protein in the\n'
                     'respective channels. Lookup should already include '
-                    'proteins.',
+                    'proteins.\n\n'
+
+                    'seqspace - Creates lookup DB from FASTA file for use\n'
+                    'with e.g. pycolator.py -c filterknown. You may  use \n'
+                    'flags --cutproline, --notrypsin and --ntermwildcards.',
                     required=True
                     )
 parser.add_argument('-i', dest='infile', nargs='+',
@@ -165,6 +169,22 @@ parser.add_argument('--mztoltype', dest='mztoltype', help='Type of tolerance\n'
                     'to identifications in the PSM table. One of ppm, Da.',
                     type=lambda x: parser_value_in_list(parser, x, ['ppm',
                                                                     'Da']))
+parser.add_argument('--cutproline', dest='proline', help='With flag, trypsin is '
+                    'considered to cut before a proline residue. The filter '
+                    'known will filter against both cut and non-cut peptides.',
+                    action='store_const', const=True, default=False)
+parser.add_argument('--notrypsin', dest='notrypsin', help='With flag, no \n'
+                    'trypsinization is performed. User is expected to deliver\n'
+                    'pretrypsinized FASTA file.',
+                    action='store_const', const=False, default=True)
+parser.add_argument('--ntermwildcards', dest='falloff', help='With flag, the filter '
+                    'known will filter against both intact peptides and those '
+                    'that match to the C-terminal part of a tryptic peptide '
+                    'from the database. Database should be built with this'
+                    'flag in order for the lookup to work, since sequences'
+                    'will be stored and looked up reversed',
+                    action='store_const', const=True, default=False)
+
 
 args = parser.parse_args()
 
@@ -177,6 +197,7 @@ commandmap = {
     'proteingrouplookup': proteingroups.ProteinGroupLookupDriver,
     'pepquant': pepquant.PeptideQuantLookupDriver,
     'protquant': proteinquant.ProteinQuantLookupDriver,
+    'seqspace': seqspace.SeqspaceLookupDriver,
 }
 
 command = commandmap[args.command](**vars(args))

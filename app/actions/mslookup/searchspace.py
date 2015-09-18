@@ -1,16 +1,12 @@
 from Bio import SeqIO
-from app.lookups.sqlite import searchspace as sqlite
 
 
-def create_searchspace(dbfn, outfile, proline_cut=False,
+def create_searchspace(lookup, fastafn, proline_cut=False,
                        reverse_seqs=True, do_trypsinize=True):
     """Given a FASTA database, proteins are trypsinized and resulting peptides
     stored in a database or dict for lookups"""
-    lookup = sqlite.SearchSpaceDB()
-    lookup.create_searchspacedb(outfile)
-
     allpeps = []
-    protindex = SeqIO.index(dbfn, 'fasta')
+    protindex = SeqIO.index(fastafn, 'fasta')
     for acc in protindex:
         if do_trypsinize:
             pepseqs = trypsinize(protindex[acc].seq, proline_cut)

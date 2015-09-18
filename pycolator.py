@@ -13,7 +13,6 @@ import argparse
 import os
 from app.drivers.pycolator import splitmerge
 from app.drivers.pycolator import filters
-from app.drivers.pycolator import lookup
 from app.drivers.pycolator import stats
 from app.drivers.pycolator import converters
 from app.drivers.pycolator import qvality
@@ -30,8 +29,6 @@ parser.add_argument('-c', dest='command', type=str, help='How to manipulate the 
 'splittd        - Splits target and decoy data, multiple inputs to multiple outputs\n'
 'merge          - Merges percolator xml files. nothing else. Use -i for\n'
 '                 base file, and specify files with --multifiles\n'
-'trypticlookup  - Creates a lookup DB from a FASTA file for use with e.g. filterknown\n'
-'                 --cutproline and --ntermwildcards can be used.\n'
 'filteruni      - Only includes best scoring unique peptides in a (merged) file\n'
 'filterknown    - Filters out peptides that are found in a certain lookup DB\n'
 '                 passed using the -b flag. Use with or without\n'
@@ -112,7 +109,6 @@ args = parser.parse_args()
 commandmap = {
     'splittd': splitmerge.SplitDriver,
     'merge': splitmerge.MergeDriver,
-    'trypticlookup': lookup.CreateLookup,
     'filteruni': filters.FilterUniquePeptides,
     'filterlen': filters.FilterPeptideLength,
     'filterknown': filters.FilterKnownPeptides,
