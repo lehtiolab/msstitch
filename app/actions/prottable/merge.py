@@ -29,14 +29,17 @@ def build_proteintable(pqdb, header, headerfields, isobaric=False,
     proteins = pqdb.get_merged_features(protein_sql)
     protein = next(proteins)
     outprotein = {prottabledata.HEADER_PROTEIN: protein[sqlfieldmap['p_acc']]}
+    check_prot = {k: v for k, v in outprotein.items()}
     fill_mergefeature(outprotein, iso_fun, ms1_fun, prob_fun, fdr_fun, pep_fun,
                       psms_fun, pdata_fun, protein, sqlfieldmap, headerfields,
                       pdmap)
     for protein in proteins:
         p_acc = protein[sqlfieldmap['p_acc']]
         if p_acc != outprotein[prottabledata.HEADER_PROTEIN]:
-            yield parse_NA(outprotein, header)
+            if outprotein != check_prot:
+                yield parse_NA(outprotein, header)
             outprotein = {prottabledata.HEADER_PROTEIN: p_acc}
+            check_prot = {k: v for k, v in outprotein.items()}
         fill_mergefeature(outprotein, iso_fun, ms1_fun, prob_fun, fdr_fun,
                           pep_fun, psms_fun, pdata_fun, protein, sqlfieldmap,
                           headerfields, pdmap)
@@ -59,6 +62,8 @@ def get_isobaric_quant(protein, sqlmap, headerfields):
     psmfield = protein[sqlmap['isoq_psmsfield']]
     quant = protein[sqlmap['isoq_val']]
     nopsms = protein[sqlmap['isoq_psms']]
+    if quant is None:
+        return {}
     return {headerfields['isoquant'][chan][pool]: quant,
             headerfields['isoquant'][psmfield][pool]: nopsms}
 

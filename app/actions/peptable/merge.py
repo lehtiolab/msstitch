@@ -30,14 +30,17 @@ def build_peptidetable(pqdb, header, headerfields, isobaric=False,
     peptides = pqdb.get_merged_features(peptide_sql)
     peptide = next(peptides)
     outpeptide = {peptabledata.HEADER_PEPTIDE: peptide[sqlfieldmap['p_seq']]}
+    check_pep = {k: v for k, v in outpeptide.items()}
     fill_mergefeature(outpeptide, iso_fun, ms1_fun, empty_return, fdr_fun,
                       pep_fun, psms_fun, pdata_fun, peptide, sqlfieldmap,
                       headerfields, peptidedatamap)
     for peptide in peptides:
         p_seq = peptide[sqlfieldmap['p_seq']]
         if p_seq != outpeptide[peptabledata.HEADER_PEPTIDE]:
-            yield parse_NA(outpeptide, header)
+            if outpeptide != check_pep:
+                yield parse_NA(outpeptide, header)
             outpeptide = {peptabledata.HEADER_PEPTIDE: p_seq}
+            check_pep = {k: v for k, v in outpeptide.items()}
         fill_mergefeature(outpeptide, iso_fun, ms1_fun, empty_return, fdr_fun,
                           pep_fun, psms_fun, pdata_fun, peptide, sqlfieldmap,
                           headerfields, peptidedatamap)
@@ -48,6 +51,8 @@ def get_isobaric_quant(peptide, sqlmap, headerfields):
     chan = peptide[sqlmap['channel']]
     pool = peptide[sqlmap['set_name']]
     quant = peptide[sqlmap['isoq_val']]
+    if quant is None:
+        return {}
     return {headerfields['isoquant'][chan][pool]: quant}
 
 
