@@ -50,47 +50,33 @@ class PepTableDB(ProtPepTable):
 
     def prepare_mergetable_sql(self, precursor=False, isobaric=False,
                                fdr=False, pep=False):
-        selects = ['p.sequence']
-        selectmap, count = self.update_selects({}, ['p_seq'], 0)
+        selects = ['p.sequence', 'bs.set_name']
+        selectmap, count = self.update_selects({}, ['p_seq', 'set_name'], 0)
         joins = []
         if isobaric:
-            selects.extend(['pc.channel_name', 'bs.set_name',
-                            'piq.quantvalue'])
-            joins.extend([('peptide_iso_quanted', 'piq', 'p', 'pep_id', True),
-                          ('pepquant_channels', 'pc', 'piq', 'channel_id'),
-                          ('peptide_tables', 'pt', 'pc', 'peptable_id'),
-                          ('biosets', 'bs', 'pt', 'set_id')
-                          ])
-            fld = ['channel', 'isoq_poolname', 'isoq_val']
+            selects.extend(['pc.channel_name', 'piq.quantvalue'])
+            joins.extend([('pepquant_channels', 'pc', ['pt']),
+                          ('peptide_iso_quanted', 'piq', ['p', 'pc'], True)])
+            fld = ['channel', 'isoq_val']
             selectmap, count = self.update_selects(selectmap, fld, count)
         if precursor:
-            selects.extend(['prqbs.set_name', 'preq.quant'])
-            joins.extend([('peptide_precur_quanted', 'preq', 'p', 'pep_id',
-                           True),
-                          ('peptide_tables', 'prqpt', 'preq', 'peptable_id'),
-                          ('biosets', 'prqbs', 'prqpt', 'set_id')
-                          ])
-            fld = ['preq_poolname', 'preq_val']
+            selects.extend(['preq.quant'])
+            joins.append(('peptide_precur_quanted', 'preq', ['p', 'pt'], True))
+            fld = ['preq_val']
             selectmap, count = self.update_selects(selectmap, fld, count)
         if fdr:
-            selects.extend(['fdrbs.set_name', 'pfdr.fdr'])
-            joins.extend([('peptide_fdr', 'pfdr', 'p', 'pep_id', True),
-                          ('peptide_tables', 'fdrpt', 'pfdr', 'peptable_id'),
-                          ('biosets', 'fdrbs', 'fdrpt', 'set_id')
-                          ])
-            fld = ['fdr_poolname', 'fdr_val']
+            selects.extend(['pfdr.fdr'])
+            joins.append(('peptide_fdr', 'pfdr', ['p', 'pt'], True))
+            fld = ['fdr_val']
             selectmap, count = self.update_selects(selectmap, fld, count)
         if pep:
-            selects.extend(['pepbs.set_name', 'ppep.pep'])
-            joins.extend([('peptide_pep', 'ppep', 'p', 'pep_id', True),
-                          ('peptide_tables', 'peppt', 'ppep', 'peptable_id'),
-                          ('biosets', 'pepbs', 'peppt', 'set_id')
-                          ])
-            fld = ['pep_poolname', 'pep_val']
+            selects.extend(['ppep.pep'])
+            joins.append(('peptide_pep', 'ppep', ['p', 'pt'], True))
+            fld = ['pep_val']
             selectmap, count = self.update_selects(selectmap, fld, count)
 
-        sql = 'SELECT {} FROM peptide_sequences AS p'.format(
-            ', '.join(selects))
+        sql = ('SELECT {} FROM peptide_sequences AS p JOIN biosets AS bs '
+               'JOIN peptide_tables AS pt'.format(', '.join(selects)))
         sql = self.get_sql_joins_mergetable(sql, joins)
         sql = '{0} ORDER BY p.sequence'.format(sql)
         return sql, selectmap

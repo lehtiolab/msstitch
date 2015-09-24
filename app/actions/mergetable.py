@@ -1,5 +1,5 @@
-def simple_val_fetch(feature, sqlmap, headerfields, poolkey, valkey):
-    pool = feature[sqlmap[poolkey]]
+def simple_val_fetch(feature, sqlmap, headerfields, valkey):
+    pool = feature[sqlmap['set_name']]
     hfield = headerfields[pool]
     return {hfield: feature[sqlmap[valkey]]}
 

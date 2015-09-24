@@ -12,7 +12,7 @@ def build_peptidetable(pqdb, header, headerfields, isobaric=False,
     peptide quant information."""
     peptidedatamap = False
     if nopsms or proteindata:
-        peptidedatamap = create_featuredata_map(pqdb, add_record_to_peptidedata, 
+        peptidedatamap = create_featuredata_map(pqdb, add_record_to_peptidedata,
                                                 get_uniques=False)
     if nopsms:
         count_psms(peptidedatamap)
@@ -31,7 +31,7 @@ def build_peptidetable(pqdb, header, headerfields, isobaric=False,
     peptide = next(peptides)
     outpeptide = {peptabledata.HEADER_PEPTIDE: peptide[sqlfieldmap['p_seq']]}
     fill_mergefeature(outpeptide, iso_fun, ms1_fun, empty_return, fdr_fun,
-                      pep_fun, psms_fun, pdata_fun, peptide, sqlfieldmap, 
+                      pep_fun, psms_fun, pdata_fun, peptide, sqlfieldmap,
                       headerfields, peptidedatamap)
     for peptide in peptides:
         p_seq = peptide[sqlfieldmap['p_seq']]
@@ -46,7 +46,7 @@ def build_peptidetable(pqdb, header, headerfields, isobaric=False,
 
 def get_isobaric_quant(peptide, sqlmap, headerfields):
     chan = peptide[sqlmap['channel']]
-    pool = peptide[sqlmap['isoq_poolname']]
+    pool = peptide[sqlmap['set_name']]
     quant = peptide[sqlmap['isoq_val']]
     return {headerfields['isoquant'][chan][pool]: quant}
 
@@ -54,22 +54,19 @@ def get_isobaric_quant(peptide, sqlmap, headerfields):
 def get_precursor_quant(peptide, sqlmap, headerfields):
     return simple_val_fetch(peptide, sqlmap,
                             headerfields['precursorquant'][
-                                peptabledata.HEADER_AREA],
-                            'preq_poolname', 'preq_val')
+                                peptabledata.HEADER_AREA], 'preq_val')
 
 
 def get_pep_fdr(peptide, sqlmap, headerfields):
     return simple_val_fetch(peptide, sqlmap,
                             headerfields['peptidefdr'][
-                                peptabledata.HEADER_QVAL],
-                            'fdr_poolname', 'fdr_val')
+                                peptabledata.HEADER_QVAL], 'fdr_val')
 
 
 def get_peptide_pep(peptide, sqlmap, headerfields):
     return simple_val_fetch(peptide, sqlmap,
                             headerfields['peptidepep'][
-                                peptabledata.HEADER_PEP],
-                            'pep_poolname', 'pep_val')
+                                peptabledata.HEADER_PEP], 'pep_val')
 
 
 def get_no_psms(peptide, pdata, headerfields):
@@ -85,7 +82,7 @@ def get_no_psms(peptide, pdata, headerfields):
 
 
 def get_protein_data(peptide, pdata, headerfields):
-    """These fields are currently not pool dependent so headerfields 
+    """These fields are currently not pool dependent so headerfields
     is ignored"""
     seq = peptide[peptabledata.HEADER_PEPTIDE]
     outdict = {}

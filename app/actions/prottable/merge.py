@@ -55,7 +55,7 @@ def get_protein_data(outprotein, proteindata_map, headerfields):
 
 def get_isobaric_quant(protein, sqlmap, headerfields):
     chan = protein[sqlmap['channel']]
-    pool = protein[sqlmap['isoq_poolname']]
+    pool = protein[sqlmap['set_name']]
     psmfield = protein[sqlmap['isoq_psmsfield']]
     quant = protein[sqlmap['isoq_val']]
     nopsms = protein[sqlmap['isoq_psms']]
@@ -66,26 +66,22 @@ def get_isobaric_quant(protein, sqlmap, headerfields):
 def get_precursor_quant(protein, sqlmap, headerfields):
     return simple_val_fetch(protein, sqlmap,
                             headerfields['precursorquant'][
-                                prottabledata.HEADER_AREA],
-                            'preq_poolname', 'preq_val')
+                                prottabledata.HEADER_AREA], 'preq_val')
 
 
 def get_prot_probability(protein, sqlmap, headerfields):
     return simple_val_fetch(protein, sqlmap,
                             headerfields['probability'][
-                                prottabledata.HEADER_PROBABILITY],
-                            'prob_poolname', 'prob_val')
+                                prottabledata.HEADER_PROBABILITY], 'prob_val')
 
 
 def get_prot_fdr(protein, sqlmap, headerfields):
     return simple_val_fetch(protein, sqlmap,
                             headerfields['proteinfdr'][
-                                prottabledata.HEADER_QVAL],
-                            'fdr_poolname', 'fdr_val')
+                                prottabledata.HEADER_QVAL], 'fdr_val')
 
 
 def get_prot_pep(protein, sqlmap, headerfields):
     return simple_val_fetch(protein, sqlmap,
                             headerfields['proteinpep'][
-                                prottabledata.HEADER_PEP],
-                            'pep_poolname', 'pep_val')
+                                prottabledata.HEADER_PEP], 'pep_val')

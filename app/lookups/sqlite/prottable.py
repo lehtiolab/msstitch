@@ -30,59 +30,42 @@ class ProtTableDB(ProtPepTable):
 
     def prepare_mergetable_sql(self, precursor=False, isobaric=False,
                                probability=False, fdr=False, pep=False):
-        selects = ['p.protein_acc']
-        selectmap, count = self.update_selects({}, ['p_acc'], 0)
+        selects = ['p.protein_acc', 'bs.set_name']
+        selectmap, count = self.update_selects({}, ['p_acc', 'set_name'], 0)
         joins = []
         if isobaric:
-            selects.extend(['pc.channel_name', 'bs.set_name',
+            selects.extend(['pc.channel_name',
                             'pc.amount_psms_name', 'piq.quantvalue',
                             'piq.amount_psms'])
-            joins.extend([('protein_iso_quanted', 'piq', 'p', 'pacc_id', True),
-                          ('protquant_channels', 'pc', 'piq', 'channel_id'),
-                          ('protein_tables', 'pt', 'pc', 'prottable_id'),
-                          ('biosets', 'bs', 'pt', 'set_id')
+            joins.extend([('protquant_channels', 'pc', ['pt']),
+                          ('protein_iso_quanted', 'piq', ['p', 'pc'], True),
                           ])
-            fld = ['channel', 'isoq_poolname', 'isoq_psmsfield', 'isoq_val',
+            fld = ['channel', 'isoq_psmsfield', 'isoq_val',
                    'isoq_psms']
             selectmap, count = self.update_selects(selectmap, fld, count)
         if precursor:
-            selects.extend(['prqbs.set_name', 'preq.quant'])
-            joins.extend([('protein_precur_quanted', 'preq', 'p', 'pacc_id',
-                           True),
-                          ('protein_tables', 'prqpt', 'preq', 'prottable_id'),
-                          ('biosets', 'prqbs', 'prqpt', 'set_id')
-                          ])
-            fld = ['preq_poolname', 'preq_val']
+            selects.extend(['preq.quant'])
+            joins.append(('protein_precur_quanted', 'preq', ['p', 'pt'], True))
+            fld = ['preq_val']
             selectmap, count = self.update_selects(selectmap, fld, count)
         if probability:
-            selects.extend(['probbs.set_name', 'pprob.probability'])
-            joins.extend([('protein_probability', 'pprob', 'p', 'pacc_id',
-                           True),
-                          ('protein_tables', 'probpt', 'pprob',
-                           'prottable_id'),
-                          ('biosets', 'probbs', 'probpt', 'set_id')
-                          ])
-            fld = ['prob_poolname', 'prob_val']
+            selects.extend(['pprob.probability'])
+            joins.append(('protein_probability', 'pprob', ['p', 'pt'], True))
+            fld = ['prob_val']
             selectmap, count = self.update_selects(selectmap, fld, count)
         if fdr:
-            selects.extend(['fdrbs.set_name', 'pfdr.fdr'])
-            joins.extend([('protein_fdr', 'pfdr', 'p', 'pacc_id', True),
-                          ('protein_tables', 'fdrpt', 'pfdr', 'prottable_id'),
-                          ('biosets', 'fdrbs', 'fdrpt', 'set_id')
-                          ])
-            fld = ['fdr_poolname', 'fdr_val']
+            selects.extend(['pfdr.fdr'])
+            joins.append(('protein_fdr', 'pfdr', ['p', 'pt'], True))
+            fld = ['fdr_val']
             selectmap, count = self.update_selects(selectmap, fld, count)
         if pep:
-            selects.extend(['pepbs.set_name', 'ppep.pep'])
-            joins.extend([('protein_pep', 'ppep', 'p', 'pacc_id', True),
-                          ('protein_tables', 'peppt', 'ppep', 'prottable_id'),
-                          ('biosets', 'pepbs', 'peppt', 'set_id')
-                          ])
-            fld = ['pep_poolname', 'pep_val']
+            selects.extend(['ppep.pep'])
+            joins.append(('protein_pep', 'ppep', ['p', 'pt'], True))
+            fld = ['pep_val']
             selectmap, count = self.update_selects(selectmap, fld, count)
 
-        sql = 'SELECT {} FROM proteins AS p'.format(
-            ', '.join(selects))
+        sql = ('SELECT {} FROM proteins AS p JOIN biosets AS bs '
+               'JOIN protein_tables AS pt'.format(', '.join(selects)))
         sql = self.get_sql_joins_mergetable(sql, joins)
         sql = '{0} ORDER BY p.protein_acc'.format(sql)
         return sql, selectmap
