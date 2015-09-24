@@ -95,7 +95,7 @@ class ProtPepTable(ResultLookupInterface):
         protein_j_cols = {'p': 'pacc_id', 'pt': 'prottable_id'}
         peptide_j_cols = {'p': 'pep_id', 'pt': 'peptable_id'}
         colpick = {'peptide': peptide_j_cols, 'protein': protein_j_cols}
-        join_cols = {'pc': 'channel_name'}
+        join_cols = {'pc': 'channel_id'}
         join_cols.update(colpick[pep_or_prot])
         if joins:
             joinsql = ''

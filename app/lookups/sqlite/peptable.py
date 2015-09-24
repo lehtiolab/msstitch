@@ -77,6 +77,6 @@ class PepTableDB(ProtPepTable):
 
         sql = ('SELECT {} FROM peptide_sequences AS p JOIN biosets AS bs '
                'JOIN peptide_tables AS pt'.format(', '.join(selects)))
-        sql = self.get_sql_joins_mergetable(sql, joins)
+        sql = self.get_sql_joins_mergetable(sql, joins, 'peptide')
         sql = '{0} ORDER BY p.sequence'.format(sql)
         return sql, selectmap
