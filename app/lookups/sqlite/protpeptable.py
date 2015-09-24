@@ -91,15 +91,22 @@ class ProtPepTable(ResultLookupInterface):
         cursor = self.get_cursor()
         return cursor.execute(sql)
 
-    def get_sql_joins_mergetable(self, sql, joins):
+    def get_sql_joins_mergetable(self, sql, joins, pep_or_prot):
+        protein_j_cols = {'p': 'pacc_id', 'pt': 'prottable_id'}
+        peptide_j_cols = {'p': 'pep_id', 'pt': 'peptable_id'}
+        colpick = {'peptide': peptide_j_cols, 'protein': protein_j_cols}
+        join_cols = {'pc': 'channel_name'}
+        join_cols.update(colpick[pep_or_prot])
         if joins:
             joinsql = ''
             for j in joins:
                 joincmd = 'JOIN'
-                if True in j:
+                if j[-1] is True:
                     joincmd = 'LEFT OUTER {}'.format(joincmd)
-                joinsql = '{5} {0} {1} AS {2} ON {3}.{4}={2}.{4}'.format(
-                    joincmd, j[0], j[1], j[2], j[3], joinsql)
+                joinmatchsql = ' AND '.join(['{0}.{1}={2}.{1}'.format(
+                    j[1], join_cols[jj], jj) for jj in j[2]])
+                joinsql = '{4} {0} {1} AS {2} ON {3}'.format(
+                    joincmd, j[0], j[1], joinmatchsql, joinsql)
             sql = '{} {}'.format(sql, joinsql)
         return sql
 
