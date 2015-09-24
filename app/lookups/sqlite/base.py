@@ -119,7 +119,7 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                    ],
                    'protein_precur_quanted':
                    ['prot_precquant_id INTEGER PRIMARY KEY',
-                    'pacc_id TEXT',
+                    'pacc_id INTEGER',
                     'prottable_id INTEGER',
                     'quant REAL',
                     'FOREIGN KEY(pacc_id) '
@@ -147,7 +147,7 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                           'REFERENCES '
                                           'protein_tables(prottable_id)'
                                           ],
-                   'protein_probability': ['pacc_id TEXT',
+                   'protein_probability': ['pacc_id INTEGER',
                                            'prottable_id INTEGER',
                                            'probability DOUBLE',
                                            'FOREIGN KEY(pacc_id) '
@@ -156,7 +156,7 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                            'REFERENCES '
                                            'protein_tables(prottable_id)'
                                            ],
-                   'protein_fdr': ['pacc_id TEXT',
+                   'protein_fdr': ['pacc_id INTEGER',
                                    'prottable_id INTEGER',
                                    'fdr DOUBLE',
                                    'FOREIGN KEY(pacc_id) '
@@ -165,7 +165,7 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                    'REFERENCES '
                                    'protein_tables(prottable_id)'
                                    ],
-                   'protein_pep': ['pacc_id TEXT',
+                   'protein_pep': ['pacc_id INTEGER',
                                    'prottable_id INTEGER',
                                    'pep DOUBLE',
                                    'FOREIGN KEY(pacc_id) '
