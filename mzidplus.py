@@ -116,6 +116,11 @@ parser.add_argument('--bioset', dest='bioset', help='Flag. When using '
                     'biological set names, for which a a column specifying '
                     'these must exist.',
                     action='store_const', const=True, default=False)
+parser.add_argument('--setnames', dest='setnames', help='Names of biological\n'
+                    'sets to split TSV file on. Order of these determines \n'
+                    'order of output files when splitting. Sets can be \n'
+                    'specified with quotation marks if spaces are used.',
+                    nargs='+')
 parser.add_argument('--splitcol', dest='splitcol', help='Column number on '
                     'which to split a TSV PSM table', type=int, required=False)
 parser.add_argument('--rename-cols', dest='renamecols', help='Column numbers '

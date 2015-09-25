@@ -29,6 +29,5 @@ def generate_psms_split(fn, oldheader, bioset, splitcol):
     splitcolnr = get_splitcolnr(oldheader, bioset, splitcol)
     for psm in tsvreader.generate_tsv_psms(fn, oldheader):
         yield {'psm': psm,
-               'split_pool':  ''.join(x for x in psm[oldheader[splitcolnr]]
-                                      if x.isalnum() or x in '_.-')
+               'split_pool': psm[oldheader[splitcolnr]]
                }
