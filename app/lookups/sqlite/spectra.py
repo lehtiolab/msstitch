@@ -23,8 +23,8 @@ class SpectraDB(BioSetDB):
         cursor = self.get_cursor()
         return cursor.execute('SELECT pr.rownr, bs.set_name, sp.retention_time'
                               ' FROM psmrows AS pr '
-                              'JOIN psms AS p USING psm_id '
-                              'JOIN mzml AS mz USING spectra_id '
-                              'JOIN mzmfiles as mf USING mzmlfile_id '
-                              'JOIN biosets AS bs USING set_id '
+                              'JOIN psms AS p USING(psm_id) '
+                              'JOIN mzml AS sp USING(spectra_id) '
+                              'JOIN mzmlfiles as mf USING(mzmlfile_id) '
+                              'JOIN biosets AS bs USING(set_id) '
                               'ORDER BY pr.rownr')
