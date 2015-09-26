@@ -8,7 +8,7 @@ def create_header(oldheader, spectracol):
     return header
 
 
-def generate_psms_spectradata(lookup, tsvfn, oldheader,	spec_column):
+def generate_psms_spectradata(lookup, tsvfn, oldheader):
     psm_specdata = zip(enumerate(readers.generate_tsv_psms(tsvfn, oldheader)),
                        lookup.get_exp_spectra_data_rows())
     for (row, psm), specdata in psm_specdata:
