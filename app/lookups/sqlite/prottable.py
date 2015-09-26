@@ -65,7 +65,7 @@ class ProtTableDB(ProtPepTable):
             selectmap, count = self.update_selects(selectmap, fld, count)
 
         sql = ('SELECT {} FROM proteins AS p JOIN biosets AS bs '
-               'JOIN protein_tables AS pt'.format(', '.join(selects)))
+               'JOIN protein_tables AS pt ON pt.set_id=bs.set_id'.format(', '.join(selects)))
         sql = self.get_sql_joins_mergetable(sql, joins, 'protein')
         sql = '{0} ORDER BY p.protein_acc'.format(sql)
         return sql, selectmap

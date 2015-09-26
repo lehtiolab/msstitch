@@ -76,7 +76,7 @@ class PepTableDB(ProtPepTable):
             selectmap, count = self.update_selects(selectmap, fld, count)
 
         sql = ('SELECT {} FROM peptide_sequences AS p JOIN biosets AS bs '
-               'JOIN peptide_tables AS pt'.format(', '.join(selects)))
+               'JOIN peptide_tables AS pt ON pt.set_id=bs.set_id'.format(', '.join(selects)))
         sql = self.get_sql_joins_mergetable(sql, joins, 'peptide')
         sql = '{0} ORDER BY p.sequence'.format(sql)
         return sql, selectmap
