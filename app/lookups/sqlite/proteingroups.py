@@ -27,9 +27,10 @@ class ProteinGroupDB(ResultLookupInterface):
             'VALUES(?)', proteins)
         self.conn.commit()
         cursor = self.get_cursor()
-        cursor.executemany(
-            'INSERT INTO protein_evidence(protein_acc, evidence_lvl) '
-            'VALUES(?, ?)', evidence_lvls)
+        if evidence_lvls:
+            cursor.executemany(
+                'INSERT INTO protein_evidence(protein_acc, evidence_lvl) '
+                'VALUES(?, ?)', evidence_lvls)
         if sequences:
             cursor.executemany(
                 'INSERT INTO protein_seq(protein_acc, sequence) '
@@ -55,10 +56,11 @@ class ProteinGroupDB(ResultLookupInterface):
             ' VALUES (?, ?)', prot_psm_ids)
         self.conn.commit()
 
-    def index_protein_peptides(self):
+    def index_protein_peptides(self, descriptions):
         self.index_column('protein_index', 'protein_psm', 'protein_acc')
         self.index_column('protpsmid_index', 'protein_psm', 'psm_id')
-        self.index_column('protdesc_index', 'prot_desc', 'protein_acc')
+        if descriptions:
+            self.index_column('protdesc_index', 'prot_desc', 'protein_acc')
 
     def store_masters(self, allmasters, psm_masters):
         allmasters = ((x,) for x in allmasters)

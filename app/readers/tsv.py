@@ -70,10 +70,11 @@ def get_psm_id(line):
                                 line[mzidtsvdata.HEADER_PEPTIDE])
 
 
-def get_proteins_from_psm(line):
+def get_proteins_from_psm(line, field=False):
     """From a line, return list of proteins reported by Mzid2TSV. When unrolled
     lines are given, this returns the single protein from the line."""
-    proteins = line[mzidtsvdata.HEADER_PROTEIN].split(';')
+    colfield = field if field else mzidtsvdata.HEADER_PROTEIN
+    proteins = line[colfield].split(';')
     outproteins = []
     for protein in proteins:
         try:
