@@ -3,7 +3,8 @@ from app.actions.mergetable import create_featuredata_map
 
 
 def add_record_to_proteindata(proteindata, p_acc, pool, psmdata):
-    seq, psm_id, desc, cov = psmdata[2], psmdata[3], psmdata[4], psmdata[5]
+    seq, psm_id = psmdata[2], psmdata[3]
+    desc, cov = psmdata[4], psmdata[5]
     try:
         proteindata[p_acc]['pools'][pool]['psms'].add(psm_id)
     except KeyError:
@@ -12,8 +13,9 @@ def add_record_to_proteindata(proteindata, p_acc, pool, psmdata):
         try:
             proteindata[p_acc]['pools'][pool] = emptyinfo
         except KeyError:
-            proteindata[p_acc] = {'pools': {pool: emptyinfo},
-                                  'desc': desc, 'cov': cov}
+            proteindata[p_acc] = {'pools': {pool: emptyinfo}}
+            if cov is not None:
+                proteindata[p_acc].update({'desc': desc, 'cov': cov})
     proteindata[p_acc]['pools'][pool]['psms'].add(psm_id)
     proteindata[p_acc]['pools'][pool]['peptides'].add(seq)
     #proteindata[p_acc][pool]['proteins'].add(pg_content)
@@ -57,9 +59,15 @@ def get_protein_data(proteindata, p_acc, headerfields):
         pool_values = [pdata['unipeps'], pdata['peptides'], pdata['psms']]
         outdict.update({headerfields['proteindata'][hfield][pool]: val
                         for (hfield, val) in zip(hfields, pool_values)})
-    outdict.update({prottabledata.HEADER_DESCRIPTION:
-                    proteindata[p_acc]['desc'],
-                    prottabledata.HEADER_COVERAGE: proteindata[p_acc]['cov'],
-                    prottabledata.HEADER_NO_PROTEIN: proteincount,
-                    })
+    outdict[prottabledata.HEADER_NO_PROTEIN] = proteincount
+    try:
+        outdict.update({prottabledata.HEADER_DESCRIPTION:
+                        proteindata[p_acc]['desc'],
+                        prottabledata.HEADER_COVERAGE:
+                        proteindata[p_acc]['cov'],
+                        })
+    except KeyError:
+        # In case database is built without a FASTA file there is no coverage
+        # info available.
+        pass
     return outdict
