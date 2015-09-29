@@ -13,6 +13,7 @@ class LookupDriver(BaseDriver):
         self.fasta = kwargs.get('fasta', False)
         self.coverage = self.fasta is not False
         self.confcol = kwargs.get('confcol', False)
+        self.proteincol = kwargs.get('protcol', False)
 
     def initialize_lookup(self):
         if self.lookup is None:

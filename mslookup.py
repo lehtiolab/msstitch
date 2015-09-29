@@ -123,7 +123,7 @@ parser.add_argument('--unroll', dest='unroll', help='Flag. The tsv input file '
                     'line (unrolled).',
                     action='store_const', const=True, default=False)
 parser.add_argument('--protcol', dest='protcol', help='Column number\n'
-                    'of protein table in which protein accessions are \n'
+                    'of protein/PSM table in which protein accessions are \n'
                     'stored. First column number is 1.',
                     type=int, required=False)
 parser.add_argument('--pepcol', dest='pepcol', help='Column number\n'
