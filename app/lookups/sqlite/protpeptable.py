@@ -81,8 +81,8 @@ class ProtPepTable(ResultLookupInterface):
             j[0], j[1], j[2]) for j in joins])
         if extended:
             fields.extend(['psm.psm_id', 'pd.description', 'pcov.coverage'])
-            ljs = ('LEFT OUTER JOIN prot_desc AS pd USING protein_acc '
-                   'LEFT OUTER JOIN protein_coverage AS pcov USING protein_acc'
+            ljs = ('LEFT OUTER JOIN prot_desc AS pd USING(protein_acc) '
+                   'LEFT OUTER JOIN protein_coverage AS pcov USING(protein_acc)'
                    )
             join_sql = '{} {}'.format(join_sql, ljs)
         sql = ('SELECT {} FROM protein_group_master '
