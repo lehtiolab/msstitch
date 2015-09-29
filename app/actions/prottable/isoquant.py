@@ -13,7 +13,6 @@ def add_isoquant_data(proteins, quantproteins, quantfields):
             outprotein.update(quant_proteinmap[prot_acc])
         except KeyError:
             outprotein.update({field: 'NA' for field in quantfields})
-        print(outprotein)
         yield outprotein
 
 
