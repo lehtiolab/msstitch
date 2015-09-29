@@ -12,7 +12,8 @@ def build_peptidetable(pqdb, header, headerfields, isobaric=False,
     peptide quant information."""
     peptidedatamap = False
     if nopsms or proteindata:
-        peptidedatamap = create_featuredata_map(pqdb, add_record_to_peptidedata,
+        peptidedatamap = create_featuredata_map(pqdb,
+                                                add_record_to_peptidedata,
                                                 get_uniques=False)
     if nopsms:
         count_psms(peptidedatamap)
@@ -91,10 +92,15 @@ def get_protein_data(peptide, pdata, headerfields):
     is ignored"""
     seq = peptide[peptabledata.HEADER_PEPTIDE]
     outdict = {}
-    for idx, key in enumerate([peptabledata.HEADER_PROTEINS,
-                               peptabledata.HEADER_DESCRIPTIONS,
-                               peptabledata.HEADER_COVERAGES]):
-        outdict[key] = ';'.join([str(x[idx]) for x in pdata[seq]['proteins']])
+    outdict = {peptabledata.HEADER_PROTEINS:
+               ';'.join([str(x[0]) for x in pdata[seq]['proteins']])}
+    for idx, key in zip([1, 2], [peptabledata.HEADER_DESCRIPTIONS,
+                                 peptabledata.HEADER_COVERAGES]):
+        try:
+            outdict[key] = ';'.join([str(x[idx])
+                                     for x in pdata[seq]['proteins']])
+        except IndexError:
+            pass
     return outdict
 
 
@@ -105,7 +111,8 @@ def count_psms(pdata):
 
 
 def add_record_to_peptidedata(peptidedata, p_acc, pool, psmdata):
-    seq, psm_id, desc, cov = psmdata[2], psmdata[3], psmdata[4], psmdata[5]
+    seq, psm_id = psmdata[2], psmdata[3]
+    desc, cov = psmdata[4], psmdata[5]
     try:
         peptidedata[seq]['psms'][pool].add(psm_id)
     except KeyError:
@@ -115,4 +122,8 @@ def add_record_to_peptidedata(peptidedata, p_acc, pool, psmdata):
             peptidedata[seq] = {'psms': {pool: set()},
                                 'proteins': set()}
         peptidedata[seq]['psms'][pool].add(psm_id)
-    peptidedata[seq]['proteins'].add((p_acc, desc, cov))
+    if cov is not None:
+        protein = (p_acc, desc, cov)
+    else:
+        protein = (p_acc,)
+    peptidedata[seq]['proteins'].add(protein)
