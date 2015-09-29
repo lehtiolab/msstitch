@@ -25,7 +25,7 @@ def create_protein_pep_lookup(fn, header, pgdb, confkey, conflvl,
     for psm in tsvreader.generate_tsv_lines_multifile(fn, header):
         if not conffilt.passes_filter(psm, conflvl, confkey, lower_is_better):
             continue
-        psm_id, prots = tsvreader.get_pepproteins(psm)
+        psm_id, prots = tsvreader.get_pepproteins(psm, proteinfield)
         try:
             allpsms[psm_id].extend(prots)
         except KeyError:

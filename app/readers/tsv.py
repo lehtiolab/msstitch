@@ -111,7 +111,7 @@ def get_psm_sequence(line, unroll=False):
     return peptideseq
 
 
-def get_pepproteins(line):
+def get_pepproteins(line, proteinfield):
     """Returns from a PSM line peptide sequence,
     and other information about the PSM.
     Return values:
@@ -119,7 +119,7 @@ def get_pepproteins(line):
         proteins        -   list of str
     """
     psm_id = get_psm_id(line)
-    proteins = get_proteins_from_psm(line)
+    proteins = get_proteins_from_psm(line, proteinfield)
     return psm_id, proteins
 
 

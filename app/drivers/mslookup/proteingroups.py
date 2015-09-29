@@ -16,5 +16,5 @@ class ProteinGroupLookupDriver(base.LookupDriver):
                                                     self.conflvl,
                                                     self.lowerbetter,
                                                     self.fasta,
-                                                    self.proteinfield)
+                                                    self.proteincol)
         lookups.build_proteingroup_db(self.lookup, allpsms, self.coverage)
