@@ -12,7 +12,7 @@ from app.actions.mzidtsv import proteingroup_sorters as sorters
 
 def create_protein_pep_lookup(fn, header, pgdb, confkey, conflvl,
                               lower_is_better, fastafn=False,
-                              proteinfield=False, coverage=True):
+                              proteinfield=False):
     """Reads PSMs from file, extracts their proteins and peptides and passes
     them to a database backend in chunks.
     """
@@ -178,7 +178,7 @@ def filter_proteins_with_missing_psms(proteins, pg_psms):
     for protein, protein_psms in proteins.items():
         filter_out = False
         for psm_id in [psm[0] for peptide in protein_psms.values()
-                              for psm in peptide]:
+                       for psm in peptide]:
             if psm_id not in pg_psms:
                 filter_out = True
                 break
@@ -251,7 +251,8 @@ def generate_coverage(seqinfo):
             try:
                 start = seq.index(psmseq)
             except:
-                print('CANNOT FIND PSM seq {0} in seq {1} for acc {2}'.format(psmseq, seq, acc))
+                print('CANNOT FIND PSM seq {0} in seq {1} '
+                      'for acc {2}'.format(psmseq, seq, acc))
             coverage_aa_indices.update(range(start, start + len(psmseq)))
         yield (acc, len(coverage_aa_indices) / len(seq))
 
@@ -268,11 +269,12 @@ def get_protein_group_content(pgmap, master):
     # correct number. Would be nice with a solution, but the INDEXes were
     # originally made for mzidtsv protein group adding.
     pg_content = [[0, master, protein, len(peptides), len([psm for pgpsms in
-                                                        peptides.values()
-                                                        for psm in pgpsms]),
-                   sum([psm[1] for pgpsms in peptides.values() for psm in pgpsms]), # score
-                   next(iter(next(iter(peptides.values()))))[2], # evidence level
-                   next(iter(next(iter(peptides.values()))))[3] # coverage
+                                                           peptides.values()
+                                                           for psm in pgpsms]),
+                   sum([psm[1] for pgpsms in peptides.values()
+                        for psm in pgpsms]),  # score
+                   next(iter(next(iter(peptides.values()))))[2],  # evid level
+                   next(iter(next(iter(peptides.values()))))[3]  # coverage
                    ]
                   for protein, peptides in pgmap.items()]
     return pg_content
