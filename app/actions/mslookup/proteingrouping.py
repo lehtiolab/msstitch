@@ -16,7 +16,7 @@ def create_protein_pep_lookup(fn, header, pgdb, confkey, conflvl,
     """Reads PSMs from file, extracts their proteins and peptides and passes
     them to a database backend in chunks.
     """
-    store_proteins_descriptions(fastafn, tsvfn, header)
+    store_proteins_descriptions(pgdb, fastafn, fn, header, proteinfield)
     # TODO do we need an OrderedDict or is regular dict enough?
     # Sorting for psm_id useful?
     allpsms = OrderedDict()
@@ -76,7 +76,7 @@ def build_content_db(pgdb, coverage):
     all_master_psms = pgdb.get_all_master_psms()
     lastpsmmaster, masterpsm = next(all_master_psms)
     master_psms = {masterpsm}
-    (lastcontentmaster, contentpsm, protein, 
+    (lastcontentmaster, contentpsm, protein,
      pepseq, score, evid, cover) = next(all_master_psm_proteins)
     content = add_protein_psm_to_pre_proteingroup(dict(), protein, pepseq,
                                                   contentpsm, score, evid,
@@ -109,8 +109,8 @@ def build_content_db(pgdb, coverage):
     pgdb.index_protein_group_content()
 
 
-
-def store_proteins_descriptions(fastafn, tsvfn, header, proteinfield=False):
+def store_proteins_descriptions(pgdb, fastafn, tsvfn, header,
+                                proteinfield=False):
     if fastafn:
         proteins, sequences, evidences = fastareader.get_proteins_for_db(
             fastafn)
@@ -119,16 +119,17 @@ def store_proteins_descriptions(fastafn, tsvfn, header, proteinfield=False):
         pgdb.store_descriptions(protein_descriptions)
     else:
         proteins = {}
-        for psm in tsvreader.generate_tsv_lines_multifile(fn, header):
-            proteins.update({x: 1 for x in 
-                             tsvreader.get_proteins_from_psm(psm, proteinfield)})
-        pgdb.store_proteins(((protein,) for protein in proteins.keys())
+        for psm in tsvreader.generate_tsv_lines_multifile(tsvfn, header):
+            proteins.update({x: 1 for x in
+                             tsvreader.get_proteins_from_psm(psm,
+                                                             proteinfield)})
+        pgdb.store_proteins(((protein,) for protein in proteins.keys()))
 
 
 def fetch_pg_content(all_master_psm_proteins, lastcontentmaster, psmmaster,
                      content, master_psms):
     filtered = False
-    for (contentmaster, contentpsm, protein, pepseq, 
+    for (contentmaster, contentpsm, protein, pepseq,
          score, evid, cover) in all_master_psm_proteins:
         # Inner loop gets protein group content from DB join table
         if contentmaster != lastcontentmaster:
@@ -264,14 +265,14 @@ def get_protein_group_content(pgmap, master):
     which is ready to enter the DB table.
     """
     # first item (0) is only a placeholder so the lookup.INDEX things get the
-    # correct number. Would be nice with a solution, but the INDEXes were 
+    # correct number. Would be nice with a solution, but the INDEXes were
     # originally made for mzidtsv protein group adding.
     pg_content = [[0, master, protein, len(peptides), len([psm for pgpsms in
                                                         peptides.values()
                                                         for psm in pgpsms]),
                    sum([psm[1] for pgpsms in peptides.values() for psm in pgpsms]), # score
                    next(iter(next(iter(peptides.values()))))[2], # evidence level
-                   next(iter(next(iter(peptides.values()))))[3] # coverage 
+                   next(iter(next(iter(peptides.values()))))[3] # coverage
                    ]
                   for protein, peptides in pgmap.items()]
     return pg_content

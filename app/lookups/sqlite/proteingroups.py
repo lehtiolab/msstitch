@@ -1,7 +1,7 @@
 from app.lookups.sqlite.base import ResultLookupInterface
 
 
-# Indices that belong to positions of these features in output from 
+# Indices that belong to positions of these features in output from
 # function get_all_psms_proteingroups:
 MASTER_INDEX = 1
 PROTEIN_ACC_INDEX = 2
@@ -157,8 +157,8 @@ class ProteinGroupDB(ResultLookupInterface):
                'JOIN protein_psm AS pp USING(psm_id) '
                'JOIN psms AS p USING(psm_id) '
                'JOIN peptide_sequences AS peps USING(pep_id) '
-               'JOIN protein_evidence AS pev USING(protein_acc) '
-               'JOIN protein_coverage AS pc USING(protein_acc) '
+               'LEFT OUTER JOIN protein_evidence AS pev USING(protein_acc) '
+               'LEFT OUTER JOIN protein_coverage AS pc USING(protein_acc) '
                'ORDER BY ppg.master_id'
                )
         cursor = self.get_cursor()
@@ -180,7 +180,7 @@ class ProteinGroupDB(ResultLookupInterface):
         joins = [('psm_protein_groups', 'ppg', 'psm_id'),
                  ('protein_group_master', 'pgm', 'master_id'),
                  ('protein_group_content', 'pgc', 'master_id'),
-                ]
+                 ]
         specialjoin = [('protein_evidence', 'pev')]
         if coverage:
             fields.append('pc.coverage')
@@ -189,7 +189,9 @@ class ProteinGroupDB(ResultLookupInterface):
             j[0], j[1], j[2]) for j in joins])
         sql = 'SELECT {0} FROM psmrows AS pr {1}\n{2}\n{2}'.format(
             ', '.join(fields), join_sql, '{}')
-        specialjoin = '\n'.join(['JOIN {0} AS {1} ON pgc.protein_acc={1}.protein_acc'.format(j[0], j[1]) for j in specialjoin])
+        specialjoin = '\n'.join(['JOIN {0} AS {1} ON '
+                                 'pgc.protein_acc={1}.protein_acc'.format(
+                                     j[0], j[1]) for j in specialjoin])
         sql = sql.format(specialjoin, 'ORDER BY pr.rownr')
         cursor = self.get_cursor()
         return cursor.execute(sql)
