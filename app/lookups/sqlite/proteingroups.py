@@ -173,6 +173,17 @@ class ProteinGroupDB(ResultLookupInterface):
         return ((master, psm)
                 for master, psm in cursor.execute(sql).fetchall())
 
+    def check_coverage_evidence_tables(self):
+        checks = {'coverage': False,
+                  'evidence': False}
+        for checktype in checks.keys():
+            cursor = self.get_cursor()
+            cursor.execute('SELECT * FROM protein_{} '
+                           'LIMIT 10'.format(checktype))
+            if len(cursor.fetchall()) > 0:
+                checks[checktype] = True
+        return False in checks.values()
+
     def get_all_psms_proteingroups(self, coverage):
         fields = ['pr.rownr', 'pgm.protein_acc', 'pgc.protein_acc',
                   'pgc.peptide_count', 'pgc.psm_count', 'pgc.protein_score',
