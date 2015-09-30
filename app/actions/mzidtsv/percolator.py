@@ -3,35 +3,6 @@ from app.readers import tsv as tsvreader
 from app.dataformats import mzidtsv as mzidtsvdata
 
 
-def get_percoline(specresult, namespace, line, multipsm, seqdb):
-    """Extracts percolator data from specresult and returns a dict"""
-    out = line
-    out.update({'rank': None})
-    try:
-        xmlns = '{%s}' % namespace['xmlns']
-    except TypeError:
-        xmlns = ''
-    if multipsm is True:
-        pass  # FIXME support later
-        # loop through psms in specresult
-        # check line sequence (without mods) in seqdb with psm
-        # get percodata,
-        # percoline = [line-with-correct-rank]
-    else:  # only the first element
-        perco = readers.get_specidentitem_percolator_data(
-            specresult.find('{0}SpectrumIdentificationItem'.format(xmlns)),
-            namespace)
-    out.update(perco)
-    return out
-
-
-def get_specresult_data(specresults, id_fnlookup):
-    specresult = next(specresults)
-    scannr = readers.get_specresult_scan_nr(specresult)
-    mzmlid = readers.get_specresult_mzml_id(specresult)
-    return specresult, {'scan': scannr, 'fn': id_fnlookup[mzmlid]}
-
-
 def add_percolator_to_mzidtsv(mzidfn, tsvfn, multipsm,
                               oldheader, seqdb=None):
     """Takes a MSGF+ tsv and corresponding mzId, adds percolatordata
@@ -39,32 +10,25 @@ def add_percolator_to_mzidtsv(mzidfn, tsvfn, multipsm,
     can be delivered, in which case rank is also reported.
     """
     namespace = readers.get_mzid_namespace(mzidfn)
+    try:
+        xmlns = '{%s}' % namespace['xmlns']
+    except TypeError:
+        xmlns = ''
     specfnids = readers.get_mzid_specfile_ids(mzidfn, namespace)
-    specresults = readers.mzid_spec_result_generator(mzidfn, namespace)
-    # multiple lines can belong to one specresult, so we use a nested
-    # for/while-true-break construction.
-    # FIXME we assume best ranking is first line. Fix this in
-    # FIXME get header names instead of positions!
-    # FIXME we should count amounts of specresult/line and throw error if
-    #  not match. Also error at not found lines.
-    specresult, specdata = get_specresult_data(specresults, specfnids)
-    writelines = []
+    mzidpepmap = {pep_id: seq for pep_id, seq
+                  in readers.generate_mzid_peptides(mzidfn, namespace)}
+    mzidpercomap = {}
+    for specid_data in readers.generate_mzid_spec_id_items(mzidfn, namespace,
+                                                           xmlns, specfnids):
+        scan, fn, pepid, spec_id = specid_data
+        percodata = readers.get_specidentitem_percolator_data(spec_id, xmlns)
+        mzidpercomap[fn][scan][mzidpepmap[pepid]] = percodata
     for line in tsvreader.generate_tsv_psms(tsvfn, oldheader):
-        while True:
-            if line[mzidtsvdata.HEADER_SCANNR] == specdata['scan'] and \
-               line[mzidtsvdata.HEADER_SPECFILE] == specdata['fn']:
-                outline = get_percoline(specresult, namespace, line,
-                                        multipsm, seqdb)
-                writelines.append(outline)
-                break
-            else:
-                specresult, specdata = get_specresult_data(specresults,
-                                                           specfnids)
-        for outline in writelines:
-            yield outline
-        writelines = []
-    # write last lines
-    for outline in writelines:
+        outline = {k: v for k, v in line.items()}
+        fn = line[mzidtsvdata.HEADER_SPECFILE]
+        scan = line[mzidtsvdata.HEADER_SCANNR]
+        seq = line[mzidtsvdata.HEADER_PEPTIDE]
+        outline.update(mzidpercomap[fn][scan][seq])
         yield outline
 
 

@@ -31,6 +31,44 @@ def mzid_spec_result_generator(mzidfile, namespace):
         namespace)
 
 
+def generate_mzid_peptides(mzidfile, namespace):
+    return basereader.generate_tags_multiple_files(
+        [mzidfile],
+        'Peptide',
+        ['cvList',
+         'AnalysisSoftwareList',
+         'DataCollection',
+         'AnalysisProtocolCollection',
+         'AnalysisCollection',
+         ],
+        namespace)
+
+
+def get_mzid_peptidedata(peptide, xmlns):
+    pep_id = peptide.attrib['id']
+    sequence = peptide.find('{}PeptideSequence'.format(xmlns)).text
+    mods = {}
+    for mod in peptide.findall('{}Modification'.format(xmlns)):
+        mods[int(mod.attrib['location'])] = mod.attrib['monoisotopicMassDelta']
+    outseq = []
+    for pos, aa in enumerate(sequence):
+        if pos in mods:
+            outseq.append(mods[pos])
+        outseq.append(aa)
+    return pep_id, outseq
+
+
+def generate_mzid_spec_id_items(mzidfile, namespace, xmlns, specfn_idmap):
+    specid_tag = '{0}SpectrumIdentificationItem'.format(xmlns)
+    for specresult in mzid_spec_result_generator(mzidfile, namespace):
+        scan = get_specresult_scan_nr(specresult)
+        mzmlid = get_specresult_mzml_id(specresult)
+        mzmlfn = specfn_idmap[mzmlid]
+        for spec_id_item in specresult.findall(specid_tag):
+            pep_id = spec_id_item.attrib['peptide_ref']
+            yield (scan, mzmlfn, pep_id, spec_id_item)
+
+
 def mzid_specdata_generator(mzidfile, namespace):
     return basereader.generate_tags_multiple_files(
         [mzidfile],
@@ -64,11 +102,10 @@ def get_specresult_mzml_id(specresult):
     return specresult.attrib['spectraData_ref']
 
 
-def get_specidentitem_percolator_data(item, namespace):
+def get_specidentitem_percolator_data(item, xmlns):
     """Loop through SpecIdentificationItem children. Find
     percolator data by matching to a dict lookup. Return a
     dict containing percolator data"""
-    xmlns = '{%s}' % namespace['xmlns']
     percomap = {'{0}userParam'.format(xmlns): PERCO_HEADERMAP, }
     percodata = {}
     for child in item:
