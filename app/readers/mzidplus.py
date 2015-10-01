@@ -53,9 +53,11 @@ def get_mzid_peptidedata(peptide, xmlns):
     outseq = []
     for pos, aa in enumerate(sequence):
         if pos in mods:
-            outseq.append(mods[pos])
+            outseq.append('+{}'.format(round(float(mods[pos]), 3)))
         outseq.append(aa)
-    return pep_id, outseq
+    if pos + 1 in mods:
+            outseq.append('+{}'.format(round(float(mods[pos + 1]), 3)))
+    return pep_id, ''.join(outseq)
 
 
 def generate_mzid_spec_id_items(mzidfile, namespace, xmlns, specfn_idmap):

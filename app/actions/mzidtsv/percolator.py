@@ -15,14 +15,22 @@ def add_percolator_to_mzidtsv(mzidfn, tsvfn, multipsm,
     except TypeError:
         xmlns = ''
     specfnids = readers.get_mzid_specfile_ids(mzidfn, namespace)
-    mzidpepmap = {pep_id: seq for pep_id, seq
-                  in readers.generate_mzid_peptides(mzidfn, namespace)}
+    mzidpepmap = {}
+    for peptide in readers.generate_mzid_peptides(mzidfn, namespace):
+        pep_id, seq = readers.get_mzid_peptidedata(peptide, xmlns)
+        mzidpepmap[pep_id] = seq 
     mzidpercomap = {}
     for specid_data in readers.generate_mzid_spec_id_items(mzidfn, namespace,
                                                            xmlns, specfnids):
         scan, fn, pepid, spec_id = specid_data
         percodata = readers.get_specidentitem_percolator_data(spec_id, xmlns)
-        mzidpercomap[fn][scan][mzidpepmap[pepid]] = percodata
+        try:
+            mzidpercomap[fn][scan][mzidpepmap[pepid]] = percodata
+        except KeyError:
+            try:
+                mzidpercomap[fn][scan] = {mzidpepmap[pepid]: percodata}
+            except KeyError:
+                mzidpercomap[fn] = {scan: {mzidpepmap[pepid]: percodata}}
     for line in tsvreader.generate_tsv_psms(tsvfn, oldheader):
         outline = {k: v for k, v in line.items()}
         fn = line[mzidtsvdata.HEADER_SPECFILE]
