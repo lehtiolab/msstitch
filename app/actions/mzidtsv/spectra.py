@@ -8,25 +8,16 @@ def create_header(oldheader, spectracol):
     return header
 
 
-def generate_psms_spectradata(lookup, tsvfn, oldheader,	spec_column):
-    if spec_column is not None:
-        speccol_head = oldheader[spec_column - 1]
-    else:
-        speccol_head = mzidtsvdata.HEADER_SPECFILE
-    mzmlmap = lookup.get_mzmlfile_map()
-    for psm in readers.generate_tsv_psms(tsvfn, oldheader):
+def generate_psms_spectradata(lookup, tsvfn, oldheader):
+    psm_specdata = zip(enumerate(readers.generate_tsv_psms(tsvfn, oldheader)),
+                       lookup.get_exp_spectra_data_rows())
+    for (row, psm), specdata in psm_specdata:
         outpsm = {x: y for x, y in psm.items()}
-        specfile = outpsm[speccol_head]
-        scannr = outpsm[mzidtsvdata.HEADER_SCANNR]
-        outpsm.update(lookup_spectra(lookup, mzmlmap[specfile], scannr))
+        if row == int(specdata[0]):
+            outpsm.update({mzidtsvdata.HEADER_SETNAME: specdata[1],
+                           mzidtsvdata.HEADER_RETENTION_TIME: str(specdata[2]),
+                           })
+        else:
+            raise RuntimeError('PSM with row nr {} has no rownr in DB. '
+                               'Current DB row is {}'.format(row, specdata[0]))
         yield outpsm
-
-
-def lookup_spectra(lookup, spectrafile_id, scannr):
-    """Outputs dict with keys == spectradataheadernames,
-    values == spectra data."""
-    for specdata in lookup.get_spectradata(scannr):
-        if specdata[0] == spectrafile_id:
-            break
-    return {mzidtsvdata.HEADER_SETNAME: specdata[1],
-            mzidtsvdata.HEADER_RETENTION_TIME: str(specdata[2])}

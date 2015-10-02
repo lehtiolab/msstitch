@@ -1,9 +1,9 @@
 from app.dataformats import mzidtsv as psmtsvdata
 
 
-def add_peptide(allpeps, psm, key, scorecol=False, fncol=None, new=False,
+def add_peptide(allpeps, psm, key, score, fncol=None, new=False,
                 track_psms=True):
-    peptide = {'score': float(psm[scorecol]),
+    peptide = {'score': score,
                'line': psm,
                'psms': []
                }
@@ -18,14 +18,19 @@ def add_peptide(allpeps, psm, key, scorecol=False, fncol=None, new=False,
 def evaluate_peptide(peptides, psm, key, higherbetter, scorecol, fncol=None,
                      track_psms=True):
     try:
+        score = float(psm[scorecol])
+    except ValueError:
+        # If score is NA or similar, dont use this PSM 
+        return peptides
+    try:
         existing_score = peptides[key]['score']
     except KeyError:
-        add_peptide(peptides, psm, key, scorecol, fncol, True, track_psms)
+        add_peptide(peptides, psm, key, score, fncol, True, track_psms)
     else:
-        if higherbetter and float(psm[scorecol]) > existing_score:
-            add_peptide(peptides, psm, key, scorecol, fncol,
+        if higherbetter and score > existing_score:
+            add_peptide(peptides, psm, key, score, fncol,
                         track_psms=track_psms)
-        elif not higherbetter and float(psm[scorecol]) < existing_score:
-            add_peptide(peptides, psm, key, scorecol, fncol,
+        elif not higherbetter and score < existing_score:
+            add_peptide(peptides, psm, key, score, fncol,
                         track_psms=track_psms)
     return peptides

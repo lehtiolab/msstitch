@@ -8,7 +8,8 @@ class SpectraDB(BioSetDB):
 
     def store_mzmls(self, spectra):
         self.store_many(
-            'INSERT INTO mzml(mzmlfile_id, scan_nr, charge, mz, retention_time) '
+            'INSERT INTO mzml(mzmlfile_id, scan_nr, charge, mz, '
+            'retention_time) '
             'VALUES (?, ?, ?, ?, ?)', spectra)
 
     def index_mzml(self):
@@ -18,13 +19,12 @@ class SpectraDB(BioSetDB):
         self.index_column('specrt_index', 'mzml', 'retention_time')
         self.index_column('specmz_index', 'mzml', 'mz')
 
-    def get_spectradata(self, scannr):
+    def get_exp_spectra_data_rows(self):
         cursor = self.get_cursor()
-        cursor.execute(
-            'SELECT sp.mzmlfile_id, bs.set_name, sp.retention_time '
-            'FROM mzml AS sp '
-            'JOIN mzmlfiles AS mf USING(mzmlfile_id) '
-            'JOIN biosets AS bs USING(set_id) '
-            'WHERE sp.scan_nr=?'
-            , (scannr,))
-        return cursor
+        return cursor.execute('SELECT pr.rownr, bs.set_name, sp.retention_time'
+                              ' FROM psmrows AS pr '
+                              'JOIN psms AS p USING(psm_id) '
+                              'JOIN mzml AS sp USING(spectra_id) '
+                              'JOIN mzmlfiles as mf USING(mzmlfile_id) '
+                              'JOIN biosets AS bs USING(set_id) '
+                              'ORDER BY pr.rownr')

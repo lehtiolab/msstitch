@@ -11,4 +11,4 @@ class TSVSpectraDriver(MzidTSVDriver):
         lines plus quant data for these."""
         self.header = actions.create_header(self.oldheader, self.spec_column)
         self.psms = actions.generate_psms_spectradata(self.lookup, self.fn,
-                                               self.oldheader, self.spec_column)
+                                                      self.oldheader)

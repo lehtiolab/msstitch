@@ -11,15 +11,12 @@ from app.actions.mzidtsv import proteingroup_sorters as sorters
 
 
 def create_protein_pep_lookup(fn, header, pgdb, confkey, conflvl,
-                              lower_is_better, fastafn=None):
+                              lower_is_better, fastafn=False,
+                              proteinfield=False):
     """Reads PSMs from file, extracts their proteins and peptides and passes
     them to a database backend in chunks.
     """
-    proteins, sequences, evidences = fastareader.get_proteins_for_db(
-        fastafn)
-    pgdb.store_proteins(proteins, evidences, sequences)
-    protein_descriptions = fastareader.get_proteins_descriptions(fastafn)
-    pgdb.store_descriptions(protein_descriptions)
+    store_proteins_descriptions(pgdb, fastafn, fn, header, proteinfield)
     # TODO do we need an OrderedDict or is regular dict enough?
     # Sorting for psm_id useful?
     allpsms = OrderedDict()
@@ -28,7 +25,7 @@ def create_protein_pep_lookup(fn, header, pgdb, confkey, conflvl,
     for psm in tsvreader.generate_tsv_lines_multifile(fn, header):
         if not conffilt.passes_filter(psm, conflvl, confkey, lower_is_better):
             continue
-        psm_id, prots = tsvreader.get_pepproteins(psm)
+        psm_id, prots = tsvreader.get_pepproteins(psm, proteinfield)
         try:
             allpsms[psm_id].extend(prots)
         except KeyError:
@@ -42,7 +39,7 @@ def create_protein_pep_lookup(fn, header, pgdb, confkey, conflvl,
         psmids_to_store.add(psm_id)
         last_id = psm_id
     pgdb.store_peptides_proteins(allpsms, psmids_to_store)
-    pgdb.index_protein_peptides()
+    pgdb.index_protein_peptides(fastafn is not False)
     return allpsms
 
 
@@ -79,7 +76,7 @@ def build_content_db(pgdb, coverage):
     all_master_psms = pgdb.get_all_master_psms()
     lastpsmmaster, masterpsm = next(all_master_psms)
     master_psms = {masterpsm}
-    (lastcontentmaster, contentpsm, protein, 
+    (lastcontentmaster, contentpsm, protein,
      pepseq, score, evid, cover) = next(all_master_psm_proteins)
     content = add_protein_psm_to_pre_proteingroup(dict(), protein, pepseq,
                                                   contentpsm, score, evid,
@@ -112,10 +109,27 @@ def build_content_db(pgdb, coverage):
     pgdb.index_protein_group_content()
 
 
+def store_proteins_descriptions(pgdb, fastafn, tsvfn, header,
+                                proteinfield=False):
+    if fastafn:
+        proteins, sequences, evidences = fastareader.get_proteins_for_db(
+            fastafn)
+        pgdb.store_proteins(proteins, evidences, sequences)
+        protein_descriptions = fastareader.get_proteins_descriptions(fastafn)
+        pgdb.store_descriptions(protein_descriptions)
+    else:
+        proteins = {}
+        for psm in tsvreader.generate_tsv_lines_multifile(tsvfn, header):
+            proteins.update({x: 1 for x in
+                             tsvreader.get_proteins_from_psm(psm,
+                                                             proteinfield)})
+        pgdb.store_proteins(((protein,) for protein in proteins.keys()))
+
+
 def fetch_pg_content(all_master_psm_proteins, lastcontentmaster, psmmaster,
                      content, master_psms):
     filtered = False
-    for (contentmaster, contentpsm, protein, pepseq, 
+    for (contentmaster, contentpsm, protein, pepseq,
          score, evid, cover) in all_master_psm_proteins:
         # Inner loop gets protein group content from DB join table
         if contentmaster != lastcontentmaster:
@@ -164,7 +178,7 @@ def filter_proteins_with_missing_psms(proteins, pg_psms):
     for protein, protein_psms in proteins.items():
         filter_out = False
         for psm_id in [psm[0] for peptide in protein_psms.values()
-                              for psm in peptide]:
+                       for psm in peptide]:
             if psm_id not in pg_psms:
                 filter_out = True
                 break
@@ -237,7 +251,8 @@ def generate_coverage(seqinfo):
             try:
                 start = seq.index(psmseq)
             except:
-                print('CANNOT FIND PSM seq {0} in seq {1} for acc {2}'.format(psmseq, seq, acc))
+                print('CANNOT FIND PSM seq {0} in seq {1} '
+                      'for acc {2}'.format(psmseq, seq, acc))
             coverage_aa_indices.update(range(start, start + len(psmseq)))
         yield (acc, len(coverage_aa_indices) / len(seq))
 
@@ -251,14 +266,15 @@ def get_protein_group_content(pgmap, master):
     which is ready to enter the DB table.
     """
     # first item (0) is only a placeholder so the lookup.INDEX things get the
-    # correct number. Would be nice with a solution, but the INDEXes were 
+    # correct number. Would be nice with a solution, but the INDEXes were
     # originally made for mzidtsv protein group adding.
     pg_content = [[0, master, protein, len(peptides), len([psm for pgpsms in
-                                                        peptides.values()
-                                                        for psm in pgpsms]),
-                   sum([psm[1] for pgpsms in peptides.values() for psm in pgpsms]), # score
-                   next(iter(next(iter(peptides.values()))))[2], # evidence level
-                   next(iter(next(iter(peptides.values()))))[3] # coverage 
+                                                           peptides.values()
+                                                           for psm in pgpsms]),
+                   sum([psm[1] for pgpsms in peptides.values()
+                        for psm in pgpsms]),  # score
+                   next(iter(next(iter(peptides.values()))))[2],  # evid level
+                   next(iter(next(iter(peptides.values()))))[3]  # coverage
                    ]
                   for protein, peptides in pgmap.items()]
     return pg_content

@@ -20,6 +20,12 @@ def get_proteins_descriptions(fastafn):
         yield (record.id, record.description)
 
 
+def get_proteins_genes(fastafn):
+    for record in parse_fasta(fastafn):
+        rectype = get_record_type(record)
+        yield (record.id, get_gene(record.description, rectype))
+
+
 def parse_protein_identifier(record):
     return record.id
 
@@ -28,6 +34,22 @@ def parse_fasta(fn):
     with open(fn) as fp:
         for record in SeqIO.parse(fp, 'fasta'):
             yield record
+
+
+def get_record_type(record):
+    if record.id.split('|')[0] == 'sp':
+        return 'swiss'
+    elif record.id[:4] == 'ENSP':
+        return 'ensembl'
+
+
+def get_gene(description, rectype):
+    splitter = {'ensembl': ':',
+                'swiss': '='}[rectype]
+    field = {'ensembl': 'gene',
+             'swiss': 'GN'}[rectype]
+    splitdesc = [x.split(splitter) for x in description.split()]
+    return [x[1] for x in splitdesc if x[0] == field][0]
 
 
 def has_evidence_levels(fastafn):

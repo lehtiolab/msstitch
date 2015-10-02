@@ -1,7 +1,7 @@
 from app.lookups.sqlite.base import ResultLookupInterface
 
 
-# Indices that belong to positions of these features in output from 
+# Indices that belong to positions of these features in output from
 # function get_all_psms_proteingroups:
 MASTER_INDEX = 1
 PROTEIN_ACC_INDEX = 2
@@ -20,16 +20,17 @@ class ProteinGroupDB(ResultLookupInterface):
                             'protein_group_content', 'psm_protein_groups',
                             'prot_desc'])
 
-    def store_proteins(self, proteins, evidence_lvls, sequences=False):
+    def store_proteins(self, proteins, evidence_lvls=False, sequences=False):
         cursor = self.get_cursor()
         cursor.executemany(
             'INSERT INTO proteins(protein_acc) '
             'VALUES(?)', proteins)
         self.conn.commit()
         cursor = self.get_cursor()
-        cursor.executemany(
-            'INSERT INTO protein_evidence(protein_acc, evidence_lvl) '
-            'VALUES(?, ?)', evidence_lvls)
+        if evidence_lvls:
+            cursor.executemany(
+                'INSERT INTO protein_evidence(protein_acc, evidence_lvl) '
+                'VALUES(?, ?)', evidence_lvls)
         if sequences:
             cursor.executemany(
                 'INSERT INTO protein_seq(protein_acc, sequence) '
@@ -55,10 +56,11 @@ class ProteinGroupDB(ResultLookupInterface):
             ' VALUES (?, ?)', prot_psm_ids)
         self.conn.commit()
 
-    def index_protein_peptides(self):
+    def index_protein_peptides(self, descriptions):
         self.index_column('protein_index', 'protein_psm', 'protein_acc')
         self.index_column('protpsmid_index', 'protein_psm', 'psm_id')
-        self.index_column('protdesc_index', 'prot_desc', 'protein_acc')
+        if descriptions:
+            self.index_column('protdesc_index', 'prot_desc', 'protein_acc')
 
     def store_masters(self, allmasters, psm_masters):
         allmasters = ((x,) for x in allmasters)
@@ -155,8 +157,8 @@ class ProteinGroupDB(ResultLookupInterface):
                'JOIN protein_psm AS pp USING(psm_id) '
                'JOIN psms AS p USING(psm_id) '
                'JOIN peptide_sequences AS peps USING(pep_id) '
-               'JOIN protein_evidence AS pev USING(protein_acc) '
-               'JOIN protein_coverage AS pc USING(protein_acc) '
+               'LEFT OUTER JOIN protein_evidence AS pev USING(protein_acc) '
+               'LEFT OUTER JOIN protein_coverage AS pc USING(protein_acc) '
                'ORDER BY ppg.master_id'
                )
         cursor = self.get_cursor()
@@ -171,23 +173,35 @@ class ProteinGroupDB(ResultLookupInterface):
         return ((master, psm)
                 for master, psm in cursor.execute(sql).fetchall())
 
-    def get_all_psms_proteingroups(self, coverage):
+    def check_coverage_evidence_tables(self):
+        checks = {'coverage': False,
+                  'evidence': False}
+        for checktype in checks.keys():
+            cursor = self.get_cursor()
+            cursor.execute('SELECT * FROM protein_{} '
+                           'LIMIT 10'.format(checktype))
+            if len(cursor.fetchall()) > 0:
+                checks[checktype] = True
+        return False not in checks.values()
+
+    def get_all_psms_proteingroups(self, coverage_evidence):
         fields = ['pr.rownr', 'pgm.protein_acc', 'pgc.protein_acc',
-                  'pgc.peptide_count', 'pgc.psm_count', 'pgc.protein_score',
-                  'pev.evidence_lvl']
+                  'pgc.peptide_count', 'pgc.psm_count', 'pgc.protein_score']
         joins = [('psm_protein_groups', 'ppg', 'psm_id'),
                  ('protein_group_master', 'pgm', 'master_id'),
                  ('protein_group_content', 'pgc', 'master_id'),
-                ]
-        specialjoin = [('protein_evidence', 'pev')]
-        if coverage:
-            fields.append('pc.coverage')
-            specialjoin.append(('protein_coverage', 'pc'))
+                 ]
         join_sql = '\n'.join(['JOIN {0} AS {1} USING({2})'.format(
             j[0], j[1], j[2]) for j in joins])
-        sql = 'SELECT {0} FROM psmrows AS pr {1}\n{2}\n{2}'.format(
-            ', '.join(fields), join_sql, '{}')
-        specialjoin = '\n'.join(['JOIN {0} AS {1} ON pgc.protein_acc={1}.protein_acc'.format(j[0], j[1]) for j in specialjoin])
-        sql = sql.format(specialjoin, 'ORDER BY pr.rownr')
+        if coverage_evidence:
+            specialjoin = [('protein_evidence', 'pev'),
+                           ('protein_coverage', 'pc')]
+            fields.extend(['pc.coverage', 'pev.evidence_lvl'])
+            specialjoin = '\n'.join(['JOIN {0} AS {1} ON '
+                                     'pgc.protein_acc={1}.protein_acc'.format(
+                                         j[0], j[1]) for j in specialjoin])
+            join_sql = '{} {}'.format(join_sql, specialjoin)
+        sql = 'SELECT {0} FROM psmrows AS pr {1} ORDER BY pr.rownr'.format(
+            ', '.join(fields), join_sql)
         cursor = self.get_cursor()
         return cursor.execute(sql)

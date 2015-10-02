@@ -1,6 +1,5 @@
 from app.actions.mzidtsv import proteingrouping as prep
 from app.drivers.mzidtsv import MzidTSVDriver
-from app.readers import fasta
 
 
 class ProteinGroupDriver(MzidTSVDriver):
@@ -17,5 +16,4 @@ class ProteinGroupDriver(MzidTSVDriver):
                                                           confkey,
                                                           self.conflvl,
                                                           self.lowerbetter,
-                                                          self.unroll,
-                                                          self.coverage)
+                                                          self.unroll)

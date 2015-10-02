@@ -76,9 +76,10 @@ parser.add_argument('-c', dest='command', type=str,
 parser.add_argument('-i', dest='infile', nargs='+',
                     help='The input files to create the lookup from. Can be\n'
                     'type mzML, consensusXML, featureXML, percolatoroutXML,\n'
-                    'tab separated PSM table or protein table. If order is\n'
-                    'important then it is taken from the input order at the\n'
-                    'command line.',
+                    'tab separated PSM table, protein table or FASTA file.\n'
+                    'If order is important then it is taken from the input\n'
+                    'order at the command line. FASTA input for seqspace \n'
+                    'is a single file.',
                     type=lambda x: parser_file_exists(parser, x),
                     required=True)
 parser.add_argument('-d', dest='outdir', required=True,
@@ -122,7 +123,7 @@ parser.add_argument('--unroll', dest='unroll', help='Flag. The tsv input file '
                     'line (unrolled).',
                     action='store_const', const=True, default=False)
 parser.add_argument('--protcol', dest='protcol', help='Column number\n'
-                    'of protein table in which protein accessions are \n'
+                    'of protein/PSM table in which protein accessions are \n'
                     'stored. First column number is 1.',
                     type=int, required=False)
 parser.add_argument('--pepcol', dest='pepcol', help='Column number\n'

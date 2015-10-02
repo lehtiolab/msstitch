@@ -5,19 +5,16 @@ from app.readers import tsv as tsvreader
 
 class ProteinGroupLookupDriver(base.LookupDriver):
     lookuptype = 'proteingroups'
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
 
     def create_lookup(self):
         header = tsvreader.get_tsv_header(self.fn[0])
-        confkey = header[int(self.confcol) - 1]
+        self.get_column_header_for_number(['confcol', 'proteincol'], header)
         allpsms = lookups.create_protein_pep_lookup(self.fn,
-                                          header,
-                                          self.lookup,
-                                          confkey,
-                                          self.conflvl,
-                                          self.lowerbetter,
-                                          self.fasta)
-        lookups.build_proteingroup_db(
-                                      self.lookup,
-                                      allpsms, self.coverage)
+                                                    header,
+                                                    self.lookup,
+                                                    self.confcol,
+                                                    self.conflvl,
+                                                    self.lowerbetter,
+                                                    self.fasta,
+                                                    self.proteincol)
+        lookups.build_proteingroup_db(self.lookup, allpsms, self.coverage)

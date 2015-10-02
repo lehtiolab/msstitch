@@ -83,4 +83,8 @@ def add_quant_values(allpeps, psm, isobq_fieldmap, precurq_field):
             quants['precur'].append(psm[precurq_field])
         except KeyError:
             quants['precur'] = [psm[precurq_field]]
-    allpeps[psm[peptabledata.HEADER_PEPTIDE]]['quant'] = quants
+    try:
+        allpeps[psm[peptabledata.HEADER_PEPTIDE]]['quant'] = quants
+    except KeyError:
+        # PSM sequence does not exist in allpeps because has no good-scoring peptides
+        pass

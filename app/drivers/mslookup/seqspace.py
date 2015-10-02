@@ -8,7 +8,7 @@ class SeqspaceLookupDriver(base.LookupDriver):
     for N-terminal falloff indexing, and it can be specified to cut
     tryptic before proline.
     """
-    outsuffix = '_seqlookup.sqlite'
+    outsuffix = '_lookup.sqlite'
     lookuptype = 'searchspace'
 
     def __init__(self, **kwargs):
@@ -18,5 +18,5 @@ class SeqspaceLookupDriver(base.LookupDriver):
         self.trypsinize = kwargs.get('notrypsin', True)
 
     def create_lookup(self):
-        preparation.create_searchspace(self.lookup, self.fn, self.proline,
+        preparation.create_searchspace(self.lookup, self.fn[0], self.proline,
                                        self.falloff, self.trypsinize)

@@ -1,14 +1,13 @@
 import app.lookups.sqlite.proteingroups as lookups
 
 
-def get_sortfnxs(coverage):
+def get_sortfnxs(coverage_evidence):
     sortfnxs = [sort_pgroup_peptides,
                 sort_pgroup_psms,
                 sort_pgroup_score,
-                sort_evidence_score,
                 ]
-    if coverage:
-        sortfnxs.append(sort_pgroup_coverage)
+    if coverage_evidence:
+        sortfnxs.extend([sort_evidence_score, sort_pgroup_coverage])
     sortfnxs.append(sort_alphabet)
     return sortfnxs
 
@@ -20,8 +19,8 @@ def sort_to_get_master(pgroup, coverage):
             'protein_acc': sorted_pg[0][lookups.PROTEIN_ACC_INDEX]}
 
 
-def sort_protein_groups(pgroups, coverage):
-    sortfnxs = get_sortfnxs(coverage)
+def sort_protein_groups(pgroups, coverage_evidence):
+    sortfnxs = get_sortfnxs(coverage_evidence)
     pgroups_out = {}
     for pgroup in pgroups.values():
         sorted_pg = sort_protein_group(pgroup, sortfnxs, 0)

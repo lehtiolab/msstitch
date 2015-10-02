@@ -14,7 +14,6 @@ class ProteinQuantLookupDriver(base.LookupDriver):
         self.psmnrcolpattern = kwargs.get('psmnrcolpattern', None)
         self.precursorquantcolpattern = kwargs.get('precursorquantcolpattern',
                                                    None)
-        self.proteincol = kwargs.get('protcol', None)
         self.probcolpattern = kwargs.get('probcolpattern', None)
         self.fdrcolpattern = kwargs.get('fdrcolpattern', None)
         self.pepcolpattern = kwargs.get('pepcolpattern', None)
