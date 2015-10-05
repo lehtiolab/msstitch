@@ -76,4 +76,4 @@ def get_isoquant_fields(pqdb=False, poolnames=False):
 
 
 def get_bestpeptide_fields(poolnames=False):
-    return {prottabledata.HEADER_BEST_PEPTIDE_Q: poolnames}
+    return {prottabledata.HEADER_QSCORE: poolnames}

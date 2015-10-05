@@ -26,7 +26,7 @@ def generate_proteins(pepfn, proteins, pepheader, scorecol, minlog,
         peptide = protein_peptides[protein[prottabledata.HEADER_PROTEIN]]
         if minlog:
             peptide['score'] = log_score(peptide['score'], nextbestscore)
-        protein[prottabledata.HEADER_BEST_PEPTIDE_Q] = str(
+        protein[prottabledata.HEADER_QSCORE] = str(
             peptide['score'])
         yield protein
 
