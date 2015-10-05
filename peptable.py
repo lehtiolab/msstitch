@@ -75,12 +75,12 @@ parser.add_argument('--spectracol', dest='speccol', help='Column number\n'
 parser.add_argument('--scorecol', dest='scorecol', help='Column number in '
                     'which score to filter on is written.',
                     type=int, required=False)
-parser.add_argument('--scorecolpattern', dest='scorecol', help='Regexp pattern'
+parser.add_argument('--scorecolpattern', dest='scorecolpattern', help='Regexp pattern'
                     ' to get column where scores are in.',
-                    type=int, required=False)
+                    type=str, required=False)
 parser.add_argument('--qcolpattern', dest='qcolpattern', help='Regexp pattern '
                     'to het column where q-values are in.',
-                    type=int, required=False)
+                    type=str, required=False)
 parser.add_argument('--ms1quantcolpattern', dest='precursorquantcolpattern',
                     help='Unique text pattern to identify precursor quant \n'
                     'column in PSM table for peptide quanting.',

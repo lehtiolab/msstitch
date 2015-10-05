@@ -1,7 +1,7 @@
 from app.drivers.prottable.base import PepProttableDriver
 from app.actions.headers import peptable as head
 from app.readers import tsv as tsvreader
-import app.actions.peptable.psmtopeptable as prep
+import app.actions.peptable.model_qvals as prep
 
 
 class ModelQValuesDriver(PepProttableDriver):
@@ -23,14 +23,13 @@ class ModelQValuesDriver(PepProttableDriver):
         self.scorecol = tsvreader.get_cols_in_file(self.scorecol,
                                                    self.oldheader, True)
         self.qvalcol = tsvreader.get_cols_in_file(self.qvalcol,
-                                                  self.qvalcol, True)
+                                                  self.oldheader, True)
 
     def create_header(self):
         self.header = head.get_linear_model_header(self.oldheader)
 
     def set_feature_generator(self):
         self.features = prep.recalculate_qvals_linear_model(self.fn,
-                                                            self.oldheader,
                                                             self.scorecol,
                                                             self.qvalcol,
                                                             10e-4)
