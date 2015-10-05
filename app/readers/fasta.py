@@ -15,6 +15,11 @@ def get_proteins_for_db(fastafn):
              for acc, record in objects.items()))
 
 
+def generate_proteins_id(fastafn):
+    for record in parse_fasta(fastafn):
+        yield record.id
+
+
 def get_proteins_descriptions(fastafn):
     for record in parse_fasta(fastafn):
         yield (record.id, record.description)

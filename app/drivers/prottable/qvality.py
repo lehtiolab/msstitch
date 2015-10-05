@@ -17,14 +17,13 @@ class ProttableQvalityDriver(QvalityDriver):
 
     def prepare(self):
         """No percolator XML for protein tables"""
-        pass
+        self.targetheader = tsv.get_tsv_header(self.fn)
+        self.decoyheader = tsv.get_tsv_header(self.decoy)
 
     def set_features(self):
         """Creates scorefiles for qvality's target and decoy distributions"""
-        targetheader = tsv.get_tsv_header(self.fn)
-        self.target = tsv.generate_tsv_proteins(self.fn, targetheader)
-        decoyheader = tsv.get_tsv_header(self.decoy)
-        self.decoy = tsv.generate_tsv_proteins(self.decoy, decoyheader)
+        self.target = tsv.generate_tsv_proteins(self.fn, self.targetheader)
+        self.decoy = tsv.generate_tsv_proteins(self.decoy, self.decoyheader)
         super().set_features()
 
 
@@ -48,5 +47,7 @@ class PickedQvalityDriver(ProttableQvalityDriver):
 
     def prepare(self):
         """Using this to write picked protein tables"""
+        super().prepare()
         self.target, self.decoy = pickprotein.write_pick_td_tables(
-            self.target, self.decoy, self.t_fasta, self.d_fasta)
+            self.target, self.decoy, self.targetheader, self.decoyheader,
+            self.t_fasta, self.d_fasta)
