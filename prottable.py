@@ -33,31 +33,49 @@ parser.add_argument('-c', dest='command', type=str,
                     'addprotdata - Add protein data (description, coverage,\n'
                     '# PSMs, etc.) to a table with protein accessions\n'
                     'Use with --dbfile\n\n'
+
                     'buildquant - Create protein quant data from a lookup\n'
                     'database. E.g. when multiple protein quant tables have\n'
                     'been read into the lookup and will be combined. Use \n'
                     'with --dbfile, --proteindata, --precursor, --isobaric\n'
                     'but NOT with -i.\n\n'
+
                     'addisoquant - Add isobaric quantification data from a\n'
                     'proteintable containing this. Needs a second table\n'
                     'specified with --quantfile and --isobquantcolpattern\n\n'
+
                     'addms1quant - Add MS1 quantification data from a\n'
                     'PSM table containing precursor quant areas. Needs\n'
                     'a psmtable specified with --psmtable.\n\n'
                     'emptyprottable - Create protein table from PSM table\n'
                     'containing no quant data, resulting in one column with\n'
                     'master proteins only.\n\n'
+
                     'addprob - Add protein probabilities from a\n'
                     'peptide table posterior error probabilities. Needs\n'
                     '--peptable, and probabilities are calculated \n'
                     'as in Nesvizhskii et al. (2003) Anal.Chem., eq 3.\n\n'
+
                     'bestpeptide - Given the protein table and corresponding\n'
                     'peptide table, fetch the best scoring peptide for each\n'
                     'protein and annotates that score in the protein table.\n'
                     'Use with --scorecol, --peptable, --logscore.\n\n'
+
                     'protqvality - Run qvality on protein (or tsv) tables\n'
                     'containing target (-i) proteins and decoy (--decoy)\n'
-                    'proteins.\n\n'
+                    'proteins. Use with --feattype to use either protein\n'
+                    'error probability (Nesvizhskii 2003) or Q score from\n'
+                    'Savitski 2014 MCP.\n\n'
+
+                    'pickqvality - Run qvality on protein tables\n'
+                    'containing target (-i) proteins and decoy (--decoy)\n'
+                    'proteins. Targets and decoys will be filtered according\n'
+                    'Savitski et al. 2014 MCP, where the best scoring of a\n'
+                    'pair of target/decoy proteins is retained and the other\n'
+                    'protein discarded. Matching (reversed, tryptic reversed,'
+                    ' scrambled) target and decoy FASTA files are needed to\n'
+                    'determine the pairs, use --targetfasta, --decoyfasta \n\n'
+
                     'addfdr - Add protein FDR to protein table by comparing\n'
                     'score (peptide q-value, protein probability, etc)\n'
                     'with qvality lookup table. Needs \n'
@@ -100,6 +118,12 @@ parser.add_argument('--logscore', dest='logscore',
 parser.add_argument('--decoy', dest='decoyfn', help='Protein table containing '
                     'decoy proteins for running qvality',
                     type=lambda x: parser_file_exists(parser, x))
+parser.add_argument('--targetfasta', dest='targetfasta',
+                    help='FASTA file with target proteins to determine best\n'
+                    'scoring proteins of target/decoy pairs for pickqvality.')
+parser.add_argument('--decoyfasta', dest='decoyfasta',
+                    help='FASTA file with decoy proteins to determine best\n'
+                    'scoring proteins of target/decoy pairs for pickqvality.')
 parser.add_argument('--feattype', dest='feattype', help='Score type to use for'
                     ' qvality. Can either be probability or qvalue.')
 parser.add_argument('-o', dest='options', nargs='+',
@@ -142,6 +166,7 @@ commandmap = {
     'emptyprottable': create_empty.CreateEmptyDriver,
     'bestpeptide': bestpeptide.BestPeptidePerProtein,
     'protqvality': qvality.ProttableQvalityDriver,
+    'pickqvality': qvality.PickedQvalityDriver,
     'protfdr': fdr.ProttableFDRDriver,
 }
 
