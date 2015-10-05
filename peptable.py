@@ -13,6 +13,7 @@ import argparse
 import os
 import app.drivers.peptable.psmtopeptable as psm2pepdrivers
 import app.drivers.peptable.merge as mergedrivers
+import app.drivers.peptable.model_qvals as modeldrivers
 
 
 def parser_file_exists(currentparser, fn):
@@ -38,6 +39,12 @@ parser.add_argument('-c', dest='command', type=str,
                     'uses best scoring PSM for each peptide and medians of\n'
                     'quant information. Use with --spectracol, --scorecol,\n'
                     '--ms1quantcolpattern, --isobquantcolpattern.\n\n'
+
+                    'modelqvals - Recalculate peptide q-values by creating\n'
+                    'a linear model of them against a score (partial least \n'
+                    'squares regression). Uses --qcolpattern, \n'
+                    '--scorecolpattern.\n\n'
+
                     'buildpep - Build peptide table from data stored in a\n'
                     'lookup DB object created with mslookup.py. Use with\n'
                     '--isobaric, --precursor, --fdr, --pep.\n\n'
@@ -67,6 +74,12 @@ parser.add_argument('--spectracol', dest='speccol', help='Column number\n'
 parser.add_argument('--scorecol', dest='scorecol', help='Column number in '
                     'which score to filter on is written.',
                     type=int, required=False)
+parser.add_argument('--scorecolpattern', dest='scorecol', help='Regexp pattern'
+                    ' to get column where scores are in.',
+                    type=int, required=False)
+parser.add_argument('--qcolpattern', dest='qcolpattern', help='Regexp pattern '
+                    'to het column where q-values are in.',
+                    type=int, required=False)
 parser.add_argument('--ms1quantcolpattern', dest='precursorquantcolpattern',
                     help='Unique text pattern to identify precursor quant \n'
                     'column in PSM table for peptide quanting.',
@@ -80,7 +93,7 @@ parser.add_argument('--isobaric', dest='isobaric',
                     'data in peptide table.',
                     action='store_const', const=True, default=False)
 parser.add_argument('--precursor', dest='precursor',
-                    help='Flag. Instructs buildpep to include precursor quant\n'
+                    help='Flag. Instructs buildpep to include precursor quant '
                     'data in peptide table.',
                     action='store_const', const=True, default=False)
 parser.add_argument('--fdr', dest='fdr',
@@ -88,12 +101,12 @@ parser.add_argument('--fdr', dest='fdr',
                     'data in peptide table.',
                     action='store_const', const=True, default=False)
 parser.add_argument('--pep', dest='pep',
-                    help='Flag. Instructs buildpep to include posterior error\n'
+                    help='Flag. Instructs buildpep to include posterior error '
                     'data in peptide table.',
                     action='store_const', const=True, default=False)
 parser.add_argument('--nopsms', dest='nopsms',
-                    help='Flag. Instructs buildpep to include a column with # PSMs\n'
-                    'in peptide table.',
+                    help='Flag. Instructs buildpep to include a column with '
+                    '# PSMs in peptide table.',
                     action='store_const', const=True, default=False)
 parser.add_argument('--proteindata', dest='proteindata',
                     help='Flag. Instructs buildpep to include protein data \n'
@@ -135,6 +148,7 @@ args = parser.parse_args()
 
 commandmap = {
     'psm2pep': psm2pepdrivers.MzidTSVPeptableDriver,
+    'modelqvals': modeldrivers.ModelQValuesDriver,
     'buildpep': mergedrivers.BuildPeptideTableDriver,
 }
 

@@ -3,7 +3,7 @@ from collections import OrderedDict
 from app.actions.headers.base import (generate_general_header,
                                       generate_headerfields)
 from app.dataformats import peptable as peptabledata
-from app.dataformats import mzidtsv as mzidtsvdata 
+from app.dataformats import mzidtsv as mzidtsvdata
 
 
 def switch_psm_to_peptable_fields(oldheader):
@@ -12,11 +12,11 @@ def switch_psm_to_peptable_fields(oldheader):
                                           mzidtsvdata.HEADER_PROTEIN,
                                           mzidtsvdata.HEADER_PEPTIDE_Q,
                                           mzidtsvdata.HEADER_PEPTIDE_PEP],
-                                         [peptabledata.HEADER_PEPTIDE, 
+                                         [peptabledata.HEADER_PEPTIDE,
                                           peptabledata.HEADER_PROTEINS,
                                           peptabledata.HEADER_QVAL,
                                           peptabledata.HEADER_PEP])}
-        
+
 
 def get_pepquant_header(oldheader, isobqfieldmap=False, precurqfield=False):
     header = oldheader[:]
@@ -30,7 +30,14 @@ def get_pepquant_header(oldheader, isobqfieldmap=False, precurqfield=False):
     ix = header.index(mzidtsvdata.HEADER_PEPTIDE)
     header = header[:ix] + peptable_header + header[ix:]
     switch_map = switch_psm_to_peptable_fields(header)
-    return [switch_map[field] if field in switch_map else field for field in header]
+    return [switch_map[field] if field in switch_map else field
+            for field in header]
+
+
+def get_linear_model_header(oldheader):
+    header = oldheader[:]
+    ix = header.index(peptabledata.HEADER_PEP) + 1
+    return header[:ix] + [peptabledata.HEADER_QVAL_MODELED] + header[ix:]
 
 
 def generate_header(headerfields, oldheader=False):
