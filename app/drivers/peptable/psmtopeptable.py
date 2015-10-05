@@ -13,8 +13,8 @@ class MzidTSVPeptableDriver(PepProttableDriver):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.fncol = kwargs.get('speccol', None)
-        self.scorecol = kwargs.get('scorecol', None)
+        self.fncol = kwargs.get('speccol', False)
+        self.scorecol = kwargs.get('scorecol')
         self.quantcolpattern = kwargs.get('quantcolpattern', None)
         self.precursorquantcolpattern = kwargs.get('precursorquantcolpattern',
                                                    None)

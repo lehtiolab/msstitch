@@ -16,8 +16,8 @@ def generate_proteins(pepfn, proteins, pepheader, scorecol, minlog,
         if ';' in p_acc:
             continue
         protein_peptides = evaluate_peptide(protein_peptides, psm, p_acc,
-                                            higherbetter, scorecol, fncol=None,
-                                            track_psms=False)
+                                            higherbetter, scorecol,
+                                            fncol=False)
     if minlog:
         nextbestscore = min([pep['score'] for pep in protein_peptides.values()
                              if pep['score'] > 0])

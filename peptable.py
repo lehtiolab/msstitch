@@ -37,7 +37,8 @@ parser.add_argument('-c', dest='command', type=str,
                     help='How to manipulate the input:\n'
                     'psm2pep - Create peptide table from PSM TSV input,\n'
                     'uses best scoring PSM for each peptide and medians of\n'
-                    'quant information. Use with --spectracol, --scorecol,\n'
+                    'quant information. Use with --spectracol (optional for\n'
+                    'tracking PSMs fr. different spectra files), --scorecol,\n'
                     '--ms1quantcolpattern, --isobquantcolpattern.\n\n'
 
                     'modelqvals - Recalculate peptide q-values by creating\n'
