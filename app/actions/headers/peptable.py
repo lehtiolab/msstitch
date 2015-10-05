@@ -42,7 +42,7 @@ def get_linear_model_header(oldheader):
 
 def generate_header(headerfields, oldheader=False):
     """Returns a header as a list, ready to write to TSV file"""
-    fieldtypes = ['peptidefdr', 'peptidepep', 'nopsms', 'proteindata', 
+    fieldtypes = ['peptidefdr', 'peptidepep', 'nopsms', 'proteindata',
                   'precursorquant', 'isoquant']
     return generate_general_header(headerfields, fieldtypes,
                                    peptabledata.HEADER_PEPTIDE, oldheader)
@@ -91,6 +91,7 @@ def get_nopsms_fields(poolnames=False):
     for field in poolfields:
         allfields[field] = poolnames
     return allfields
+
 
 def get_isoquant_fields(pqdb=False, poolnames=False):
     """Returns a headerfield dict for isobaric quant channels. Channels are

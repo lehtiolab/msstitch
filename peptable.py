@@ -38,8 +38,9 @@ parser.add_argument('-c', dest='command', type=str,
                     'psm2pep - Create peptide table from PSM TSV input,\n'
                     'uses best scoring PSM for each peptide and medians of\n'
                     'quant information. Use with --spectracol (optional for\n'
-                    'tracking PSMs fr. different spectra files), --scorecol,\n'
-                    '--ms1quantcolpattern, --isobquantcolpattern.\n\n'
+                    'tracking PSMs fr. different spectra files), \n'
+                    '--scorecolpattern, --ms1quantcolpattern, \n'
+                    '--isobquantcolpattern.\n\n'
 
                     'modelqvals - Recalculate peptide q-values by creating\n'
                     'a linear model of them against a score (partial least \n'
@@ -72,11 +73,8 @@ parser.add_argument('--spectracol', dest='speccol', help='Column number\n'
                     'has changed the file names. First column number and\n'
                     'default is 1.',
                     type=int, required=False)
-parser.add_argument('--scorecol', dest='scorecol', help='Column number in '
-                    'which score to filter on is written.',
-                    type=int, required=False)
-parser.add_argument('--scorecolpattern', dest='scorecolpattern', help='Regexp pattern'
-                    ' to get column where scores are in.',
+parser.add_argument('--scorecolpattern', dest='scorecolpattern',
+                    help='Regexp pattern to get column where scores are in.',
                     type=str, required=False)
 parser.add_argument('--qcolpattern', dest='qcolpattern', help='Regexp pattern '
                     'to het column where q-values are in.',

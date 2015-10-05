@@ -14,14 +14,16 @@ class MzidTSVPeptableDriver(PepProttableDriver):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.fncol = kwargs.get('speccol', False)
-        self.scorecol = kwargs.get('scorecol')
+        self.scorecol = kwargs.get('scorecolpattern')
         self.quantcolpattern = kwargs.get('quantcolpattern', None)
         self.precursorquantcolpattern = kwargs.get('precursorquantcolpattern',
                                                    None)
 
     def initialize_input(self):
         self.oldheader = tsvreader.get_tsv_header(self.fn)
-        self.get_column_header_for_number(['fncol', 'scorecol'])
+        self.get_column_header_for_number(['fncol'])
+        self.scorecol = tsvreader.get_cols_in_file(self.scorecol,
+                                                   self.oldheader, True)
         self.isobfieldmap = prep.get_quantcols(self.quantcolpattern,
                                                self.oldheader, 'isob')
         self.precurquantcol = prep.get_quantcols(self.precursorquantcolpattern,

@@ -59,7 +59,7 @@ parser.add_argument('-c', dest='command', type=str,
                     'bestpeptide - Given the protein table and corresponding\n'
                     'peptide table, fetch the best scoring peptide for each\n'
                     'protein and annotates that score in the protein table.\n'
-                    'Use with --scorecol, --peptable, --logscore.\n\n'
+                    'Use with --scorecolpattern, --peptable, --logscore.\n\n'
 
                     'protqvality - Run qvality on protein (or tsv) tables\n'
                     'containing target (-i) proteins and decoy (--decoy)\n'
@@ -108,8 +108,9 @@ parser.add_argument('--isobquantcolpattern', dest='isobquantcolpattern',
                     help='Unique text pattern to identify isobaric quant \n'
                     'columns in protein table.',
                     type=str, required=False)
-parser.add_argument('--scorecol', dest='scorecol', help='Column number in '
-                    'which score to filter on is written.',
+parser.add_argument('--scorecolpattern', dest='scorecolpattern',
+                    help='Regular expression pattern to find column where\n'
+                    'score to filter on is written.',
                     type=int, required=False)
 parser.add_argument('--logscore', dest='logscore',
                     help='Flag. When using proteinbest, e.g. q-values will\n'
