@@ -73,6 +73,9 @@ parser.add_argument('--spectracol', dest='speccol', help='Column number\n'
                     'has changed the file names. First column number and\n'
                     'default is 1.',
                     type=int, required=False)
+parser.add_argument('--peptidepattern', dest='peptidepattern',
+                    help='Optional regexp pattern to get column where sequences are in.',
+                    type=str, required=False)
 parser.add_argument('--scorecolpattern', dest='scorecolpattern',
                     help='Regexp pattern to get column where scores are in.',
                     type=str, required=False)

@@ -111,7 +111,7 @@ parser.add_argument('--isobquantcolpattern', dest='isobquantcolpattern',
 parser.add_argument('--scorecolpattern', dest='scorecolpattern',
                     help='Regular expression pattern to find column where\n'
                     'score to filter on is written.',
-                    type=int, required=False)
+                    type=str, required=False)
 parser.add_argument('--logscore', dest='logscore',
                     help='Flag. When using proteinbest, e.g. q-values will\n'
                     'be converted to -log10 values.',

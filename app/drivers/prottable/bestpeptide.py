@@ -20,7 +20,7 @@ class BestPeptidePerProtein(ProttableAddData):
         super().initialize_input()
         self.pepheader = tsvreader.get_tsv_header(self.peptable)
         self.scorecol = tsvreader.get_cols_in_file(self.scorecol,
-                                                   self.oldheader, True)
+                                                   self.pepheader, True)
 
     def set_feature_generator(self):
         self.features = prep.generate_proteins(self.peptable, self.in_proteins,

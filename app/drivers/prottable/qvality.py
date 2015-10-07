@@ -10,9 +10,9 @@ class ProttableQvalityDriver(QvalityDriver):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        if self.featuretype not in ['probability', 'qvalue']:
+        if self.featuretype not in ['probability', 'qvalue', 'svm']:
             raise Exception('Featuretype (-f) should be (protein) probability '
-                            'or Q-score (qvalue).')
+                            'or Q-score (qvalue)')
         self.score_get_fun = preparation.prepare_qvality_input
 
     def prepare(self):

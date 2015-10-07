@@ -16,7 +16,7 @@ class QvalityDriver(base.PycolatorDriver):
         if self.decoy is None:
             raise Exception('Not implemented single file qvality yet')
         self.featuretype = kwargs.get('feattype', None)
-        if self.featuretype not in ['peptide', 'psm', 'probability', 'qvalue']:
+        if self.featuretype not in ['peptide', 'psm', 'probability', 'qvalue', 'svm']:
             raise Exception('Featuretype (-f) should be peptide or psm.')
         self.qvalityoptions = []
         options = kwargs.get('options')
