@@ -13,7 +13,9 @@ def add_genes_to_psm_table(psmfn, oldheader, fastafn):
     for psm in tsvreader.generate_tsv_psms(psmfn, oldheader):
         outpsm = {x: y for x, y in psm.items()}
         proteins = tsvreader.get_proteins_from_psm(psm)
-        outpsm[mzidtsvdata.HEADER_GENE] = get_genes(proteins, gpmap)
+        genes = get_genes(proteins, gpmap)
+        genes = {gene: 1 for gene in genes.split(';')}
+        outpsm[mzidtsvdata.HEADER_GENE] = ';'.join(genes)
         yield outpsm
 
 
