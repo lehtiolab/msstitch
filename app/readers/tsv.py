@@ -2,6 +2,7 @@ import re
 import os
 import itertools
 from app.dataformats import mzidtsv as mzidtsvdata
+from app.dataformats import prottable as prottabledata
 
 
 def get_tsv_header(tsvfn):
@@ -68,6 +69,10 @@ def get_psm_id(line):
     return '{0}_{1}_{2}'.format(line[mzidtsvdata.HEADER_SPECFILE],
                                 line[mzidtsvdata.HEADER_SCANNR],
                                 line[mzidtsvdata.HEADER_PEPTIDE])
+
+
+def get_content_proteins_from_master(line):
+    return line[prottabledata.HEADER_CONTENT_PROTEINS].split(';')
 
 
 def get_proteins_from_psm(line, field=False):

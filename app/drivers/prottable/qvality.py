@@ -44,10 +44,12 @@ class PickedQvalityDriver(ProttableQvalityDriver):
                             'Q-score (qvalue).')
         self.t_fasta = kwargs.get('targetfasta')
         self.d_fasta = kwargs.get('decoyfasta')
+        self.proteingroups = kwargs.get('proteingroups')
 
     def prepare(self):
         """Using this to write picked protein tables"""
         super().prepare()
+        inferencetype = {True: 'group', False: 'genes'}[self.proteingroups]
         self.target, self.decoy = pickprotein.write_pick_td_tables(
             self.target, self.decoy, self.targetheader, self.decoyheader,
-            self.t_fasta, self.d_fasta)
+            self.t_fasta, self.d_fasta, inferencetype)

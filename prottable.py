@@ -74,7 +74,10 @@ parser.add_argument('-c', dest='command', type=str,
                     'pair of target/decoy proteins is retained and the other\n'
                     'protein discarded. Matching (reversed, tryptic reversed,'
                     ' scrambled) target and decoy FASTA files are needed to\n'
-                    'determine the pairs, use --targetfasta, --decoyfasta \n\n'
+                    'determine the pairs, use --targetfasta, --decoyfasta.\n'
+                    'In case proteingrouping has been used, protein group\n'
+                    'content must have been put in the protein tables, and\n'
+                    'the flag --proteingroups must have been passed.\n\n'
 
                     'addfdr - Add protein FDR to protein table by comparing\n'
                     'score (peptide q-value, protein probability, etc)\n'
@@ -125,6 +128,10 @@ parser.add_argument('--targetfasta', dest='targetfasta',
 parser.add_argument('--decoyfasta', dest='decoyfasta',
                     help='FASTA file with decoy proteins to determine best\n'
                     'scoring proteins of target/decoy pairs for pickqvality.')
+parser.add_argument('--proteingroups', dest='proteingroups',
+                    help='Flag. When using pickqvality use this flag to be\n'
+                    'able to use pick FDR method on protein grouped samples.',
+                    action='store_const', const=True, default=False)
 parser.add_argument('--feattype', dest='feattype', help='Score type to use for'
                     ' qvality. Can either be probability or qvalue.')
 parser.add_argument('-o', dest='options', nargs='+',
