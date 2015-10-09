@@ -46,6 +46,8 @@ def get_record_type(record):
         return 'swiss'
     elif record.id[:4] == 'ENSP':
         return 'ensembl'
+    else:
+        raise RuntimeError('Cannot detect type of FASTA file. Should be Uniprot or ENSEMBL')
 
 
 def get_gene(description, rectype):
