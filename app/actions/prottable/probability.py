@@ -2,10 +2,12 @@ from app.dataformats import peptable as peptabledata
 from app.dataformats import prottable as prottabledata 
 
 
-def add_nesvi_protein_probability(proteins, peptides, headerfields):
+def add_nesvi_protein_probability(proteins, peptides, headerfields, protcol):
     protein_probs = {}
+    if not protcol:
+        protcol = peptabledata.HEADER_MASTERPROTEINS
     for peptide in peptides:
-        protacc = peptide[peptabledata.HEADER_MASTERPROTEINS]
+        protacc = peptide[protcol]
         pep = peptide[peptabledata.HEADER_PEP]
         if ';' in protacc or pep in ['NA', False]:
             continue

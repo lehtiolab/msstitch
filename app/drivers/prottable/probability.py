@@ -14,7 +14,10 @@ class AddProteinProbability(ProttableAddData):
     def initialize_input(self):
         super().initialize_input()
         self.in_peptides = reader.generate_tsv_peptides(self.pepfile)
+        pepheader = tsvreader.get_tsv_header(self.peptable)
+        self.get_column_header_for_number(['proteincol'], pepheader)
 
     def set_feature_generator(self):
         self.features = preparation.add_nesvi_protein_probability(
-            self.in_proteins, self.in_peptides, self.headerfields)
+            self.in_proteins, self.in_peptides, self.headerfields,
+            self.proteincol)

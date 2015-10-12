@@ -9,6 +9,7 @@ class BaseDriver(object):
     def __init__(self, **kwargs):
         self.fn = kwargs['infile']
         self.outdir = kwargs['outdir']
+        self.proteincol = kwargs.get('protcol', False)
         lookupfn = kwargs.get('lookup', None)
         if lookupfn is not None and hasattr(self, 'lookuptype'):
             self.lookup = lookups.get_lookup(lookupfn, self.lookuptype)

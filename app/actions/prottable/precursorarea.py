@@ -2,13 +2,13 @@ from app.dataformats import prottable as prottabledata
 from app.dataformats import mzidtsv as mzidtsvdata
 
 
-def generate_top_psms(psms):
+def generate_top_psms(psms, protcol):
     """Fed with a psms generator, this returns the 3 PSMs with
     the highest precursor intensities (or areas, or whatever is
     given in the HEADER_PRECURSOR_QUANT"""
     top_ms1_psms = {}
     for psm in psms:
-        protacc = psm[mzidtsvdata.HEADER_MASTER_PROT]
+        protacc = psm[protcol]
         precursor_amount = psm[mzidtsvdata.HEADER_PRECURSOR_QUANT]
         if ';' in protacc or precursor_amount == 'NA':
             continue
@@ -37,10 +37,12 @@ def calculate_protein_precursor_quant(top_ms1_psms, prot_acc):
         return sum(amounts) / len(amounts)
 
 
-def add_ms1_quant_from_top3_mzidtsv(proteins, psms, headerfields):
+def add_ms1_quant_from_top3_mzidtsv(proteins, psms, headerfields, protcol):
     """Collects PSMs with the highes precursor quant values,
     adds sum of the top 3 of these to a protein table"""
-    top_ms1_psms = generate_top_psms(psms)
+    if not protcol:
+        protcol = mzidtsvdata.HEADER_MASTER_PROT
+    top_ms1_psms = generate_top_psms(psms, protcol)
     for protein in proteins:
         prot_acc = protein[prottabledata.HEADER_PROTEIN]
         prec_area = calculate_protein_precursor_quant(top_ms1_psms, prot_acc)
