@@ -14,36 +14,9 @@ COVERAGE_INDEX = 7
 
 class ProteinGroupDB(ResultLookupInterface):
     def add_tables(self):
-        self.create_tables(['proteins', 'protein_psm',
-                            'protein_evidence', 'protein_seq',
+        self.create_tables(['protein_psm',
                             'protein_coverage', 'protein_group_master',
-                            'protein_group_content', 'psm_protein_groups',
-                            'prot_desc'])
-
-    def store_proteins(self, proteins, evidence_lvls=False, sequences=False):
-        cursor = self.get_cursor()
-        cursor.executemany(
-            'INSERT INTO proteins(protein_acc) '
-            'VALUES(?)', proteins)
-        self.conn.commit()
-        cursor = self.get_cursor()
-        if evidence_lvls:
-            cursor.executemany(
-                'INSERT INTO protein_evidence(protein_acc, evidence_lvl) '
-                'VALUES(?, ?)', evidence_lvls)
-        if sequences:
-            cursor.executemany(
-                'INSERT INTO protein_seq(protein_acc, sequence) '
-                'VALUES(?, ?)', sequences)
-        self.conn.commit()
-        self.index_column('proteins_index', 'proteins', 'protein_acc')
-
-    def store_descriptions(self, descriptions):
-        cursor = self.get_cursor()
-        cursor.executemany(
-            'INSERT INTO prot_desc(protein_acc, description) '
-            'VALUES(?, ?)', descriptions)
-        self.conn.commit()
+                            'protein_group_content', 'psm_protein_groups'])
 
     def store_peptides_proteins(self, allpepprot, psmids_to_store):
         ppmap = {psm_id: allpepprot[psm_id] for psm_id in psmids_to_store}
@@ -56,11 +29,9 @@ class ProteinGroupDB(ResultLookupInterface):
             ' VALUES (?, ?)', prot_psm_ids)
         self.conn.commit()
 
-    def index_protein_peptides(self, descriptions):
+    def index_protein_peptides(self):
         self.index_column('protein_index', 'protein_psm', 'protein_acc')
         self.index_column('protpsmid_index', 'protein_psm', 'psm_id')
-        if descriptions:
-            self.index_column('protdesc_index', 'prot_desc', 'protein_acc')
 
     def store_masters(self, allmasters, psm_masters):
         allmasters = ((x,) for x in allmasters)

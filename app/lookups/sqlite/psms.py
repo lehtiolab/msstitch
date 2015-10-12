@@ -3,7 +3,35 @@ from app.lookups.sqlite.base import ResultLookupInterface
 
 class PSMDB(ResultLookupInterface):
     def add_tables(self):
-        self.create_tables(['psms', 'psmrows', 'peptide_sequences'])
+        self.create_tables(['psms', 'psmrows', 'peptide_sequences',
+                            'proteins', 'protein_evidence', 'protein_seq',
+                            'prot_desc'])
+
+    def store_proteins(self, proteins, evidence_lvls=False, sequences=False):
+        cursor = self.get_cursor()
+        cursor.executemany(
+            'INSERT INTO proteins(protein_acc) '
+            'VALUES(?)', proteins)
+        self.conn.commit()
+        cursor = self.get_cursor()
+        if evidence_lvls:
+            cursor.executemany(
+                'INSERT INTO protein_evidence(protein_acc, evidence_lvl) '
+                'VALUES(?, ?)', evidence_lvls)
+        if sequences:
+            cursor.executemany(
+                'INSERT INTO protein_seq(protein_acc, sequence) '
+                'VALUES(?, ?)', sequences)
+        self.conn.commit()
+        self.index_column('proteins_index', 'proteins', 'protein_acc')
+
+    def store_descriptions(self, descriptions):
+        cursor = self.get_cursor()
+        cursor.executemany(
+            'INSERT INTO prot_desc(protein_acc, description) '
+            'VALUES(?, ?)', descriptions)
+        self.conn.commit()
+        self.index_column('protdesc_index', 'prot_desc', 'protein_acc')
 
     def store_pepseqs(self, sequences):
         cursor = self.get_cursor()

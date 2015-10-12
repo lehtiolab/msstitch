@@ -11,12 +11,10 @@ from app.actions.mzidtsv import proteingroup_sorters as sorters
 
 
 def create_protein_pep_lookup(fn, header, pgdb, confkey, conflvl,
-                              lower_is_better, fastafn=False,
-                              proteinfield=False):
+                              lower_is_better, proteinfield=False):
     """Reads PSMs from file, extracts their proteins and peptides and passes
     them to a database backend in chunks.
     """
-    store_proteins_descriptions(pgdb, fastafn, fn, header, proteinfield)
     # TODO do we need an OrderedDict or is regular dict enough?
     # Sorting for psm_id useful?
     allpsms = OrderedDict()
@@ -39,7 +37,7 @@ def create_protein_pep_lookup(fn, header, pgdb, confkey, conflvl,
         psmids_to_store.add(psm_id)
         last_id = psm_id
     pgdb.store_peptides_proteins(allpsms, psmids_to_store)
-    pgdb.index_protein_peptides(fastafn is not False)
+    pgdb.index_protein_peptides()
     return allpsms
 
 
@@ -107,23 +105,6 @@ def build_content_db(pgdb, coverage):
     pgdb.update_master_proteins(new_masters)
     pgdb.store_protein_group_content(protein_groups)
     pgdb.index_protein_group_content()
-
-
-def store_proteins_descriptions(pgdb, fastafn, tsvfn, header,
-                                proteinfield=False):
-    if fastafn:
-        proteins, sequences, evidences = fastareader.get_proteins_for_db(
-            fastafn)
-        pgdb.store_proteins(proteins, evidences, sequences)
-        protein_descriptions = fastareader.get_proteins_descriptions(fastafn)
-        pgdb.store_descriptions(protein_descriptions)
-    else:
-        proteins = {}
-        for psm in tsvreader.generate_tsv_lines_multifile(tsvfn, header):
-            proteins.update({x: 1 for x in
-                             tsvreader.get_proteins_from_psm(psm,
-                                                             proteinfield)})
-        pgdb.store_proteins(((protein,) for protein in proteins.keys()))
 
 
 def fetch_pg_content(all_master_psm_proteins, lastcontentmaster, psmmaster,

@@ -13,4 +13,6 @@ class PSMLookupDriver(base.LookupDriver):
     def create_lookup(self):
         header = tsvreader.get_tsv_header(self.fn[0])
         specfncol = header[int(self.spectracol) - 1]
-        lookup.create_psm_lookup(self.fn, header, self.lookup, self.unroll, specfncol)
+        self.get_column_header_for_number(['proteincol'], header)
+        lookup.create_psm_lookup(self.fn, self.fasta, header, self.lookup, 
+                                 self.unroll, specfncol, self.proteincol)
