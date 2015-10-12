@@ -132,6 +132,11 @@ parser.add_argument('--proteingroups', dest='proteingroups',
                     help='Flag. When using pickqvality use this flag to be\n'
                     'able to use pick FDR method on protein grouped samples.',
                     action='store_const', const=True, default=False)
+parser.add_argument('--protcol', dest='protcol', help='Column number\n'
+                    'of PSM table in which protein/gene accessions are. \n'
+                    'stored. First column number is 1. Use in case of not using\n'
+                    'standard master protein column.',
+                    type=int, required=False)
 parser.add_argument('--feattype', dest='feattype', help='Score type to use for'
                     ' qvality. Can either be probability or qvalue.')
 parser.add_argument('-o', dest='options', nargs='+',
