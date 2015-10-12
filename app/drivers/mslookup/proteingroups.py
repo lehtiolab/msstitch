@@ -12,8 +12,5 @@ class ProteinGroupLookupDriver(base.LookupDriver):
         allpsms = lookups.create_protein_pep_lookup(self.fn,
                                                     header,
                                                     self.lookup,
-                                                    self.confcol,
-                                                    self.conflvl,
-                                                    self.lowerbetter,
                                                     self.proteincol)
         lookups.build_proteingroup_db(self.lookup, allpsms, self.coverage)

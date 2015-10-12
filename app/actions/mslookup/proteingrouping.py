@@ -6,12 +6,11 @@ from collections import OrderedDict
 
 from app.readers import tsv as tsvreader
 from app.readers import fasta as fastareader
-from app.actions.mzidtsv import confidencefilters as conffilt
 from app.actions.mzidtsv import proteingroup_sorters as sorters
 
 
-def create_protein_pep_lookup(fn, header, pgdb, confkey, conflvl,
-                              lower_is_better, proteinfield=False):
+def create_protein_pep_lookup(fn, header, pgdb, lower_is_better, 
+                              proteinfield=False):
     """Reads PSMs from file, extracts their proteins and peptides and passes
     them to a database backend in chunks.
     """
@@ -21,8 +20,6 @@ def create_protein_pep_lookup(fn, header, pgdb, confkey, conflvl,
     last_id, psmids_to_store = None, set()
     store_soon = False
     for psm in tsvreader.generate_tsv_lines_multifile(fn, header):
-        if not conffilt.passes_filter(psm, conflvl, confkey, lower_is_better):
-            continue
         psm_id, prots = tsvreader.get_pepproteins(psm, proteinfield)
         try:
             allpsms[psm_id].extend(prots)

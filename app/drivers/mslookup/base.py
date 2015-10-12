@@ -7,12 +7,9 @@ from app.drivers.base import BaseDriver
 class LookupDriver(BaseDriver):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.conflvl = kwargs.get('conflvl', None)
-        self.lowerbetter = kwargs.get('conftype', None) == 'lower'
         self.unroll = kwargs.get('unroll', False)
         self.fasta = kwargs.get('fasta', False)
         self.coverage = self.fasta is not False
-        self.confcol = kwargs.get('confcol', False)
         self.proteincol = kwargs.get('protcol', False)
 
     def initialize_lookup(self):
