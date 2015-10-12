@@ -17,6 +17,7 @@ import app.drivers.mzidtsv.proteingrouping as pgdrivers
 import app.drivers.mzidtsv.prot2gene as genedrivers
 import app.drivers.mzidtsv.quant as quantdrivers
 import app.drivers.mzidtsv.splitmerge as splitmergedrivers
+import app.drivers.mzidtsv.filter_confidence as conffiltdrivers 
 
 
 def parser_file_exists(currentparser, fn):
@@ -51,6 +52,10 @@ parser.add_argument('-c', dest='command', type=str,
                     '--isobaric or --precursor, \n'
                     '--spectracol changes the column where the spectra\n'
                     'file names are in from the standard #SpecFile column.\n\n'
+                    
+                    'conffilt - Filters PSMs by their confidence level\n'
+                    'Use with --confidence-lvl, --confidence-col,\n'
+                    '--confidence-better\n\n'
 
                     'proteingroup   - Takes lookup SQLite result, uses it\n'
                     'to output mzidtsv file with protein groups\n'
@@ -153,6 +158,7 @@ commandmap = {
     'percotsv': percodrivers.MzidPercoTSVDriver,
     'mergetsv': splitmergedrivers.MzidTSVConcatenateDriver,
     'splittsv': splitmergedrivers.MzidTSVSplitDriver,
+    'conffilt': conffiltdrivers.ConfidenceFilterDriver,
     'quanttsv': quantdrivers.TSVQuantDriver,
     'proteingroup': pgdrivers.ProteinGroupDriver,
     'genepsm': genedrivers.TSVGeneFromProteinDriver,
