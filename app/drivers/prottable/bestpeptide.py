@@ -26,4 +26,5 @@ class BestPeptidePerProtein(ProttableAddData):
     def set_feature_generator(self):
         self.features = prep.generate_proteins(self.peptable, self.in_proteins,
                                                self.pepheader, self.scorecol,
-                                               self.minlogscore, self.proteincol)
+                                               self.minlogscore, 
+                                               protcol=self.proteincol)
