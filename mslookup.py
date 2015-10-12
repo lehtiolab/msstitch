@@ -42,7 +42,8 @@ parser.add_argument('-c', dest='command', type=str,
                     'psms - Loads PSM table into lookup. Important for\n'
                     'several steps later on, such as protein grouping and\n'
                     'PSM quantitation. PSM TSV table passed to -i, \n'
-                    'With flags --unroll, --spectracol\n\n'
+                    'With flags --unroll, --spectracol, and specify a FASTA\n'
+                    'file with --fasta OR use --protcol to get proteins.\n\n'
 
                     'proteingrouplookup  - Groups proteins from mzid2tsv\n'
                     'output (single file passed to -i).\n\n'
@@ -110,6 +111,9 @@ parser.add_argument('--protcol', dest='protcol', help='Column number\n'
                     'of protein/PSM table in which protein accessions are \n'
                     'stored. First column number is 1.',
                     type=int, required=False)
+parser.add_argument('--fasta', dest='fasta', help='FASTA sequence database, '
+                    'to use when extracting gene names to the PSM table from '
+                    'proteins.', type=lambda x: parser_file_exists(parser, x))
 parser.add_argument('--pepcol', dest='pepcol', help='Column number\n'
                     'of peptide table in which peptide sequences are \n'
                     'stored. First column number is 1.',
