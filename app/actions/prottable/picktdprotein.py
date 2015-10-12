@@ -42,8 +42,8 @@ def generate_pick_fdr(targetprot, decoyprot, theader, dheader,
 def generate_picked_genes(tfasta, dfasta, tscores, dscores):
     tdmap = create_td_gene_map(tfasta, dfasta)
     for tgene, dgene in tdmap.items():
-        picked = pick_target_decoy(tgene, dgene, tscores[tgene],
-                                   dscores[dgene])
+        tscore, dscore = tscores.get(tgene), dscores.get(dgene)
+        picked = pick_target_decoy(tgene, dgene, tscore, dscore)
         if picked:
             p_type, pickedgene, score = picked
             yield p_type, pickedgene, score
@@ -56,8 +56,8 @@ def generate_picked_protein_groups(targetprot, theader, decoyprot, dheader,
     tdmap = create_td_protein_map(tfasta, dfasta)
     for tprot, dprot in tdmap:
         tmaster, dmaster = tcontentmap[tprot], dcontentmap[dprot]
-        picked = pick_target_decoy(tmaster, dmaster, t_scores[tmaster],
-                                   d_scores[dmaster])
+        tscore, dscore = t_scores.get(tmaster), d_scores.get(dmaster)
+        picked = pick_target_decoy(tmaster, dmaster, tscore, dscore)
         if picked:
             ptype, pickedprotein, score = picked
             yield ptype, pickedprotein, score
@@ -103,16 +103,16 @@ def generate_scoremaps(targetprot, decoyprot, theader, dheader):
     return t_scores, d_scores
 
 
-def pick_target_decoy(tscore, dscore, target, decoy):
+def pick_target_decoy(target, decoy, tscore, dscore):
     """Feed it with a target and decoy score and the protein/gene/id names,
     and this will return target/decoy type, the winning ID and the score"""
     try:
         tscore = float(tscore)
-    except KeyError:
+    except (ValueError, TypeError):
         tscore = False
     try:
         dscore = float(dscore)
-    except KeyError:
+    except (ValueError, TypeError):
         dscore = False
     if tscore > dscore:
         return TARGET, target, tscore
