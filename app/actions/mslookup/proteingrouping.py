@@ -9,45 +9,22 @@ from app.readers import fasta as fastareader
 from app.actions.mzidtsv import proteingroup_sorters as sorters
 
 
-def create_protein_pep_lookup(fn, header, pgdb, lower_is_better, 
-                              proteinfield=False):
-    """Reads PSMs from file, extracts their proteins and peptides and passes
-    them to a database backend in chunks.
-    """
-    # TODO do we need an OrderedDict or is regular dict enough?
-    # Sorting for psm_id useful?
-    allpsms = OrderedDict()
-    last_id, psmids_to_store = None, set()
-    store_soon = False
-    for psm in tsvreader.generate_tsv_lines_multifile(fn, header):
-        psm_id, prots = tsvreader.get_pepproteins(psm, proteinfield)
-        try:
-            allpsms[psm_id].extend(prots)
-        except KeyError:
-            allpsms[psm_id] = prots
-        if len(psmids_to_store) % DB_STORE_CHUNK == 0:
-            store_soon = True
-        if store_soon and last_id != psm_id:
-            pgdb.store_peptides_proteins(allpsms, psmids_to_store)
-            store_soon = False
-            psmids_to_store = set()
-        psmids_to_store.add(psm_id)
-        last_id = psm_id
-    pgdb.store_peptides_proteins(allpsms, psmids_to_store)
-    pgdb.index_protein_peptides()
-    return allpsms
-
-
-def build_proteingroup_db(pgdb, allpsms, coverage):
-    build_master_db(pgdb, allpsms)
+def build_proteingroup_db(pgdb, coverage):
+    build_master_db(pgdb)
     if coverage:
         build_coverage(pgdb)
     build_content_db(pgdb, coverage)
 
 
-def build_master_db(pgdb, allpsms):
+def build_master_db(pgdb):
     psm_masters = OrderedDict()
     allmasters = {}
+    allpsms = {}
+    for psmid, protein in pgdb.get_all_psm_protein_relations():
+        try:
+            allpsms[psmid].append(protein)
+        except KeyError:
+            allpsms[psmid] = [protein]
     while len(allpsms) > 0:
         psm_id, proteins = allpsms.popitem()
         pepprotmap = pgdb.get_protpepmap_from_proteins(proteins)

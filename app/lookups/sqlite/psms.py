@@ -5,7 +5,7 @@ class PSMDB(ResultLookupInterface):
     def add_tables(self):
         self.create_tables(['psms', 'psmrows', 'peptide_sequences',
                             'proteins', 'protein_evidence', 'protein_seq',
-                            'prot_desc'])
+                            'prot_desc', 'protein_psm'])
 
     def store_proteins(self, proteins, evidence_lvls=False, sequences=False):
         cursor = self.get_cursor()
@@ -52,6 +52,17 @@ class PSMDB(ResultLookupInterface):
             ((psm['psm_id'], psm['rownr']) for psm in psms))
         self.conn.commit()
 
+    def store_peptides_proteins(self, allpepprot, psmids_to_store):
+        ppmap = {psm_id: allpepprot[psm_id] for psm_id in psmids_to_store}
+        prot_psm_ids = ((prot_acc, psm_id)
+                        for psm_id, prots in ppmap.items()
+                        for prot_acc in prots)
+        cursor = self.get_cursor()
+        cursor.executemany(
+            'INSERT INTO protein_psm(protein_acc, psm_id)'
+            ' VALUES (?, ?)', prot_psm_ids)
+        self.conn.commit()
+
     def get_peptide_seq_map(self):
         cursor = self.get_cursor()
         seqs = cursor.execute('SELECT pep_id, sequence FROM peptide_sequences')
@@ -63,3 +74,8 @@ class PSMDB(ResultLookupInterface):
         self.index_column('psmrowid_index', 'psmrows', 'psm_id')
         self.index_column('psmrow_index', 'psmrows', 'rownr')
         self.index_column('pepseq_index', 'peptide_sequences', 'sequence')
+    
+    def index_protein_peptides(self):
+        self.index_column('protein_index', 'protein_psm', 'protein_acc')
+        self.index_column('protpsmid_index', 'protein_psm', 'psm_id')
+

@@ -14,24 +14,8 @@ COVERAGE_INDEX = 7
 
 class ProteinGroupDB(ResultLookupInterface):
     def add_tables(self):
-        self.create_tables(['protein_psm',
-                            'protein_coverage', 'protein_group_master',
+        self.create_tables(['protein_coverage', 'protein_group_master',
                             'protein_group_content', 'psm_protein_groups'])
-
-    def store_peptides_proteins(self, allpepprot, psmids_to_store):
-        ppmap = {psm_id: allpepprot[psm_id] for psm_id in psmids_to_store}
-        prot_psm_ids = ((prot_acc, psm_id)
-                        for psm_id, prots in ppmap.items()
-                        for prot_acc in prots)
-        cursor = self.get_cursor()
-        cursor.executemany(
-            'INSERT INTO protein_psm(protein_acc, psm_id)'
-            ' VALUES (?, ?)', prot_psm_ids)
-        self.conn.commit()
-
-    def index_protein_peptides(self):
-        self.index_column('protein_index', 'protein_psm', 'protein_acc')
-        self.index_column('protpsmid_index', 'protein_psm', 'psm_id')
 
     def store_masters(self, allmasters, psm_masters):
         allmasters = ((x,) for x in allmasters)
@@ -79,6 +63,11 @@ class ProteinGroupDB(ResultLookupInterface):
     def index_protein_group_content(self):
         self.index_column('pgc_master_index', 'protein_group_content',
                           'master_id')
+
+    def get_all_psm_protein_relations(self):
+        sql = 'SELECT psm_id, protein_acc FROM protein_psm'
+        cursor = self.get_cursor()
+        return cursor.execute(sql)
 
     def get_allpsms_masters(self):
         sql = ('SELECT pgm.protein_acc, pp.psm_id FROM protein_group_master '

@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 from app.readers import tsv as tsvreader
 from app.readers import fasta as fastareader
 DB_STORE_CHUNK = 100000
@@ -30,6 +32,7 @@ def create_psm_lookup(fn, fastafn, header, pgdb, unroll=False, specfncol=None,
                      })
     pgdb.store_psms(psms)
     pgdb.index_psms()
+    store_psm_protein_relations(fn, header, pgdb, proteinfield)
 
 
 def store_proteins_descriptions(pgdb, fastafn, tsvfn, header,
@@ -47,5 +50,33 @@ def store_proteins_descriptions(pgdb, fastafn, tsvfn, header,
                              tsvreader.get_proteins_from_psm(psm,
                                                              proteinfield)})
         pgdb.store_proteins(((protein,) for protein in proteins.keys()))
+
+
+def store_psm_protein_relations(fn, header, pgdb, proteinfield=False):
+    """Reads PSMs from file, extracts their proteins and peptides and passes
+    them to a database backend in chunks.
+    """
+    # TODO do we need an OrderedDict or is regular dict enough?
+    # Sorting for psm_id useful?
+    allpsms = OrderedDict()
+    last_id, psmids_to_store = None, set()
+    store_soon = False
+    for psm in tsvreader.generate_tsv_lines_multifile(fn, header):
+        psm_id, prots = tsvreader.get_pepproteins(psm, proteinfield)
+        try:
+            allpsms[psm_id].extend(prots)
+        except KeyError:
+            allpsms[psm_id] = prots
+        if len(psmids_to_store) % DB_STORE_CHUNK == 0:
+            store_soon = True
+        if store_soon and last_id != psm_id:
+            pgdb.store_peptides_proteins(allpsms, psmids_to_store)
+            store_soon = False
+            psmids_to_store = set()
+        psmids_to_store.add(psm_id)
+        last_id = psm_id
+    pgdb.store_peptides_proteins(allpsms, psmids_to_store)
+    pgdb.index_protein_peptides()
+    return allpsms
 
 
