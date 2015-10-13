@@ -6,13 +6,14 @@ from app.actions.mergetable import (simple_val_fetch, fill_mergefeature,
 
 def build_proteintable(pqdb, header, headerfields, isobaric=False,
                        precursor=False, probability=False, fdr=False,
-                       pep=False, nopsms=False, proteindata=False):
+                       pep=False, genecentric=False):
     """Fetches proteins and quants from joined lookup table, loops through
     them and when all of a protein's quants have been collected, yields the
     protein quant information."""
-    pdmap = create_featuredata_map(pqdb,
+    pdmap = create_featuredata_map(pqdb, genecentric=genecentric,
                                    fill_fun=pinfo.add_record_to_proteindata,
-                                   count_fun=pinfo.count_peps_psms)
+                                   count_fun=pinfo.count_peps_psms,
+                                   get_uniques=True)
     empty_return = lambda x, y, z: {}
     iso_fun = {True: get_isobaric_quant, False: empty_return}[isobaric]
     ms1_fun = {True: get_precursor_quant, False: empty_return}[precursor]
@@ -22,8 +23,9 @@ def build_proteintable(pqdb, header, headerfields, isobaric=False,
                False: empty_return}[fdr]
     pep_fun = {True: get_prot_pep,
                False: empty_return}[pep]
-    psms_fun = {True: get_nopsms, False: empty_return}[nopsms]
-    pdata_fun = {True: get_protein_data, False: empty_return}[proteindata]
+    psms_fun = empty_return
+    pdata_fun = {True: get_protein_data_genecentric,
+                 False: get_protein_data}[genecentric]
     protein_sql, sqlfieldmap = pqdb.prepare_mergetable_sql(precursor, isobaric,
                                                            probability, fdr,
                                                            pep)
@@ -47,14 +49,16 @@ def build_proteintable(pqdb, header, headerfields, isobaric=False,
     yield parse_NA(outprotein, header)
 
 
-def get_nopsms(outprotein, proteindata_map, headerfields):
-    pass
+def get_protein_data_genecentric(outprotein, proteindata_map, headerfields):
+    p_acc = outprotein[prottabledata.HEADER_PROTEIN]
+    return pinfo.get_protein_data_genecentric(proteindata_map, p_acc,
+                                              headerfields)
 
 
 def get_protein_data(outprotein, proteindata_map, headerfields):
     p_acc = outprotein[prottabledata.HEADER_PROTEIN]
-    return pinfo.get_protein_data(proteindata_map,
-                                  p_acc, headerfields)
+    return pinfo.get_protein_data_pgrouped(proteindata_map, p_acc,
+                                           headerfields)
 
 
 def get_isobaric_quant(protein, sqlmap, headerfields):

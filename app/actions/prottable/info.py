@@ -2,9 +2,12 @@ from app.dataformats import prottable as prottabledata
 from app.actions.mergetable import create_featuredata_map
 
 
-def add_record_to_proteindata(proteindata, p_acc, pool, psmdata):
+def add_record_to_proteindata(proteindata, p_acc, pool, psmdata, genecentric):
     seq, psm_id = psmdata[2], psmdata[3]
-    desc, cov = psmdata[4], psmdata[5]
+    if not genecentric:
+        desc, cov = psmdata[4], psmdata[5]
+    else:
+        cov = None
     try:
         proteindata[p_acc]['pools'][pool]['psms'].add(psm_id)
     except KeyError:
@@ -28,27 +31,40 @@ def count_peps_psms(proteindata, p_acc, pool):
     proteindata[p_acc]['pools'][pool]['peptides'] = len(data['peptides'])
 
 
-def add_protein_data(proteins, pgdb, headerfields, pool_to_output=False):
+def add_protein_data(proteins, pgdb, headerfields, genecentric=False,
+                     pool_to_output=False):
     """First creates a map with all master proteins with data,
     then outputs protein data dicts for rows of a tsv. If a pool
     is given then only output for that pool will be shown in the
     protein table."""
-    proteindata = create_featuredata_map(pgdb, add_record_to_proteindata,
-                                         count_peps_psms, pool_to_output)
+    proteindata = create_featuredata_map(pgdb, genecentric=genecentric,
+                                         fill_fun=add_record_to_proteindata,
+                                         count_fun=count_peps_psms,
+                                         pool_to_output=pool_to_output)
+    dataget_fun = {True: get_protein_data_genecentric,
+                   False: get_protein_data_pgrouped}[genecentric]
     for protein in proteins:
         outprotein = {k: v for k, v in protein.items()}
         protein_acc = protein[prottabledata.HEADER_PROTEIN]
         if not protein_acc in proteindata:
             continue
-        outprotein.update(get_protein_data(proteindata, protein_acc,
-                                           headerfields))
+        outprotein.update(dataget_fun(proteindata, protein_acc, headerfields))
         outprotein = {k: str(v) for k, v in outprotein.items()}
         yield outprotein
 
 
-def get_protein_data(proteindata, p_acc, headerfields):
+def get_protein_data_genecentric(proteindata, p_acc, headerfields):
+    return get_protein_data_base(proteindata, p_acc, headerfields)
+
+
+def get_protein_data_pgrouped(proteindata, p_acc, headerfields):
     """Parses protein data for a certain protein into tsv output
     dictionary"""
+    report = get_protein_data_base(proteindata, p_acc, headerfields)
+    return get_cov_descriptions(proteindata, p_acc, report)
+
+
+def get_protein_data_base(proteindata, p_acc, headerfields):
     proteincount = 'na'
     outdict = {}
     hfields = [prottabledata.HEADER_NO_UNIPEP,
@@ -60,14 +76,18 @@ def get_protein_data(proteindata, p_acc, headerfields):
         outdict.update({headerfields['proteindata'][hfield][pool]: val
                         for (hfield, val) in zip(hfields, pool_values)})
     outdict[prottabledata.HEADER_NO_PROTEIN] = proteincount
+    return outdict
+
+
+def get_cov_descriptions(proteindata, p_acc, report):
     try:
-        outdict.update({prottabledata.HEADER_DESCRIPTION:
-                        proteindata[p_acc]['desc'],
-                        prottabledata.HEADER_COVERAGE:
-                        proteindata[p_acc]['cov'],
-                        })
+        report.update({prottabledata.HEADER_DESCRIPTION:
+                       proteindata[p_acc]['desc'],
+                       prottabledata.HEADER_COVERAGE:
+                       proteindata[p_acc]['cov'],
+                       })
     except KeyError:
         # In case database is built without a FASTA file there is no coverage
         # info available.
         pass
-    return outdict
+    return report

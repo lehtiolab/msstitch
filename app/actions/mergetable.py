@@ -29,7 +29,7 @@ def parse_NA(feature, header):
 
 
 def create_featuredata_map(pgdb, fill_fun, genecentric=False, count_fun=None,
-                           pool_to_output=False, get_uniques=True):
+                           pool_to_output=False, get_uniques=False):
     """Creates dict of protein data containing PSMs, peptides, proteins in
     protein group, unique peptides, description and coverage. Loops through
     PSM/protein matches and uses a passed fill_fun function to actually
@@ -42,7 +42,7 @@ def create_featuredata_map(pgdb, fill_fun, genecentric=False, count_fun=None,
     proteindata = {}
     psmdata = next(protein_psms_data)
     last_prot, last_pool = psmdata[0], psmdata[1]
-    fill_fun(proteindata, last_prot, last_pool, psmdata)
+    fill_fun(proteindata, last_prot, last_pool, psmdata, genecentric)
     for psmdata in protein_psms_data:
         p_acc, samplepool = psmdata[0], psmdata[1]
         if pool_to_output and samplepool != pool_to_output:
@@ -51,7 +51,7 @@ def create_featuredata_map(pgdb, fill_fun, genecentric=False, count_fun=None,
             if count_fun is not None:
                 count_fun(proteindata, last_prot, last_pool)
             last_pool, last_prot = samplepool, p_acc
-        fill_fun(proteindata, p_acc, samplepool, psmdata)
+        fill_fun(proteindata, p_acc, samplepool, psmdata, genecentric)
     if count_fun is not None:
         count_fun(proteindata, last_prot, last_pool)
     if get_uniques:

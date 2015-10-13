@@ -85,13 +85,6 @@ class ProtPepTable(ResultLookupInterface):
         return self.get_proteins_psms('protein_group_master', fields,
                                       firstjoin, leftjoins)
 
-    def get_proteins_psms_unipeps(self):
-        fields = ['p.protein_acc', 'sets.set_name',
-                  'pep.sequence']
-        firstjoin = ('psm_protein_groups', 'ppg', 'master_id')
-        return self.get_proteins_psms('protein_group_master', fields,
-                                      firstjoin)
-
     def get_proteins_psms(self, firsttable, fields, firstjoin,
                           leftjoins=False):
         joins = [firstjoin]

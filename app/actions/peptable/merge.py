@@ -6,16 +6,13 @@ from app.actions.mergetable import create_featuredata_map
 
 def build_peptidetable(pqdb, header, headerfields, isobaric=False,
                        precursor=False, fdr=False, pep=False,
-                       nopsms=False, proteindata=False):
+                       genecentric=False):
     """Fetches peptides and quants from joined lookup table, loops through
     them and when all of a peptides quants/data have been collected, yields
     peptide quant information."""
-    peptidedatamap = False
-    if nopsms or proteindata:
-        peptidedatamap = create_featuredata_map(
-            pqdb, fill_fun=add_record_to_peptidedata, get_uniques=False)
-    if nopsms:
-        count_psms(peptidedatamap)
+    peptidedatamap = create_featuredata_map(pqdb, genecentric=genecentric,
+                                            fill_fun=add_record_to_peptidedata)
+    count_psms(peptidedatamap)
     empty_return = lambda x, y, z: {}
     iso_fun = {True: get_isobaric_quant, False: empty_return}[isobaric]
     ms1_fun = {True: get_precursor_quant, False: empty_return}[precursor]
@@ -23,8 +20,9 @@ def build_peptidetable(pqdb, header, headerfields, isobaric=False,
                False: empty_return}[fdr]
     pep_fun = {True: get_peptide_pep,
                False: empty_return}[pep]
-    psms_fun = {True: get_no_psms, False: empty_return}[nopsms]
-    pdata_fun = {True: get_protein_data, False: empty_return}[proteindata]
+    psms_fun = {True: get_no_psms, False: empty_return}[True]
+    pdata_fun = {True: get_protein_data_genecentric,
+                 False: get_protein_data}[genecentric]
     peptide_sql, sqlfieldmap = pqdb.prepare_mergetable_sql(precursor, isobaric,
                                                            fdr, pep)
     peptides = pqdb.get_merged_features(peptide_sql)
@@ -86,21 +84,35 @@ def get_no_psms(peptide, pdata, headerfields):
     return outdict
 
 
+def get_protein_data_genecentric(peptide, pdata, headerfields):
+    return get_proteins(peptide, pdata)
+
+
 def get_protein_data(peptide, pdata, headerfields):
     """These fields are currently not pool dependent so headerfields
     is ignored"""
+    report = get_proteins(peptide, pdata)
+    return get_cov_descriptions(peptide, pdata, report)
+
+
+def get_proteins(peptide, pdata):
     seq = peptide[peptabledata.HEADER_PEPTIDE]
     outdict = {}
     outdict = {peptabledata.HEADER_PROTEINS:
                ';'.join([str(x[0]) for x in pdata[seq]['proteins']])}
+    return outdict
+
+
+def get_cov_descriptions(peptide, pdata, report):
+    seq = peptide[peptabledata.HEADER_PEPTIDE]
     for idx, key in zip([1, 2], [peptabledata.HEADER_DESCRIPTIONS,
                                  peptabledata.HEADER_COVERAGES]):
         try:
-            outdict[key] = ';'.join([str(x[idx])
-                                     for x in pdata[seq]['proteins']])
+            report[key] = ';'.join([str(x[idx])
+                                    for x in pdata[seq]['proteins']])
         except IndexError:
             pass
-    return outdict
+    return report
 
 
 def count_psms(pdata):
@@ -109,9 +121,12 @@ def count_psms(pdata):
             pdata[seq]['psms'][pool] = len(pdata[seq]['psms'][pool])
 
 
-def add_record_to_peptidedata(peptidedata, p_acc, pool, psmdata):
+def add_record_to_peptidedata(peptidedata, p_acc, pool, psmdata, genecentric):
     seq, psm_id = psmdata[2], psmdata[3]
-    desc, cov = psmdata[4], psmdata[5]
+    if not genecentric:
+        desc, cov = psmdata[4], psmdata[5]
+    else:
+        cov = None
     try:
         peptidedata[seq]['psms'][pool].add(psm_id)
     except KeyError:
