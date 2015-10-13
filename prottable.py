@@ -37,7 +37,7 @@ parser.add_argument('-c', dest='command', type=str,
                     'buildquant - Create protein quant data from a lookup\n'
                     'database. E.g. when multiple protein quant tables have\n'
                     'been read into the lookup and will be combined. Use \n'
-                    'with --dbfile, --proteindata, --precursor, --isobaric\n'
+                    'with --dbfile, --genecentric, --precursor, --isobaric\n'
                     'but NOT with -i.\n\n'
 
                     'addisoquant - Add isobaric quantification data from a\n'
@@ -149,8 +149,8 @@ parser.add_argument('--setname', dest='setname', help='Name of biological '
                     'set which to use when adding protein info to table. '
                     'Must be used with addprotdata.',
                     default=False, type=str)
-parser.add_argument('--proteindata', dest='proteindata', help='Include '
-                    'protein group data such as coverage in output. Flag.',
+parser.add_argument('--genecentric', dest='genecentric', help='Do not '
+                    'include protein group data such in output. Flag.',
                     action='store_const', default=False, const=True)
 parser.add_argument('--precursor', dest='precursor', help='Build protein '
                     'table which contains precursor quant data. Flag.',

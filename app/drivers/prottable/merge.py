@@ -20,8 +20,7 @@ class BuildProteinTableDriver(ProttableMergeDriver):
         self.probability = kwargs.get('probability', False)
         self.fdr = kwargs.get('fdr', False)
         self.pep = kwargs.get('pep', False)
-        self.nopsms = False
-        self.proteindata = kwargs.get('proteindata', False)
+        self.genecentric = kwargs.get('genecentric', False)
 
     def set_feature_generator(self):
         """Generates proteins with quant from the lookup table"""
@@ -32,5 +31,4 @@ class BuildProteinTableDriver(ProttableMergeDriver):
                                                        self.precursorquant,
                                                        self.probability,
                                                        self.fdr, self.pep,
-                                                       self.nopsms,
-                                                       self.proteindata)
+                                                       self.genecentric)

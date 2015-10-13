@@ -49,7 +49,7 @@ parser.add_argument('-c', dest='command', type=str,
 
                     'buildpep - Build peptide table from data stored in a\n'
                     'lookup DB object created with mslookup.py. Use with\n'
-                    '--isobaric, --precursor, --fdr, --pep.\n\n'
+                    '--genecentric, --isobaric, --precursor, --fdr, --pep.\n\n'
                     '',
                     required=True
                     )
@@ -106,13 +106,9 @@ parser.add_argument('--pep', dest='pep',
                     help='Flag. Instructs buildpep to include posterior error '
                     'data in peptide table.',
                     action='store_const', const=True, default=False)
-parser.add_argument('--nopsms', dest='nopsms',
-                    help='Flag. Instructs buildpep to include a column with '
-                    '# PSMs in peptide table.',
-                    action='store_const', const=True, default=False)
-parser.add_argument('--proteindata', dest='proteindata',
-                    help='Flag. Instructs buildpep to include protein data \n'
-                    'accessions, coverage, descriptions in peptide table.',
+parser.add_argument('--genecentric', dest='genecentric',
+                    help='Flag. Instructs buildpep data are not protein\n'
+                    'grouped.',
                     action='store_const', const=True, default=False)
 #parser.add_argument('--dbfile', dest='lookup', help='Lookup database in '
 #                    'SQLite format, to be created using mslookup.py.',

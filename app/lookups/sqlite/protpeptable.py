@@ -71,7 +71,7 @@ class ProtPepTable(ResultLookupInterface):
         fields = ['p.protein_acc', 'sets.set_name',
                   'pep.sequence', 'psm.psm_id']
         firstjoin = ('protein_psm', 'pp', 'protein_acc')
-        return self.get_proteins_psms('protein', fields, firstjoin)
+        return self.get_proteins_psms('proteins', fields, firstjoin)
 
     def get_proteins_psms_pgrouped(self):
         fields = ['p.protein_acc', 'sets.set_name',
@@ -88,8 +88,7 @@ class ProtPepTable(ResultLookupInterface):
     def get_proteins_psms(self, firsttable, fields, firstjoin,
                           leftjoins=False):
         joins = [firstjoin]
-        joins.extend([('psm_protein_groups', 'ppg', 'master_id'),
-                      ('psms', 'psm', 'psm_id'),
+        joins.extend([('psms', 'psm', 'psm_id'),
                       ('peptide_sequences', 'pep', 'pep_id'),
                       ('mzml', 'sp', 'spectra_id'),
                       ('mzmlfiles', 'mzfn', 'mzmlfile_id'),
@@ -99,7 +98,7 @@ class ProtPepTable(ResultLookupInterface):
             j[0], j[1], j[2]) for j in joins])
         if leftjoins:
             join_sql = '{} {}'.format(join_sql, leftjoins)
-        sql = ('SELECT {} FROM {}'
+        sql = ('SELECT {} FROM {} '
                'AS p'.format(', '.join(fields), firsttable))
         sql = '{} {} ORDER BY p.protein_acc, sets.set_name'.format(sql,
                                                                    join_sql)

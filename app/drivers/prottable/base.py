@@ -21,11 +21,11 @@ class ProttableAddData(ProttableDriver):
 
 class ProttableMergeDriver(ProttableDriver):
     def initialize_input(self):
-        self.headertypes = []
-        for inflag, htype in zip([self.proteindata, self.probability, self.fdr,
+        self.headertypes = ['proteindata']
+        for inflag, htype in zip([self.probability, self.fdr,
                                   self.pep, self.precursorquant,
                                   self.isobaricquant],
-                                 ['proteindata', 'probability', 'proteinfdr',
+                                 ['probability', 'proteinfdr',
                                   'proteinpep', 'precursorquant', 'isoquant']):
             if inflag:
                 self.headertypes.append(htype)
