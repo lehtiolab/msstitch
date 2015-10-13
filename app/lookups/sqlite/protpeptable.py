@@ -67,28 +67,49 @@ class ProtPepTable(ResultLookupInterface):
         fieldcount = max(selectmap.values()) + 1
         return selectmap, fieldcount
 
-    def get_proteins_psms(self, extended=False):
-        fields = ['pgm.protein_acc', 'sets.set_name',
+    def get_proteins_psms_genecentric(self):
+        fields = ['p.protein_acc', 'sets.set_name',
+                  'pep.sequence', 'psm.psm_id']
+        firstjoin = ('protein_psm', 'pp', 'protein_acc')
+        return self.get_proteins_psms('protein', fields, firstjoin)
+
+    def get_proteins_psms_pgrouped(self):
+        fields = ['p.protein_acc', 'sets.set_name',
+                  'pep.sequence', 'psm.psm_id', 'pd.description',
+                  'pcov.coverage']
+        leftjoins = ('LEFT OUTER JOIN prot_desc AS pd USING(protein_acc) '
+                     'LEFT OUTER JOIN protein_coverage '
+                     'AS pcov USING(protein_acc)'
+                     )
+        firstjoin = ('psm_protein_groups', 'ppg', 'master_id')
+        return self.get_proteins_psms('protein_group_master', fields,
+                                      firstjoin, leftjoins)
+
+    def get_proteins_psms_unipeps(self):
+        fields = ['p.protein_acc', 'sets.set_name',
                   'pep.sequence']
-        joins = [('psm_protein_groups', 'ppg', 'master_id'),
-                 ('psms', 'psm', 'psm_id'),
-                 ('peptide_sequences', 'pep', 'pep_id'),
-                 ('mzml', 'sp', 'spectra_id'),
-                 ('mzmlfiles', 'mzfn', 'mzmlfile_id'),
-                 ('biosets', 'sets', 'set_id'),
-                 ]
+        firstjoin = ('psm_protein_groups', 'ppg', 'master_id')
+        return self.get_proteins_psms('protein_group_master', fields,
+                                      firstjoin)
+
+    def get_proteins_psms(self, firsttable, fields, firstjoin,
+                          leftjoins=False):
+        joins = [firstjoin]
+        joins.extend([('psm_protein_groups', 'ppg', 'master_id'),
+                      ('psms', 'psm', 'psm_id'),
+                      ('peptide_sequences', 'pep', 'pep_id'),
+                      ('mzml', 'sp', 'spectra_id'),
+                      ('mzmlfiles', 'mzfn', 'mzmlfile_id'),
+                      ('biosets', 'sets', 'set_id'),
+                      ])
         join_sql = ' '.join(['JOIN {} AS {} USING({})'.format(
             j[0], j[1], j[2]) for j in joins])
-        if extended:
-            fields.extend(['psm.psm_id', 'pd.description', 'pcov.coverage'])
-            ljs = ('LEFT OUTER JOIN prot_desc AS pd USING(protein_acc) '
-                   'LEFT OUTER JOIN protein_coverage AS pcov USING(protein_acc)'
-                   )
-            join_sql = '{} {}'.format(join_sql, ljs)
-        sql = ('SELECT {} FROM protein_group_master '
-               'AS pgm'.format(', '.join(fields)))
-        sql = '{} {} ORDER BY pgm.protein_acc, sets.set_name'.format(sql,
-                                                                     join_sql)
+        if leftjoins:
+            join_sql = '{} {}'.format(join_sql, leftjoins)
+        sql = ('SELECT {} FROM {}'
+               'AS p'.format(', '.join(fields), firsttable))
+        sql = '{} {} ORDER BY p.protein_acc, sets.set_name'.format(sql,
+                                                                   join_sql)
         cursor = self.get_cursor()
         return cursor.execute(sql)
 

@@ -28,14 +28,17 @@ def parse_NA(feature, header):
     return feature
 
 
-def create_featuredata_map(pgdb, fill_fun, count_fun=None,
+def create_featuredata_map(pgdb, fill_fun, genecentric=False, count_fun=None,
                            pool_to_output=False, get_uniques=True):
     """Creates dict of protein data containing PSMs, peptides, proteins in
     protein group, unique peptides, description and coverage. Loops through
     PSM/protein matches and uses a passed fill_fun function to actually
     fill the outputted map.
     """
-    protein_psms_data = pgdb.get_all_protein_psms_with_sets()
+    if genecentric:
+        protein_psms_data = pgdb.get_proteins_psms_genecentric()
+    else:
+        protein_psms_data = pgdb.get_proteins_psms_pgrouped()
     proteindata = {}
     psmdata = next(protein_psms_data)
     last_prot, last_pool = psmdata[0], psmdata[1]

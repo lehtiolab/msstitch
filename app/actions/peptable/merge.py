@@ -12,9 +12,8 @@ def build_peptidetable(pqdb, header, headerfields, isobaric=False,
     peptide quant information."""
     peptidedatamap = False
     if nopsms or proteindata:
-        peptidedatamap = create_featuredata_map(pqdb,
-                                                add_record_to_peptidedata,
-                                                get_uniques=False)
+        peptidedatamap = create_featuredata_map(
+            pqdb, fill_fun=add_record_to_peptidedata, get_uniques=False)
     if nopsms:
         count_psms(peptidedatamap)
     empty_return = lambda x, y, z: {}

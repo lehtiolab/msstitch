@@ -10,8 +10,9 @@ def build_proteintable(pqdb, header, headerfields, isobaric=False,
     """Fetches proteins and quants from joined lookup table, loops through
     them and when all of a protein's quants have been collected, yields the
     protein quant information."""
-    pdmap = create_featuredata_map(pqdb, pinfo.add_record_to_proteindata,
-                                   pinfo.count_peps_psms)
+    pdmap = create_featuredata_map(pqdb,
+                                   fill_fun=pinfo.add_record_to_proteindata,
+                                   count_fun=pinfo.count_peps_psms)
     empty_return = lambda x, y, z: {}
     iso_fun = {True: get_isobaric_quant, False: empty_return}[isobaric]
     ms1_fun = {True: get_precursor_quant, False: empty_return}[precursor]

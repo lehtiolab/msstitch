@@ -22,11 +22,12 @@ class ProtTableDB(ProtPepTable):
             'amount_psms_name) VALUES (?, ?, ?)',
             quantchannels)
 
-    def get_all_protein_psms_with_sets(self):
-        return self.get_proteins_psms(extended=True)
-
     def get_all_proteins_psms_for_unipeps(self):
-        return self.get_proteins_psms(extended=False)
+        fields = ['p.protein_acc', 'sets.set_name',
+                  'pep.sequence']
+        firstjoin = ('psm_protein_groups', 'ppg', 'master_id')
+        return self.get_proteins_psms('protein_group_master', fields,
+                                      firstjoin)
 
     def prepare_mergetable_sql(self, precursor=False, isobaric=False,
                                probability=False, fdr=False, pep=False):
