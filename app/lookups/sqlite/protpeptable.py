@@ -19,7 +19,7 @@ class ProtPepTable(ResultLookupInterface):
     def get_all_poolnames(self):
         cursor = self.get_cursor()
         cursor.execute(
-            'SELECT DISTINCT set_name, set_id FROM biosets')
+            'SELECT DISTINCT set_name, set_id FROM biosets ORDER BY set_name')
         return cursor
 
     def store_table_files(self, tables):
