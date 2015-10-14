@@ -20,7 +20,6 @@ def build_peptidetable(pqdb, header, headerfields, isobaric=False,
                False: empty_return}[fdr]
     pep_fun = {True: get_peptide_pep,
                False: empty_return}[pep]
-    psms_fun = {True: get_no_psms, False: empty_return}[True]
     pdata_fun = {True: get_protein_data_genecentric,
                  False: get_protein_data}[genecentric]
     peptide_sql, sqlfieldmap = pqdb.prepare_mergetable_sql(precursor, isobaric,
@@ -30,7 +29,7 @@ def build_peptidetable(pqdb, header, headerfields, isobaric=False,
     outpeptide = {peptabledata.HEADER_PEPTIDE: peptide[sqlfieldmap['p_seq']]}
     check_pep = {k: v for k, v in outpeptide.items()}
     fill_mergefeature(outpeptide, iso_fun, ms1_fun, empty_return, fdr_fun,
-                      pep_fun, psms_fun, pdata_fun, peptide, sqlfieldmap,
+                      pep_fun, pdata_fun, peptide, sqlfieldmap,
                       headerfields, peptidedatamap)
     for peptide in peptides:
         p_seq = peptide[sqlfieldmap['p_seq']]
@@ -40,7 +39,7 @@ def build_peptidetable(pqdb, header, headerfields, isobaric=False,
             outpeptide = {peptabledata.HEADER_PEPTIDE: p_seq}
             check_pep = {k: v for k, v in outpeptide.items()}
         fill_mergefeature(outpeptide, iso_fun, ms1_fun, empty_return, fdr_fun,
-                          pep_fun, psms_fun, pdata_fun, peptide, sqlfieldmap,
+                          pep_fun, pdata_fun, peptide, sqlfieldmap,
                           headerfields, peptidedatamap)
     yield parse_NA(outpeptide, header)
 
@@ -85,21 +84,24 @@ def get_no_psms(peptide, pdata, headerfields):
 
 
 def get_protein_data_genecentric(peptide, pdata, headerfields):
-    return get_proteins(peptide, pdata)
+    return get_proteins(peptide, pdata, headerfields)
 
 
 def get_protein_data(peptide, pdata, headerfields):
     """These fields are currently not pool dependent so headerfields
     is ignored"""
-    report = get_proteins(peptide, pdata)
+    report = get_proteins(peptide, pdata, headerfields)
     return get_cov_descriptions(peptide, pdata, report)
 
 
-def get_proteins(peptide, pdata):
+def get_proteins(peptide, pdata, headerfields):
     seq = peptide[peptabledata.HEADER_PEPTIDE]
     outdict = {}
     outdict = {peptabledata.HEADER_PROTEINS:
                ';'.join([str(x[0]) for x in pdata[seq]['proteins']])}
+    for pool, psms in pdata[seq]['psms'].items():
+        pool_values = [psms]
+        outdict.update({headerfields['proteindata'][peptabledata.HEADER_NO_PSM][pool]: psms})
     return outdict
 
 

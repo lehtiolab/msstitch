@@ -54,7 +54,6 @@ def get_peptable_headerfields(headertypes, lookup=False, poolnames=False):
                   'precursorquant': get_precursorquant_fields(poolnames),
                   'peptidefdr': get_peptidefdr_fields(poolnames),
                   'peptidepep': get_peptidepep_fields(poolnames),
-                  'nopsms': get_nopsms_fields(poolnames),
                   'proteindata': get_proteininfo_fields(poolnames),
                   }
     return generate_headerfields(headertypes, field_defs, poolnames)
@@ -82,6 +81,7 @@ def get_proteininfo_fields(poolnames=False):
                   ]
     for field in basefields:
         allfields[field] = False
+    allfields[peptabledata.HEADER_NO_PSM] = poolnames
     return allfields
 
 

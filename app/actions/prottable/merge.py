@@ -23,7 +23,6 @@ def build_proteintable(pqdb, header, headerfields, isobaric=False,
                False: empty_return}[fdr]
     pep_fun = {True: get_prot_pep,
                False: empty_return}[pep]
-    psms_fun = empty_return
     pdata_fun = {True: get_protein_data_genecentric,
                  False: get_protein_data}[genecentric]
     protein_sql, sqlfieldmap = pqdb.prepare_mergetable_sql(precursor, isobaric,
@@ -34,7 +33,7 @@ def build_proteintable(pqdb, header, headerfields, isobaric=False,
     outprotein = {prottabledata.HEADER_PROTEIN: protein[sqlfieldmap['p_acc']]}
     check_prot = {k: v for k, v in outprotein.items()}
     fill_mergefeature(outprotein, iso_fun, ms1_fun, prob_fun, fdr_fun, pep_fun,
-                      psms_fun, pdata_fun, protein, sqlfieldmap, headerfields,
+                      pdata_fun, protein, sqlfieldmap, headerfields,
                       pdmap)
     for protein in proteins:
         p_acc = protein[sqlfieldmap['p_acc']]
@@ -44,7 +43,7 @@ def build_proteintable(pqdb, header, headerfields, isobaric=False,
             outprotein = {prottabledata.HEADER_PROTEIN: p_acc}
             check_prot = {k: v for k, v in outprotein.items()}
         fill_mergefeature(outprotein, iso_fun, ms1_fun, prob_fun, fdr_fun,
-                          pep_fun, psms_fun, pdata_fun, protein, sqlfieldmap,
+                          pep_fun, pdata_fun, protein, sqlfieldmap,
                           headerfields, pdmap)
     yield parse_NA(outprotein, header)
 
