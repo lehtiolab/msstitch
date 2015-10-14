@@ -22,12 +22,16 @@ class ProtTableDB(ProtPepTable):
             'amount_psms_name) VALUES (?, ?, ?)',
             quantchannels)
 
-    def get_all_proteins_psms_for_unipeps(self):
+    def get_all_proteins_psms_for_unipeps(self, genecentric):
         fields = ['p.protein_acc', 'sets.set_name',
                   'pep.sequence']
-        firstjoin = ('psm_protein_groups', 'ppg', 'master_id')
-        return self.get_proteins_psms('protein_group_master', fields,
-                                      firstjoin)
+        if genecentric:
+            firstjoin = ('protein_psm', 'pp', 'protein_acc')
+            firsttable = 'proteins'
+        else:
+            firstjoin = ('psm_protein_groups', 'ppg', 'master_id')
+            firsttable = 'protein_group_master'
+        return self.get_proteins_psms(firsttable, fields, firstjoin)
 
     def prepare_mergetable_sql(self, precursor=False, isobaric=False,
                                probability=False, fdr=False, pep=False):

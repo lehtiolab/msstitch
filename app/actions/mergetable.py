@@ -58,7 +58,7 @@ def create_featuredata_map(pgdb, fill_fun, genecentric=False, count_fun=None,
     if count_fun is not None:
         count_fun(proteindata, last_prot, last_pool)
     if get_uniques:
-        get_unique_peptides(pgdb, proteindata)
+        get_unique_peptides(pgdb, proteindata, genecentric)
     return proteindata
 
 
@@ -72,9 +72,9 @@ def get_proteingroup_content(pgdb):
     return pgmap
 
 
-def get_pep_prot_map(pgdb):
+def get_pep_prot_map(pgdb, genecentric):
     seq_protein_map = {}
-    for p_acc, pool, seq in pgdb.get_all_proteins_psms_for_unipeps():
+    for p_acc, pool, seq in pgdb.get_all_proteins_psms_for_unipeps(genecentric):
         try:
             seq_protein_map[pool][seq].add(p_acc)
         except KeyError:
@@ -85,8 +85,8 @@ def get_pep_prot_map(pgdb):
     return seq_protein_map
 
 
-def get_unique_peptides(pgdb, proteindata):
-    seq_protein_map = get_pep_prot_map(pgdb)
+def get_unique_peptides(pgdb, proteindata, genecentric):
+    seq_protein_map = get_pep_prot_map(pgdb, genecentric)
     for pool, peptides in seq_protein_map.items():
         for proteins in peptides.values():
             if len(proteins) == 1:
