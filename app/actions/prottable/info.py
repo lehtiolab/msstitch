@@ -88,7 +88,7 @@ def get_cov_descriptions(proteindata, p_acc, report):
                        prottabledata.HEADER_COVERAGE:
                        proteindata[p_acc]['cov'],
                        prottabledata.HEADER_CONTENTPROT:
-                       proteindata[p_acc]['proteins'],
+                       ','.join(proteindata[p_acc]['proteins']),
                        prottabledata.HEADER_NO_PROTEIN:
                        len(proteindata[p_acc]['proteins'])
                        })
