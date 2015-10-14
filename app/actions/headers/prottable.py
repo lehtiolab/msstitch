@@ -23,7 +23,7 @@ def get_prottable_headerfields(headertypes, lookup=False, poolnames=False):
                   'proteinpep': get_proteinpep_fields(poolnames),
                   'bestpepscore': get_bestpeptide_fields(poolnames),
                   }
-    return generate_headerfields(headertypes, field_defs, poolnames)
+    return generate_headerfields(headertypes, field_defs)
 
 
 def get_precursorquant_fields(poolnames=False):

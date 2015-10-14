@@ -56,7 +56,7 @@ def get_peptable_headerfields(headertypes, lookup=False, poolnames=False):
                   'peptidepep': get_peptidepep_fields(poolnames),
                   'proteindata': get_proteininfo_fields(poolnames),
                   }
-    return generate_headerfields(headertypes, field_defs, poolnames)
+    return generate_headerfields(headertypes, field_defs)
 
 
 def get_precursorquant_fields(poolnames=False):
