@@ -76,7 +76,7 @@ class ProtPepTable(ResultLookupInterface):
     def get_proteins_psms_pgrouped(self):
         fields = ['p.protein_acc', 'sets.set_name',
                   'pep.sequence', 'psm.psm_id', 'pd.description',
-                  'pcov.coverage', 'pgc.protein_acc']
+                  'pcov.coverage']
         extrajoins = ('LEFT OUTER JOIN prot_desc AS pd USING(protein_acc) '
                       'LEFT OUTER JOIN protein_coverage '
                       'AS pcov USING(protein_acc) '
