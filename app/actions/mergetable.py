@@ -36,13 +36,16 @@ def create_featuredata_map(pgdb, fill_fun, genecentric=False, count_fun=None,
     fill the outputted map.
     """
     if genecentric:
+        pgcontentmap = None
         protein_psms_data = pgdb.get_proteins_psms_genecentric()
     else:
+        pgcontentmap = get_proteingroup_content(pgdb)
         protein_psms_data = pgdb.get_proteins_psms_pgrouped()
     proteindata = {}
     psmdata = next(protein_psms_data)
     last_prot, last_pool = psmdata[0], psmdata[1]
-    fill_fun(proteindata, last_prot, last_pool, psmdata, genecentric)
+    fill_fun(proteindata, last_prot, last_pool, psmdata, genecentric,
+             pgcontentmap)
     for psmdata in protein_psms_data:
         p_acc, samplepool = psmdata[0], psmdata[1]
         if pool_to_output and samplepool != pool_to_output:
@@ -51,12 +54,23 @@ def create_featuredata_map(pgdb, fill_fun, genecentric=False, count_fun=None,
             if count_fun is not None:
                 count_fun(proteindata, last_prot, last_pool)
             last_pool, last_prot = samplepool, p_acc
-        fill_fun(proteindata, p_acc, samplepool, psmdata, genecentric)
+        fill_fun(proteindata, p_acc, samplepool, psmdata, genecentric,
+                 pgcontentmap)
     if count_fun is not None:
         count_fun(proteindata, last_prot, last_pool)
     if get_uniques:
         get_unique_peptides(pgdb, proteindata)
     return proteindata
+
+
+def get_proteingroup_content(pgdb):
+    pgmap = {}
+    for master, contentprot in pgdb.get_proteingroup_content():
+        try:
+            pgmap[master].append(contentprot)
+        except KeyError:
+            pgmap[master] = [contentprot]
+    return pgmap
 
 
 def get_pep_prot_map(pgdb):

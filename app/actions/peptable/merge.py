@@ -105,8 +105,9 @@ def get_proteins(peptide, pdata):
 
 def get_cov_descriptions(peptide, pdata, report):
     seq = peptide[peptabledata.HEADER_PEPTIDE]
-    for idx, key in zip([1, 2], [peptabledata.HEADER_DESCRIPTIONS,
-                                 peptabledata.HEADER_COVERAGES]):
+    for idx, key in zip([1, 2, 3], [peptabledata.HEADER_DESCRIPTIONS,
+                                    peptabledata.HEADER_COVERAGES,
+                                    peptabledata.HEADER_NO_CONTENTPROTEINS]):
         try:
             report[key] = ';'.join([str(x[idx])
                                     for x in pdata[seq]['proteins']])
@@ -121,10 +122,12 @@ def count_psms(pdata):
             pdata[seq]['psms'][pool] = len(pdata[seq]['psms'][pool])
 
 
-def add_record_to_peptidedata(peptidedata, p_acc, pool, psmdata, genecentric):
+def add_record_to_peptidedata(peptidedata, p_acc, pool, psmdata, genecentric,
+                              pgcontentmap=None):
     seq, psm_id = psmdata[2], psmdata[3]
     if not genecentric:
         desc, cov = psmdata[4], psmdata[5]
+        pgcontent = pgcontentmap[p_acc]
     else:
         cov = None
     try:
@@ -137,7 +140,7 @@ def add_record_to_peptidedata(peptidedata, p_acc, pool, psmdata, genecentric):
                                 'proteins': set()}
         peptidedata[seq]['psms'][pool].add(psm_id)
     if cov is not None:
-        protein = (p_acc, desc, cov)
+        protein = (p_acc, desc, cov, len(pgcontent))
     else:
         protein = (p_acc,)
     peptidedata[seq]['proteins'].add(protein)

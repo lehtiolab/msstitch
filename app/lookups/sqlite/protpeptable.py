@@ -76,17 +76,24 @@ class ProtPepTable(ResultLookupInterface):
     def get_proteins_psms_pgrouped(self):
         fields = ['p.protein_acc', 'sets.set_name',
                   'pep.sequence', 'psm.psm_id', 'pd.description',
-                  'pcov.coverage']
-        leftjoins = ('LEFT OUTER JOIN prot_desc AS pd USING(protein_acc) '
-                     'LEFT OUTER JOIN protein_coverage '
-                     'AS pcov USING(protein_acc)'
-                     )
+                  'pcov.coverage', 'pgc.protein_acc']
+        extrajoins = ('LEFT OUTER JOIN prot_desc AS pd USING(protein_acc) '
+                      'LEFT OUTER JOIN protein_coverage '
+                      'AS pcov USING(protein_acc) '
+                      )
         firstjoin = ('psm_protein_groups', 'ppg', 'master_id')
         return self.get_proteins_psms('protein_group_master', fields,
-                                      firstjoin, leftjoins)
+                                      firstjoin, extrajoins)
+
+    def get_proteingroup_content(self):
+        cursor = self.get_cursor()
+        sql = ('SELECT pgm.protein_acc, pgc.protein_acc FROM '
+               'protein_group_master AS pgm '
+               'JOIN protein_group_content AS pgc USING(master_id)')
+        return cursor.execute(sql)
 
     def get_proteins_psms(self, firsttable, fields, firstjoin,
-                          leftjoins=False):
+                          extrajoins=False):
         joins = [firstjoin]
         joins.extend([('psms', 'psm', 'psm_id'),
                       ('peptide_sequences', 'pep', 'pep_id'),
@@ -96,8 +103,8 @@ class ProtPepTable(ResultLookupInterface):
                       ])
         join_sql = ' '.join(['JOIN {} AS {} USING({})'.format(
             j[0], j[1], j[2]) for j in joins])
-        if leftjoins:
-            join_sql = '{} {}'.format(join_sql, leftjoins)
+        if extrajoins:
+            join_sql = '{} {}'.format(join_sql, extrajoins)
         sql = ('SELECT {} FROM {} '
                'AS p'.format(', '.join(fields), firsttable))
         sql = '{} {} ORDER BY p.protein_acc, sets.set_name'.format(sql,

@@ -2,26 +2,28 @@ from app.dataformats import prottable as prottabledata
 from app.actions.mergetable import create_featuredata_map
 
 
-def add_record_to_proteindata(proteindata, p_acc, pool, psmdata, genecentric):
+def add_record_to_proteindata(proteindata, p_acc, pool, psmdata, genecentric,
+                              pgcontentmap=None):
+    """Fill function for create_featuredata_map"""
     seq, psm_id = psmdata[2], psmdata[3]
     if not genecentric:
         desc, cov = psmdata[4], psmdata[5]
+        pgcontent = pgcontentmap[p_acc]
     else:
         cov = None
     try:
         proteindata[p_acc]['pools'][pool]['psms'].add(psm_id)
     except KeyError:
-        emptyinfo = {'psms': set(), 'peptides': set(), 'proteins': set(),
-                     'unipeps': 0}
+        emptyinfo = {'psms': set(), 'peptides': set(), 'unipeps': 0}
         try:
             proteindata[p_acc]['pools'][pool] = emptyinfo
         except KeyError:
             proteindata[p_acc] = {'pools': {pool: emptyinfo}}
             if cov is not None:
-                proteindata[p_acc].update({'desc': desc, 'cov': cov})
+                proteindata[p_acc].update({'desc': desc, 'cov': cov, 
+                                           'proteins': pgcontent})
     proteindata[p_acc]['pools'][pool]['psms'].add(psm_id)
     proteindata[p_acc]['pools'][pool]['peptides'].add(seq)
-    #proteindata[p_acc][pool]['proteins'].add(pg_content)
 
 
 def count_peps_psms(proteindata, p_acc, pool):
@@ -85,6 +87,10 @@ def get_cov_descriptions(proteindata, p_acc, report):
                        proteindata[p_acc]['desc'],
                        prottabledata.HEADER_COVERAGE:
                        proteindata[p_acc]['cov'],
+                       prottabledata.HEADER_CONTENTPROT:
+                       proteindata[p_acc]['proteins'],
+                       prottabledata.HEADER_NO_PROTEIN:
+                       len(proteindata[p_acc]['proteins'])
                        })
     except KeyError:
         # In case database is built without a FASTA file there is no coverage

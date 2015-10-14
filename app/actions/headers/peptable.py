@@ -78,6 +78,7 @@ def get_proteininfo_fields(poolnames=False):
     basefields = [peptabledata.HEADER_PROTEINS,
                   peptabledata.HEADER_DESCRIPTIONS,
                   peptabledata.HEADER_COVERAGES,
+                  peptabledata.HEADER_NO_CONTENTPROTEINS,
                   ]
     for field in basefields:
         allfields[field] = False

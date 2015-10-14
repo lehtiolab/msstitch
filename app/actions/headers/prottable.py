@@ -50,6 +50,7 @@ def get_proteininfo_fields(poolnames=False):
     basefields = [prottabledata.HEADER_DESCRIPTION,
                   prottabledata.HEADER_COVERAGE,
                   prottabledata.HEADER_NO_PROTEIN,
+                  prottabledata.HEADER_CONTENTPROT,
                   ]
     poolfields = [prottabledata.HEADER_NO_UNIPEP,
                   prottabledata.HEADER_NO_PEPTIDE,
