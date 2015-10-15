@@ -20,9 +20,10 @@ def add_genes_to_psm_table(psmfn, oldheader, fastafn):
         outpsm[mzidtsvdata.HEADER_GENE] = ';'.join(get_genes(proteins, gpmap))
         symbols = get_symbols(proteins, gpmap)
         desc = get_descriptions(proteins, gpmap)
-        if not None in symbols:
-            outpsm[mzidtsvdata.HEADER_SYMBOL] = ';'.join(symbols)
-            outpsm[mzidtsvdata.HEADER_REAL_DESCRIPTION] = ';'.join(desc)
+        if None in symbols:
+            symbols, desc = ['NA'], ['NA']
+        outpsm[mzidtsvdata.HEADER_SYMBOL] = ';'.join(symbols)
+        outpsm[mzidtsvdata.HEADER_DESCRIPTION] = ';'.join(desc)
         yield outpsm
 
 

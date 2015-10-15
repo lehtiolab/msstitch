@@ -42,7 +42,7 @@ def get_proteins_genes(fastafn):
             header = next(fp).strip().split('\t')
             ensg = header.index('Ensembl Gene ID')
             ensp = header.index('Ensembl Protein ID')
-            symb = header.index('HGNC Symbol')
+            symb = header.index('HGNC symbol')
             desc = header.index('Description')
             for line in fp:
                 line = line.strip().split('\t')
