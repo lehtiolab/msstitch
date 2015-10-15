@@ -47,9 +47,11 @@ parser.add_argument('-c', dest='command', type=str,
                     'addms1quant - Add MS1 quantification data from a\n'
                     'PSM table containing precursor quant areas. Needs\n'
                     'a psmtable specified with --psmtable.\n\n'
+
                     'emptyprottable - Create protein table from PSM table\n'
                     'containing no quant data, resulting in one column with\n'
-                    'master proteins only.\n\n'
+                    'master proteins only. Use with --protcol if input PSMs\n'
+                    'are not of standard protein grouped variety.\n\n'
 
                     'addprob - Add protein probabilities from a\n'
                     'peptide table posterior error probabilities. Needs\n'
