@@ -26,9 +26,27 @@ def get_proteins_descriptions(fastafn):
 
 
 def get_proteins_genes(fastafn):
-    for record in parse_fasta(fastafn):
-        rectype = get_record_type(record)
-        yield (record.id, get_gene(record.description, rectype))
+    """This returns a tuple of (protein, gene, HGNC symbol, description) from
+    a passed file. If the file is FASTA from ENSEMBL or UniProt, only genes
+    are given and symbol/description will be None. If the file is a ENSEMBL
+    Biomart mapping file it tries to parse that and also return the rest"""
+    with open(fastafn) as fp:
+        firstline = next(fp).strip()
+    if firstline[0] == '>':
+        for record in parse_fasta(fastafn):
+            rectype = get_record_type(record)
+            yield (record.id, get_gene(record.description, rectype),
+                   None, None)
+    elif firstline.split('\t')[0] == 'Ensembl Gene ID':
+        with open(fastafn) as fp:
+            header = next(fp).strip().split('\t')
+            ensg = header.index('Ensembl Gene ID')
+            ensp = header.index('Ensembl Protein ID')
+            symb = header.index('HGNC Symbol')
+            desc = header.index('Description')
+            for line in fp:
+                line = line.strip().split('\t')
+                yield (line[ensp], line[ensg], line[symb], line[desc])
 
 
 def parse_protein_identifier(record):
@@ -47,7 +65,8 @@ def get_record_type(record):
     elif record.id[:4] == 'ENSP':
         return 'ensembl'
     else:
-        raise RuntimeError('Cannot detect type of FASTA file. Should be Uniprot or ENSEMBL')
+        raise RuntimeError('Cannot detect type of FASTA file. '
+                           'Should be Uniprot or ENSEMBL')
 
 
 def get_gene(description, rectype):
