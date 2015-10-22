@@ -9,6 +9,7 @@ def generate_general_header(headerfields, fieldtypes, firstfield,
         header = [firstfield]
     else:
         header = oldheader[:]
+    poolfields = OrderedDict()
     for fieldtype in fieldtypes:
         try:
             fields = headerfields[fieldtype]
@@ -17,8 +18,15 @@ def generate_general_header(headerfields, fieldtypes, firstfield,
         if type(fields) == list:
             header.extend(fields)
         else:
-            for pools in fields.values():
-                header.extend(pools.values())
+            for pool_field in fields.values():
+                for pool, field in pool_field.items():
+                    try:
+                        poolfields[pool].append(field)
+                    except KeyError:
+                        poolfields[pool] = [field]
+    if poolfields:
+        for fields in poolfields.values():
+            header.extend(fields)
     return header
 
 
