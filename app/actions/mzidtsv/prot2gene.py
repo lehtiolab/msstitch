@@ -20,8 +20,6 @@ def add_genes_to_psm_table(psmfn, oldheader, pgdb):
         outpsm[mzidtsvdata.HEADER_GENE] = ';'.join(get_genes(proteins, gpmap))
         symbols = get_symbols(proteins, gpmap)
         desc = get_descriptions(proteins, gpmap)
-        if None in symbols:
-            symbols, desc = ['NA'], ['NA']
         outpsm[mzidtsvdata.HEADER_SYMBOL] = ';'.join(symbols)
         outpsm[mzidtsvdata.HEADER_DESCRIPTION] = ';'.join(desc)
         yield outpsm
@@ -30,8 +28,11 @@ def add_genes_to_psm_table(psmfn, oldheader, pgdb):
 def get_mapped(proteins, gpmap, outtype):
     # FIXME multiple vals for a protein?
     outvals = [gpmap[protein][outtype] for protein in proteins]
-    outvals = OrderedDict([(val, 1) for val in outvals])
-    return outvals.keys()
+    outvals = OrderedDict([(val, 1) for val in outvals]).keys()
+    if None in outvals:
+        return ['NA']
+    else:
+        return outvals
 
 
 def get_genes(proteins, gpmap):
