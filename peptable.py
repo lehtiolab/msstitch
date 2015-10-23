@@ -14,6 +14,7 @@ import os
 import app.drivers.peptable.psmtopeptable as psm2pepdrivers
 import app.drivers.peptable.merge as mergedrivers
 import app.drivers.peptable.model_qvals as modeldrivers
+import app.drivers.peptable.isoquant as isoquantdrivers 
 
 
 def parser_file_exists(currentparser, fn):
@@ -48,6 +49,11 @@ parser.add_argument('-c', dest='command', type=str,
                     'a linear model of them against a score (partial least \n'
                     'squares regression). Uses --qcolpattern, \n'
                     '--scorecolpattern.\n\n'
+
+                    'addpepisoquant - Add isobaric quantification data from a\n'
+                    'peptidetable containing this. Needs a second table\n'
+                    'specified with --quantfile, --qaccpattern, and \n'
+                    '--isobquantcolpattern\n\n'
 
                     'buildpep - Build peptide table from data stored in a\n'
                     'lookup DB object created with mslookup.py. Use with\n'
@@ -92,6 +98,13 @@ parser.add_argument('--isobquantcolpattern', dest='quantcolpattern',
                     help='Unique text pattern to identify isobaric quant \n'
                     'column in PSM table for peptide quant.',
                     type=str, required=False)
+parser.add_argument('--qaccpattern', dest='quantacccolpattern',
+                    help='Unique text pattern to identify peptide column\n'
+                    'in peptide quant table.',
+                    type=str, required=False)
+parser.add_argument('--quantfile', dest='quantfile', help='Peptide table file '
+                    'containing isobaric quant data to add to peptide table.',
+                    type=lambda x: parser_file_exists(parser, x))
 parser.add_argument('--isobaric', dest='isobaric',
                     help='Flag. Instructs buildpep to include isobaric quant\n'
                     'data in peptide table.',
@@ -148,6 +161,7 @@ args = parser.parse_args()
 
 commandmap = {
     'psm2pep': psm2pepdrivers.MzidTSVPeptableDriver,
+    'addpepisoquant': isoquantdrivers.AddIsobaricQuantDriver,
     'modelqvals': modeldrivers.ModelQValuesDriver,
     'buildpep': mergedrivers.BuildPeptideTableDriver,
 }

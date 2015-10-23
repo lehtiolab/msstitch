@@ -1,5 +1,6 @@
 from app.drivers.pepprottable import PepProttableDriver
 from app.actions.headers import peptable as head
+from app.readers import tsv as reader
 
 
 class PeptableDriver(PepProttableDriver):
@@ -9,6 +10,13 @@ class PeptableDriver(PepProttableDriver):
                                                            self.poolnames)
         self.header = head.generate_header(self.headerfields,
                                            self.oldheader)
+
+
+class PeptableAddData(PeptableDriver):
+    def initialize_input(self):
+        self.oldheader = reader.get_tsv_header(self.fn)
+        self.in_peptides = reader.generate_tsv_proteins(self.fn,
+                                                        self.oldheader)
 
 
 class PeptableMergeDriver(PeptableDriver):
