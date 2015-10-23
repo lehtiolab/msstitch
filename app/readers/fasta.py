@@ -27,8 +27,8 @@ def get_proteins_descriptions(fastafn):
 
 def get_proteins_genes(fastafn):
     """This returns a tuple of (protein, gene, HGNC symbol, description) from
-    a passed file. If the file is FASTA from ENSEMBL or UniProt, only genes
-    are given and symbol/description will be None. If the file is a ENSEMBL
+    a passed file. If the file is FASTA from ENSEMBL or UniProt, only genes and
+    descriptions are given and symbol will be None. If the file is a ENSEMBL
     Biomart mapping file it tries to parse that and also return the rest"""
     with open(fastafn) as fp:
         firstline = next(fp).strip()
@@ -36,7 +36,7 @@ def get_proteins_genes(fastafn):
         for record in parse_fasta(fastafn):
             rectype = get_record_type(record)
             yield (record.id, get_gene(record.description, rectype),
-                   None, None)
+                   None, record.description)
     elif firstline.split('\t')[0] == 'Ensembl Gene ID':
         with open(fastafn) as fp:
             header = next(fp).strip().split('\t')

@@ -57,8 +57,13 @@ def store_proteins_descriptions(pgdb, fastafn, tsvfn, mapfn, header):
         proteins = [x for x in proteins]
         pgdb.store_proteins(proteins, evidences, sequences)
         if not mapfn:
-            protein_descriptions = fastareader.get_proteins_descriptions(fastafn)
-            pgdb.store_descriptions(protein_descriptions)
+            associations = fastareader.get_proteins_genes(fastafn)
+            genes, descriptions = [], []
+            for assoc in associations:
+                genes.append((assoc[1], assoc[0]))
+                descriptions.append((assoc[0], assoc[3]))
+            pgdb.store_descriptions(descriptions)
+            pgdb.store_genes(genes)
     if mapfn:
         proteins = {x[0]: 1 for x in proteins}
         gpmap = get_protein_gene_map(mapfn, proteins)
