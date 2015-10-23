@@ -63,8 +63,8 @@ parser.add_argument('-c', dest='command', type=str,
                     '--confidence-better, --dbfile, --spectracol\n\n'
 
                     'genepsm        - Add column to mzidtsv with gene names\n'
-                    'or symbols, extracted from FASTA file (--fasta) from \n'
-                    'Swissprot or ENSEMBL.\n\n'
+                    'or symbols, which are stored in a lookup specified with\n'
+                    '--dbfile\n\n'
 
                     'mergetsv       - Merges multiple TSV tables of MSGF+ \n'
                     'output. Make sure headers are same in all files.\n\n'
@@ -89,9 +89,6 @@ parser.add_argument('-d', dest='outdir', required=True,
                     type=lambda x: parser_file_exists(parser, x))
 parser.add_argument('--mzid', dest='mzid', help='mzIdentML file',
                     type=lambda x: parser_file_exists(parser, x))
-parser.add_argument('--fasta', dest='fasta', help='FASTA sequence database, '
-                    'to use when extracting gene names to the PSM table from '
-                    'proteins.', type=lambda x: parser_file_exists(parser, x))
 parser.add_argument('--confidence-col', dest='confcol', help='Confidence '
                     'column number or name in the tsv file. First column has'
                     ' number 1.')

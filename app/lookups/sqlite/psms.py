@@ -57,6 +57,20 @@ class PSMDB(ResultLookupInterface):
         self.conn.commit()
         self.index_column('associd_index', 'associated_ids', 'protein_acc')
 
+    def get_protein_gene_map(self):
+        cursor = self.get_cursor()
+        cursor.execute(
+            'SELECT p.protein_acc, g.gene_acc, aid.assoc_id, d.description '
+            'FROM proteins AS p '
+            'LEFT OUTER JOIN genes AS g ON p.protein_acc=g.protein_acc '
+            'LEFT OUTER JOIN associated_ids AS aid '
+            'ON p.protein_acc=aid.protein_acc '
+            'LEFT OUTER JOIN prot_desc AS d ON p.protein_acc=d.protein_acc'
+            )
+        gpmap = {p_acc: {'gene': gene, 'symbol': sym, 'desc': desc}
+                 for p_acc, gene, sym, desc in cursor}
+        return gpmap
+
     def store_pepseqs(self, sequences):
         cursor = self.get_cursor()
         cursor.executemany(

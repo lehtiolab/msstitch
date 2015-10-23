@@ -11,8 +11,6 @@ class MzidTSVDriver(base.BaseDriver):
         self.conflvl = kwargs.get('conflvl', None)
         self.lowerbetter = kwargs.get('conftype', None) == 'lower'
         self.unroll = kwargs.get('unroll', False)
-        self.fasta = kwargs.get('fasta', False)
-        self.coverage = self.fasta is not False
         self.spec_column = kwargs.get('speccol', None)
 
     def run(self):
