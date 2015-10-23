@@ -36,10 +36,10 @@ class PSMDB(ResultLookupInterface):
 
     def store_gene_and_associated_id(self, feats):
         genes = ((mapped['gene'], protein) for protein, mapped in feats.items())
-        syms = ((mapped['symbol'], protein) for protein, mapped in feats.items())
-        descs = ((protein, mapped['desc']) for protein, mapped in feats.items())
         self.store_genes(genes)
+        syms = ((mapped['symbol'], protein) for protein, mapped in feats.items())
         self.store_associated_ids(syms)
+        descs = ((protein, mapped['desc']) for protein, mapped in feats.items())
         self.store_descriptions(descs)
             
     def store_genes(self, genes):

@@ -35,10 +35,11 @@ def create_psm_lookup(fn, fastafn, mapfn, header, pgdb, unroll=False,
     store_psm_protein_relations(fn, header, pgdb)
 
 
-def get_protein_gene_map(fastafn):
+def get_protein_gene_map(mapfn, proteins):
     gpmap = {}
-    for protein, gene, symbol, desc in fastareader.get_proteins_genes(fastafn):
-        gpmap[protein] = {'gene': gene, 'symbol': symbol, 'desc': desc}
+    for protein, gene, symbol, desc in fastareader.get_proteins_genes(mapfn):
+        if protein in proteins:
+            gpmap[protein] = {'gene': gene, 'symbol': symbol, 'desc': desc}
     return gpmap
 
 
@@ -48,16 +49,19 @@ def store_proteins_descriptions(pgdb, fastafn, tsvfn, mapfn, header):
         for psm in tsvreader.generate_tsv_lines_multifile(tsvfn, header):
             proteins.update({x: 1 for x in 
                              tsvreader.get_proteins_from_psm(psm)}) 
-        pgdb.store_proteins(((protein,) for protein in proteins[0].keys()))
+            proteins = [(protein,) for protein in proteins.keys()]
+        pgdb.store_proteins(proteins)
     else:
         proteins, sequences, evidences = fastareader.get_proteins_for_db(
             fastafn)
+        proteins = [x for x in proteins]
         pgdb.store_proteins(proteins, evidences, sequences)
         if not mapfn:
             protein_descriptions = fastareader.get_proteins_descriptions(fastafn)
             pgdb.store_descriptions(protein_descriptions)
     if mapfn:
-        gpmap = get_protein_gene_map(fastafn)
+        proteins = {x[0]: 1 for x in proteins}
+        gpmap = get_protein_gene_map(mapfn, proteins)
         pgdb.store_gene_and_associated_id(gpmap)
 
 
