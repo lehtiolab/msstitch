@@ -60,7 +60,7 @@ def parse_fasta(fn):
 
 
 def get_record_type(record):
-    if record.id.split('|')[0] == 'sp':
+    if record.id.split('|')[0] in ['sp', 'tr']:
         return 'swiss'
     elif record.id[:4] == 'ENSP':
         return 'ensembl'
