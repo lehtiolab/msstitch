@@ -219,6 +219,14 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                           ' psms(psm_id)',
                                           'FOREIGN KEY(master_id) REFERENCES'
                                           ' protein_group_master(master_id)'],
+                   'genes': ['gene_acc TEXT',
+                             'protein_acc TEXT',
+                             'FOREIGN KEY(protein_acc) '
+                             'REFERENCES proteins(protein_acc)'],
+                   'associated_ids': ['assoc_id TEXT',
+                                      'protein_acc TEXT',
+                                      'FOREIGN KEY(protein_acc) '
+                                      'REFERENCES proteins(protein_acc)'],
                    'prot_desc': ['protein_acc TEXT',
                                  'description TEXT',
                                  'FOREIGN KEY(protein_acc) '

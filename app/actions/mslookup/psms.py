@@ -58,7 +58,7 @@ def store_proteins_descriptions(pgdb, fastafn, tsvfn, mapfn, header):
             pgdb.store_descriptions(protein_descriptions)
     if mapfn:
         gpmap = get_protein_gene_map(fastafn)
-        store_gene_and_associated_id(gpmap)
+        pgdb.store_gene_and_associated_id(gpmap)
 
 
 def store_psm_protein_relations(fn, header, pgdb):

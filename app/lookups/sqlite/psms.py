@@ -5,7 +5,8 @@ class PSMDB(ResultLookupInterface):
     def add_tables(self):
         self.create_tables(['psms', 'psmrows', 'peptide_sequences',
                             'proteins', 'protein_evidence', 'protein_seq',
-                            'prot_desc', 'protein_psm'])
+                            'prot_desc', 'protein_psm', 'genes',
+                            'associated_ids'])
 
     def store_proteins(self, proteins, evidence_lvls=False, sequences=False):
         cursor = self.get_cursor()
@@ -34,9 +35,9 @@ class PSMDB(ResultLookupInterface):
         self.index_column('protdesc_index', 'prot_desc', 'protein_acc')
 
     def store_gene_and_associated_id(self, feats):
-        genes = (mapped['gene'], protein for protein, mapped in feats.items())
-        syms = (mapped['symbol'], protein for protein, mapped in feats.items())
-        descs = (protein, mapped['desc'] for protein, mapped in feats.items())
+        genes = ((mapped['gene'], protein) for protein, mapped in feats.items())
+        syms = ((mapped['symbol'], protein) for protein, mapped in feats.items())
+        descs = ((protein, mapped['desc']) for protein, mapped in feats.items())
         self.store_genes(genes)
         self.store_associated_ids(syms)
         self.store_descriptions(descs)
@@ -52,7 +53,7 @@ class PSMDB(ResultLookupInterface):
         cursor = self.get_cursor()
         cursor.executemany(
             'INSERT INTO associated_ids(assoc_id, protein_acc) VALUES(?, ?)',
-            sequences)
+            assoc_ids)
         self.conn.commit()
         self.index_column('associd_index', 'associated_ids', 'protein_acc')
 
