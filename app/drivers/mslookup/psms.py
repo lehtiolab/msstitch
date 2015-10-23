@@ -9,10 +9,10 @@ class PSMLookupDriver(base.LookupDriver):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.spectracol = kwargs.get('speccol', None)
+        self.mapfn = kwargs.get('mapfn', False)
 
     def create_lookup(self):
         header = tsvreader.get_tsv_header(self.fn[0])
         specfncol = header[int(self.spectracol) - 1]
-        self.get_column_header_for_number(['proteincol'], header)
-        lookup.create_psm_lookup(self.fn, self.fasta, header, self.lookup, 
-                                 self.unroll, specfncol, self.proteincol)
+        lookup.create_psm_lookup(self.fn, self.fasta, self.mapfn, header, 
+                                 self.lookup, self.unroll, specfncol)

@@ -75,11 +75,10 @@ def get_content_proteins_from_master(line):
     return line[prottabledata.HEADER_CONTENT_PROTEINS].split(';')
 
 
-def get_proteins_from_psm(line, field=False):
+def get_proteins_from_psm(line):
     """From a line, return list of proteins reported by Mzid2TSV. When unrolled
     lines are given, this returns the single protein from the line."""
-    colfield = field if field else mzidtsvdata.HEADER_PROTEIN
-    proteins = line[colfield].split(';')
+    proteins = line[mzidtsvdata.HEADER_PROTEIN].split(';')
     outproteins = []
     for protein in proteins:
         try:
@@ -116,7 +115,7 @@ def get_psm_sequence(line, unroll=False):
     return peptideseq
 
 
-def get_pepproteins(line, proteinfield):
+def get_pepproteins(line):
     """Returns from a PSM line peptide sequence,
     and other information about the PSM.
     Return values:
@@ -124,7 +123,7 @@ def get_pepproteins(line, proteinfield):
         proteins        -   list of str
     """
     psm_id = get_psm_id(line)
-    proteins = get_proteins_from_psm(line, proteinfield)
+    proteins = get_proteins_from_psm(line)
     return psm_id, proteins
 
 

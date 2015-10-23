@@ -33,6 +33,29 @@ class PSMDB(ResultLookupInterface):
         self.conn.commit()
         self.index_column('protdesc_index', 'prot_desc', 'protein_acc')
 
+    def store_gene_and_associated_id(self, feats):
+        genes = (mapped['gene'], protein for protein, mapped in feats.items())
+        syms = (mapped['symbol'], protein for protein, mapped in feats.items())
+        descs = (protein, mapped['desc'] for protein, mapped in feats.items())
+        self.store_genes(genes)
+        self.store_associated_ids(syms)
+        self.store_descriptions(descs)
+            
+    def store_genes(self, genes):
+        cursor = self.get_cursor()
+        cursor.executemany(
+            'INSERT INTO genes(gene_acc, protein_acc) VALUES(?, ?)', genes)
+        self.conn.commit()
+        self.index_column('gene_index', 'genes', 'protein_acc')
+
+    def store_associated_ids(self, assoc_ids):
+        cursor = self.get_cursor()
+        cursor.executemany(
+            'INSERT INTO associated_ids(assoc_id, protein_acc) VALUES(?, ?)',
+            sequences)
+        self.conn.commit()
+        self.index_column('associd_index', 'associated_ids', 'protein_acc')
+
     def store_pepseqs(self, sequences):
         cursor = self.get_cursor()
         cursor.executemany(

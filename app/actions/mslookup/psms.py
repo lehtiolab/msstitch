@@ -5,11 +5,11 @@ from app.readers import fasta as fastareader
 DB_STORE_CHUNK = 100000
 
 
-def create_psm_lookup(fn, fastafn, header, pgdb, unroll=False, specfncol=None, 
-                      proteinfield=False):
+def create_psm_lookup(fn, fastafn, mapfn, header, pgdb, unroll=False,
+                      specfncol=None):
     """Reads PSMs from file, stores them to a database backend in chunked PSMs.
     """
-    store_proteins_descriptions(pgdb, fastafn, fn, header, proteinfield)
+    store_proteins_descriptions(pgdb, fastafn, fn, mapfn, header)
     mzmlmap = pgdb.get_mzmlfile_map()
     sequences = {}
     for psm in tsvreader.generate_tsv_lines_multifile(fn, header):
@@ -32,27 +32,36 @@ def create_psm_lookup(fn, fastafn, header, pgdb, unroll=False, specfncol=None,
                      })
     pgdb.store_psms(psms)
     pgdb.index_psms()
-    store_psm_protein_relations(fn, header, pgdb, proteinfield)
+    store_psm_protein_relations(fn, header, pgdb)
 
 
-def store_proteins_descriptions(pgdb, fastafn, tsvfn, header,
-                                proteinfield=False):
-    if fastafn:
+def get_protein_gene_map(fastafn):
+    gpmap = {}
+    for protein, gene, symbol, desc in fastareader.get_proteins_genes(fastafn):
+        gpmap[protein] = {'gene': gene, 'symbol': symbol, 'desc': desc}
+    return gpmap
+
+
+def store_proteins_descriptions(pgdb, fastafn, tsvfn, mapfn, header):
+    if not fastafn: 
+        proteins = {}
+        for psm in tsvreader.generate_tsv_lines_multifile(tsvfn, header):
+            proteins.update({x: 1 for x in 
+                             tsvreader.get_proteins_from_psm(psm)}) 
+        pgdb.store_proteins(((protein,) for protein in proteins[0].keys()))
+    else:
         proteins, sequences, evidences = fastareader.get_proteins_for_db(
             fastafn)
         pgdb.store_proteins(proteins, evidences, sequences)
-        protein_descriptions = fastareader.get_proteins_descriptions(fastafn)
-        pgdb.store_descriptions(protein_descriptions)
-    else:
-        proteins = {}
-        for psm in tsvreader.generate_tsv_lines_multifile(tsvfn, header):
-            proteins.update({x: 1 for x in
-                             tsvreader.get_proteins_from_psm(psm,
-                                                             proteinfield)})
-        pgdb.store_proteins(((protein,) for protein in proteins.keys()))
+        if not mapfn:
+            protein_descriptions = fastareader.get_proteins_descriptions(fastafn)
+            pgdb.store_descriptions(protein_descriptions)
+    if mapfn:
+        gpmap = get_protein_gene_map(fastafn)
+        store_gene_and_associated_id(gpmap)
 
 
-def store_psm_protein_relations(fn, header, pgdb, proteinfield=False):
+def store_psm_protein_relations(fn, header, pgdb):
     """Reads PSMs from file, extracts their proteins and peptides and passes
     them to a database backend in chunks.
     """
@@ -62,7 +71,7 @@ def store_psm_protein_relations(fn, header, pgdb, proteinfield=False):
     last_id, psmids_to_store = None, set()
     store_soon = False
     for psm in tsvreader.generate_tsv_lines_multifile(fn, header):
-        psm_id, prots = tsvreader.get_pepproteins(psm, proteinfield)
+        psm_id, prots = tsvreader.get_pepproteins(psm)
         try:
             allpsms[psm_id].extend(prots)
         except KeyError:
