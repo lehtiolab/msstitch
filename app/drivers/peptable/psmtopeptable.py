@@ -24,18 +24,15 @@ class MzidTSVPeptableDriver(PepProttableDriver):
         self.get_column_header_for_number(['fncol'])
         self.scorecol = tsvreader.get_cols_in_file(self.scorecol,
                                                    self.oldheader, True)
-        self.isobfieldmap = prep.get_quantcols(self.quantcolpattern,
-                                               self.oldheader, 'isob')
         self.precurquantcol = prep.get_quantcols(self.precursorquantcolpattern,
                                                  self.oldheader, 'precur')
 
     def create_header(self):
-        self.header = head.get_pepquant_header(self.oldheader,
-                                               self.isobfieldmap,
-                                               self.precurquantcol)
+        self.header = head.get_psm2pep_header(self.oldheader,
+                                              self.quantcolpattern,
+                                              self.precurquantcol)
 
     def set_feature_generator(self):
         self.features = prep.generate_peptides(self.fn, self.oldheader,
                                                self.scorecol,
-                                               self.isobfieldmap,
                                                self.precurquantcol, self.fncol)

@@ -36,8 +36,10 @@ parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
 parser.add_argument('-c', dest='command', type=str,
                     help='How to manipulate the input:\n'
                     'psm2pep - Create peptide table from PSM TSV input,\n'
-                    'uses best scoring PSM for each peptide and medians of\n'
-                    'quant information. Use with --spectracol (optional for\n'
+                    'uses best scoring PSM for each peptide and strips PSM\n'
+                    'isobaric quant information. Retains MS1 quant info if\n'
+                    'specified, by taking the highest precursor quant value\n'
+                    'for a peptide. Use with --spectracol (optional for\n'
                     'tracking PSMs fr. different spectra files), \n'
                     '--scorecolpattern, --ms1quantcolpattern, \n'
                     '--isobquantcolpattern.\n\n'

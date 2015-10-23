@@ -1,5 +1,6 @@
 from collections import OrderedDict
 
+from app.readers import tsv
 from app.actions.headers.base import (generate_general_header,
                                       generate_headerfields)
 from app.dataformats import peptable as peptabledata
@@ -18,11 +19,12 @@ def switch_psm_to_peptable_fields(oldheader):
                                           peptabledata.HEADER_PEP])}
 
 
-def get_pepquant_header(oldheader, isobqfieldmap=False, precurqfield=False):
+def get_psm2pep_header(oldheader, isobq_pattern=False, precurqfield=False):
     header = oldheader[:]
-    if isobqfieldmap:
-        for field, medianfield in isobqfieldmap.items():
-            header = [medianfield if x == field else x for x in header]
+    if isobq_pattern:
+        isocols = tsv.get_columns_by_pattern(header, isobq_pattern)
+        for col in isocols:
+            header.pop(header.index(col))
     if precurqfield:
         header = [peptabledata.HEADER_AREA if x == precurqfield
                   else x for x in header]
