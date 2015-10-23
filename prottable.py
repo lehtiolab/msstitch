@@ -42,7 +42,8 @@ parser.add_argument('-c', dest='command', type=str,
 
                     'addisoquant - Add isobaric quantification data from a\n'
                     'proteintable containing this. Needs a second table\n'
-                    'specified with --quantfile and --isobquantcolpattern\n\n'
+                    'specified with --quantfile, --qaccpattern, and \n'
+                    '--isobquantcolpattern\n\n'
 
                     'addms1quant - Add MS1 quantification data from a\n'
                     'PSM table containing precursor quant areas. Needs\n'
@@ -112,6 +113,10 @@ parser.add_argument('--quantfile', dest='quantfile', help='Protein table file '
 parser.add_argument('--isobquantcolpattern', dest='isobquantcolpattern',
                     help='Unique text pattern to identify isobaric quant \n'
                     'columns in protein table.',
+                    type=str, required=False)
+parser.add_argument('--qaccpattern', dest='quantacccolpattern',
+                    help='Unique text pattern to identify peptide column\n'
+                    'in peptide quant table.',
                     type=str, required=False)
 parser.add_argument('--scorecolpattern', dest='scorecolpattern',
                     help='Regular expression pattern to find column where\n'
