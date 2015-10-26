@@ -6,11 +6,13 @@ def add_record_to_proteindata(proteindata, p_acc, pool, psmdata, genecentric,
                               pgcontentmap=None):
     """Fill function for create_featuredata_map"""
     seq, psm_id = psmdata[2], psmdata[3]
-    if not genecentric:
-        desc, cov = psmdata[4], psmdata[5]
-        pgcontent = pgcontentmap[p_acc]
+    if genecentric:
+        desc, assoc_id = psmdata[4], psmdata[5]
+        cov, gene, pgcontent = None, None, None
     else:
-        cov = None
+        desc, cov = psmdata[4], psmdata[5]
+        gene, assoc_id = psmdata[6], psmdata[7]
+        pgcontent = pgcontentmap[p_acc]
     try:
         proteindata[p_acc]['pools'][pool]['psms'].add(psm_id)
     except KeyError:
@@ -19,9 +21,9 @@ def add_record_to_proteindata(proteindata, p_acc, pool, psmdata, genecentric,
             proteindata[p_acc]['pools'][pool] = emptyinfo
         except KeyError:
             proteindata[p_acc] = {'pools': {pool: emptyinfo}}
-            if cov is not None:
-                proteindata[p_acc].update({'desc': desc, 'cov': cov, 
-                                           'proteins': pgcontent})
+            proteindata[p_acc].update({'desc': desc, 'cov': cov, 
+                                       'gene': gene, 'aid': assoc_id,
+                                       'proteins': pgcontent})
     proteindata[p_acc]['pools'][pool]['psms'].add(psm_id)
     proteindata[p_acc]['pools'][pool]['peptides'].add(seq)
 
@@ -63,7 +65,7 @@ def get_protein_data_pgrouped(proteindata, p_acc, headerfields):
     """Parses protein data for a certain protein into tsv output
     dictionary"""
     report = get_protein_data_base(proteindata, p_acc, headerfields)
-    return get_cov_descriptions(proteindata, p_acc, report)
+    return get_cov_protnumbers(proteindata, p_acc, report)
 
 
 def get_protein_data_base(proteindata, p_acc, headerfields):
@@ -77,16 +79,17 @@ def get_protein_data_base(proteindata, p_acc, headerfields):
         pool_values = [pdata['unipeps'], pdata['peptides'], pdata['psms']]
         outdict.update({headerfields['proteindata'][hfield][pool]: val
                         for (hfield, val) in zip(hfields, pool_values)})
-    outdict[prottabledata.HEADER_NO_PROTEIN] = proteincount
+    outdict.update({prottabledata.HEADER_NO_PROTEIN: proteincount,
+                    prottabledata.HEADER_DESCRIPTION: proteindata[p_acc]['desc'],
+                    prottabledata.HEADER_ASSOCIATED: proteindata[p_acc]['aid']})
     return outdict
 
 
-def get_cov_descriptions(proteindata, p_acc, report):
+def get_cov_protnumbers(proteindata, p_acc, report):
     try:
-        report.update({prottabledata.HEADER_DESCRIPTION:
-                       proteindata[p_acc]['desc'],
-                       prottabledata.HEADER_COVERAGE:
+        report.update({prottabledata.HEADER_COVERAGE:
                        proteindata[p_acc]['cov'],
+                       prottabledata.HEADER_GENE: proteindata[p_acc]['gene'],
                        prottabledata.HEADER_CONTENTPROT:
                        ','.join(proteindata[p_acc]['proteins']),
                        prottabledata.HEADER_NO_PROTEIN:

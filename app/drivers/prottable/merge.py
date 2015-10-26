@@ -14,13 +14,15 @@ class BuildProteinTableDriver(ProttableMergeDriver):
         and outfile creating wont error."""
         kwargs['infile'] = os.path.join(os.getcwd(),
                                         'built_protein_table.txt')
+        self.genecentric = kwargs.get('genecentric', False)
+        if self.genecentric:
+            self.lookuptype = 'genetable'
         super().__init__(**kwargs)
         self.isobaricquant = kwargs.get('isobaric', False)
         self.precursorquant = kwargs.get('precursor', False)
         self.probability = kwargs.get('probability', False)
         self.fdr = kwargs.get('fdr', False)
         self.pep = kwargs.get('pep', False)
-        self.genecentric = kwargs.get('genecentric', False)
 
     def set_feature_generator(self):
         """Generates proteins with quant from the lookup table"""

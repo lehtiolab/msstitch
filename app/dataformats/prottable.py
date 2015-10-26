@@ -1,4 +1,6 @@
 HEADER_PROTEIN = 'Protein accession'
+HEADER_GENE = 'Gene'
+HEADER_ASSOCIATED = 'Associated gene ID'
 HEADER_DESCRIPTION = 'Description'
 HEADER_COVERAGE = 'Coverage'
 HEADER_NO_PROTEIN = '# Proteins'

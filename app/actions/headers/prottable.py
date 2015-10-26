@@ -47,7 +47,9 @@ def get_proteininfo_fields(poolnames=False):
     Some fields are shared between pools, others are specific
     for a pool"""
     allfields = OrderedDict()
-    basefields = [prottabledata.HEADER_DESCRIPTION,
+    basefields = [prottabledata.HEADER_GENE,
+                  prottabledata.HEADER_ASSOCIATED,
+                  prottabledata.HEADER_DESCRIPTION,
                   prottabledata.HEADER_COVERAGE,
                   prottabledata.HEADER_NO_PROTEIN,
                   prottabledata.HEADER_CONTENTPROT,

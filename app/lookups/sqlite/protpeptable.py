@@ -79,24 +79,6 @@ class ProtPepTable(ResultLookupInterface):
         fieldcount = max(selectmap.values()) + 1
         return selectmap, fieldcount
 
-    def get_proteins_psms_genecentric(self):
-        fields = ['p.protein_acc', 'sets.set_name',
-                  'pep.sequence', 'psm.psm_id']
-        firstjoin = ('protein_psm', 'pp', 'protein_acc')
-        return self.get_proteins_psms('proteins', fields, firstjoin)
-
-    def get_proteins_psms_pgrouped(self):
-        fields = ['p.protein_acc', 'sets.set_name',
-                  'pep.sequence', 'psm.psm_id', 'pd.description',
-                  'pcov.coverage']
-        extrajoins = ('LEFT OUTER JOIN prot_desc AS pd USING(protein_acc) '
-                      'LEFT OUTER JOIN protein_coverage '
-                      'AS pcov USING(protein_acc) '
-                      )
-        firstjoin = ('psm_protein_groups', 'ppg', 'master_id')
-        return self.get_proteins_psms('protein_group_master', fields,
-                                      firstjoin, extrajoins)
-
     def get_proteingroup_content(self):
         cursor = self.get_cursor()
         sql = ('SELECT pgm.protein_acc, pgc.protein_acc FROM '
@@ -119,15 +101,17 @@ class ProtPepTable(ResultLookupInterface):
             join_sql = '{} {}'.format(join_sql, extrajoins)
         sql = ('SELECT {} FROM {} '
                'AS p'.format(', '.join(fields), firsttable))
-        sql = '{} {} ORDER BY p.protein_acc, sets.set_name'.format(sql,
-                                                                   join_sql)
+        sql = '{} {} ORDER BY {}, sets.set_name'.format(sql, join_sql,
+                                                        fields[0])
         cursor = self.get_cursor()
         return cursor.execute(sql)
 
     def get_sql_joins_mergetable(self, sql, joins, pep_or_prot):
         protein_j_cols = {'p': 'pacc_id', 'pt': 'prottable_id'}
         peptide_j_cols = {'p': 'pep_id', 'pt': 'peptable_id'}
-        colpick = {'peptide': peptide_j_cols, 'protein': protein_j_cols}
+        gene_j_cols = {'g': 'gene_id', 'gt': 'genetable_id'}
+        colpick = {'peptide': peptide_j_cols, 'protein': protein_j_cols,
+                   'gene': gene_j_cols}
         join_cols = {'pc': 'channel_id'}
         join_cols.update(colpick[pep_or_prot])
         if joins:

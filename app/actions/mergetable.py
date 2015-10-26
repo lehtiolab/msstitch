@@ -36,10 +36,9 @@ def create_featuredata_map(pgdb, fill_fun, genecentric=False, count_fun=None,
     """
     if genecentric:
         pgcontentmap = None
-        protein_psms_data = pgdb.get_proteins_psms_genecentric()
     else:
         pgcontentmap = get_proteingroup_content(pgdb)
-        protein_psms_data = pgdb.get_proteins_psms_pgrouped()
+    protein_psms_data = pgdb.get_proteins_psms_for_map()
     proteindata = {}
     psmdata = next(protein_psms_data)
     last_prot, last_pool = psmdata[0], psmdata[1]
