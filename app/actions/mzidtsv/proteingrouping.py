@@ -2,7 +2,6 @@ from app.readers import tsv as tsvreader
 from app.dataformats import mzidtsv as mzidtsvdata
 import app.lookups.sqlite.proteingroups as lookups
 import app.actions.mzidtsv.proteingroup_sorters as sorters
-from app.actions.mzidtsv import confidencefilters as conffilt
 
 
 def get_header_with_proteingroups(header):
@@ -14,16 +13,12 @@ def get_all_proteins_from_unrolled_psm(rownr, pgdb):
     return pgdb.get_proteins_for_peptide([rownr])
 
 
-def generate_psms_with_proteingroups(fn, oldheader, newheader, pgdb, confkey,
-                                     conflvl, lower_is_better, unroll=False):
+def generate_psms_with_proteingroups(fn, oldheader, newheader, pgdb, unroll=False):
     rownr = 0
     cov_evi = pgdb.check_coverage_evidence_tables()
     all_protein_group_content = pgdb.get_all_psms_proteingroups(cov_evi)
     protein = next(all_protein_group_content)
     for psm in tsvreader.generate_tsv_psms(fn, oldheader):
-        if not conffilt.passes_filter(psm, conflvl, confkey, lower_is_better):
-            rownr += 1
-            continue
         if unroll:
             psm_id = tsvreader.get_psm_id(psm)
             lineproteins = get_all_proteins_from_unrolled_psm(psm_id, pgdb)
