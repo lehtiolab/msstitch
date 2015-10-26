@@ -64,8 +64,8 @@ parser.add_argument('-c', dest='command', type=str,
                     'data in tab separated format. Header should include\n'
                     'quantification channel names, and if possible the\n'
                     'number of peptides quantified for each protein in the\n'
-                    'respective channels. Lookup should already include '
-                    'proteins.\n\n'
+                    'respective channels. Can be used with --genecentric\n'
+                    'Lookup should already include proteins.\n\n'
 
                     'seqspace - Creates lookup DB from FASTA file for use\n'
                     'with e.g. pycolator.py -c filterknown. You may  use \n'
@@ -146,6 +146,9 @@ parser.add_argument('--pepcolpattern', dest='pepcolpattern',
                     help='Unique text pattern to identify protein PEP\n'
                     'column in protein table.',
                     type=str, required=False)
+parser.add_argument('--genecentric', dest='genecentric', help='Do not '
+                    'include protein group data such in output. Flag.',
+                    action='store_const', default=False, const=True)
 parser.add_argument('--quanttype', dest='quanttype',
                     help='Filetype of precursor quants to store. Choose from\n'
                     'kronik or openms.',

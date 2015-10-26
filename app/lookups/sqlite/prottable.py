@@ -108,8 +108,110 @@ class ProtTableDB(ProtPepTable):
             'quantvalue, amount_psms) '
             'VALUES (?, ?, ?, ?)', quants)
 
-    def store_protprob(self, probabilities):
+
+class GeneTableDB(ProtPepTable):
+    datatype = 'gene'
+    colmap = {'gene_precur_quanted': ['gene_id', 'genetable_id', 'quant'],
+              'gene_fdr': ['gene_id', 'genetable_id', 'fdr'],
+              'gene_pep': ['gene_id', 'genetable_id', 'pep'],
+              'gene_probability': ['gene_id', 'genetable_id',
+                                   'probability'],
+              }
+
+    def add_tables(self):
+        self.create_tables(['gene_tables', 'gene_iso_quanted',
+                            'genequant_channels', 'gene_precur_quanted',
+                            'gene_probability', 'gene_fdr',
+                            'gene_pep'])
+
+    def store_quant_channels(self, quantchannels):
         self.store_many(
-            'INSERT INTO protein_probability(pacc_id, prottable_id, '
-            'probability) '
-            'VALUES (?, ?, ?)', probabilities)
+            'INSERT INTO genequant_channels(genetable_id, channel_name, '
+            'amount_psms_name) VALUES (?, ?, ?)',
+            quantchannels)
+
+    def get_all_proteins_psms_for_unipeps(self, genecentric):
+        fields = ['p.protein_acc', 'sets.set_name',
+                  'pep.sequence']
+        if genecentric:
+            firstjoin = ('protein_psm', 'pp', 'protein_acc')
+            firsttable = 'proteins'
+        else:
+            firstjoin = ('psm_protein_groups', 'ppg', 'master_id')
+            firsttable = 'protein_group_master'
+        return self.get_proteins_psms(firsttable, fields, firstjoin)
+
+    def prepare_mergetable_sql(self, precursor=False, isobaric=False,
+                               probability=False, fdr=False, pep=False):
+        selects = ['p.protein_acc', 'bs.set_name']
+        selectmap, count = self.update_selects({}, ['p_acc', 'set_name'], 0)
+        joins = []
+        if isobaric:
+            selects.extend(['pc.channel_name',
+                            'pc.amount_psms_name', 'piq.quantvalue',
+                            'piq.amount_psms'])
+            joins.extend([('protquant_channels', 'pc', ['pt']),
+                          ('protein_iso_quanted', 'piq', ['p', 'pc'], True),
+                          ])
+            fld = ['channel', 'isoq_psmsfield', 'isoq_val',
+                   'isoq_psms']
+            selectmap, count = self.update_selects(selectmap, fld, count)
+        if precursor:
+            selects.extend(['preq.quant'])
+            joins.append(('protein_precur_quanted', 'preq', ['p', 'pt'], True))
+            fld = ['preq_val']
+            selectmap, count = self.update_selects(selectmap, fld, count)
+        if probability:
+            selects.extend(['pprob.probability'])
+            joins.append(('protein_probability', 'pprob', ['p', 'pt'], True))
+            fld = ['prob_val']
+            selectmap, count = self.update_selects(selectmap, fld, count)
+        if fdr:
+            selects.extend(['pfdr.fdr'])
+            joins.append(('protein_fdr', 'pfdr', ['p', 'pt'], True))
+            fld = ['fdr_val']
+            selectmap, count = self.update_selects(selectmap, fld, count)
+        if pep:
+            selects.extend(['ppep.pep'])
+            joins.append(('protein_pep', 'ppep', ['p', 'pt'], True))
+            fld = ['pep_val']
+            selectmap, count = self.update_selects(selectmap, fld, count)
+
+        sql = ('SELECT {} FROM proteins AS p JOIN biosets AS bs '
+               'JOIN protein_tables AS pt ON pt.set_id=bs.set_id'.format(', '.join(selects)))
+        sql = self.get_sql_joins_mergetable(sql, joins, 'protein')
+        sql = '{0} ORDER BY p.protein_acc'.format(sql)
+        return sql, selectmap
+
+    def get_isoquant_amountpsms_channels(self):
+        cursor = self.get_cursor()
+        cursor.execute(
+            'SELECT DISTINCT channel_name, amount_psms_name '
+            'FROM genequant_channels')
+        return cursor
+
+    def get_precursorquant_headerfields(self):
+        cursor = self.get_cursor()
+        cursor.execute(
+            'SELECT DISTINCT prottable_id '
+            'FROM protein_precur_quanted')
+        return cursor
+
+    def get_quantchannel_map(self):
+        outdict = {}
+        cursor = self.get_cursor()
+        cursor.execute(
+            'SELECT channel_id, genetable_id, channel_name, amount_psms_name'
+            ' FROM genequant_channels')
+        for channel_id, fnid, channel_name, amount_psms_name in cursor:
+            try:
+                outdict[fnid][channel_name] = (channel_id, amount_psms_name)
+            except KeyError:
+                outdict[fnid] = {channel_name: (channel_id, amount_psms_name)}
+        return outdict
+
+    def store_isobaric_quants(self, quants):
+        self.store_many(
+            'INSERT INTO gene_iso_quanted(gene_id, channel_id, '
+            'quantvalue, amount_psms) '
+            'VALUES (?, ?, ?, ?)', quants)

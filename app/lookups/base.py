@@ -14,6 +14,7 @@ def get_lookup(fn, lookuptype):
                  'searchspace': searchspace.SearchSpaceDB,
                  'peptidetable': peptable.PepTableDB,
                  'prottable': prottable.ProtTableDB,
+                 'genetable': prottable.GeneTableDB,
                  }
     return lookupmap[lookuptype](fn)
 

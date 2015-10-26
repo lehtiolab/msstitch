@@ -7,7 +7,15 @@ class ProtPepTable(ResultLookupInterface):
                              'prectable': 'protein_precur_quanted',
                              'fdrtable': 'protein_fdr',
                              'peptable': 'protein_pep',
+                             'probabilitytable': 'protein_probability',
                              },
+                 'gene': {'fntable': 'gene_tables',
+                          'feattable': 'genes',
+                          'prectable': 'gene_precur_quanted',
+                          'fdrtable': 'gene_fdr',
+                          'peptable': 'gene_pep',
+                          'probabilitytable': 'gene_probability',
+                          },
                  'peptide': {'fntable': 'peptide_tables',
                              'feattable': 'peptide_sequences',
                              'prectable': 'peptide_precur_quanted',
@@ -36,6 +44,7 @@ class ProtPepTable(ResultLookupInterface):
 
     def get_feature_map(self):
         columns = {'protein': ['pacc_id', 'protein_acc'],
+                   'gene': ['gene_id', 'gene_acc'],
                    'peptide': ['pep_id', 'sequence']
                    }
         table = self.table_map[self.datatype]['feattable']
@@ -60,6 +69,9 @@ class ProtPepTable(ResultLookupInterface):
 
     def store_pep(self, pep):
         self.store_singlecol('peptable', pep)
+
+    def store_probability(self, probabilities):
+        self.store_singlecol('probabilitytable', probabilities)
 
     def update_selects(self, selectmap, fields, fieldcount):
         selectmap.update({field: i + fieldcount

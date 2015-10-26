@@ -7,6 +7,9 @@ class ProteinQuantLookupDriver(base.LookupDriver):
     lookuptype = 'prottable'
 
     def __init__(self, **kwargs):
+        self.genecentric = kwargs.get('genecentric', False)
+        if self.genecentric:
+            self.lookuptype = 'genetable'
         super().__init__(**kwargs)
         self.poolnames = [x.replace('"', '') for x in kwargs.get('setnames')]
         # FIXME need check to see same poolnames correlate with self.fn len
@@ -28,4 +31,5 @@ class ProteinQuantLookupDriver(base.LookupDriver):
                                            self.psmnrcolpattern,
                                            self.probcolpattern,
                                            self.fdrcolpattern,
-                                           self.pepcolpattern)
+                                           self.pepcolpattern,
+                                           self.genecentric)

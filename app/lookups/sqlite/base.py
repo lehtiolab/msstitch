@@ -61,6 +61,11 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                'REFERENCES psms(psm_id)'],
                    'proteins': ['pacc_id INTEGER PRIMARY KEY',
                                 'protein_acc TEXT UNIQUE'],
+                   'gene_tables': ['genetable_id INTEGER PRIMARY KEY',
+                                   'set_id INTEGER',
+                                   'filename TEXT',
+                                   'FOREIGN KEY(set_id)'
+                                   'REFERENCES biosets'],
                    'protein_tables': ['prottable_id INTEGER PRIMARY KEY',
                                       'set_id INTEGER',
                                       'filename TEXT',
@@ -127,6 +132,16 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                     'FOREIGN KEY(prottable_id) '
                     'REFERENCES protein_tables(prottable_id)'
                     ],
+                   'gene_precur_quanted':
+                   ['gene_precquant_id INTEGER PRIMARY KEY',
+                    'gene_id INTEGER',
+                    'genetable_id INTEGER',
+                    'quant REAL',
+                    'FOREIGN KEY(gene_id) '
+                    'REFERENCES genes(gene_id) '
+                    'FOREIGN KEY(genetable_id) '
+                    'REFERENCES gene_tables(genetable_id)'
+                    ],
                    'protein_iso_quanted': ['proteinquant_id '
                                            'INTEGER PRIMARY KEY',
                                            'pacc_id INTEGER',
@@ -139,6 +154,26 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                            'REFERENCES '
                                            'protquant_channels(channel_id)'
                                            ],
+                   'gene_iso_quanted': ['genequant_id '
+                                           'INTEGER PRIMARY KEY',
+                                           'gene_id INTEGER',
+                                           'channel_id INTEGER',
+                                           'quantvalue REAL',
+                                           'amount_psms INTEGER',
+                                           'FOREIGN KEY(gene_id) '
+                                           'REFERENCES genes(gene_id) '
+                                           'FOREIGN KEY(channel_id) '
+                                           'REFERENCES '
+                                           'genequant_channels(channel_id)'
+                                           ],
+                   'genequant_channels': ['channel_id INTEGER PRIMARY KEY',
+                                          'genetable_id INTEGER',
+                                          'channel_name TEXT',
+                                          'amount_psms_name TEXT',
+                                          'FOREIGN KEY(genetable_id) '
+                                          'REFERENCES '
+                                          'gene_tables(genetable_id)'
+                                          ],
                    'protquant_channels': ['channel_id INTEGER PRIMARY KEY',
                                           'prottable_id INTEGER',
                                           'channel_name TEXT',
@@ -147,6 +182,15 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                           'REFERENCES '
                                           'protein_tables(prottable_id)'
                                           ],
+                   'gene_probability': ['gene_id INTEGER',
+                                        'genetable_id INTEGER',
+                                        'probability DOUBLE',
+                                        'FOREIGN KEY(gene_id) '
+                                        'REFERENCES genes(gene_id) '
+                                        'FOREIGN KEY(genetable_id) '
+                                        'REFERENCES '
+                                        'gene_tables(genetable_id)'
+                                        ],
                    'protein_probability': ['pacc_id INTEGER',
                                            'prottable_id INTEGER',
                                            'probability DOUBLE',
@@ -156,6 +200,15 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                            'REFERENCES '
                                            'protein_tables(prottable_id)'
                                            ],
+                   'gene_fdr': ['gene_id INTEGER',
+                                'genetable_id INTEGER',
+                                'fdr DOUBLE',
+                                'FOREIGN KEY(gene_id) '
+                                'REFERENCES genes(gene_id) '
+                                'FOREIGN KEY(genetable_id) '
+                                'REFERENCES '
+                                'gene_tables(genetable_id)'
+                                ],
                    'protein_fdr': ['pacc_id INTEGER',
                                    'prottable_id INTEGER',
                                    'fdr DOUBLE',
@@ -165,6 +218,15 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                    'REFERENCES '
                                    'protein_tables(prottable_id)'
                                    ],
+                   'gene_pep': ['gene_id INTEGER',
+                                'genetable_id INTEGER',
+                                'pep DOUBLE',
+                                'FOREIGN KEY(gene_id) '
+                                'REFERENCES genes(gene_id) '
+                                'FOREIGN KEY(genetable_id) '
+                                'REFERENCES '
+                                'gene_tables(genetable_id)'
+                                ],
                    'protein_pep': ['pacc_id INTEGER',
                                    'prottable_id INTEGER',
                                    'pep DOUBLE',
@@ -219,7 +281,8 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                           ' psms(psm_id)',
                                           'FOREIGN KEY(master_id) REFERENCES'
                                           ' protein_group_master(master_id)'],
-                   'genes': ['gene_acc TEXT',
+                   'genes': ['gene_id INTEGER PRIMARY KEY',
+                             'gene_acc TEXT',
                              'protein_acc TEXT',
                              'FOREIGN KEY(protein_acc) '
                              'REFERENCES proteins(protein_acc)'],
