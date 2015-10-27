@@ -77,6 +77,8 @@ def get_proteininfo_fields(poolnames=False):
     """Returns header fields for protein (group) information."""
     allfields = OrderedDict()
     basefields = [peptabledata.HEADER_PROTEINS,
+                  peptabledata.HEADER_GENES,
+                  peptabledata.HEADER_ASSOCIATED,
                   peptabledata.HEADER_DESCRIPTIONS,
                   peptabledata.HEADER_COVERAGES,
                   peptabledata.HEADER_NO_CONTENTPROTEINS,

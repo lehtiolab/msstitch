@@ -45,9 +45,6 @@ class PepTableDB(ProtPepTable):
                 outdict[fnid] = {channel_name: (channel_id, amount_psms_name)}
         return outdict
 
-    def get_all_protein_psms_with_sets(self):
-        return self.get_proteins_psms(extended=True)
-
     def prepare_mergetable_sql(self, precursor=False, isobaric=False,
                                fdr=False, pep=False):
         selects = ['p.sequence', 'bs.set_name']
