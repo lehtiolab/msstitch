@@ -20,8 +20,7 @@ def build_peptidetable(pqdb, header, headerfields, isobaric=False,
                False: empty_return}[fdr]
     pep_fun = {True: get_peptide_pep,
                False: empty_return}[pep]
-    pdata_fun = {True: get_protein_data_genecentric,
-                 False: get_protein_data}[genecentric]
+    pdata_fun = get_protein_data
     peptide_sql, sqlfieldmap = pqdb.prepare_mergetable_sql(precursor, isobaric,
                                                            fdr, pep)
     peptides = pqdb.get_merged_features(peptide_sql)
@@ -83,10 +82,6 @@ def get_no_psms(peptide, pdata, headerfields):
     return outdict
 
 
-def get_protein_data_genecentric(peptide, pdata, headerfields):
-    return get_proteins(peptide, pdata, headerfields)
-
-
 def get_protein_data(peptide, pdata, headerfields):
     """These fields are currently not pool dependent so headerfields
     is ignored"""
@@ -132,7 +127,10 @@ def add_record_to_peptidedata(peptidedata, p_acc, pool, psmdata, genecentric,
     seq, psm_id = psmdata[2], psmdata[3]
     desc, cov = psmdata[4], psmdata[5]
     gene, assoc_id = psmdata[6], psmdata[7]
-    pgcontent = pgcontentmap[p_acc]
+    if not genecentric:
+        pgcontent = pgcontentmap[p_acc]
+    else:
+        pgcontent = None
     try:
         peptidedata[seq]['psms'][pool].add(psm_id)
     except KeyError:
@@ -142,8 +140,8 @@ def add_record_to_peptidedata(peptidedata, p_acc, pool, psmdata, genecentric,
             peptidedata[seq] = {'psms': {pool: set()},
                                 'proteins': set()}
         peptidedata[seq]['psms'][pool].add(psm_id)
-    if cov is not None:
+    if not genecentric:
         protein = (p_acc, desc, cov, gene, assoc_id, len(pgcontent))
     else:
-        protein = (p_acc,)
+        protein = (p_acc, desc, cov, gene, assoc_id)
     peptidedata[seq]['proteins'].add(protein)
