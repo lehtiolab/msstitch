@@ -31,5 +31,4 @@ class ProteinQuantLookupDriver(base.LookupDriver):
                                            self.psmnrcolpattern,
                                            self.probcolpattern,
                                            self.fdrcolpattern,
-                                           self.pepcolpattern,
-                                           self.genecentric)
+                                           self.pepcolpattern)

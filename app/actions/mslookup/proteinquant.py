@@ -10,26 +10,25 @@ def create_peptidequant_lookup(fns, pqdb, poolnames, pepseq_colnr,
     storefuns = [pqdb.store_precursor_quants, pqdb.store_fdr,
                  pqdb.store_pep]
     create_pep_protein_quant_lookup(fns, pqdb, poolnames, pepseq_colnr,
-                                    patterns, genecentric, storefuns, 
+                                    patterns, storefuns, 
                                     isobqcolpattern)
 
 
 def create_proteinquant_lookup(fns, pqdb, poolnames, protacc_colnr,
                                ms1_qcolpattern=None, isobqcolpattern=None,
                                psmnrpattern=None, probcolpattern=None,
-                               fdrcolpattern=None, pepcolpattern=None,
-                               genecentric=False):
+                               fdrcolpattern=None, pepcolpattern=None):
     """Calls lower level function to create a protein quant lookup"""
     patterns = [ms1_qcolpattern, probcolpattern, fdrcolpattern, pepcolpattern]
     storefuns = [pqdb.store_precursor_quants, pqdb.store_probability,
                  pqdb.store_fdr, pqdb.store_pep]
     create_pep_protein_quant_lookup(fns, pqdb, poolnames, protacc_colnr,
-                                    patterns, genecentric, storefuns, 
-                                    isobqcolpattern, psmnrpattern)
+                                    patterns, storefuns, isobqcolpattern,
+                                    psmnrpattern)
 
 
 def create_pep_protein_quant_lookup(fns, pqdb, poolnames, featcolnr, patterns,
-                                    genecentric, storefuns, isobqcolpattern=None,
+                                    storefuns, isobqcolpattern=None,
                                     psmnrpattern=None):
     """Does the work when creating peptide and protein quant lookups. This
     loops through storing options and parses columns, passing on to the
