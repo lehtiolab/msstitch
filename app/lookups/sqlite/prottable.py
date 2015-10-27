@@ -221,7 +221,7 @@ class GeneTableDB(ProtPepTable):
         cursor = self.get_cursor()
         cursor.execute(
             'SELECT DISTINCT prottable_id '
-            'FROM protein_precur_quanted')
+            'FROM gene_precur_quanted')
         return cursor
 
     def get_quantchannel_map(self):
