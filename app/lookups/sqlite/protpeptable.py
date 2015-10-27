@@ -86,6 +86,22 @@ class ProtPepTable(ResultLookupInterface):
                'JOIN protein_group_content AS pgc USING(master_id)')
         return cursor.execute(sql)
 
+    def get_proteins_psms_for_map(self):
+        """Gets protein-PSM combinations and other info for creating a map
+        of protein data. This particular version is protein-group centric"""
+        fields = ['p.protein_acc', 'sets.set_name',
+                  'pep.sequence', 'psm.psm_id', 'pd.description',
+                  'pcov.coverage', 'g.gene_acc', 'aid.assoc_id']
+        extrajoins = ('LEFT OUTER JOIN prot_desc AS pd USING(protein_acc) '
+                      'LEFT OUTER JOIN protein_coverage '
+                      'AS pcov USING(protein_acc) '
+                      'LEFT OUTER JOIN genes AS g USING(protein_acc) '
+                      'LEFT OUTER JOIN associated_ids AS aid USING(protein_acc)'
+                      )
+        firstjoin = ('psm_protein_groups', 'ppg', 'master_id')
+        return self.get_proteins_psms('protein_group_master', fields,
+                                      firstjoin, extrajoins)
+
     def get_proteins_psms(self, firsttable, fields, firstjoin,
                           extrajoins=False):
         joins = [firstjoin]

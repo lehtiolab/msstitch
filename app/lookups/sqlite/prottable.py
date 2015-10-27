@@ -22,20 +22,6 @@ class ProtTableDB(ProtPepTable):
             'amount_psms_name) VALUES (?, ?, ?)',
             quantchannels)
 
-    def get_proteins_psms_for_map(self):
-        fields = ['p.protein_acc', 'sets.set_name',
-                  'pep.sequence', 'psm.psm_id', 'pd.description',
-                  'pcov.coverage', 'g.gene_acc', 'aid.assoc_id']
-        extrajoins = ('LEFT OUTER JOIN prot_desc AS pd USING(protein_acc) '
-                      'LEFT OUTER JOIN protein_coverage '
-                      'AS pcov USING(protein_acc) '
-                      'LEFT OUTER JOIN genes AS g USING(protein_acc) '
-                      'LEFT OUTER JOIN associated_ids AS aid USING(protein_acc)'
-                      )
-        firstjoin = ('psm_protein_groups', 'ppg', 'master_id')
-        return self.get_proteins_psms('protein_group_master', fields,
-                                      firstjoin, extrajoins)
-
     def get_all_proteins_psms_for_unipeps(self, genecentric):
         fields = ['p.protein_acc', 'sets.set_name',
                   'pep.sequence']
