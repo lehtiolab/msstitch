@@ -40,7 +40,8 @@ def get_genes(proteins, gpmap):
 
 
 def get_descriptions(proteins, gpmap):
-    return get_mapped(proteins, gpmap, 'desc')
+    descriptions = get_mapped(proteins, gpmap, 'desc')
+    return [x.replace('\t', ' ') for x in descriptions]
 
 
 def get_symbols(proteins, gpmap):
