@@ -43,7 +43,8 @@ parser.add_argument('-c', dest='command', type=str,
                     'several steps later on, such as protein grouping and\n'
                     'PSM quantitation. PSM TSV table passed to -i, \n'
                     'With flag --unroll, --spectracol, and specify a FASTA\n'
-                    'file with --fasta, a Biomart map file with --mart.\n\n'
+                    'file with --fasta, a Biomart map file with --map. When\n'
+                    'using --map for a decoy lookup, use --decoy.\n\n'
 
                     'proteingrouplookup  - Groups proteins from mzid2tsv\n'
                     'output (single file passed to -i).\n\n'
@@ -104,6 +105,10 @@ parser.add_argument('--map', dest='mapfn', help='Specifies a file that contains\
                     'a map obtained from ENSEMBL BioMart which should contain\n'
                     'mappings from protein accession to Gene ENSG and Symbol.',
                     type=lambda x: parser_file_exists(parser, x))
+parser.add_argument('--decoy', dest='decoy', help='Specifies the lookup is \n'
+                    'for decoy PSMs, use with --map in case there are no \n'
+                    'decoy symbols in the FASTA used to search.',
+                    action='store_const', const=True, default=False)
 parser.add_argument('--unroll', dest='unroll', help='Flag. The tsv input file '
                     'from Mzid2TSV contains either one PSM per line with all '
                     'the proteins of that shared peptide on the same line (not'

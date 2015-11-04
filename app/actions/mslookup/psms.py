@@ -6,10 +6,10 @@ DB_STORE_CHUNK = 100000
 
 
 def create_psm_lookup(fn, fastafn, mapfn, header, pgdb, unroll=False,
-                      specfncol=None):
+                      specfncol=None, decoy=False):
     """Reads PSMs from file, stores them to a database backend in chunked PSMs.
     """
-    store_proteins_descriptions(pgdb, fastafn, fn, mapfn, header)
+    store_proteins_descriptions(pgdb, fastafn, fn, mapfn, header, decoy)
     mzmlmap = pgdb.get_mzmlfile_map()
     sequences = {}
     for psm in tsvreader.generate_tsv_lines_multifile(fn, header):
@@ -18,12 +18,14 @@ def create_psm_lookup(fn, fastafn, mapfn, header, pgdb, unroll=False,
     pgdb.store_pepseqs(((seq,) for seq in sequences))
     pepseqmap = pgdb.get_peptide_seq_map()
     psms = []
-    for rownr, psm in enumerate(tsvreader.generate_tsv_lines_multifile(fn, header)):
-        specfn, psm_id, scan, seq, score = tsvreader.get_psm(psm, unroll, specfncol)
+    for row, psm in enumerate(tsvreader.generate_tsv_lines_multifile(fn,
+                                                                     header)):
+        specfn, psm_id, scan, seq, score = tsvreader.get_psm(psm, unroll,
+                                                             specfncol)
         if len(psms) % DB_STORE_CHUNK == 0:
             pgdb.store_psms(psms)
             psms = []
-        psms.append({'rownr': rownr,
+        psms.append({'rownr': row,
                      'psm_id': psm_id,
                      'seq': pepseqmap[seq],
                      'score': score,
@@ -35,20 +37,22 @@ def create_psm_lookup(fn, fastafn, mapfn, header, pgdb, unroll=False,
     store_psm_protein_relations(fn, header, pgdb)
 
 
-def get_protein_gene_map(mapfn, proteins):
+def get_protein_gene_map(mapfn, proteins, decoy):
     gpmap = {}
     for protein, gene, symbol, desc in fastareader.get_proteins_genes(mapfn):
         if protein in proteins:
+            if decoy:
+                symbol = 'decoy_{}'.format(symbol)
             gpmap[protein] = {'gene': gene, 'symbol': symbol, 'desc': desc}
     return gpmap
 
 
-def store_proteins_descriptions(pgdb, fastafn, tsvfn, mapfn, header):
-    if not fastafn: 
+def store_proteins_descriptions(pgdb, fastafn, tsvfn, mapfn, header, decoy):
+    if not fastafn:
         proteins = {}
         for psm in tsvreader.generate_tsv_lines_multifile(tsvfn, header):
-            proteins.update({x: 1 for x in 
-                             tsvreader.get_proteins_from_psm(psm)}) 
+            proteins.update({x: 1 for x in
+                             tsvreader.get_proteins_from_psm(psm)})
             proteins = [(protein,) for protein in proteins.keys()]
         pgdb.store_proteins(proteins)
     else:
@@ -66,7 +70,7 @@ def store_proteins_descriptions(pgdb, fastafn, tsvfn, mapfn, header):
             pgdb.store_genes(genes)
     if mapfn:
         proteins = {x[0]: 1 for x in proteins}
-        gpmap = get_protein_gene_map(mapfn, proteins)
+        gpmap = get_protein_gene_map(mapfn, proteins, decoy)
         pgdb.store_gene_and_associated_id(gpmap)
 
 
@@ -96,5 +100,3 @@ def store_psm_protein_relations(fn, header, pgdb):
     pgdb.store_peptides_proteins(allpsms, psmids_to_store)
     pgdb.index_protein_peptides()
     return allpsms
-
-
