@@ -9,7 +9,8 @@ class ProteinQuantLookupDriver(base.LookupDriver):
     def __init__(self, **kwargs):
         self.genecentric = kwargs.get('genecentric', False)
         if self.genecentric:
-            self.lookuptype = 'genetable'
+            self.lookuptype = {'genes': 'genetable',
+                               'assoc': 'associdtable'}[self.genecentric]
         super().__init__(**kwargs)
         self.poolnames = [x.replace('"', '') for x in kwargs.get('setnames')]
         # FIXME need check to see same poolnames correlate with self.fn len

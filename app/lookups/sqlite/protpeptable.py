@@ -4,6 +4,7 @@ from app.lookups.sqlite.base import ResultLookupInterface
 class ProtPepTable(ResultLookupInterface):
     table_map = {'protein': {'fntable': 'protein_tables',
                              'feattable': 'proteins',
+                             'isoqtable': 'protein_iso_quanted',
                              'prectable': 'protein_precur_quanted',
                              'fdrtable': 'protein_fdr',
                              'peptable': 'protein_pep',
@@ -11,11 +12,20 @@ class ProtPepTable(ResultLookupInterface):
                              },
                  'gene': {'fntable': 'gene_tables',
                           'feattable': 'genes',
+                          'isoqtable': 'gene_iso_quanted',
                           'prectable': 'gene_precur_quanted',
                           'fdrtable': 'gene_fdr',
                           'peptable': 'gene_pep',
                           'probabilitytable': 'gene_probability',
                           },
+                 'assoc': {'fntable': 'gene_tables',
+                           'feattable': 'associated_ids',
+                           'isoqtable': 'assoc_iso_quanted',
+                           'prectable': 'assoc_precur_quanted',
+                           'fdrtable': 'assoc_fdr',
+                           'peptable': 'assoc_pep',
+                           'probabilitytable': 'assoc_probability',
+                           },
                  'peptide': {'fntable': 'peptide_tables',
                              'feattable': 'peptide_sequences',
                              'prectable': 'peptide_precur_quanted',
@@ -96,7 +106,8 @@ class ProtPepTable(ResultLookupInterface):
                       'LEFT OUTER JOIN protein_coverage '
                       'AS pcov USING(protein_acc) '
                       'LEFT OUTER JOIN genes AS g USING(protein_acc) '
-                      'LEFT OUTER JOIN associated_ids AS aid USING(protein_acc)'
+                      'LEFT OUTER JOIN associated_ids AS aid '
+                      'USING(protein_acc)'
                       )
         firstjoin = ('psm_protein_groups', 'ppg', 'master_id')
         return self.get_proteins_psms('protein_group_master', fields,
@@ -122,12 +133,62 @@ class ProtPepTable(ResultLookupInterface):
         cursor = self.get_cursor()
         return cursor.execute(sql)
 
+    def prepare_mergetable_sql(self, precursor=False, isobaric=False,
+                               probability=False, fdr=False, pep=False):
+        featcol = self.colmap[self.table_map[self.datatype]['feattable']][1]
+        selects = ['g.{}'.format(featcol), 'bs.set_name']
+        selectmap, count = self.update_selects({}, ['p_acc', 'set_name'], 0)
+        joins = []
+        if isobaric:
+            selects.extend(['pc.channel_name',
+                            'pc.amount_psms_name', 'giq.quantvalue',
+                            'giq.amount_psms'])
+            joins.extend([('genequant_channels', 'pc', ['gt']),
+                          (self.table_map[self.datatype]['isoqtable'], 'giq',
+                           ['g', 'pc'], True),
+                          ])
+            fld = ['channel', 'isoq_psmsfield', 'isoq_val',
+                   'isoq_psms']
+            selectmap, count = self.update_selects(selectmap, fld, count)
+        if precursor:
+            selects.extend(['preq.quant'])
+            joins.append((self.table_map[self.datatype]['prectable'], 'preq',
+                          ['g', 'gt'], True))
+            fld = ['preq_val']
+            selectmap, count = self.update_selects(selectmap, fld, count)
+        if probability:
+            selects.extend(['gprob.probability'])
+            joins.append((self.table_map[self.datatype]['probabilitytable'],
+                          'gprob', ['g', 'gt'], True))
+            fld = ['prob_val']
+            selectmap, count = self.update_selects(selectmap, fld, count)
+        if fdr:
+            selects.extend(['gfdr.fdr'])
+            joins.append((self.table_map[self.datatype]['fdrtable'], 'gfdr',
+                          ['g', 'gt'], True))
+            fld = ['fdr_val']
+            selectmap, count = self.update_selects(selectmap, fld, count)
+        if pep:
+            selects.extend(['gpep.pep'])
+            joins.append((self.table_map[self.datatype]['peptable'], 'gpep',
+                          ['g', 'gt'], True))
+            fld = ['pep_val']
+            selectmap, count = self.update_selects(selectmap, fld, count)
+        sql = ('SELECT {} FROM {} AS g JOIN biosets AS bs '
+               'JOIN gene_tables AS gt ON gt.set_id=bs.set_id'.format(
+                   ', '.join(selects),
+                   self.table_map[self.datatype]['feattable']))
+        sql = self.get_sql_joins_mergetable(sql, joins, self.datatype)
+        sql = '{} ORDER BY g.{}'.format(sql, featcol)
+        return sql, selectmap
+
     def get_sql_joins_mergetable(self, sql, joins, pep_or_prot):
         protein_j_cols = {'p': 'pacc_id', 'pt': 'prottable_id'}
         peptide_j_cols = {'p': 'pep_id', 'pt': 'peptable_id'}
         gene_j_cols = {'g': 'gene_id', 'gt': 'genetable_id'}
+        assoc_j_cols = {'g': 'assoc_id', 'gt': 'genetable_id'}
         colpick = {'peptide': peptide_j_cols, 'protein': protein_j_cols,
-                   'gene': gene_j_cols}
+                   'gene': gene_j_cols, 'assoc': assoc_j_cols}
         join_cols = {'pc': 'channel_id'}
         join_cols.update(colpick[pep_or_prot])
         if joins:

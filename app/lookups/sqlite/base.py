@@ -89,7 +89,8 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                            'channel_id INTEGER',
                                            'quantvalue REAL',
                                            'FOREIGN KEY(pep_id) '
-                                           'REFERENCES peptide_sequences(pep_id) '
+                                           'REFERENCES '
+                                           'peptide_sequences(pep_id) '
                                            'FOREIGN KEY(channel_id) '
                                            'REFERENCES '
                                            'pepquant_channels(channel_id)'
@@ -142,6 +143,16 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                     'FOREIGN KEY(genetable_id) '
                     'REFERENCES gene_tables(genetable_id)'
                     ],
+                   'assoc_precur_quanted':
+                   ['gene_precquant_id INTEGER PRIMARY KEY',
+                    'gene_id INTEGER',
+                    'genetable_id INTEGER',
+                    'quant REAL',
+                    'FOREIGN KEY(gene_id) '
+                    'REFERENCES associated_ids(gene_id) '
+                    'FOREIGN KEY(genetable_id) '
+                    'REFERENCES gene_tables(genetable_id)'
+                    ],
                    'protein_iso_quanted': ['proteinquant_id '
                                            'INTEGER PRIMARY KEY',
                                            'pacc_id INTEGER',
@@ -155,17 +166,29 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                            'protquant_channels(channel_id)'
                                            ],
                    'gene_iso_quanted': ['genequant_id '
-                                           'INTEGER PRIMARY KEY',
-                                           'gene_id INTEGER',
-                                           'channel_id INTEGER',
-                                           'quantvalue REAL',
-                                           'amount_psms INTEGER',
-                                           'FOREIGN KEY(gene_id) '
-                                           'REFERENCES genes(gene_id) '
-                                           'FOREIGN KEY(channel_id) '
-                                           'REFERENCES '
-                                           'genequant_channels(channel_id)'
-                                           ],
+                                        'INTEGER PRIMARY KEY',
+                                        'gene_id INTEGER',
+                                        'channel_id INTEGER',
+                                        'quantvalue REAL',
+                                        'amount_psms INTEGER',
+                                        'FOREIGN KEY(gene_id) '
+                                        'REFERENCES genes(gene_id) '
+                                        'FOREIGN KEY(channel_id) '
+                                        'REFERENCES '
+                                        'genequant_channels(channel_id)'
+                                        ],
+                   'assoc_iso_quanted': ['genequant_id '
+                                         'INTEGER PRIMARY KEY',
+                                         'gene_id INTEGER',
+                                         'channel_id INTEGER',
+                                         'quantvalue REAL',
+                                         'amount_psms INTEGER',
+                                         'FOREIGN KEY(gene_id) '
+                                         'REFERENCES associated_ids(gene_id) '
+                                         'FOREIGN KEY(channel_id) '
+                                         'REFERENCES '
+                                         'genequant_channels(channel_id)'
+                                         ],
                    'genequant_channels': ['channel_id INTEGER PRIMARY KEY',
                                           'genetable_id INTEGER',
                                           'channel_name TEXT',
@@ -191,6 +214,15 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                         'REFERENCES '
                                         'gene_tables(genetable_id)'
                                         ],
+                   'assoc_probability': ['gene_id INTEGER',
+                                         'genetable_id INTEGER',
+                                         'probability DOUBLE',
+                                         'FOREIGN KEY(gene_id) '
+                                         'REFERENCES associated_ids(gene_id) '
+                                         'FOREIGN KEY(genetable_id) '
+                                         'REFERENCES '
+                                         'gene_tables(genetable_id)'
+                                         ],
                    'protein_probability': ['pacc_id INTEGER',
                                            'prottable_id INTEGER',
                                            'probability DOUBLE',
@@ -209,6 +241,15 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                 'REFERENCES '
                                 'gene_tables(genetable_id)'
                                 ],
+                   'assoc_fdr': ['gene_id INTEGER',
+                                 'genetable_id INTEGER',
+                                 'fdr DOUBLE',
+                                 'FOREIGN KEY(gene_id) '
+                                 'REFERENCES associated_ids(gene_id) '
+                                 'FOREIGN KEY(genetable_id) '
+                                 'REFERENCES '
+                                 'gene_tables(genetable_id)'
+                                 ],
                    'protein_fdr': ['pacc_id INTEGER',
                                    'prottable_id INTEGER',
                                    'fdr DOUBLE',
@@ -227,6 +268,15 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                 'REFERENCES '
                                 'gene_tables(genetable_id)'
                                 ],
+                   'assoc_pep': ['gene_id INTEGER',
+                                 'genetable_id INTEGER',
+                                 'pep DOUBLE',
+                                 'FOREIGN KEY(gene_id) '
+                                 'REFERENCES associated_ids(gene_id) '
+                                 'FOREIGN KEY(genetable_id) '
+                                 'REFERENCES '
+                                 'gene_tables(genetable_id)'
+                                 ],
                    'protein_pep': ['pacc_id INTEGER',
                                    'prottable_id INTEGER',
                                    'pep DOUBLE',
@@ -286,7 +336,8 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                              'protein_acc TEXT',
                              'FOREIGN KEY(protein_acc) '
                              'REFERENCES proteins(protein_acc)'],
-                   'associated_ids': ['assoc_id TEXT',
+                   'associated_ids': ['gene_id INTEGER PRIMARY KEY',
+                                      'assoc_id TEXT',
                                       'protein_acc TEXT',
                                       'FOREIGN KEY(protein_acc) '
                                       'REFERENCES proteins(protein_acc)'],
@@ -294,8 +345,7 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                  'description TEXT',
                                  'FOREIGN KEY(protein_acc) '
                                  'REFERENCES proteins(protein_acc)'],
-                   'known_searchspace': ['seqs TEXT',
-                                  ],
+                   'known_searchspace': ['seqs TEXT'],
                    }
 
 

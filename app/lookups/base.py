@@ -15,6 +15,7 @@ def get_lookup(fn, lookuptype):
                  'peptidetable': peptable.PepTableDB,
                  'prottable': prottable.ProtTableDB,
                  'genetable': prottable.GeneTableDB,
+                 'associdtable': prottable.GeneTableAssocIDsDB,
                  }
     return lookupmap[lookuptype](fn)
 

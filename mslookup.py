@@ -152,8 +152,12 @@ parser.add_argument('--pepcolpattern', dest='pepcolpattern',
                     'column in protein table.',
                     type=str, required=False)
 parser.add_argument('--genecentric', dest='genecentric', help='Do not '
-                    'include protein group data such in output. Flag.',
-                    action='store_const', default=False, const=True)
+                    'include protein group data such in output. Should be\n'
+                    'one of [genes, assoc]. With assoc, associated gene IDs\n'
+                    'are used from e.g. Biomart rather than the ones found\n'
+                    'in the FASTA db used for PSM search. These need to have\n'
+                    'been stored when creating a PSM lookup.',
+                    type=str, required=False)
 parser.add_argument('--quanttype', dest='quanttype',
                     help='Filetype of precursor quants to store. Choose from\n'
                     'kronik or openms.',

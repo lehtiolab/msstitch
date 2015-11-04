@@ -3,7 +3,8 @@ from app.lookups.sqlite.protpeptable import ProtPepTable
 
 class ProtTableDB(ProtPepTable):
     datatype = 'protein'
-    colmap = {'protein_precur_quanted': ['pacc_id', 'prottable_id', 'quant'],
+    colmap = {'proteins': ['pacc_id', 'protein_acc'],
+              'protein_precur_quanted': ['pacc_id', 'prottable_id', 'quant'],
               'protein_fdr': ['pacc_id', 'prottable_id', 'fdr'],
               'protein_pep': ['pacc_id', 'prottable_id', 'pep'],
               'protein_probability': ['pacc_id', 'prottable_id',
@@ -23,6 +24,8 @@ class ProtTableDB(ProtPepTable):
             quantchannels)
 
     def get_all_proteins_psms_for_unipeps(self, genecentric):
+        # FIXME isnt genecentric ready to removed since the DB interface
+        # also changes with genecentric/not gene centric?
         fields = ['p.protein_acc', 'sets.set_name',
                   'pep.sequence']
         if genecentric:
@@ -32,48 +35,6 @@ class ProtTableDB(ProtPepTable):
             firstjoin = ('psm_protein_groups', 'ppg', 'master_id')
             firsttable = 'protein_group_master'
         return self.get_proteins_psms(firsttable, fields, firstjoin)
-
-    def prepare_mergetable_sql(self, precursor=False, isobaric=False,
-                               probability=False, fdr=False, pep=False):
-        selects = ['p.protein_acc', 'bs.set_name']
-        selectmap, count = self.update_selects({}, ['p_acc', 'set_name'], 0)
-        joins = []
-        if isobaric:
-            selects.extend(['pc.channel_name',
-                            'pc.amount_psms_name', 'piq.quantvalue',
-                            'piq.amount_psms'])
-            joins.extend([('protquant_channels', 'pc', ['pt']),
-                          ('protein_iso_quanted', 'piq', ['p', 'pc'], True),
-                          ])
-            fld = ['channel', 'isoq_psmsfield', 'isoq_val',
-                   'isoq_psms']
-            selectmap, count = self.update_selects(selectmap, fld, count)
-        if precursor:
-            selects.extend(['preq.quant'])
-            joins.append(('protein_precur_quanted', 'preq', ['p', 'pt'], True))
-            fld = ['preq_val']
-            selectmap, count = self.update_selects(selectmap, fld, count)
-        if probability:
-            selects.extend(['pprob.probability'])
-            joins.append(('protein_probability', 'pprob', ['p', 'pt'], True))
-            fld = ['prob_val']
-            selectmap, count = self.update_selects(selectmap, fld, count)
-        if fdr:
-            selects.extend(['pfdr.fdr'])
-            joins.append(('protein_fdr', 'pfdr', ['p', 'pt'], True))
-            fld = ['fdr_val']
-            selectmap, count = self.update_selects(selectmap, fld, count)
-        if pep:
-            selects.extend(['ppep.pep'])
-            joins.append(('protein_pep', 'ppep', ['p', 'pt'], True))
-            fld = ['pep_val']
-            selectmap, count = self.update_selects(selectmap, fld, count)
-
-        sql = ('SELECT {} FROM proteins AS p JOIN biosets AS bs '
-               'JOIN protein_tables AS pt ON pt.set_id=bs.set_id'.format(', '.join(selects)))
-        sql = self.get_sql_joins_mergetable(sql, joins, 'protein')
-        sql = '{0} ORDER BY p.protein_acc'.format(sql)
-        return sql, selectmap
 
     def get_isoquant_amountpsms_channels(self):
         cursor = self.get_cursor()
@@ -111,7 +72,8 @@ class ProtTableDB(ProtPepTable):
 
 class GeneTableDB(ProtPepTable):
     datatype = 'gene'
-    colmap = {'gene_precur_quanted': ['gene_id', 'genetable_id', 'quant'],
+    colmap = {'genes': ['gene_id', 'gene_acc', 'protein_acc'],
+              'gene_precur_quanted': ['gene_id', 'genetable_id', 'quant'],
               'gene_fdr': ['gene_id', 'genetable_id', 'fdr'],
               'gene_pep': ['gene_id', 'genetable_id', 'pep'],
               'gene_probability': ['gene_id', 'genetable_id',
@@ -131,6 +93,9 @@ class GeneTableDB(ProtPepTable):
             quantchannels)
 
     def get_all_proteins_psms_for_unipeps(self, genecentric):
+        # FIXME isnt genecentric ready to removed since the DB interface
+        # also changes with genecentric/not gene centric?
+        # I mean: gene table of which the first table is protein_group_master?
         fields = ['p.gene_acc', 'sets.set_name',
                   'pep.sequence']
         if genecentric:
@@ -150,11 +115,16 @@ class GeneTableDB(ProtPepTable):
                   'pd.description', 'aid.assoc_id']
         firstjoin = ('protein_psm', 'pp', 'protein_acc')
         extrajoins = ('LEFT OUTER JOIN prot_desc AS pd USING(protein_acc) '
-                      'LEFT OUTER JOIN associated_ids AS aid USING(protein_acc)'
+                      'LEFT OUTER JOIN associated_ids AS aid '
+                      'USING(protein_acc)'
                       )
+        return self.get_unique_gene_psms(fields, firstjoin, extrajoins)
+
+    def get_unique_gene_psms(self, fields, firstjoin, extrajoins):
+        genetable = self.table_map[self.datatype]['feattable']
         lastgene = None
         gpsms_out, gp_ids = [], []
-        for gpsm in self.get_proteins_psms('genes', fields, firstjoin,
+        for gpsm in self.get_proteins_psms(genetable, fields, firstjoin,
                                            extrajoins):
             if gpsm[0] != lastgene:
                 for outpsm in gpsms_out:
@@ -168,48 +138,6 @@ class GeneTableDB(ProtPepTable):
         for outpsm in gpsms_out:
             yield outpsm
 
-    def prepare_mergetable_sql(self, precursor=False, isobaric=False,
-                               probability=False, fdr=False, pep=False):
-        selects = ['g.gene_acc', 'bs.set_name']
-        selectmap, count = self.update_selects({}, ['p_acc', 'set_name'], 0)
-        joins = []
-        if isobaric:
-            selects.extend(['pc.channel_name',
-                            'pc.amount_psms_name', 'giq.quantvalue',
-                            'giq.amount_psms'])
-            joins.extend([('genequant_channels', 'pc', ['gt']),
-                          ('gene_iso_quanted', 'giq', ['g', 'pc'], True),
-                          ])
-            fld = ['channel', 'isoq_psmsfield', 'isoq_val',
-                   'isoq_psms']
-            selectmap, count = self.update_selects(selectmap, fld, count)
-        if precursor:
-            selects.extend(['preq.quant'])
-            joins.append(('gene_precur_quanted', 'preq', ['g', 'gt'], True))
-            fld = ['preq_val']
-            selectmap, count = self.update_selects(selectmap, fld, count)
-        if probability:
-            selects.extend(['gprob.probability'])
-            joins.append(('gene_probability', 'gprob', ['g', 'gt'], True))
-            fld = ['prob_val']
-            selectmap, count = self.update_selects(selectmap, fld, count)
-        if fdr:
-            selects.extend(['gfdr.fdr'])
-            joins.append(('gene_fdr', 'gfdr', ['g', 'gt'], True))
-            fld = ['fdr_val']
-            selectmap, count = self.update_selects(selectmap, fld, count)
-        if pep:
-            selects.extend(['gpep.pep'])
-            joins.append(('gene_pep', 'gpep', ['g', 'gt'], True))
-            fld = ['pep_val']
-            selectmap, count = self.update_selects(selectmap, fld, count)
-
-        sql = ('SELECT {} FROM genes AS g JOIN biosets AS bs '
-               'JOIN gene_tables AS gt ON gt.set_id=bs.set_id'.format(', '.join(selects)))
-        sql = self.get_sql_joins_mergetable(sql, joins, 'gene')
-        sql = '{0} ORDER BY g.gene_acc'.format(sql)
-        return sql, selectmap
-
     def get_isoquant_amountpsms_channels(self):
         cursor = self.get_cursor()
         cursor.execute(
@@ -221,7 +149,7 @@ class GeneTableDB(ProtPepTable):
         cursor = self.get_cursor()
         cursor.execute(
             'SELECT DISTINCT prottable_id '
-            'FROM gene_precur_quanted')
+            'FROM {}'.format(self.table_map[self.datatype]['prectable']))
         return cursor
 
     def get_quantchannel_map(self):
@@ -239,6 +167,45 @@ class GeneTableDB(ProtPepTable):
 
     def store_isobaric_quants(self, quants):
         self.store_many(
-            'INSERT INTO gene_iso_quanted(gene_id, channel_id, '
-            'quantvalue, amount_psms) '
-            'VALUES (?, ?, ?, ?)', quants)
+            'INSERT INTO {}(gene_id, channel_id, quantvalue, amount_psms) '
+            'VALUES '
+            '(?, ?, ?, ?)'.format(self.table_map[self.datatype]['isoqtable']),
+            quants)
+
+
+class GeneTableAssocIDsDB(GeneTableDB):
+    datatype = 'assoc'
+
+    def add_tables(self):
+        self.colmap.pop('genes')
+        self.colmap = {table.replace('gene', 'assoc'): cols
+                       for table, cols in self.colmap.items()}
+        self.colmap['associated_ids'] = ['gene_id', 'assoc_id', 'protein_acc']
+        self.create_tables(['gene_tables', 'assoc_iso_quanted',
+                            'genequant_channels', 'assoc_precur_quanted',
+                            'assoc_probability', 'assoc_fdr',
+                            'assoc_pep'])
+
+    def get_all_proteins_psms_for_unipeps(self, genecentric):
+        # FIXME isnt genecentric ready to removed since the DB interface
+        # also changes with genecentric/not gene centric?
+        # this is a test function and it is not used at all.
+        fields = ['p.assoc_id', 'sets.set_name',
+                  'pep.sequence']
+        firstjoin = ('protein_psm', 'pp', 'protein_acc')
+        firsttable = 'associated_ids'
+        return self.get_proteins_psms(firsttable, fields, firstjoin)
+
+    def get_proteins_psms_for_map(self):
+        """Gets gene-PSM combinations from DB and filters out uniques
+        on the fly. Filtering is done since PSM are stored per protein,
+        not per gene, so there may be a lot of *plicates"""
+        fields = ['p.assoc_id', 'sets.set_name',
+                  'pep.sequence', 'psm.psm_id',
+                  'pd.description', 'g.gene_acc']
+        firstjoin = ('protein_psm', 'pp', 'protein_acc')
+        extrajoins = ('LEFT OUTER JOIN prot_desc AS pd USING(protein_acc) '
+                      'LEFT OUTER JOIN genes AS g '
+                      'USING(protein_acc)'
+                      )
+        return self.get_unique_gene_psms(fields, firstjoin, extrajoins)
