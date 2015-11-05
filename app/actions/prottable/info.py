@@ -20,12 +20,14 @@ def add_record_to_proteindata(proteindata, p_acc, pool, psmdata, genecentric,
         try:
             proteindata[p_acc]['pools'][pool] = emptyinfo
         except KeyError:
-            proteindata[p_acc] = {'pools': {pool: emptyinfo}}
-            proteindata[p_acc].update({'desc': desc, 'cov': cov, 
-                                       'gene': gene, 'aid': assoc_id,
-                                       'proteins': pgcontent})
+            proteindata[p_acc] = {'pools': {pool: emptyinfo},
+                                  'desc': desc, 'cov': cov, 
+                                  'proteins': pgcontent,
+                                  'gene': set(), 'aid': set()}
     proteindata[p_acc]['pools'][pool]['psms'].add(psm_id)
     proteindata[p_acc]['pools'][pool]['peptides'].add(seq)
+    proteindata[p_acc]['gene'].add(gene)
+    proteindata[p_acc]['aid'].add(assoc_id)
 
 
 def count_peps_psms(proteindata, p_acc, pool):
@@ -81,22 +83,21 @@ def get_protein_data_base(proteindata, p_acc, headerfields):
                         for (hfield, val) in zip(hfields, pool_values)})
     outdict.update({prottabledata.HEADER_NO_PROTEIN: proteincount,
                     prottabledata.HEADER_DESCRIPTION: proteindata[p_acc]['desc'],
-                    prottabledata.HEADER_ASSOCIATED: proteindata[p_acc]['aid']})
+                    prottabledata.HEADER_GENE: 
+                    ';'.join(proteindata[p_acc]['gene']),
+                    prottabledata.HEADER_ASSOCIATED: 
+                    ';'.join(proteindata[p_acc]['aid'])})
     return outdict
 
 
 def get_cov_protnumbers(proteindata, p_acc, report):
     try:
-        report.update({prottabledata.HEADER_COVERAGE:
-                       proteindata[p_acc]['cov'],
-                       prottabledata.HEADER_GENE: proteindata[p_acc]['gene'],
-                       prottabledata.HEADER_CONTENTPROT:
+        report[prottabledata.HEADER_COVERAGE] = proteindata[p_acc]['cov']
+    except KeyError:
+        pass
+    if 'proteins' in proteindata[p_acc]:
+        report.update({prottabledata.HEADER_CONTENTPROT:
                        ','.join(proteindata[p_acc]['proteins']),
                        prottabledata.HEADER_NO_PROTEIN:
-                       len(proteindata[p_acc]['proteins'])
-                       })
-    except KeyError:
-        # In case database is built without a FASTA file there is no coverage
-        # info available.
-        pass
+                       len(proteindata[p_acc]['proteins'])})
     return report
