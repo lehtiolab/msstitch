@@ -157,7 +157,7 @@ parser.add_argument('--genecentric', dest='genecentric', help='Do not '
                     'are used from e.g. Biomart rather than the ones found\n'
                     'in the FASTA db used for PSM search. These need to have\n'
                     'been stored when creating a PSM lookup.',
-                    type=str, required=False)
+                    type=str, default=False)
 parser.add_argument('--quanttype', dest='quanttype',
                     help='Filetype of precursor quants to store. Choose from\n'
                     'kronik or openms.',
