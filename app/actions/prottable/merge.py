@@ -24,7 +24,7 @@ def build_proteintable(pqdb, header, headerfields, isobaric=False,
     pep_fun = {True: get_prot_pep,
                False: empty_return}[pep]
     pdata_fun = {True: get_protein_data_genecentric,
-                 False: get_protein_data}[genecentric]
+                 False: get_protein_data}[genecentric is not False]
     protein_sql, sqlfieldmap = pqdb.prepare_mergetable_sql(precursor, isobaric,
                                                            probability, fdr,
                                                            pep)

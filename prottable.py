@@ -157,8 +157,12 @@ parser.add_argument('--setname', dest='setname', help='Name of biological '
                     'Must be used with addprotdata.',
                     default=False, type=str)
 parser.add_argument('--genecentric', dest='genecentric', help='Do not '
-                    'include protein group data such in output. Flag.',
-                    action='store_const', default=False, const=True)
+                    'include protein group data in output. Should be\n'
+                    'one of [genes, assoc]. With assoc, associated gene IDs\n'
+                    'are used from e.g. Biomart rather than the ones found\n'
+                    'in the FASTA db used for PSM search. These need to have\n'
+                    'been stored when creating a PSM lookup.',
+                    type=str, default=False)
 parser.add_argument('--precursor', dest='precursor', help='Build protein '
                     'table which contains precursor quant data. Flag.',
                     action='store_const', default=False, const=True)

@@ -5,6 +5,7 @@ class ProtPepTable(ResultLookupInterface):
     table_map = {'protein': {'fntable': 'protein_tables',
                              'feattable': 'proteins',
                              'isoqtable': 'protein_iso_quanted',
+                             'isochtable': 'protquant_channels',
                              'prectable': 'protein_precur_quanted',
                              'fdrtable': 'protein_fdr',
                              'peptable': 'protein_pep',
@@ -13,6 +14,7 @@ class ProtPepTable(ResultLookupInterface):
                  'gene': {'fntable': 'gene_tables',
                           'feattable': 'genes',
                           'isoqtable': 'gene_iso_quanted',
+                          'isochtable': 'genequant_channels',
                           'prectable': 'gene_precur_quanted',
                           'fdrtable': 'gene_fdr',
                           'peptable': 'gene_pep',
@@ -21,6 +23,7 @@ class ProtPepTable(ResultLookupInterface):
                  'assoc': {'fntable': 'gene_tables',
                            'feattable': 'associated_ids',
                            'isoqtable': 'assoc_iso_quanted',
+                           'isochtable': 'genequant_channels',
                            'prectable': 'assoc_precur_quanted',
                            'fdrtable': 'assoc_fdr',
                            'peptable': 'assoc_pep',
@@ -28,6 +31,8 @@ class ProtPepTable(ResultLookupInterface):
                            },
                  'peptide': {'fntable': 'peptide_tables',
                              'feattable': 'peptide_sequences',
+                             'isoqtable': 'peptide_iso_quanted',
+                             'isochtable': 'pepquant_channels',
                              'prectable': 'peptide_precur_quanted',
                              'fdrtable': 'peptide_fdr',
                              'peptable': 'peptide_pep',
@@ -55,7 +60,8 @@ class ProtPepTable(ResultLookupInterface):
     def get_feature_map(self):
         columns = {'protein': ['pacc_id', 'protein_acc'],
                    'gene': ['gene_id', 'gene_acc'],
-                   'peptide': ['pep_id', 'sequence']
+                   'peptide': ['pep_id', 'sequence'],
+                   'assoc': ['gene_id', 'assoc_id'],
                    }
         table = self.table_map[self.datatype]['feattable']
         columns = columns[self.datatype]
@@ -143,7 +149,8 @@ class ProtPepTable(ResultLookupInterface):
             selects.extend(['pc.channel_name',
                             'pc.amount_psms_name', 'giq.quantvalue',
                             'giq.amount_psms'])
-            joins.extend([('genequant_channels', 'pc', ['gt']),
+            joins.extend([(self.table_map[self.datatype]['isochtable'], 'pc',
+                           ['gt']),
                           (self.table_map[self.datatype]['isoqtable'], 'giq',
                            ['g', 'pc'], True),
                           ])
@@ -175,20 +182,20 @@ class ProtPepTable(ResultLookupInterface):
             fld = ['pep_val']
             selectmap, count = self.update_selects(selectmap, fld, count)
         sql = ('SELECT {} FROM {} AS g JOIN biosets AS bs '
-               'JOIN gene_tables AS gt ON gt.set_id=bs.set_id'.format(
+               'JOIN {} AS gt ON gt.set_id=bs.set_id'.format(
                    ', '.join(selects),
-                   self.table_map[self.datatype]['feattable']))
+                   self.table_map[self.datatype]['feattable'],
+                   self.table_map[self.datatype]['fntable']))
         sql = self.get_sql_joins_mergetable(sql, joins, self.datatype)
         sql = '{} ORDER BY g.{}'.format(sql, featcol)
         return sql, selectmap
 
     def get_sql_joins_mergetable(self, sql, joins, pep_or_prot):
-        protein_j_cols = {'p': 'pacc_id', 'pt': 'prottable_id'}
-        peptide_j_cols = {'p': 'pep_id', 'pt': 'peptable_id'}
+        protein_j_cols = {'g': 'pacc_id', 'gt': 'prottable_id'}
+        peptide_j_cols = {'g': 'pep_id', 'gt': 'peptable_id'}
         gene_j_cols = {'g': 'gene_id', 'gt': 'genetable_id'}
-        assoc_j_cols = {'g': 'assoc_id', 'gt': 'genetable_id'}
         colpick = {'peptide': peptide_j_cols, 'protein': protein_j_cols,
-                   'gene': gene_j_cols, 'assoc': assoc_j_cols}
+                   'gene': gene_j_cols, 'assoc': gene_j_cols}
         join_cols = {'pc': 'channel_id'}
         join_cols.update(colpick[pep_or_prot])
         if joins:

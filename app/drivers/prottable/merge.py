@@ -16,7 +16,8 @@ class BuildProteinTableDriver(ProttableMergeDriver):
                                         'built_protein_table.txt')
         self.genecentric = kwargs.get('genecentric', False)
         if self.genecentric:
-            self.lookuptype = 'genetable'
+            self.lookuptype = {'genes': 'genetable',
+                               'assoc': 'associdtable'}[self.genecentric]
         super().__init__(**kwargs)
         self.isobaricquant = kwargs.get('isobaric', False)
         self.precursorquant = kwargs.get('precursor', False)
