@@ -13,5 +13,9 @@ def generate_master_proteins(psms, protcol):
         if ';' in protacc:
             continue
         master_proteins[protacc] = 1
+    if 'NA' in master_proteins:
+        master_proteins.pop('NA')
+    if '' in master_proteins:
+        master_proteins.pop('')
     for protacc in master_proteins:
         yield {prottabledata.HEADER_PROTEIN: protacc}
