@@ -175,12 +175,14 @@ class GeneTableDB(ProtPepTable):
 
 class GeneTableAssocIDsDB(GeneTableDB):
     datatype = 'assoc'
-
-    def add_tables(self):
+    def __init__(self, fn=None):
+        super().__init__(fn)
         self.colmap.pop('genes')
         self.colmap = {table.replace('gene', 'assoc'): cols
                        for table, cols in self.colmap.items()}
         self.colmap['associated_ids'] = ['gene_id', 'assoc_id', 'protein_acc']
+
+    def add_tables(self):
         self.create_tables(['gene_tables', 'assoc_iso_quanted',
                             'genequant_channels', 'assoc_precur_quanted',
                             'assoc_probability', 'assoc_fdr',
