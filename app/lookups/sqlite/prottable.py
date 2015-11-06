@@ -9,6 +9,10 @@ class ProtTableDB(ProtPepTable):
               'protein_pep': ['pacc_id', 'prottable_id', 'pep'],
               'protein_probability': ['pacc_id', 'prottable_id',
                                       'probability'],
+              'protquant_channels': ['channel_id', 'prottable_id',
+                                     'channel_name', 'amount_psms_name'],
+              'protein_iso_quanted': ['proteinquant_id', 'pacc_id',
+                                      'channel_id', 'quantvalue', 'amount_psms'],
               }
 
     def add_tables(self):
@@ -16,12 +20,6 @@ class ProtTableDB(ProtPepTable):
                             'protquant_channels', 'protein_precur_quanted',
                             'protein_probability', 'protein_fdr',
                             'protein_pep'])
-
-    def store_quant_channels(self, quantchannels):
-        self.store_many(
-            'INSERT INTO protquant_channels(prottable_id, channel_name, '
-            'amount_psms_name) VALUES (?, ?, ?)',
-            quantchannels)
 
     def get_all_proteins_psms_for_unipeps(self, genecentric):
         # FIXME isnt genecentric ready to removed since the DB interface
@@ -50,25 +48,6 @@ class ProtTableDB(ProtPepTable):
             'FROM protein_precur_quanted')
         return cursor
 
-    def get_quantchannel_map(self):
-        outdict = {}
-        cursor = self.get_cursor()
-        cursor.execute(
-            'SELECT channel_id, prottable_id, channel_name, amount_psms_name'
-            ' FROM protquant_channels')
-        for channel_id, fnid, channel_name, amount_psms_name in cursor:
-            try:
-                outdict[fnid][channel_name] = (channel_id, amount_psms_name)
-            except KeyError:
-                outdict[fnid] = {channel_name: (channel_id, amount_psms_name)}
-        return outdict
-
-    def store_isobaric_quants(self, quants):
-        self.store_many(
-            'INSERT INTO protein_iso_quanted(pacc_id, channel_id, '
-            'quantvalue, amount_psms) '
-            'VALUES (?, ?, ?, ?)', quants)
-
 
 class GeneTableDB(ProtPepTable):
     datatype = 'gene'
@@ -78,6 +57,10 @@ class GeneTableDB(ProtPepTable):
               'gene_pep': ['gene_id', 'genetable_id', 'pep'],
               'gene_probability': ['gene_id', 'genetable_id',
                                    'probability'],
+              'genequant_channels': ['channel_id', 'genetable_id',
+                                     'channel_name', 'amount_psms_name'],
+              'gene_iso_quanted': ['genequant_id', 'gene_id',
+                                   'channel_id', 'quantvalue', 'amount_psms'],
               }
 
     def add_tables(self):
@@ -85,12 +68,6 @@ class GeneTableDB(ProtPepTable):
                             'genequant_channels', 'gene_precur_quanted',
                             'gene_probability', 'gene_fdr',
                             'gene_pep'])
-
-    def store_quant_channels(self, quantchannels):
-        self.store_many(
-            'INSERT INTO genequant_channels(genetable_id, channel_name, '
-            'amount_psms_name) VALUES (?, ?, ?)',
-            quantchannels)
 
     def get_all_proteins_psms_for_unipeps(self, genecentric):
         # FIXME isnt genecentric ready to removed since the DB interface
@@ -151,26 +128,6 @@ class GeneTableDB(ProtPepTable):
             'SELECT DISTINCT prottable_id '
             'FROM {}'.format(self.table_map[self.datatype]['prectable']))
         return cursor
-
-    def get_quantchannel_map(self):
-        outdict = {}
-        cursor = self.get_cursor()
-        cursor.execute(
-            'SELECT channel_id, genetable_id, channel_name, amount_psms_name'
-            ' FROM genequant_channels')
-        for channel_id, fnid, channel_name, amount_psms_name in cursor:
-            try:
-                outdict[fnid][channel_name] = (channel_id, amount_psms_name)
-            except KeyError:
-                outdict[fnid] = {channel_name: (channel_id, amount_psms_name)}
-        return outdict
-
-    def store_isobaric_quants(self, quants):
-        self.store_many(
-            'INSERT INTO {}(gene_id, channel_id, quantvalue, amount_psms) '
-            'VALUES '
-            '(?, ?, ?, ?)'.format(self.table_map[self.datatype]['isoqtable']),
-            quants)
 
 
 class GeneTableAssocIDsDB(GeneTableDB):

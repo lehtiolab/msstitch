@@ -51,6 +51,33 @@ class ProtPepTable(ResultLookupInterface):
                 self.table_map[self.datatype]['fntable']),
             tables)
 
+    def store_quant_channels(self, quantchannels):
+        table = self.table_map[self.datatype]['isochtable']
+        self.store_many(
+            'INSERT INTO {}({}, channel_name, amount_psms_name) VALUES'
+            '(?, ?, ?)'.format(table, self.colmap[table][1]), quantchannels)
+
+    def get_quantchannel_map(self):
+        outdict = {}
+        table = self.table_map[self.datatype]['isochtable']
+        cursor = self.get_cursor()
+        cursor.execute(
+            'SELECT channel_id, {}, channel_name, amount_psms_name'
+            ' FROM {}'.format(self.colmap[table][1], table))
+        for channel_id, fnid, channel_name, amount_psms_name in cursor:
+            try:
+                outdict[fnid][channel_name] = (channel_id, amount_psms_name)
+            except KeyError:
+                outdict[fnid] = {channel_name: (channel_id, amount_psms_name)}
+        return outdict
+
+    def store_isobaric_quants(self, quants):
+        table = self.table_map[self.datatype]['isoqtable']
+        self.store_many(
+            'INSERT INTO {}({}, channel_id, quantvalue, amount_psms) '
+            'VALUES '
+            '(?, ?, ?, ?)'.format(table, self.colmap[table][1]), quants)
+
     def get_tablefn_map(self):
         table = self.table_map[self.datatype]['fntable']
         cursor = self.get_cursor()
