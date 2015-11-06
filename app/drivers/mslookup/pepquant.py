@@ -17,5 +17,6 @@ class PeptideQuantLookupDriver(ProteinQuantLookupDriver):
                                            self.peptidecol,
                                            self.precursorquantcolpattern,
                                            self.quantcolpattern,
+                                           self.psmnrcolpattern,
                                            self.fdrcolpattern,
                                            self.pepcolpattern)

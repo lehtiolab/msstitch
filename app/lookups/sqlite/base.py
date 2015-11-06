@@ -79,6 +79,7 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                    'pepquant_channels': ['channel_id INTEGER PRIMARY KEY',
                                          'peptable_id INTEGER',
                                          'channel_name TEXT',
+                                         'amount_psms_name TEXT',
                                          'FOREIGN KEY(peptable_id) '
                                          'REFERENCES '
                                          'peptide_tables(peptable_id)'
@@ -88,6 +89,7 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                            'pep_id INTEGER',
                                            'channel_id INTEGER',
                                            'quantvalue REAL',
+                                           'amount_psms INTEGER',
                                            'FOREIGN KEY(pep_id) '
                                            'REFERENCES '
                                            'peptide_sequences(pep_id) '

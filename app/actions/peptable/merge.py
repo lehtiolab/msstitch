@@ -22,16 +22,17 @@ def build_peptidetable(pqdb, header, headerfields, isobaric=False,
                False: empty_return}[pep]
     pdata_fun = get_protein_data
     peptide_sql, sqlfieldmap = pqdb.prepare_mergetable_sql(precursor, isobaric,
-                                                           fdr, pep)
+                                                           probability=False,
+                                                           fdr=fdr, pep=pep)
     peptides = pqdb.get_merged_features(peptide_sql)
     peptide = next(peptides)
-    outpeptide = {peptabledata.HEADER_PEPTIDE: peptide[sqlfieldmap['p_seq']]}
+    outpeptide = {peptabledata.HEADER_PEPTIDE: peptide[sqlfieldmap['p_acc']]}
     check_pep = {k: v for k, v in outpeptide.items()}
     fill_mergefeature(outpeptide, iso_fun, ms1_fun, empty_return, fdr_fun,
                       pep_fun, pdata_fun, peptide, sqlfieldmap,
                       headerfields, peptidedatamap)
     for peptide in peptides:
-        p_seq = peptide[sqlfieldmap['p_seq']]
+        p_seq = peptide[sqlfieldmap['p_acc']]
         if p_seq != outpeptide[peptabledata.HEADER_PEPTIDE]:
             if outpeptide != check_pep:
                 yield parse_NA(outpeptide, header)
