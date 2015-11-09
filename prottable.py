@@ -78,9 +78,9 @@ parser.add_argument('-c', dest='command', type=str,
                     'protein discarded. Matching (reversed, tryptic reversed,'
                     ' scrambled) target and decoy FASTA files are needed to\n'
                     'determine the pairs, use --targetfasta, --decoyfasta.\n'
-                    'In case proteingrouping has been used, protein group\n'
-                    'content must have been put in the protein tables, and\n'
-                    'the flag --proteingroups must have been passed.\n\n'
+                    'Specify gene type with --picktype [fasta, result] to\n'
+                    'distinguish between creating target-decoy pairs from\n'
+                    'matched FASTA files or from the protein table input.\n\n'
 
                     'addfdr - Add protein FDR to protein table by comparing\n'
                     'score (peptide q-value, protein probability, etc)\n'
@@ -135,10 +135,11 @@ parser.add_argument('--targetfasta', dest='targetfasta',
 parser.add_argument('--decoyfasta', dest='decoyfasta',
                     help='FASTA file with decoy proteins to determine best\n'
                     'scoring proteins of target/decoy pairs for pickqvality.')
-parser.add_argument('--proteingroups', dest='proteingroups',
-                    help='Flag. When using pickqvality use this flag to be\n'
-                    'able to use pick FDR method on protein grouped samples.',
-                    action='store_const', const=True, default=False)
+parser.add_argument('--picktype', dest='picktype',
+                    help='When using pickqvality use this to specify whether\n'
+                    'using FASTA files to build target-decoy matches from or\n'
+                    'that the matches should be inferred from the target and\n'
+                    'decoy protein table input. Can be one of [fasta, result].')
 parser.add_argument('--protcol', dest='protcol', help='Column number\n'
                     'of PSM table in which protein/gene accessions are. \n'
                     'stored. First column number is 1. Use in case of not using\n'
