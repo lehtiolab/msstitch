@@ -137,6 +137,7 @@ class GeneTableAssocIDsDB(GeneTableDB):
         self.colmap.pop('genes')
         self.colmap = {table.replace('gene', 'assoc'): cols
                        for table, cols in self.colmap.items()}
+        self.colmap['genequant_channels'] = self.colmap.pop('assocquant_channels')
         self.colmap['associated_ids'] = ['gene_id', 'assoc_id', 'protein_acc']
 
     def add_tables(self):
