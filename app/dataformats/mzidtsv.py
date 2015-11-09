@@ -1,5 +1,6 @@
 from app.readers.mzidplus import (PERCO_ORDER, P_PEPTIDEQ, P_PEPTIDEPEP)
 
+DECOY_PREFIX = 'decoy_'
 
 HEADER_SPECFILE = '#SpecFile'
 HEADER_SCANNR = 'ScanNum'

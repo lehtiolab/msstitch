@@ -1,5 +1,6 @@
 from collections import OrderedDict
 
+from app.dataformats import mzidtsv as mzidtsvdata
 from app.readers import tsv as tsvreader
 from app.readers import fasta as fastareader
 DB_STORE_CHUNK = 100000
@@ -42,7 +43,10 @@ def get_protein_gene_map(mapfn, proteins, decoy):
     for protein, gene, symbol, desc in fastareader.get_proteins_genes(mapfn):
         if protein in proteins:
             if decoy:
-                symbol = 'decoy_{}'.format(symbol)
+                protein = proteins[protein]
+                symbol = '{}{}'.format(mzidtsvdata.DECOY_PREFIX, symbol)
+                gene = '{}{}'.format(mzidtsvdata.DECOY_PREFIX, gene)
+                desc = None
             gpmap[protein] = {'gene': gene, 'symbol': symbol, 'desc': desc}
     return gpmap
 
@@ -69,9 +73,27 @@ def store_proteins_descriptions(pgdb, fastafn, tsvfn, mapfn, header, decoy):
             pgdb.store_descriptions(descriptions)
             pgdb.store_genes(genes)
     if mapfn:
-        proteins = {x[0]: 1 for x in proteins}
+        if decoy:
+            mod = get_decoy_mod_string(proteins[0][0])
+            proteins = {x[0].replace(mod, ''): x[0] for x in proteins}
+        else:
+            proteins = {x[0]: 1 for x in proteins}
         gpmap = get_protein_gene_map(mapfn, proteins, decoy)
         pgdb.store_gene_and_associated_id(gpmap)
+
+
+def get_decoy_mod_string(protein):
+    mods = ['tryp_reverse', 'reverse', 'decoy', 'random', 'shuffle']
+    for mod in mods:
+        if mod in protein:
+            if protein.endswith('_{}'.format(mod)):
+                return '_{}'.format(mod) 
+            elif protein.endswith('{}'.format(mod)):
+                return mod 
+            elif protein.startswith('{}_'.format(mod)):
+                return '{}_'.format(mod) 
+            elif protein.startswith('{}'.format(mod)):
+                return mod 
 
 
 def store_psm_protein_relations(fn, header, pgdb):
