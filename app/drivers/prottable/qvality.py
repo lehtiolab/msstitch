@@ -2,6 +2,7 @@ from app.drivers.pycolator.qvality import QvalityDriver
 from app.actions.prottable import qvality as preparation
 from app.actions.prottable import picktdprotein as pickprotein
 from app.readers import tsv
+from app.dataformats import prottable as prottabledata
 
 
 class ProttableQvalityDriver(QvalityDriver):
@@ -52,3 +53,5 @@ class PickedQvalityDriver(ProttableQvalityDriver):
         self.target, self.decoy = pickprotein.write_pick_td_tables(
             self.target, self.decoy, self.targetheader, self.decoyheader,
             self.t_fasta, self.d_fasta, self.picktype)
+        self.targetheader = prottabledata.PICKED_HEADER
+        self.decoyheader = prottabledata.PICKED_HEADER

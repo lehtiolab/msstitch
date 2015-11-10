@@ -12,8 +12,7 @@ def write_pick_td_tables(target, decoy, theader, dheader,
                          targetfasta, decoyfasta, inferencetype):
     tfile, dfile = 'target.txt', 'decoy.txt'
     tdmap = {}
-    header = '{}\t{}'.format(prottabledata.HEADER_PROTEIN,
-                             prottabledata.HEADER_QSCORE)
+    header = '\t'.join(prottabledata.PICKED_HEADER)
     with open(tfile, 'w') as tdmap[TARGET], open(dfile, 'w') as tdmap[DECOY]:
         tdmap[TARGET].write(header)
         tdmap[DECOY].write(header)
