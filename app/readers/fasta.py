@@ -74,8 +74,13 @@ def get_gene(description, rectype):
                 'swiss': '='}[rectype]
     field = {'ensembl': 'gene',
              'swiss': 'GN'}[rectype]
-    splitdesc = [x.split(splitter) for x in description.split()]
-    return [x[1] for x in splitdesc if x[0] == field][0]
+    splitdesc = [x.split(splitter) for x in description.split()
+                 if splitter in x]
+    gn_list = [x[1] for x in splitdesc if x[0] == field]
+    try:
+        return gn_list[0]
+    except IndexError:
+        return 'NA'
 
 
 def has_evidence_levels(fastafn):
