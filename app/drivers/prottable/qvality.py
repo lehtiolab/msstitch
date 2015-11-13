@@ -47,11 +47,10 @@ class PickedQvalityDriver(ProttableQvalityDriver):
         self.d_fasta = kwargs.get('decoyfasta')
         self.picktype = kwargs.get('picktype')
 
-    def prepare(self):
-        """Using this to write picked protein tables"""
-        super().prepare()
-        self.target, self.decoy = pickprotein.write_pick_td_tables(
+    
+    def set_features(self):
+        """Using this to write picked score tables for qvality"""
+        target, decoy = pickprotein.write_pick_td_tables(
             self.target, self.decoy, self.targetheader, self.decoyheader,
             self.t_fasta, self.d_fasta, self.picktype)
-        self.targetheader = prottabledata.PICKED_HEADER
-        self.decoyheader = prottabledata.PICKED_HEADER
+        self.scores = {'target': {'fn': target}, 'decoy': {'fn': decoy}}
