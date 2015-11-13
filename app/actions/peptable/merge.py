@@ -126,12 +126,13 @@ def count_psms(pdata):
 def add_record_to_peptidedata(peptidedata, p_acc, pool, psmdata, genecentric,
                               pgcontentmap=None):
     seq, psm_id = psmdata[2], psmdata[3]
-    desc, cov = psmdata[4], psmdata[5]
-    gene, assoc_id = psmdata[6], psmdata[7]
-    if not genecentric:
-        pgcontent = pgcontentmap[p_acc]
+    if genecentric:
+        desc, assoc_id = psmdata[4], psmdata[5]
+        cov, gene, pgcontent = None, None, None
     else:
-        pgcontent = None
+        desc, cov = psmdata[4], psmdata[5]
+        gene, assoc_id = psmdata[6], psmdata[7]
+        pgcontent = pgcontentmap[p_acc]
     try:
         peptidedata[seq]['psms'][pool].add(psm_id)
     except KeyError:

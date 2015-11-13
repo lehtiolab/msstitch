@@ -146,6 +146,23 @@ class ProtPepTable(ResultLookupInterface):
         return self.get_proteins_psms('protein_group_master', fields,
                                       firstjoin, extrajoins)
 
+    def get_unique_gene_psms(self, genetable, fields, firstjoin, extrajoins):
+        lastgene = None
+        gpsms_out, gp_ids = [], []
+        for gpsm in self.get_proteins_psms(genetable, fields, firstjoin,
+                                           extrajoins):
+            if gpsm[0] != lastgene:
+                for outpsm in gpsms_out:
+                    yield outpsm
+                lastgene = gpsm[0]
+                gpsms_out, gp_ids = [], []
+            gp_id = gpsm[0] + gpsm[1] + gpsm[3]
+            if gp_id not in gp_ids:
+                gp_ids.append(gp_id)
+                gpsms_out.append(gpsm)
+        for outpsm in gpsms_out:
+            yield outpsm
+
     def get_proteins_psms(self, firsttable, fields, firstjoin,
                           extrajoins=False):
         joins = [firstjoin]

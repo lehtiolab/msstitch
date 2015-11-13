@@ -24,3 +24,23 @@ class PepTableDB(ProtPepTable):
             'SELECT DISTINCT channel_name '
             'FROM pepquant_channels')
         return (x[0] for x in cursor)
+
+
+class PepTableGeneCentricDB(PepTableDB):
+    datatype = 'peptide'
+    
+    def get_proteins_psms_for_map(self):
+        """Gets gene-PSM combinations from DB and filters out uniques
+        on the fly. Filtering is done since PSM are stored per protein,
+        not per gene, so there may be a lot of *plicates"""
+        fields = ['p.gene_acc', 'sets.set_name',
+                  'pep.sequence', 'psm.psm_id',
+                  'pd.description', 'aid.assoc_id']
+        firstjoin = ('protein_psm', 'pp', 'protein_acc')
+        extrajoins = ('LEFT OUTER JOIN prot_desc AS pd USING(protein_acc) '
+                      'LEFT OUTER JOIN associated_ids AS aid '
+                      'USING(protein_acc)'
+                      )
+        genetable = 'genes'
+        return self.get_unique_gene_psms(genetable, fields, firstjoin, extrajoins)
+

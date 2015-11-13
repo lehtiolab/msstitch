@@ -13,6 +13,7 @@ def get_lookup(fn, lookuptype):
                  'ms1quant': quant.PrecursorQuantDB,
                  'searchspace': searchspace.SearchSpaceDB,
                  'peptidetable': peptable.PepTableDB,
+                 'peptidegenecentrictable': peptable.PepTableGeneCentricDB,
                  'prottable': prottable.ProtTableDB,
                  'genetable': prottable.GeneTableDB,
                  'associdtable': prottable.GeneTableAssocIDsDB,

@@ -14,12 +14,14 @@ class BuildPeptideTableDriver(PeptableMergeDriver):
         and outfile creating wont error."""
         kwargs['infile'] = os.path.join(os.getcwd(),
                                         'built_peptide_table.txt')
+        self.genecentric = kwargs.get('genecentric', False)
+        if self.genecentric:
+            self.lookuptype = 'peptidegenecentrictable'
         super().__init__(**kwargs)
         self.isobaricquant = kwargs.get('isobaric', False)
         self.precursorquant = kwargs.get('precursor', False)
         self.fdr = kwargs.get('fdr', False)
         self.pep = kwargs.get('pep', False)
-        self.genecentric = kwargs.get('genecentric', False)
 
     def set_feature_generator(self):
         """Generates proteins with quant from the lookup table"""

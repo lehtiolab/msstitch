@@ -95,25 +95,8 @@ class GeneTableDB(ProtPepTable):
                       'LEFT OUTER JOIN associated_ids AS aid '
                       'USING(protein_acc)'
                       )
-        return self.get_unique_gene_psms(fields, firstjoin, extrajoins)
-
-    def get_unique_gene_psms(self, fields, firstjoin, extrajoins):
         genetable = self.table_map[self.datatype]['feattable']
-        lastgene = None
-        gpsms_out, gp_ids = [], []
-        for gpsm in self.get_proteins_psms(genetable, fields, firstjoin,
-                                           extrajoins):
-            if gpsm[0] != lastgene:
-                for outpsm in gpsms_out:
-                    yield outpsm
-                lastgene = gpsm[0]
-                gpsms_out, gp_ids = [], []
-            gp_id = gpsm[0] + gpsm[1] + gpsm[3]
-            if gp_id not in gp_ids:
-                gp_ids.append(gp_id)
-                gpsms_out.append(gpsm)
-        for outpsm in gpsms_out:
-            yield outpsm
+        return self.get_unique_gene_psms(genetable, fields, firstjoin, extrajoins)
 
     def get_isoquant_amountpsms_channels(self):
         cursor = self.get_cursor()
@@ -168,4 +151,5 @@ class GeneTableAssocIDsDB(GeneTableDB):
                       'LEFT OUTER JOIN genes AS g '
                       'USING(protein_acc)'
                       )
-        return self.get_unique_gene_psms(fields, firstjoin, extrajoins)
+        genetable = self.table_map[self.datatype]['feattable']
+        return self.get_unique_gene_psms(genetable, fields, firstjoin, extrajoins)
