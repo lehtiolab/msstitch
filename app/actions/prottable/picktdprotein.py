@@ -47,7 +47,10 @@ def get_score(protein):
 def create_td_gene_map(tfastafn, dfastafn):
     tfasta = (x[1] for x in fasta.get_proteins_genes(tfastafn))
     dfasta = (x[1] for x in fasta.get_proteins_genes(dfastafn))
-    return create_td_map(tfasta, dfasta)
+    tdmap = {}
+    for target, decoy in zip(tfasta, dfasta):
+        tdmap[target] = decoy
+    return tdmap
 
 
 def create_td_assoc_map(tproteins, dproteins, theader, dheader):
@@ -61,27 +64,6 @@ def create_td_assoc_map(tproteins, dproteins, theader, dheader):
         if not tdmap.get(tprot, False):
             tdmap[tprot] = None
     return tdmap
-
-
-def create_td_protein_map(tfastafn, dfastafn):
-    tfasta = fasta.generate_proteins_id(tfastafn)
-    dfasta = fasta.generate_proteins_id(dfastafn)
-    return create_td_map(tfasta, dfasta)
-
-
-def create_td_map(tfasta, dfasta):
-    tdmap = {}
-    for target, decoy in zip(tfasta, dfasta):
-        tdmap[target] = decoy
-    return tdmap
-
-
-def create_content_master_map(prottable, header):
-    contentmap = {}
-    for protein in reader.generate_tsv_proteins(prottable, header):
-        master = protein[prottabledata.HEADER_PROTEIN]
-        content = reader.get_content_proteins_from_master(protein)
-        contentmap.update({prot: master for prot in content})
 
 
 def generate_scoremaps(targetprot, decoyprot, theader, dheader):
