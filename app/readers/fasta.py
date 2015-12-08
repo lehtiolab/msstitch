@@ -37,13 +37,16 @@ def get_proteins_genes(fastafn):
             rectype = get_record_type(record)
             yield (record.id, get_gene(record.description, rectype),
                    None, record.description)
-    elif firstline.split('\t')[0] == 'Ensembl Gene ID':
+    elif 'Ensembl Gene ID' in firstline.split('\t'):
         with open(fastafn) as fp:
             header = next(fp).strip().split('\t')
             ensg = header.index('Ensembl Gene ID')
             ensp = header.index('Ensembl Protein ID')
-            symb = header.index('HGNC symbol')
             desc = header.index('Description')
+            try:
+                symb = header.index('HGNC symbol')
+            except ValueError:
+                symb = header.index('Associated Gene Name')
             for line in fp:
                 line = line.strip().split('\t')
                 yield (line[ensp], line[ensg], line[symb], line[desc])
