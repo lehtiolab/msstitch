@@ -48,8 +48,11 @@ def get_proteins_genes(fastafn):
             except ValueError:
                 symb = header.index('Associated Gene Name')
             for line in fp:
-                line = line.strip().split('\t')
-                yield (line[ensp], line[ensg], line[symb], line[desc])
+                line = line.strip('\n').split('\t')
+                protein = line[ensp]
+                if not protein:
+                    continue
+                yield (protein, line[ensg], line[symb], line[desc])
 
 
 def parse_protein_identifier(record):
