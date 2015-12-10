@@ -43,17 +43,16 @@ def create_pep_protein_quant_lookup(fns, pqdb, poolnames, featcolnr, patterns,
         if colmap:
             store_single_col_data(fns, tablefn_map, feat_map,
                                   storefun, featcolnr, colmap)
-    isocolmap, psmcolmap = {}, {}
-    for pattern, colmap in zip([isobqcolpattern, psmnrpattern],
-                               [isocolmap, psmcolmap]):
-        if pattern is None:
-            continue
-        colmap.update(get_colmap(fns, pattern))
-    if isocolmap:
-        create_isobaric_quant_lookup(fns, tablefn_map,
-                                     feat_map, pqdb,
-                                     featcolnr,
-                                     isocolmap, psmcolmap)
+    if isobqcolpattern is not None:
+        isocolmap = get_colmap(fns, isobqcolpattern, antipattern=psmnrpattern)
+    else:
+        return
+    if psmnrpattern is not None:
+        psmcolmap = get_colmap(fns, psmnrpattern)
+    create_isobaric_quant_lookup(fns, tablefn_map,
+                                 feat_map, pqdb,
+                                 featcolnr,
+                                 isocolmap, psmcolmap)
 
 
 def create_tablefn_map(fns, pqdb, poolnames):
@@ -65,7 +64,7 @@ def create_tablefn_map(fns, pqdb, poolnames):
     return pqdb.get_tablefn_map()
 
 
-def get_colmap(fns, pattern, single_col=False):
+def get_colmap(fns, pattern, single_col=False, antipattern=False):
     """For table files, loops through headers and checks which column(s)
     match a passed pattern. Those column(s) names are returned in a map with
     filenames as keys"""
@@ -74,6 +73,10 @@ def get_colmap(fns, pattern, single_col=False):
         header = tsvreader.get_tsv_header(fn)
         basefn = os.path.basename(fn)
         cols = tsvreader.get_cols_in_file(pattern, header, single_col)
+        if antipattern:
+            anticols = tsvreader.get_cols_in_file(antipattern, header,
+                                                  single_col)
+            cols = [col for col in cols if col not in anticols]
         if cols:
             colmap[basefn] = cols
     return colmap
