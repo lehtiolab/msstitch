@@ -41,7 +41,7 @@ class PSMDB(ResultLookupInterface):
         self.store_associated_ids(syms)
         descs = ((protein, mapped['desc']) for protein, mapped in feats.items())
         self.store_descriptions(descs)
-            
+
     def store_genes(self, genes):
         cursor = self.get_cursor()
         cursor.executemany(
@@ -112,7 +112,7 @@ class PSMDB(ResultLookupInterface):
         self.index_column('psmrowid_index', 'psmrows', 'psm_id')
         self.index_column('psmrow_index', 'psmrows', 'rownr')
         self.index_column('pepseq_index', 'peptide_sequences', 'sequence')
-    
+
     def index_protein_peptides(self):
         self.index_column('protein_index', 'protein_psm', 'protein_acc')
         self.index_column('protpsmid_index', 'protein_psm', 'psm_id')
