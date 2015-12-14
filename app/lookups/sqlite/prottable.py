@@ -3,7 +3,8 @@ from app.lookups.sqlite.protpeptable import ProtPepTable
 
 class ProtTableDB(ProtPepTable):
     datatype = 'protein'
-    colmap = {'proteins': ['pacc_id', 'protein_acc'],
+    colmap = {'protein_group_master': ['master_id', 'protein_acc'],
+              'proteins': ['pacc_id', 'protein_acc'],
               'protein_precur_quanted': ['pacc_id', 'prottable_id', 'quant'],
               'protein_fdr': ['pacc_id', 'prottable_id', 'fdr'],
               'protein_pep': ['pacc_id', 'prottable_id', 'pep'],

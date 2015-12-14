@@ -3,7 +3,7 @@ from app.lookups.sqlite.base import ResultLookupInterface
 
 class ProtPepTable(ResultLookupInterface):
     table_map = {'protein': {'fntable': 'protein_tables',
-                             'feattable': 'proteins',
+                             'feattable': 'protein_group_master',
                              'isoqtable': 'protein_iso_quanted',
                              'isochtable': 'protquant_channels',
                              'prectable': 'protein_precur_quanted',
@@ -85,13 +85,11 @@ class ProtPepTable(ResultLookupInterface):
         return {fn: table_id for (table_id, setid, fn) in cursor}
 
     def get_feature_map(self):
-        columns = {'protein': ['pacc_id', 'protein_acc'],
-                   'gene': ['gene_id', 'gene_acc'],
-                   'peptide': ['pep_id', 'sequence'],
-                   'assoc': ['gene_id', 'assoc_id'],
-                   }
-        table = self.table_map[self.datatype]['feattable']
-        columns = columns[self.datatype]
+        if self.datatype == 'protein':
+            table = 'proteins'
+        else:
+            table = self.table_map[self.datatype]['feattable']
+        columns = self.colmap[table][0:2]
         cursor = self.get_cursor()
         cursor.execute('SELECT {}, {} FROM {}'.format(columns[0], columns[1],
                                                       table))
@@ -186,9 +184,15 @@ class ProtPepTable(ResultLookupInterface):
     def prepare_mergetable_sql(self, precursor=False, isobaric=False,
                                probability=False, fdr=False, pep=False):
         featcol = self.colmap[self.table_map[self.datatype]['feattable']][1]
-        selects = ['g.{}'.format(featcol), 'bs.set_name']
         selectmap, count = self.update_selects({}, ['p_acc', 'set_name'], 0)
         joins = []
+        if self.datatype == 'protein':
+            selects = ['pgm.{}'.format(featcol), 'bs.set_name']
+            firstselect = 'pgm'
+            joins.append(('proteins', 'g', ['pgm']))
+        else:
+            selects = ['g.{}'.format(featcol), 'bs.set_name']
+            firstselect = 'g'
         if isobaric:
             selects.extend(['pc.channel_name',
                             'pc.amount_psms_name', 'giq.quantvalue',
@@ -225,17 +229,19 @@ class ProtPepTable(ResultLookupInterface):
                           ['g', 'gt'], True))
             fld = ['pep_val']
             selectmap, count = self.update_selects(selectmap, fld, count)
-        sql = ('SELECT {} FROM {} AS g JOIN biosets AS bs '
+        sql = ('SELECT {} FROM {} AS {} JOIN biosets AS bs '
                'JOIN {} AS gt ON gt.set_id=bs.set_id'.format(
                    ', '.join(selects),
                    self.table_map[self.datatype]['feattable'],
+                   firstselect,
                    self.table_map[self.datatype]['fntable']))
         sql = self.get_sql_joins_mergetable(sql, joins, self.datatype)
         sql = '{} ORDER BY g.{}'.format(sql, featcol)
         return sql, selectmap
 
     def get_sql_joins_mergetable(self, sql, joins, pep_or_prot):
-        protein_j_cols = {'g': 'pacc_id', 'gt': 'prottable_id'}
+        protein_j_cols = {'g': 'pacc_id', 'gt': 'prottable_id', 
+                          'pgm': 'protein_acc'}
         peptide_j_cols = {'g': 'pep_id', 'gt': 'peptable_id'}
         gene_j_cols = {'g': 'gene_id', 'gt': 'genetable_id'}
         colpick = {'peptide': peptide_j_cols, 'protein': protein_j_cols,
