@@ -11,6 +11,7 @@ class PSMLookupDriver(base.LookupDriver):
         self.spectracol = kwargs.get('speccol', None)
         self.mapfn = kwargs.get('mapfn', False)
         self.decoy = kwargs.get('decoy', False)
+        self.fasta = kwargs.get('fasta')
 
     def create_lookup(self):
         header = tsvreader.get_tsv_header(self.fn[0])

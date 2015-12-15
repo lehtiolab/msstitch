@@ -13,10 +13,11 @@ def get_all_proteins_from_unrolled_psm(rownr, pgdb):
     return pgdb.get_proteins_for_peptide([rownr])
 
 
-def generate_psms_with_proteingroups(fn, oldheader, newheader, pgdb, unroll=False):
+def generate_psms_with_proteingroups(fn, oldheader, newheader, pgdb,
+                                     unroll=False):
     rownr = 0
-    cov_evi = pgdb.check_coverage_evidence_tables()
-    all_protein_group_content = pgdb.get_all_psms_proteingroups(cov_evi)
+    use_evi = pgdb.check_evidence_tables()
+    all_protein_group_content = pgdb.get_all_psms_proteingroups(use_evi)
     protein = next(all_protein_group_content)
     for psm in tsvreader.generate_tsv_psms(fn, oldheader):
         if unroll:
@@ -35,7 +36,7 @@ def generate_psms_with_proteingroups(fn, oldheader, newheader, pgdb, unroll=Fals
                 protein = next(all_protein_group_content)
             except StopIteration:
                 protein = [-1]
-        sorted_pgs = sorters.sort_protein_groups(proteins_in_groups, cov_evi)
+        sorted_pgs = sorters.sort_protein_groups(proteins_in_groups, use_evi)
         psm_masters = []
         psm_pg_proteins = []
         for master, group in sorted_pgs.items():

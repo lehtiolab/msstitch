@@ -8,8 +8,8 @@ PROTEIN_ACC_INDEX = 2
 PEPTIDE_COUNT_INDEX = 3
 PSM_COUNT_INDEX = 4
 PROTEIN_SCORE_INDEX = 5
-EVIDENCE_LVL_INDEX = 6
-COVERAGE_INDEX = 7
+COVERAGE_INDEX = 6
+EVIDENCE_LVL_INDEX = 7
 
 
 class ProteinGroupDB(ResultLookupInterface):
@@ -133,34 +133,37 @@ class ProteinGroupDB(ResultLookupInterface):
         return ((master, psm)
                 for master, psm in cursor.execute(sql).fetchall())
 
-    def check_coverage_evidence_tables(self):
-        checks = {'coverage': False,
-                  'evidence': False}
-        for checktype in checks.keys():
-            cursor = self.get_cursor()
-            cursor.execute('SELECT * FROM protein_{} '
-                           'LIMIT 10'.format(checktype))
-            if len(cursor.fetchall()) > 0:
-                checks[checktype] = True
-        return False not in checks.values()
+    def check_evidence_tables(self):
+        """Returns True if there are records in evidence
+        tables, otherwise returns False"""
+        return self.check_table('protein_evidence') is not False
 
-    def get_all_psms_proteingroups(self, coverage_evidence):
+    def check_table(self, tablename):
+        cursor = self.get_cursor()
+        cursor.execute('SELECT * FROM {} LIMIT 10'.format(tablename))
+        if len(cursor.fetchall()) > 0:
+            return True
+        return False
+
+    def get_all_psms_proteingroups(self, evidence):
         fields = ['pr.rownr', 'pgm.protein_acc', 'pgc.protein_acc',
-                  'pgc.peptide_count', 'pgc.psm_count', 'pgc.protein_score']
+                  'pgc.peptide_count', 'pgc.psm_count', 'pgc.protein_score',
+                  'pc.coverage']
         joins = [('psm_protein_groups', 'ppg', 'psm_id'),
                  ('protein_group_master', 'pgm', 'master_id'),
                  ('protein_group_content', 'pgc', 'master_id'),
                  ]
         join_sql = '\n'.join(['JOIN {0} AS {1} USING({2})'.format(
             j[0], j[1], j[2]) for j in joins])
-        if coverage_evidence:
-            specialjoin = [('protein_evidence', 'pev'),
-                           ('protein_coverage', 'pc')]
-            fields.extend(['pc.coverage', 'pev.evidence_lvl'])
-            specialjoin = '\n'.join(['JOIN {0} AS {1} ON '
-                                     'pgc.protein_acc={1}.protein_acc'.format(
-                                         j[0], j[1]) for j in specialjoin])
-            join_sql = '{} {}'.format(join_sql, specialjoin)
+        specialjoin = []
+        if evidence:
+            specialjoin = [('protein_evidence', 'pev')]
+            fields.append('pev.evidence_lvl')
+        specialjoin.append(('protein_coverage', 'pc'))
+        specialjoin = '\n'.join(['JOIN {0} AS {1} ON '
+                                 'pgc.protein_acc={1}.protein_acc'.format(
+                                     j[0], j[1]) for j in specialjoin])
+        join_sql = '{} {}'.format(join_sql, specialjoin)
         sql = 'SELECT {0} FROM psmrows AS pr {1} ORDER BY pr.rownr'.format(
             ', '.join(fields), join_sql)
         cursor = self.get_cursor()

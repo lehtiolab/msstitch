@@ -5,15 +5,13 @@ DB_STORE_CHUNK = 100000
 from collections import OrderedDict
 
 from app.readers import tsv as tsvreader
-from app.readers import fasta as fastareader
 from app.actions.mzidtsv import proteingroup_sorters as sorters
 
 
-def build_proteingroup_db(pgdb, coverage):
+def build_proteingroup_db(pgdb):
     build_master_db(pgdb)
-    if coverage:
-        build_coverage(pgdb)
-    build_content_db(pgdb, coverage)
+    build_coverage(pgdb)
+    build_content_db(pgdb)
 
 
 def build_master_db(pgdb):
@@ -43,7 +41,7 @@ def build_master_db(pgdb):
     pgdb.store_masters(allmasters, psm_masters)
 
 
-def build_content_db(pgdb, coverage):
+def build_content_db(pgdb):
     all_master_psm_proteins = pgdb.get_master_contentproteins_psms()
     all_master_psms = pgdb.get_all_master_psms()
     lastpsmmaster, masterpsm = next(all_master_psms)
@@ -61,7 +59,7 @@ def build_content_db(pgdb, coverage):
             lastcontentmaster, pgroup, content = fetch_pg_content(
                 all_master_psm_proteins, lastcontentmaster, lastpsmmaster,
                 content, master_psms)
-            new_master = sorters.sort_to_get_master(pgroup, coverage)
+            new_master = sorters.sort_to_get_master(pgroup)
             new_masters[new_master['master_id']] = new_master['protein_acc']
             pgroup = [[pg[2], pg[1], pg[3], pg[4], pg[5]] for pg in pgroup]
             protein_groups.extend(pgroup)
@@ -71,7 +69,7 @@ def build_content_db(pgdb, coverage):
     lastcontentmaster, pgroup, content = fetch_pg_content(
         all_master_psm_proteins, lastcontentmaster,
         lastpsmmaster, content, master_psms)
-    new_master = sorters.sort_to_get_master(pgroup, coverage)
+    new_master = sorters.sort_to_get_master(pgroup)
     new_masters[new_master['master_id']] = new_master['protein_acc']
     new_masters = ((acc, mid) for mid, acc in new_masters.items())
     pgroup = [[pg[2], pg[1], pg[3], pg[4], pg[5]] for pg in pgroup]
@@ -228,8 +226,8 @@ def get_protein_group_content(pgmap, master):
                                                            for psm in pgpsms]),
                    sum([psm[1] for pgpsms in peptides.values()
                         for psm in pgpsms]),  # score
+                   next(iter(next(iter(peptides.values()))))[3],  # coverage
                    next(iter(next(iter(peptides.values()))))[2],  # evid level
-                   next(iter(next(iter(peptides.values()))))[3]  # coverage
                    ]
                   for protein, peptides in pgmap.items()]
     return pg_content

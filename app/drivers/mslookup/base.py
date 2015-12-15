@@ -8,8 +8,6 @@ class LookupDriver(BaseDriver):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.unroll = kwargs.get('unroll', False)
-        self.fasta = kwargs.get('fasta', False)
-        self.coverage = self.fasta is not False
 
     def initialize_lookup(self):
         if self.lookup is None:
