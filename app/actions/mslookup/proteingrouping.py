@@ -42,6 +42,7 @@ def build_master_db(pgdb):
 
 
 def build_content_db(pgdb):
+    use_evi = pgdb.check_evidence_tables()
     all_master_psm_proteins = pgdb.get_master_contentproteins_psms()
     all_master_psms = pgdb.get_all_master_psms()
     lastpsmmaster, masterpsm = next(all_master_psms)
@@ -69,7 +70,7 @@ def build_content_db(pgdb):
     lastcontentmaster, pgroup, content = fetch_pg_content(
         all_master_psm_proteins, lastcontentmaster,
         lastpsmmaster, content, master_psms)
-    new_master = sorters.sort_to_get_master(pgroup)
+    new_master = sorters.sort_to_get_master(pgroup, use_evi)
     new_masters[new_master['master_id']] = new_master['protein_acc']
     new_masters = ((acc, mid) for mid, acc in new_masters.items())
     pgroup = [[pg[2], pg[1], pg[3], pg[4], pg[5]] for pg in pgroup]

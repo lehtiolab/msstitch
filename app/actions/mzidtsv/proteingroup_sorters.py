@@ -12,8 +12,8 @@ def get_sortfnxs(evidence):
     return sortfnxs
 
 
-def sort_to_get_master(pgroup):
-    sortfnxs = get_sortfnxs()
+def sort_to_get_master(pgroup, evidence):
+    sortfnxs = get_sortfnxs(evidence)
     sorted_pg = sort_protein_group(pgroup, sortfnxs, 0)
     return {'master_id': sorted_pg[0][lookups.MASTER_INDEX],
             'protein_acc': sorted_pg[0][lookups.PROTEIN_ACC_INDEX]}
