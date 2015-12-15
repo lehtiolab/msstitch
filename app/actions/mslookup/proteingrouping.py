@@ -60,7 +60,7 @@ def build_content_db(pgdb):
             lastcontentmaster, pgroup, content = fetch_pg_content(
                 all_master_psm_proteins, lastcontentmaster, lastpsmmaster,
                 content, master_psms)
-            new_master = sorters.sort_to_get_master(pgroup)
+            new_master = sorters.sort_to_get_master(pgroup, use_evi)
             new_masters[new_master['master_id']] = new_master['protein_acc']
             pgroup = [[pg[2], pg[1], pg[3], pg[4], pg[5]] for pg in pgroup]
             protein_groups.extend(pgroup)
