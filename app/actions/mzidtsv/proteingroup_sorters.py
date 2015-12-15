@@ -20,11 +20,15 @@ def sort_to_get_master(pgroup, evidence):
 
 
 def sort_protein_groups(pgroups, evidence):
+    """Gets a protein groups containing dict pgroups, for each master (key)
+    there is a list of protein tuples that comprise a proteingroup. This loops
+    the groups and returns a sorted group. Assumes master is already sorted
+    as the proper master"""
     sortfnxs = get_sortfnxs(evidence)
     pgroups_out = {}
-    for pgroup in pgroups.values():
+    for master, pgroup in pgroups.items():
         sorted_pg = sort_protein_group(pgroup, sortfnxs, 0)
-        pgroups_out[sorted_pg[0][lookups.PROTEIN_ACC_INDEX]] = sorted_pg
+        pgroups_out[master] = sorted_pg
     return pgroups_out
 
 
