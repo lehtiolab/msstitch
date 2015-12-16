@@ -46,7 +46,7 @@ parser.add_argument('-c', dest='command', type=str,
                     'file with --fasta, a Biomart map file with --map. When\n'
                     'using --map for a decoy lookup, use --decoy.\n\n'
 
-                    'proteingrouplookup  - Groups proteins from mzid2tsv\n'
+                    'proteingroup - Groups proteins from mzid2tsv\n'
                     'output (single file passed to -i).\n\n'
 
                     'isoquant - Create lookup of isobaric quant data in\n'
@@ -61,7 +61,7 @@ parser.add_argument('-c', dest='command', type=str,
                     'for tolerance specification, and passing \n'
                     'a featureXML or kronik file to -i\n\n'
 
-                    'protquant - Creates lookup of protein quantification\n'
+                    'proteins - Creates lookup of protein quantification\n'
                     'data in tab separated format. Header should include\n'
                     'quantification channel names, and if possible the\n'
                     'number of peptides quantified for each protein in the\n'

@@ -50,12 +50,12 @@ parser.add_argument('-c', dest='command', type=str,
                     'squares regression). Uses --qcolpattern, \n'
                     '--scorecolpattern.\n\n'
 
-                    'addpepisoquant - Add isobaric quantification data from a\n'
+                    'addisoquant - Add isobaric quantification data from a\n'
                     'peptidetable containing this. Needs a second table\n'
                     'specified with --quantfile, --qaccpattern, and \n'
                     '--isobquantcolpattern\n\n'
 
-                    'buildpep - Build peptide table from data stored in a\n'
+                    'build - Build peptide table from data stored in a\n'
                     'lookup DB object created with mslookup.py. Use with\n'
                     '--genecentric, --isobaric, --precursor, --fdr, --pep.\n\n'
                     '',
@@ -88,7 +88,7 @@ parser.add_argument('--scorecolpattern', dest='scorecolpattern',
                     help='Regexp pattern to get column where scores are in.',
                     type=str, required=False)
 parser.add_argument('--qcolpattern', dest='qcolpattern', help='Regexp pattern '
-                    'to het column where q-values are in.',
+                    'to the column where q-values are in.',
                     type=str, required=False)
 parser.add_argument('--ms1quantcolpattern', dest='precursorquantcolpattern',
                     help='Unique text pattern to identify precursor quant \n'

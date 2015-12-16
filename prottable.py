@@ -34,7 +34,7 @@ parser.add_argument('-c', dest='command', type=str,
                     '# PSMs, etc.) to a table with protein accessions\n'
                     'Use with --dbfile\n\n'
 
-                    'buildquant - Create protein quant data from a lookup\n'
+                    'build - Create protein quant data from a lookup\n'
                     'database. E.g. when multiple protein quant tables have\n'
                     'been read into the lookup and will be combined. Use \n'
                     'with --dbfile, --genecentric, --precursor, --isobaric\n'
@@ -49,7 +49,7 @@ parser.add_argument('-c', dest='command', type=str,
                     'PSM table containing precursor quant areas. Needs\n'
                     'a psmtable specified with --psmtable.\n\n'
 
-                    'emptyprottable - Create protein table from PSM table\n'
+                    'emptytable - Create protein table from PSM table\n'
                     'containing no quant data, resulting in one column with\n'
                     'master proteins only. Use with --protcol if input PSMs\n'
                     'are not of standard protein grouped variety.\n\n'
@@ -64,7 +64,7 @@ parser.add_argument('-c', dest='command', type=str,
                     'protein and annotates that score in the protein table.\n'
                     'Use with --scorecolpattern, --peptable, --logscore.\n\n'
 
-                    'protqvality - Run qvality on protein (or tsv) tables\n'
+                    'qvality - Run qvality on protein (or tsv) tables\n'
                     'containing target (-i) proteins and decoy (--decoy)\n'
                     'proteins. Use with --feattype to use either protein\n'
                     'error probability (Nesvizhskii 2003) or Q score from\n'
@@ -84,8 +84,8 @@ parser.add_argument('-c', dest='command', type=str,
 
                     'addfdr - Add protein FDR to protein table by comparing\n'
                     'score (peptide q-value, protein probability, etc)\n'
-                    'with qvality lookup table. Needs \n'
-                    'to have qvality output file specified with --qvality',
+                    'with qvality lookup table. Needs --scorecolpattern and\n'
+                    'qvality output file specified with --qvality',
                     required=True
                     )
 parser.add_argument('-i', dest='infile',

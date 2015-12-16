@@ -1,12 +1,12 @@
 #!/usr/bin/python3
 # FIXME docstring wrong
 """
-mzidplus -- Modifying MSGF+ TSV output
+mzidtsv -- Modifying MSGF+ TSV output
 
 USAGE:
-   mzidplus.py [option] [input files]
+   mzidtsv.py [option] [input files]
 EXAMPLE:
-   mzidplus.py -c percotsv -i psms.mzid -d /data -o psmquant.tsv
+   mzidtsv.py -c percotsv -i psms.mzid -d /data -o psmquant.tsv
 """
 
 import argparse
@@ -17,7 +17,7 @@ import app.drivers.mzidtsv.proteingrouping as pgdrivers
 import app.drivers.mzidtsv.prot2gene as genedrivers
 import app.drivers.mzidtsv.quant as quantdrivers
 import app.drivers.mzidtsv.splitmerge as splitmergedrivers
-import app.drivers.mzidtsv.filter_confidence as conffiltdrivers 
+import app.drivers.mzidtsv.filter_confidence as conffiltdrivers
 
 
 def parser_file_exists(currentparser, fn):
@@ -39,37 +39,37 @@ def parser_value_in_list(currentparser, value, valuelist):
 parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
 parser.add_argument('-c', dest='command', type=str,
                     help='How to manipulate the input:\n'
-                    'spectratsv - Add spectra data such as retention time,\n'
+                    'addspectra - Add spectra data such as retention time,\n'
                     'biological set name to tsv\n'
                     'percotsv       - Add percolator data to a  TSV with \n'
                     'MSGF+ output. Specify TSV file with -i, mzid file with \n'
                     '--mzid.\n\n'
 
-                    'quanttsv       - Add quantitative data from openMS\n'
+                    'addquant - Add quantitative data from openMS\n'
                     'consensusXML to a tab separated file with\n'
                     'PSMs. Needs to be passed a lookup db with --dbfile,\n'
                     'which has to contain quant information, and\n'
                     '--isobaric or --precursor, \n'
                     '--spectracol changes the column where the spectra\n'
                     'file names are in from the standard #SpecFile column.\n\n'
-                    
+
                     'conffilt - Filters PSMs by their confidence level\n'
                     'Use with --confidence-lvl, --confidence-col,\n'
                     '--confidence-better\n\n'
 
-                    'proteingroup   - Takes lookup SQLite result, uses it\n'
+                    'proteingroup - Takes lookup SQLite result, uses it\n'
                     'to output mzidtsv file with protein groups\n'
                     'With flags --confidence-lvl, --confidence-col,\n'
                     '--confidence-better, --dbfile, --spectracol\n\n'
 
-                    'genepsm        - Add column to mzidtsv with gene names\n'
+                    'genes - Add column to mzidtsv with gene names\n'
                     'or symbols, which are stored in a lookup specified with\n'
                     '--dbfile\n\n'
 
-                    'mergetsv       - Merges multiple TSV tables of MSGF+ \n'
+                    'merge - Merges multiple TSV tables of MSGF+ \n'
                     'output. Make sure headers are same in all files.\n\n'
 
-                    'splittsv       - Splits an MSGF TSV PSM table into\n'
+                    'split - Splits an MSGF TSV PSM table into\n'
                     'multiple new tables based. Use with flags --bioset or\n'
                     '--splitcol, and optionally --set-rename and\n'
                     '--rename-cols.\n\n'
