@@ -5,9 +5,11 @@ mslookup - Creating SQLite lookups for internal and external use
 """
 
 import argparse
+import sys
 import os
 from app.drivers.mslookup import (spectra, quant, proteingroups, biosets,
                                   proteinquant, pepquant, psms, seqspace)
+from app.drivers import startup
 
 
 def parser_file_exists(currentparser, fn):
@@ -190,8 +192,6 @@ parser.add_argument('--ntermwildcards', dest='falloff', help='With flag, the fil
                     'will be stored and looked up reversed',
                     action='store_const', const=True, default=False)
 
-
-args = parser.parse_args()
 drivers = [biosets.BioSetLookupDriver,
            spectra.SpectraLookupDriver,
            psms.PSMLookupDriver,
@@ -202,6 +202,4 @@ drivers = [biosets.BioSetLookupDriver,
            proteinquant.ProteinQuantLookupDriver,
            seqspace.SeqspaceLookupDriver,
            ]
-commandmap = {driver.get_commandname() for driver in drivers}
-command = commandmap[args.command](**vars(args))
-command.run()
+startup.start_msstitch(drivers, parser, sys.argv)

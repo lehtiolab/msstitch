@@ -6,6 +6,8 @@ prottable -- Creating and modifying protein tables
 
 import argparse
 import os
+import sys
+from app.drivers import startup
 from app.drivers.prottable import (probability, info, merge, isoquant,
                                    precursorarea, create_empty, bestpeptide,
                                    qvality, fdr)
@@ -180,7 +182,6 @@ parser.add_argument('--pep', dest='pep', help='Build protein '
                     'table which contains protein PEP data. Flag.',
                     action='store_const', default=False, const=True)
 
-args = parser.parse_args()
 
 drivers = [info.AddProteinInfoDriver,
            merge.BuildProteinTableDriver,
@@ -193,6 +194,4 @@ drivers = [info.AddProteinInfoDriver,
            qvality.PickedQvalityDriver,
            fdr.ProttableFDRDriver,
            ]
-commandmap = {driver.get_commandname() for driver in drivers}
-command = commandmap[args.command](**vars(args))
-command.run()
+startup.start_msstitch(drivers, parser, sys.argv)

@@ -11,6 +11,8 @@ EXAMPLE:
 
 import argparse
 import os
+import sys
+from app.drivers import startup
 import app.drivers.peptable.psmtopeptable as psm2pepdrivers
 import app.drivers.peptable.merge as mergedrivers
 import app.drivers.peptable.model_qvals as modeldrivers
@@ -157,13 +159,9 @@ parser.add_argument('--genecentric', dest='genecentric',
 #                    help='All PSMs from a single scan should be included, '
 #                    'not only the best scoring one.')
 
-args = parser.parse_args()
-
 drivers = [psm2pepdrivers.MzidTSVPeptableDriver,
            isoquantdrivers.AddIsobaricQuantDriver,
            modeldrivers.ModelQValuesDriver,
            mergedrivers.BuildPeptideTableDriver,
            ]
-commandmap = {driver.get_commandname() for driver in drivers}
-command = commandmap[args.command](**vars(args))
-command.run()
+startup.start_msstitch(drivers, parser, sys.argv)

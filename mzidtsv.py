@@ -11,6 +11,8 @@ EXAMPLE:
 
 import argparse
 import os
+import sys
+from app.drivers import startup
 import app.drivers.mzidtsv.spectra as spectradrivers
 import app.drivers.mzidtsv.percolator as percodrivers
 import app.drivers.mzidtsv.proteingrouping as pgdrivers
@@ -149,7 +151,6 @@ parser.add_argument('--rename-col-startswith', dest='renamecolpattern',
 #                    help='All PSMs from a single scan should be included, '
 #                    'not only the best scoring one.')
 
-args = parser.parse_args()
 drivers = [spectradrivers.TSVSpectraDriver,
            percodrivers.MzidPercoTSVDriver,
            splitmergedrivers.MzidTSVConcatenateDriver,
@@ -159,6 +160,4 @@ drivers = [spectradrivers.TSVSpectraDriver,
            pgdrivers.ProteinGroupDriver,
            genedrivers.TSVGeneFromProteinDriver,
            ]
-commandmap = {driver.get_commandname() for driver in drivers}
-command = commandmap[args.command](**vars(args))
-command.run()
+startup.start_msstitch(drivers, parser, sys.argv)
