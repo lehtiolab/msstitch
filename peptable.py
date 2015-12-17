@@ -6,7 +6,7 @@
 USAGE:
    peptable.py [option] [input files]
 EXAMPLE:
-   peptable.py -c psm2pep -i psms.tsv -d /data -o peptides.tsv
+   peptable.py psm2pep -i psms.tsv -d /data -o peptides.tsv
 """
 
 import argparse
@@ -36,7 +36,7 @@ def parser_value_in_list(currentparser, value, valuelist):
 
 
 parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
-parser.add_argument('-c', dest='command', type=str,
+parser.add_argument(dest='command', type=str,
                     help='How to manipulate the input:\n'
                     'psm2pep - Create peptide table from PSM TSV input,\n'
                     'uses best scoring PSM for each peptide and strips PSM\n'

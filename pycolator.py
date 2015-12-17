@@ -4,9 +4,9 @@
 pycolator -- Percolator output manipulation
 
 USAGE:
-    python pycolator.py [option] [input file] [output file]
+    python pycolator.py [command] [input file] [output file]
 EXAMPLE:
-    python pycolator.py -c splittd input.xml output.xml
+    python pycolator.py splittd input.xml output.xml
 """
 
 import argparse
@@ -14,7 +14,6 @@ import os
 from app.drivers.pycolator import splitmerge
 from app.drivers.pycolator import filters
 from app.drivers.pycolator import stats
-from app.drivers.pycolator import converters
 from app.drivers.pycolator import qvality
 
 
@@ -25,7 +24,7 @@ def parser_file_exists(currentparser, fn):
         return fn
 
 parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
-parser.add_argument('-c', dest='command', type=str, help='How to manipulate the input:\n'
+parser.add_argument(dest='command', type=str, help='How to manipulate the input:\n'
 'splittd        - Splits target and decoy data, multiple inputs to multiple outputs\n'
 'merge          - Merges percolator xml files. nothing else. Use -i for\n'
 '                 base file, and specify files with --multifiles\n'

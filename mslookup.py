@@ -29,7 +29,7 @@ def parser_value_in_list(currentparser, value, valuelist):
 
 
 parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
-parser.add_argument('-c', dest='command', type=str,
+parser.add_argument(dest='command', type=str,
                     help='How to manipulate the input:\n'
                     'biosets - Create SQLite lookup of mzML input files and\n'
                     'biological set names. Input files are passed to -i,\n'

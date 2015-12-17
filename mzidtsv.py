@@ -6,7 +6,7 @@ mzidtsv -- Modifying MSGF+ TSV output
 USAGE:
    mzidtsv.py [option] [input files]
 EXAMPLE:
-   mzidtsv.py -c percotsv -i psms.mzid -d /data -o psmquant.tsv
+   mzidtsv.py percotsv -i psms.mzid -d /data -o psmquant.tsv
 """
 
 import argparse
@@ -39,7 +39,7 @@ def parser_value_in_list(currentparser, value, valuelist):
 
 
 parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
-parser.add_argument('-c', dest='command', type=str,
+parser.add_argument(dest='command', type=str,
                     help='How to manipulate the input:\n'
                     'addspecdata - Add spectra data such as retention time,\n'
                     'biological set name to tsv\n'
