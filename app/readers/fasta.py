@@ -68,7 +68,7 @@ def parse_fasta(fn):
 def get_record_type(record):
     if record.id.split('|')[0] in ['sp', 'tr']:
         return 'swiss'
-    elif record.id[:4] == 'ENSP':
+    elif record.id[:3] == 'ENS':
         return 'ensembl'
     else:
         raise RuntimeError('Cannot detect type of FASTA file. '
