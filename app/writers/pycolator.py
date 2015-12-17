@@ -41,20 +41,3 @@ def write_qvality_input(scores, fn):
     with open(fn, 'w') as fp:
         for score in scores:
             fp.write('{0}\n'.format(score))
-
-
-def write_percolator_tsv(lines, feattype, outfn):
-    linekeys = {'psm': ['p_id', 'score', 'q', 'PEP', 'pepseq', 'proteins'],
-                'peptide': ['p_id', 'score', 'q', 'PEP', 'psm_ids', 'proteins']
-                }
-    header = {'psm': ['ID', 'svm-score', 'q-value', 'PEP',
-                      'peptide', 'protein IDs'],
-              'peptide': ['ID', 'svm-score', 'q-value', 'PEP',
-                          'psm_ids', 'protein IDs']
-              }
-
-    with open(outfn, 'w') as fp:
-        fp.write('\t'.join(header[feattype]))
-        for line in lines:
-            fp.write('\n')
-            fp.write('\t'.join([line[x] for x in linekeys[feattype]]))
