@@ -7,6 +7,7 @@ from app.drivers.peptable.base import PeptableMergeDriver
 class BuildPeptideTableDriver(PeptableMergeDriver):
     outsuffix = ''
     lookuptype = 'peptidetable'
+    command = 'build'
 
     def __init__(self, **kwargs):
         """Build peptide table has no input file (though it has a lookup),

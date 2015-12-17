@@ -14,7 +14,7 @@ import os
 import app.drivers.peptable.psmtopeptable as psm2pepdrivers
 import app.drivers.peptable.merge as mergedrivers
 import app.drivers.peptable.model_qvals as modeldrivers
-import app.drivers.peptable.isoquant as isoquantdrivers 
+import app.drivers.peptable.isoquant as isoquantdrivers
 
 
 def parser_file_exists(currentparser, fn):
@@ -159,12 +159,11 @@ parser.add_argument('--genecentric', dest='genecentric',
 
 args = parser.parse_args()
 
-commandmap = {
-    'psm2pep': psm2pepdrivers.MzidTSVPeptableDriver,
-    'addpepisoquant': isoquantdrivers.AddIsobaricQuantDriver,
-    'modelqvals': modeldrivers.ModelQValuesDriver,
-    'buildpep': mergedrivers.BuildPeptideTableDriver,
-}
-
+drivers = [psm2pepdrivers.MzidTSVPeptableDriver,
+           isoquantdrivers.AddIsobaricQuantDriver,
+           modeldrivers.ModelQValuesDriver,
+           mergedrivers.BuildPeptideTableDriver,
+           ]
+commandmap = {driver.get_commandname() for driver in drivers}
 command = commandmap[args.command](**vars(args))
 command.run()

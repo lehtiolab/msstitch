@@ -7,6 +7,7 @@ class MzidPercoTSVDriver(MzidTSVDriver):
     Adds percolator data from mzid file to table.
     """
     outsuffix = '_percolated.tsv'
+    command = 'addperco'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

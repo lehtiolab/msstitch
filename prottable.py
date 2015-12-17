@@ -182,18 +182,17 @@ parser.add_argument('--pep', dest='pep', help='Build protein '
 
 args = parser.parse_args()
 
-commandmap = {
-    'addprotdata': info.AddProteinInfoDriver,
-    'buildquant': merge.BuildProteinTableDriver,
-    'addisoquant': isoquant.AddIsobaricQuantDriver,
-    'addms1quant': precursorarea.AddPrecursorAreaDriver,
-    'addprob': probability.AddProteinProbability,
-    'emptyprottable': create_empty.CreateEmptyDriver,
-    'bestpeptide': bestpeptide.BestPeptidePerProtein,
-    'protqvality': qvality.ProttableQvalityDriver,
-    'pickqvality': qvality.PickedQvalityDriver,
-    'protfdr': fdr.ProttableFDRDriver,
-}
-
+drivers = [info.AddProteinInfoDriver,
+           merge.BuildProteinTableDriver,
+           isoquant.AddIsobaricQuantDriver,
+           precursorarea.AddPrecursorAreaDriver,
+           probability.AddProteinProbability,
+           create_empty.CreateEmptyDriver,
+           bestpeptide.BestPeptidePerProtein,
+           qvality.ProttableQvalityDriver,
+           qvality.PickedQvalityDriver,
+           fdr.ProttableFDRDriver,
+           ]
+commandmap = {driver.get_commandname() for driver in drivers}
 command = commandmap[args.command](**vars(args))
 command.run()

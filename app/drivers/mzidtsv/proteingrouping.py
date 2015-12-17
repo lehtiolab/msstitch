@@ -5,6 +5,7 @@ from app.drivers.mzidtsv import MzidTSVDriver
 class ProteinGroupDriver(MzidTSVDriver):
     outsuffix = '_protgroups.txt'
     lookuptype = 'proteingroups'
+    command = 'proteingroup'
 
     def get_psms(self):
         self.header = prep.get_header_with_proteingroups(self.oldheader)

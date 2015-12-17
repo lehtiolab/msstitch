@@ -12,6 +12,7 @@ class ModelQValuesDriver(PepProttableDriver):
     longer be correct.
     """
     outsuffix = '_qmodel.txt'
+    command = 'modelqvals'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

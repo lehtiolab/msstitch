@@ -5,6 +5,7 @@ from app.actions.pycolator import reassign
 class ReassignmentDriver(base.PycolatorDriver):
     """Reassigns statistics from qvality output on a percolator output file"""
     outsuffix = '_reassigned.xml'
+    command = 'reassign'
 
     def __init__(self, **kwargs):
         super(ReassignmentDriver, self).__init__(**kwargs)

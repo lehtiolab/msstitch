@@ -5,6 +5,7 @@ from app.drivers.prottable.base import ProttableAddData
 class AddProteinInfoDriver(ProttableAddData):
     outsuffix = '_proteindata.txt'
     lookuptype = 'prottable'
+    command = 'addprotdata'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

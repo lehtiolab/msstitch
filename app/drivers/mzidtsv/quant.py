@@ -5,6 +5,7 @@ from app.drivers.mzidtsv import MzidTSVDriver
 class TSVQuantDriver(MzidTSVDriver):
     lookuptype = 'quant'
     outsuffix = '_quant.tsv'
+    command = 'addquant'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

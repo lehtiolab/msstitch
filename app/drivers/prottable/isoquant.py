@@ -5,6 +5,7 @@ from app.drivers.prottable.base import ProttableAddData
 
 class AddIsobaricQuantDriver(ProttableAddData):
     outsuffix = '_isoq.txt'
+    command = 'addisoquant'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

@@ -5,6 +5,7 @@ from app.drivers.mzidtsv import MzidTSVDriver
 class TSVGeneFromProteinDriver(MzidTSVDriver):
     outsuffix = '_genes.txt'
     lookuptype = 'psm'
+    command = 'genes'
 
     def get_psms(self):
         """Creates iterator to write to new tsv. Contains input tsv

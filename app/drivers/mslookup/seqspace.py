@@ -10,6 +10,7 @@ class SeqspaceLookupDriver(base.LookupDriver):
     """
     outsuffix = '_lookup.sqlite'
     lookuptype = 'searchspace'
+    command = 'seqspace'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

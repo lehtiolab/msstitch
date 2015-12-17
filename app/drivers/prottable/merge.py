@@ -7,6 +7,7 @@ from app.drivers.prottable.base import ProttableMergeDriver
 class BuildProteinTableDriver(ProttableMergeDriver):
     outsuffix = ''
     lookuptype = 'prottable'
+    command = 'build'
 
     def __init__(self, **kwargs):
         """Build protein table has no input file (though it has a lookup),

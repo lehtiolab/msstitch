@@ -8,6 +8,7 @@ class QvalityDriver(base.PycolatorDriver):
     """Runs qvality from two Percolator XML files. One containing target
     PSMs or peptides, and the other containing decoys."""
     outsuffix = '_qvalityout.txt'
+    command = 'qvality'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

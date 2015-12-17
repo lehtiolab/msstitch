@@ -12,6 +12,7 @@ class QuantLookupDriver(base.LookupDriver):
 
 class IsobaricQuantLookupDriver(QuantLookupDriver):
     lookuptype = 'isoquant'
+    command = 'isoquant'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -27,6 +28,7 @@ class IsobaricQuantLookupDriver(QuantLookupDriver):
 
 class PrecursorQuantLookupDriver(QuantLookupDriver):
     lookuptype = 'ms1quant'
+    command = 'ms1quant'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

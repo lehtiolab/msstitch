@@ -5,6 +5,7 @@ from app.drivers.prottable.base import ProttableDriver
 
 class CreateEmptyDriver(ProttableDriver):
     outsuffix = '.txt'
+    command = 'emptytable'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -17,5 +18,5 @@ class CreateEmptyDriver(ProttableDriver):
     def set_feature_generator(self):
         if self.proteincol is not None:
             self.get_column_header_for_number(['proteincol'], self.pepheader)
-        self.features = preparation.generate_master_proteins(self.in_psms, 
+        self.features = preparation.generate_master_proteins(self.in_psms,
                                                              self.proteincol)

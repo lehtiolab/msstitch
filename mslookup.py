@@ -192,18 +192,16 @@ parser.add_argument('--ntermwildcards', dest='falloff', help='With flag, the fil
 
 
 args = parser.parse_args()
-
-commandmap = {
-    'biosets': biosets.BioSetLookupDriver,
-    'spectra': spectra.SpectraLookupDriver,
-    'psms': psms.PSMLookupDriver,
-    'isoquant': quant.IsobaricQuantLookupDriver,
-    'ms1quant': quant.PrecursorQuantLookupDriver,
-    'proteingrouplookup': proteingroups.ProteinGroupLookupDriver,
-    'pepquant': pepquant.PeptideQuantLookupDriver,
-    'protquant': proteinquant.ProteinQuantLookupDriver,
-    'seqspace': seqspace.SeqspaceLookupDriver,
-}
-
+drivers = [biosets.BioSetLookupDriver,
+           spectra.SpectraLookupDriver,
+           psms.PSMLookupDriver,
+           quant.IsobaricQuantLookupDriver,
+           quant.PrecursorQuantLookupDriver,
+           proteingroups.ProteinGroupLookupDriver,
+           pepquant.PeptideQuantLookupDriver,
+           proteinquant.ProteinQuantLookupDriver,
+           seqspace.SeqspaceLookupDriver,
+           ]
+commandmap = {driver.get_commandname() for driver in drivers}
 command = commandmap[args.command](**vars(args))
 command.run()

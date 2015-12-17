@@ -8,6 +8,7 @@ class BestPeptidePerProtein(ProttableAddData):
     then adds this score to the protein table.
     """
     outsuffix = '_bestpep.tsv'
+    command = 'bestpeptide'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -26,5 +27,5 @@ class BestPeptidePerProtein(ProttableAddData):
     def set_feature_generator(self):
         self.features = prep.generate_proteins(self.peptable, self.in_proteins,
                                                self.pepheader, self.scorecol,
-                                               self.minlogscore, 
+                                               self.minlogscore,
                                                protcol=self.proteincol)

@@ -6,6 +6,7 @@ from app.actions.mslookup import biosets as biosetlookup
 
 class SpectraLookupDriver(base.LookupDriver):
     lookuptype = 'spectra'
+    command = 'spectra'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -20,6 +21,7 @@ class SpectraLookupDriver(base.LookupDriver):
 
     def create_lookup(self):
         biosetlookup.create_bioset_lookup(self.lookup, self.spectrafns,
-                                     self.setnames)
-        fn_spectra = spectrareader.mzmlfn_ms2_spectra_generator(self.spectrafns)
+                                          self.setnames)
+        fn_spectra = spectrareader.mzmlfn_ms2_spectra_generator(
+            self.spectrafns)
         spectralookup.create_spectra_lookup(self.lookup, fn_spectra)

@@ -10,6 +10,7 @@ class MzidTSVPeptableDriver(PepProttableDriver):
     for the peptides beforehand or rescored afterwards.
     """
     outsuffix = '_peptable.tsv'
+    command = 'psm2pep'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

@@ -7,6 +7,7 @@ class ProttableFDRDriver(ProttableAddData):
     """Assigns FDR to protein table based on qvality output and protein table
     probabilities"""
     outsuffix = '_protfdr.txt'
+    command = 'addfdr'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

@@ -2,12 +2,12 @@ from app.drivers.pycolator.qvality import QvalityDriver
 from app.actions.prottable import qvality as preparation
 from app.actions.prottable import picktdprotein as pickprotein
 from app.readers import tsv
-from app.dataformats import prottable as prottabledata
 
 
 class ProttableQvalityDriver(QvalityDriver):
     """Runs qvality on two TSV tables"""
     outsuffix = '_protqvality.txt'
+    command = 'qvality'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -37,6 +37,7 @@ class PickedQvalityDriver(ProttableQvalityDriver):
     qvality is run to output an FDR score table.
     """
     outsuffix = '_pickedqvality.txt'
+    command = 'pickqvality'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -47,7 +48,7 @@ class PickedQvalityDriver(ProttableQvalityDriver):
         self.d_fasta = kwargs.get('decoyfasta')
         self.picktype = kwargs.get('picktype')
 
-    
+
     def set_features(self):
         """Using this to write picked score tables for qvality"""
         target, decoy = pickprotein.write_pick_td_tables(

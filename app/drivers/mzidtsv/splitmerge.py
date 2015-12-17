@@ -6,6 +6,7 @@ from app.writers import mzidtsv as writers
 class MzidTSVConcatenateDriver(MzidTSVDriver):
     """Concatenates TSVs"""
     outsuffix = '_concat.tsv'
+    command = 'merge'
 
     def __init__(self, **kwargs):
         super(MzidTSVConcatenateDriver, self).__init__(**kwargs)
@@ -23,6 +24,7 @@ class MzidTSVSplitDriver(MzidTSVDriver):
     the row is written to depends on the contents of the selected
     column"""
     outsuffix = '_split.tsv'
+    command = 'split'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

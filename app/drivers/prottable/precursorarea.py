@@ -5,6 +5,7 @@ from app.drivers.prottable.base import ProttableAddData
 
 class AddPrecursorAreaDriver(ProttableAddData):
     outsuffix = '_ms1q.txt'
+    command = 'addms1quant'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -19,5 +20,5 @@ class AddPrecursorAreaDriver(ProttableAddData):
 
     def set_feature_generator(self):
         self.features = preparation.add_ms1_quant_from_top3_mzidtsv(
-            self.in_proteins, self.in_peptides, self.headerfields, 
+            self.in_proteins, self.in_peptides, self.headerfields,
             self.proteincol)

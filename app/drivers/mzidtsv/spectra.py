@@ -5,6 +5,7 @@ from app.drivers.mzidtsv import MzidTSVDriver
 class TSVSpectraDriver(MzidTSVDriver):
     lookuptype = 'spectra'
     outsuffix = '_spectradata.tsv'
+    command = 'addspecdata'
 
     def get_psms(self):
         """Creates iterator to write to new tsv. Contains input tsv

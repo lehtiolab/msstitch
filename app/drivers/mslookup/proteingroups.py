@@ -5,6 +5,7 @@ from app.readers import tsv as tsvreader
 
 class ProteinGroupLookupDriver(base.LookupDriver):
     lookuptype = 'proteingroups'
+    command = 'proteingroup'
 
     def create_lookup(self):
         header = tsvreader.get_tsv_header(self.fn[0])

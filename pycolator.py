@@ -39,16 +39,13 @@ parser.add_argument('-c', dest='command', type=str, help='How to manipulate the 
 '                 use --decoy to specify the decoy input file, and -f\n'
 '                 to specify feature type (psm or peptide)\n'
 'reassign       - Reassigns statistics from a qvality output file onto a single'
-'                 percolator input file. Needs -q flag.\n'
-'pout2tsv       - Converts a percolator output file to tab separated format\n'
-'                 Use -f to specify feature type (psm or peptide), otherwise\n'
-'                 both psm and peptide tsv files are written.',
+'                 percolator input file. Needs -q flag.\n',
 required=True
 )
 
 parser.add_argument('-i', dest='infile',
-        type=lambda x: parser_file_exists(parser, x),
-        required=True, help='Input file')
+                    type=lambda x: parser_file_exists(parser, x),
+                    required=True, help='Input file')
 parser.add_argument('--multifiles', dest='multifile_input', nargs='+',
                     type=lambda x: parser_file_exists(parser, x),
                     help='Multiple input files for use in e.g. merging data.'
@@ -106,17 +103,14 @@ parser.add_argument('-q', dest='qvalityout', help='Qvality output file. '
 
 args = parser.parse_args()
 
-commandmap = {
-    'splittd': splitmerge.SplitDriver,
-    'merge': splitmerge.MergeDriver,
-    'filteruni': filters.FilterUniquePeptides,
-    'filterlen': filters.FilterPeptideLength,
-    'filterknown': filters.FilterKnownPeptides,
-    'qvality': qvality.QvalityDriver,
-    'reassign': stats.ReassignmentDriver,
-    'pout2tsv': converters.Pout2TSVDriver,
-}
-
-
+drivers = [splitmerge.SplitDriver,
+           splitmerge.MergeDriver,
+           filters.FilterUniquePeptides,
+           filters.FilterPeptideLength,
+           filters.FilterKnownPeptides,
+           qvality.QvalityDriver,
+           stats.ReassignmentDriver,
+           ]
+commandmap = {driver.get_commandname() for driver in drivers}
 command = commandmap[args.command](**vars(args))
 command.run()

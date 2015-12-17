@@ -5,6 +5,7 @@ from app.drivers.peptable.base import PeptableAddData
 
 class AddIsobaricQuantDriver(PeptableAddData):
     outsuffix = '_isoq.txt'
+    command = 'isoquant'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

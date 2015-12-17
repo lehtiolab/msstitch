@@ -52,3 +52,6 @@ class BaseDriver(object):
             if value is None:
                 continue
             setattr(self, col, header[int(value) - 1])
+
+    def get_commandname(self):
+        return self.command

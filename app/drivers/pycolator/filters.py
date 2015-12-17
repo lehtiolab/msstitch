@@ -7,6 +7,7 @@ class FilterPeptideLength(base.PycolatorDriver):
     multiple files if multiple file input is given. No PSMs will be
     outputted."""
     outsuffix = '_filt_len.xml'
+    command = 'filterlen'
 
     def __init__(self, **kwargs):
         super(FilterPeptideLength, self).__init__(**kwargs)
@@ -27,6 +28,7 @@ class FilterUniquePeptides(base.PycolatorDriver):
     """This class processes multiple percolator runs from fractions and
     filters out the best scoring peptides."""
     outsuffix = '_filtuniq.xml'
+    command = 'filteruni'
 
     def __init__(self, **kwargs):
         super(FilterUniquePeptides, self).__init__(**kwargs)
@@ -50,6 +52,7 @@ class FilterKnownPeptides(base.PycolatorDriver):
     filters out first peptides that are found in a specified searchspace. Then
     it keeps the remaining best scoring unique peptides."""
     outsuffix = '_filtknown.xml'
+    command = 'filterknown'
 
     def __init__(self, **kwargs):
         super(FilterKnownPeptides, self).__init__(**kwargs)

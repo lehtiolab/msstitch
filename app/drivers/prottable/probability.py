@@ -5,6 +5,7 @@ from app.readers import tsv as reader
 
 class AddProteinProbability(ProttableAddData):
     outsuffix = '_protprob.txt'
+    command = 'addprob'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

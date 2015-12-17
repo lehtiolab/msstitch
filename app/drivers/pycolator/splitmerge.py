@@ -4,6 +4,8 @@ from app.readers import pycolator as readers
 
 
 class SplitDriver(base.PycolatorDriver):
+    command = 'splittd'
+
     def __init__(self, **kwargs):
         super(SplitDriver, self).__init__(**kwargs)
         self.targetsuffix = kwargs.get('targetsuffix', '_target.xml')
@@ -35,6 +37,7 @@ class MergeDriver(base.PycolatorDriver):
     Namespace and static xml come from first percolator file.
     Make sure fractions are from same percolator run."""
     outsuffix = '_merged.xml'
+    command = 'merge'
 
     def __init__(self, **kwargs):
         super(MergeDriver, self).__init__(**kwargs)

@@ -39,14 +39,15 @@ def parser_value_in_list(currentparser, value, valuelist):
 parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
 parser.add_argument('-c', dest='command', type=str,
                     help='How to manipulate the input:\n'
-                    'addspectra - Add spectra data such as retention time,\n'
+                    'addspecdata - Add spectra data such as retention time,\n'
                     'biological set name to tsv\n'
-                    'percotsv       - Add percolator data to a  TSV with \n'
+
+                    'addperco - Add percolator data to a  TSV with \n'
                     'MSGF+ output. Specify TSV file with -i, mzid file with \n'
                     '--mzid.\n\n'
 
-                    'addquant - Add quantitative data from openMS\n'
-                    'consensusXML to a tab separated file with\n'
+                    'addquant - Add quantitative data \n'
+                    'to a tab separated file with\n'
                     'PSMs. Needs to be passed a lookup db with --dbfile,\n'
                     'which has to contain quant information, and\n'
                     '--isobaric or --precursor, \n'
@@ -149,17 +150,15 @@ parser.add_argument('--rename-col-startswith', dest='renamecolpattern',
 #                    'not only the best scoring one.')
 
 args = parser.parse_args()
-
-commandmap = {
-    'spectratsv': spectradrivers.TSVSpectraDriver,
-    'percotsv': percodrivers.MzidPercoTSVDriver,
-    'mergetsv': splitmergedrivers.MzidTSVConcatenateDriver,
-    'splittsv': splitmergedrivers.MzidTSVSplitDriver,
-    'conffilt': conffiltdrivers.ConfidenceFilterDriver,
-    'quanttsv': quantdrivers.TSVQuantDriver,
-    'proteingroup': pgdrivers.ProteinGroupDriver,
-    'genepsm': genedrivers.TSVGeneFromProteinDriver,
-}
-
+drivers = [spectradrivers.TSVSpectraDriver,
+           percodrivers.MzidPercoTSVDriver,
+           splitmergedrivers.MzidTSVConcatenateDriver,
+           splitmergedrivers.MzidTSVSplitDriver,
+           conffiltdrivers.ConfidenceFilterDriver,
+           quantdrivers.TSVQuantDriver,
+           pgdrivers.ProteinGroupDriver,
+           genedrivers.TSVGeneFromProteinDriver,
+           ]
+commandmap = {driver.get_commandname() for driver in drivers}
 command = commandmap[args.command](**vars(args))
 command.run()

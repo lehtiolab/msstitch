@@ -4,6 +4,7 @@ from app.drivers.mzidtsv import MzidTSVDriver
 
 class ConfidenceFilterDriver(MzidTSVDriver):
     outsuffix = '_filtconf.txt'
+    command = 'conffilt'
 
     def get_psms(self):
         confkey = self.oldheader[int(self.confcol) - 1]

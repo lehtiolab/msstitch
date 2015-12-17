@@ -5,6 +5,7 @@ from app.actions.mslookup import psms as lookup
 
 class PSMLookupDriver(base.LookupDriver):
     lookuptype = 'psm'
+    command = 'psms'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
