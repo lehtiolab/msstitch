@@ -25,7 +25,11 @@ def generate_proteins(pepfn, proteins, pepheader, scorecol, minlog,
                              if pep['score'] > 0])
         nextbestscore = -log(nextbestscore, 10)
     for protein in proteins:
-        peptide = protein_peptides[protein[prottabledata.HEADER_PROTEIN]]
+        try:
+            peptide = protein_peptides[protein[prottabledata.HEADER_PROTEIN]]
+        except KeyError:
+            print('WARNING - protein {} not found in peptide '
+                  'table'.format(protein[prottabledata.HEADER_PROTEIN]))
         if minlog:
             peptide['score'] = log_score(peptide['score'], nextbestscore)
         protein[prottabledata.HEADER_QSCORE] = str(
