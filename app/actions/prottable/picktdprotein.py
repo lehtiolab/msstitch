@@ -13,9 +13,9 @@ def write_pick_td_tables(target, decoy, theader, dheader,
     tfile, dfile = 'target.txt', 'decoy.txt'
     tdmap = {}
     with open(tfile, 'w') as tdmap[TARGET], open(dfile, 'w') as tdmap[DECOY]:
-        for pdata in generate_pick_fdr(target, decoy, theader, dheader,
-                                       targetfasta, decoyfasta, inferencetype):
-            ptype, score = pdata
+        for ptype, score in generate_pick_fdr(target, decoy, theader, dheader,
+                                              targetfasta, decoyfasta,
+                                              inferencetype):
             tdmap[ptype].write('\n{}'.format(score))
     return tfile, dfile
 
@@ -86,9 +86,19 @@ def pick_target_decoy(tscore, dscore):
         dscore = float(dscore)
     except (ValueError, TypeError):
         dscore = False
-    if tscore > dscore:
+    falsecheck = {score: (ptype, score) for score, ptype 
+                  in zip([tscore, dscore], [TARGET, DECOY])}
+    if len(falsecheck) == 1:
+        return False
+    elif False in falsecheck:
+        falsecheck.pop(False)
+        return next(iter(falsecheck.values()))
+    elif tscore > dscore:
         return TARGET, tscore
     elif tscore < dscore:
         return DECOY, dscore
     else:
+        # in case uncaught edgecase occurs
+        print('WARNING, target score {} and decoy score {} could not be '
+              'compared'.format(tscore, dscore))
         return False
