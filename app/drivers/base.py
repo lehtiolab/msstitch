@@ -37,11 +37,6 @@ class BaseDriver(object):
         outfn = basefn + suffix
         return os.path.join(self.outdir, outfn)
 
-    def create_multi_outfile_basepath(self, fn, suffix=None):
-        """Returns a basepath to dynamically create outfiles by writer
-        modules. Basepath includes a formatting string"""
-        return self.create_outfilepath(fn + '_{0}', suffix)
-
     def get_column_header_for_number(self, column_var_names, header=False):
         """This function subtracts 1 from inputted column number to comply
         with programmers counting (i.e. from 0, not from 1). For TSV data."""

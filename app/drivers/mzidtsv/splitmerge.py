@@ -1,3 +1,5 @@
+import os
+
 from app.actions.mzidtsv import splitmerge as prep
 from app.drivers.mzidtsv import MzidTSVDriver
 from app.writers import mzidtsv as writers
@@ -36,7 +38,6 @@ class MzidTSVSplitDriver(MzidTSVDriver):
                                              self.bioset, self.splitcol)
 
     def write(self):
-        base_outfile = self.create_multi_outfile_basepath(self.fn,
-                                                          self.outsuffix)
+        base_outfile = os.path.join(self.outdir, '{}.tsv')
         writers.write_multi_mzidtsv(self.header, self.oldheader, self.psms,
                                     self.setnames, base_outfile)
