@@ -9,6 +9,6 @@ class TSVSpectraDriver(MzidTSVDriver):
     def get_psms(self):
         """Creates iterator to write to new tsv. Contains input tsv
         lines plus quant data for these."""
-        self.header = actions.create_header(self.oldheader, self.spec_column)
+        self.header = actions.create_header(self.oldheader)
         self.psms = actions.generate_psms_spectradata(self.lookup, self.fn,
                                                       self.oldheader)

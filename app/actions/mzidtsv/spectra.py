@@ -2,9 +2,9 @@ from app.readers import tsv as readers
 from app.dataformats import mzidtsv as mzidtsvdata
 
 
-def create_header(oldheader, spectracol):
+def create_header(oldheader):
     newheadings = mzidtsvdata.SPECDATA_HEADER
-    header = oldheader[:spectracol] + newheadings + oldheader[spectracol:]
+    header = oldheader[:2] + newheadings + oldheader[2:]
     return header
 
 

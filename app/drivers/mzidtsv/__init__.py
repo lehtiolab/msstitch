@@ -11,7 +11,6 @@ class MzidTSVDriver(base.BaseDriver):
         self.conflvl = kwargs.get('conflvl', None)
         self.lowerbetter = kwargs.get('conftype', None) == 'lower'
         self.unroll = kwargs.get('unroll', False)
-        self.spec_column = kwargs.get('speccol', None)
 
     def run(self):
         self.oldheader = tsvreader.get_tsv_header(self.fn)
