@@ -53,6 +53,7 @@ def add_protein_data(proteins, pgdb, headerfields, genecentric=False,
         outprotein = {k: v for k, v in protein.items()}
         protein_acc = protein[prottabledata.HEADER_PROTEIN]
         if not protein_acc in proteindata:
+            print('Warning, could not find protein {} in lookup DB'.format(protein_acc))
             continue
         outprotein.update(dataget_fun(proteindata, protein_acc, headerfields))
         outprotein = {k: str(v) for k, v in outprotein.items()}
