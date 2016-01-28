@@ -30,13 +30,10 @@ def strip_modifications(seq):
     return re.sub('\[UNIMOD:\d*\]', '', seq)
 
 
-def filter_known_searchspace(elements, seqtype, searchspace,
-                             ns, ntermwildcards):
+def filter_known_searchspace(elements, seqtype, lookup, ns, ntermwildcards):
     """Yields peptides from generator as long as their sequence is not found in
     known search space dict. Useful for excluding peptides that are found in
     e.g. ENSEMBL or similar"""
-    lookup = sqlite.SearchSpaceDB(searchspace)
-
     for element in elements:
         seq = get_either_seq(seqtype, element, ns)
         seq = strip_modifications(seq)
@@ -48,7 +45,6 @@ def filter_known_searchspace(elements, seqtype, searchspace,
             yield formatting.string_and_clear(element, ns)
         else:
             formatting.clear_el(element)
-    lookup.close_connection()
 
 
 def filter_unique_peptides(peptides, score, ns):

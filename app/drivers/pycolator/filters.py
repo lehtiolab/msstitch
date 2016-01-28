@@ -52,6 +52,7 @@ class FilterKnownPeptides(base.PycolatorDriver):
     filters out first peptides that are found in a specified searchspace. Then
     it keeps the remaining best scoring unique peptides."""
     outsuffix = '_filtknown.xml'
+    lookuptype = 'searchspace'
     command = 'filterknown'
 
     def __init__(self, **kwargs):
@@ -63,12 +64,12 @@ class FilterKnownPeptides(base.PycolatorDriver):
         self.features = {
             'peptide': preparation.filter_known_searchspace(self.allpeps,
                                                             'pep',
-                                                            self.db,
+                                                            self.lookup,
                                                             self.ns,
                                                             self.falloff),
             'psm': preparation.filter_known_searchspace(self.allpsms,
                                                         'psm',
-                                                        self.db,
+                                                        self.lookup,
                                                         self.ns,
                                                         self.falloff),
         }
