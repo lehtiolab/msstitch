@@ -1,6 +1,6 @@
 from lxml import etree
 import itertools
-from app import formatting
+from app.readers import xmlformatting as formatting
 
 
 def get_namespace_from_top(fn, key='xmlns'):

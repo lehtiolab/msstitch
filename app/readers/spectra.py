@@ -1,7 +1,7 @@
 import os
 import app.readers.xml as basereader
 import app.readers.ml as ml
-from app import formatting
+from app.readers import xmlformatting as formatting
 
 
 def mzmlfn_ms2_spectra_generator(mzmlfiles):

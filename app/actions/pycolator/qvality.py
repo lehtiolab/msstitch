@@ -1,4 +1,4 @@
-from app import formatting
+from app.readers import xmlformatting as formatting
 from app.readers import pycolator as readers
 
 

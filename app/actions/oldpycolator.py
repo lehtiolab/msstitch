@@ -1,8 +1,8 @@
 import re
 from lxml import etree
-from app import formatting
 from app.lookups.sqlite import searchspace as sqlite
 from app.readers import pycolator as reader
+from app.readers import xmlformatting as formatting
 
 
 def get_either_seq(seqtype, element, ns):

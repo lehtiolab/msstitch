@@ -1,6 +1,6 @@
 import sys
 
-from app import formatting
+from app.readers import xmlformatting as formatting
 
 
 def parse_qvality_output(fn):
