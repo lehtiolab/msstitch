@@ -41,3 +41,15 @@ def generate_psms(fn, ns):
 
 def generate_peptides(fn, ns):
     return basereader.generate_xmltags(fn, 'peptide', ['psm', 'protein'], ns)
+
+
+def get_peptide_seq(peptide, ns):
+    return peptide.attrib['{%s}peptide_id' % ns['xmlns']]
+
+
+def get_psm_seq(psm, ns):
+    return psm.find('{%s}peptide_seq' % ns['xmlns']).attrib['seq']
+
+
+def get_psm_ids_from_peptide(peptide, ns):
+    return peptide.xpath('xmlns:psm_ids', namespaces=ns)[0]
