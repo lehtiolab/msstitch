@@ -4,18 +4,12 @@ shared_options = {
     'fn': {'driverattr': 'fn', 'dest': 'infile', 'type': 'file', 'clarg': '-i',
            'help': 'Input file'},
     'outdir': {'driverattr': 'outdir', 'dest': 'outdir', 'clarg': '-d',
-               'help': 'Directory to output in'},
-    'multifiles': {'driverattr': 'multifiles', 'dest': 'multifiles',
-                   'help': 'Multiple input files for use in merging data. '
-                   ' Features will be picked from these and merged in the '
-                   'file specified with -i.',
-                   'type': 'file', 'nargs': '+', 'clarg': '--multifiles'},
-    'lookupfn': {'driverattr': 'fn', 'dest': 'infile', 'clarg': '-i',
-                 'nargs': '+', 'type': 'file', 'help': 'The input files to '
-                 'create the lookup from. Type depends on the command. '
-                 'If order is important then it is taken from the input '
-                 'order at the command line. FASTA input for seqspace '
-                 'is a single file.'},
+               'help': 'Directory to output in', 'type': 'file'},
+    'multifiles': {'driverattr': 'fn', 'dest': 'infile', 'clarg': '-i',
+                   'help': 'Multiple input files for use in merging data. ',
+                   'type': 'file', 'nargs': '+'},
+    'lookupfn': {'driverattr': 'lookupfn', 'clarg': '--dbfile',
+                 'type': 'file', 'help': 'Database lookup file'},
     'setnames': {'driverattr': 'setnames', 'dest': 'setnames',
                  'type': str, 'nargs': '+', 'clarg': '--setnames',
                  'help': 'Names of biological sets. Can be '
@@ -187,12 +181,14 @@ pycolator_options = {
                   'required': False},
     'score': {'driverattr': 'score', 'dest': 'score', 'default': 'svm',
               'help': 'Score to filter unique peptides on, e.g. svm',
-              'type': int, 'clarg': '-s', 'required': False},
+              'type': 'pick', 'picks': ['svm', 'q', 'pep', 'p'], 'clarg': '-s',
+              'required': False},
     'qoptions': {'driverattr': 'qoptions', 'dest': 'qoptions',
-                 'required': False, 'clarg': '-o', 'default': None,
+                 'required': False, 'clarg': '--qoptions', 'default': None,
                  'help': 'Extra options that may be passed to qvality. '
-                 'Option form: -o ***flag value ***flag ***flag value',
-                 'nargs': '+'},
+                 'Option form: --qoptions ***flag value ***flag ***flag value',
+                 'nargs': '+', 'type': str},
+    # FIXME qoptions is now --qoptions, not -o
 }
 
 mzidtsv_options = {

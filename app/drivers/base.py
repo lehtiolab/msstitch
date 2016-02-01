@@ -3,19 +3,63 @@ import shutil
 from tempfile import mkdtemp
 
 from app.lookups import base as lookups
+from app.drivers.options import shared_options
 
 
 class BaseDriver(object):
-    def __init__(self, **kwargs):
-        self.fn = kwargs['infile']
-        self.outdir = kwargs['outdir']
-        self.proteincol = kwargs.get('protcol', False)
-        lookupfn = kwargs.get('lookup', None)
-        if lookupfn is not None and hasattr(self, 'lookuptype'):
-            self.lookup = lookups.get_lookup(lookupfn, self.lookuptype)
+    def __init__(self):
+        self.lookupfn = None
+        self.shared_options = shared_options
+        self.options = ['fn', 'outdir']
+
+    def set_lookup(self):
+        if self.lookupfn is not None and hasattr(self, 'lookuptype'):
+            self.lookup = lookups.get_lookup(self.lookupfn, self.lookuptype)
         else:
             self.lookup = None
-        # self.workdir = self.set_workdir(kwargs.get('workdir', os.getcwd()))
+
+    def set_options(self, options=None):
+        if options is not None:
+            self.options.extend(options)
+        self.options = self.get_parser_options(self.options)
+
+    def get_commandhelp(self):
+        return self.commandhelp
+
+    def get_options(self):
+        return self.options
+
+    def get_parser_options(self, names):
+        """Given a list of option names, this returns a list of dicts
+        defined in all_options and self.shared_options. These can then
+        be used to populate the argparser with"""
+        options = []
+        for name in names:
+            try:
+                option = self.parser_options[name]
+            except KeyError:
+                option = self.shared_options[name]
+            options.append(option)
+        return options
+
+    def parse_input(self, **kwargs):
+        for option in self.options:
+            opt_argkey = option['driverattr']
+            if 'type' in option and option['type'] == 'pick':
+                try:
+                    assert kwargs.get(opt_argkey) in option['picks']
+                except AssertionError:
+                    print('Option {} should be one of [{}]'.format(
+                        option['
+                    sys.exit(1)
+                    raise
+                    # FIXME throw nice error to user
+            setattr(self, opt_argkey, kwargs.get(opt_argkey))
+
+    def start(self, **kwargs):
+        self.parse_input(**kwargs)
+        self.set_lookup()
+        self.run()
 
     def finish(self):
         """Cleans up after work"""

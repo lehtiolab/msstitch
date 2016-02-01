@@ -9,22 +9,24 @@ class QvalityDriver(base.PycolatorDriver):
     PSMs or peptides, and the other containing decoys."""
     outsuffix = '_qvalityout.txt'
     command = 'qvality'
+    commandhelp = ('Runs qvality on an inputfile: target and decoy data. '
+                   'When using separate files for target and decoy, '
+                   'use --decoy to specify the decoy input file, and -f '
+                   'to specify feature type (psm or peptide).')
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.target = self.fn  # for clarity
-        self.decoy = kwargs.get('decoyfn', None)
-        if self.decoy is None:
-            raise Exception('Not implemented single file qvality yet')
-        self.featuretype = kwargs.get('feattype', None)
-        if self.featuretype not in ['peptide', 'psm', 'probability', 'qvalue', 'svm']:
-            raise Exception('Featuretype (-f) should be peptide or psm.')
-        self.qvalityoptions = []
-        options = kwargs.get('options')
-        if options is not None:
-            for option in kwargs.get('options'):
-                self.qvalityoptions.append(option.replace('***', '--'))
+    def parse_input(self, **kwargs):
+        super().parse_input(**kwargs)
         self.score_get_fun = preparation.prepare_qvality_input
+        self.targetfn = self.fn  # for clarity
+        if self.decoyfn is None:
+            raise Exception('Not implemented single file qvality yet')
+        self.qvalityoptions = []
+        if self.qoptions is not None:
+            for option in self.qoptions:
+                self.qvalityoptions.append(option.replace('***', '--'))
+
+    def set_options(self, options=None):
+        super().set_options(['decoyfn', 'featuretype', 'qoptions'])
 
     def extract_from_single_target_decoy_file(self):
         """Future method to split into target and decoy file"""
@@ -34,7 +36,8 @@ class QvalityDriver(base.PycolatorDriver):
     def set_features(self):
         """Creates scorefiles for qvality's target and decoy distributions"""
         self.scores = {}
-        for t_or_d, fn in zip(['target', 'decoy'], [self.target, self.decoy]):
+        for t_or_d, fn in zip(['target', 'decoy'], [self.targetfn,
+                                                    self.decoyfn]):
             self.scores[t_or_d] = {}
             self.scores[t_or_d]['scores'] = self.score_get_fun(
                 fn, self.featuretype, self.prepare_percolator_output)
@@ -48,6 +51,7 @@ class QvalityDriver(base.PycolatorDriver):
         outfn = self.create_outfilepath(self.fn, self.outsuffix)
         command = ['qvality']
         command.extend(self.qvalityoptions)
-        command.extend([self.scores['target']['fn'], self.scores['decoy']['fn']])
+        command.extend([self.scores['target']['fn'],
+                        self.scores['decoy']['fn']])
         command.extend(['-o', outfn])
         subprocess.call(command)

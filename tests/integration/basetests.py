@@ -21,13 +21,22 @@ class BaseTest(unittest.TestCase):
                                      self.infilename + self.suffix)
 
     def tearDown(self):
+        print(os.listdir(self.workdir))
         shutil.rmtree(self.workdir)
 
     def run_command(self, options=[]):
-        cmd = ['./{0}'.format(self.executable), '-c', self.command,
-               '-i', self.infile, '-d', self.workdir]
+        cmd = ['python3', '{0}'.format(self.executable), self.command,
+               '-d', self.workdir, '-i']
+        if type(self.infile) != list:
+            self.infile = [self.infile]
+        cmd.extend(self.infile)
         cmd.extend(options)
-        subprocess.call(cmd)
+        try:
+            subprocess.check_output(cmd)
+        except subprocess.CalledProcessError:
+            print('Failed to run executable {}'.format(self.executable))
+            raise
+
 
 
 class BaseTestPycolator(BaseTest):
@@ -60,7 +69,23 @@ class BaseTestPycolator(BaseTest):
         return [x.attrib['{%s}%s' % (ns, id_attrib)] for x in elements]
 
     def get_psm_seqs(self, psms, ns):
-        return [psm.find('{%s}peptide_seq' % ns).attrib['seq'] for psm in psms]
+        return [pepseq.attrib['seq'] for pepseq in
+                self.get_subelements(psms, 'peptide_seq', ns)]
+
+    def get_svms(self, elements, ns):
+        return [svm.text for svm in
+                self.get_subelements(elements, 'svm_score', ns)]
+
+    def get_qvals(self, elements, ns):
+        return [qval.text for qval in
+                self.get_subelements(elements, 'q_value', ns)]
+
+    def get_peps(self, elements, ns):
+        return [pep.text for pep in
+                self.get_subelements(elements, 'pep', ns)]
+
+    def get_subelements(self, elements, subel, ns):
+        return [element.find('{%s}%s' % (ns, subel)) for element in elements]
 
     def get_root_el(self, fn):
         rootgen = etree.iterparse(fn, events=('start',))

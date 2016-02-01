@@ -1,10 +1,61 @@
 import os
-import basetests
+from tests.integration.basetests import BaseTestPycolator, LookupTestsPycolator
 import sqlite3
-import yaml
 
 
-class TestSplitTD(basetests.BaseTestPycolator):
+class TestReassign(BaseTestPycolator):
+    command = 'reassign'
+    suffix = '_reassigned.xml'
+
+    def test_reassign_psm(self):
+        self.run_qvality('psm')
+
+    def test_reassign_peptide(self):
+        self.run_qvality('peptide')
+
+    def run_qvality(self, feattype):
+        def get_mapvals_interpolated(qpmap, svm):
+            testsvm = float(svm)
+            for map_svm in sorted([float(x) for x in qpmap], reverse=True):
+                if testsvm < map_svm:
+                    upperval = str(map_svm)
+                elif testsvm > map_svm:
+                    lowerval = str(map_svm)
+                    return tuple([str(sum([float(qpmap[upperval][x]),
+                                           float(qpmap[lowerval][x])]) / 2)
+                                  for x in [0, 1]])
+        qvalityfn = os.path.join(self.fixdir, 'qvality.txt')
+        self.run_command(['--qvality', qvalityfn, '--feattype', feattype])
+        result = self.read_percolator_out(self.resultfn)
+        origin = self.read_percolator_out(self.infile[0])
+        qvmap = {}
+        with open(qvalityfn) as fp:
+            next(fp)  # skip header
+            for line in fp:
+                line = line.strip('\n').split('\t')
+                qvmap[line[0]] = (line[1], line[2])
+        feat = '{}s'.format(feattype)
+        id_id = '{}_id'.format(feattype)
+        resultids = self.get_element_ids(result[feat], id_id, result['ns'])
+        resultsvms = self.get_svms(result[feat], result['ns'])
+        resultqvals = self.get_qvals(result[feat], result['ns'])
+        resultpeps = self.get_peps(result[feat], result['ns'])
+        originids = self.get_element_ids(origin[feat], id_id, origin['ns'])
+        originsvms = self.get_svms(origin[feat], origin['ns'])
+        for oid, rid, osvm, rsvm, rq, rpep in zip(originids, resultids,
+                                                  originsvms, resultsvms,
+                                                  resultqvals, resultpeps):
+            self.assertEqual(oid, rid)
+            self.assertEqual(osvm, rsvm)
+            try:
+                mapvals = qvmap[osvm]
+            except KeyError:
+                mapvals = get_mapvals_interpolated(qvmap, osvm)
+            self.assertEqual(rq, mapvals[1])
+            self.assertEqual(rpep, mapvals[0])
+
+
+class TestSplitTD(BaseTestPycolator):
     command = 'splittd'
     suffix = ''
 
@@ -41,16 +92,19 @@ class TestSplitTD(basetests.BaseTestPycolator):
                     el.attrib['{%s}decoy' % decoy_contents['ns']], 'true')
 
 
-class TestMerge(basetests.BaseTestPycolator):
+class TestMerge(BaseTestPycolator):
     command = 'merge'
     infilename = 'splittd_target_out.xml'
     suffix = '_merged.xml'
 
     def test_merge(self):
-        self.multifiles = [os.path.join(self.fixdir, 'splittd_decoy_out.xml')]
-        options = ['--multifiles']
-        options.extend(self.multifiles)
-        self.run_command(options)
+        #self.multifiles = [os.path.join(self.fixdir, 'splittd_decoy_out.xml')]
+        #self.multifiles =
+        #options = ['--multifiles']
+        #options.extend(self.multifiles)
+        self.infile = [self.infile]
+        self.infile.append(os.path.join(self.fixdir, 'splittd_decoy_out.xml'))
+        self.run_command()
         expected = self.read_percolator_out(os.path.join(self.fixdir,
                                                          'percolator_out.xml'))
         result = self.read_percolator_out(self.resultfn)
@@ -66,7 +120,7 @@ class TestMerge(basetests.BaseTestPycolator):
                                                    'peptide_id', result['ns']))
 
 
-class TestFilterUnique(basetests.BaseTestPycolator):
+class TestFilterUnique(BaseTestPycolator):
     command = 'filteruni'
     suffix = '_filtuniq.xml'
     # FIXME other scores than svm
@@ -79,7 +133,7 @@ class TestFilterUnique(basetests.BaseTestPycolator):
         were not unique to start with."""
         self.run_command(['-s', 'svm'])
         result = self.read_percolator_out(self.resultfn)
-        origin = self.read_percolator_out(self.infile)
+        origin = self.read_percolator_out(self.infile[0])
         resultpeps = self.get_element_ids(result['peptides'],
                                           'peptide_id', result['ns'])
         originpeps = self.get_element_ids(origin['peptides'],
@@ -88,7 +142,7 @@ class TestFilterUnique(basetests.BaseTestPycolator):
         self.assertNotEqual(len({x for x in originpeps}), len(originpeps))
 
 
-class TestFilterLength(basetests.BaseTestPycolator):
+class TestFilterLength(BaseTestPycolator):
     command = 'filterlen'
     suffix = '_filt_len.xml'
     # FIXME need to check maxlen minlen input?
@@ -111,7 +165,7 @@ class TestFilterLength(basetests.BaseTestPycolator):
         minlen = 10
         self.run_command(['--maxlen', str(maxlen), '--minlen', str(minlen)])
         result = self.get_psm_pep_ids_from_file(self.resultfn)
-        origin = self.get_psm_pep_ids_from_file(self.infile)
+        origin = self.get_psm_pep_ids_from_file(self.infile[0])
 
         self.length_correct(result['peptide_ids'], minlen, maxlen)
         self.length_correct(result['psm_seqs'], minlen, maxlen)
@@ -121,7 +175,7 @@ class TestFilterLength(basetests.BaseTestPycolator):
                                 result['psm_seqs'])
 
 
-class TestFilterKnown(basetests.LookupTestsPycolator):
+class TestFilterKnown(LookupTestsPycolator):
     command = 'filterknown'
     suffix = '_filtknown.xml'
     dbfn = 'known_peptide_lookup.sqlite'
@@ -137,11 +191,11 @@ class TestFilterKnown(basetests.LookupTestsPycolator):
 
     def assert_seqs_correct(self, flags=[], seqtype=None):
         """Does the actual testing"""
-        options = ['-b', self.dbpath]
+        options = ['--dbfile', self.dbpath]
         options.extend(flags)
         self.run_command(options)
         result = self.get_psm_pep_ids_from_file(self.resultfn)
-        origin = self.get_psm_pep_ids_from_file(self.infile)
+        origin = self.get_psm_pep_ids_from_file(self.infile[0])
         for feattype in ['peptide_ids', 'psm_seqs']:
             original_seqs = origin[feattype]
             result_seqs = result[feattype]
@@ -154,26 +208,17 @@ class TestFilterKnown(basetests.LookupTestsPycolator):
                     self.assertIn(oriseq, result_seqs)
 
 
-class TestTrypticLookup(basetests.LookupTestsPycolator):
-    command = 'trypticlookup'
-    infilename = 'proteins.fasta'
-    suffix = '_lookup.sqlite'
+class TestQvality(BaseTestPycolator):
+    command = 'qvality'
+    suffix = '_qvalityout.txt'
 
-    def query_db_assert(self, options=[], seqtype=None):
-        with open(os.path.join(self.fixdir, 'peptides_trypsinized.yml')) as fp:
-            tryp_sequences = yaml.load(fp)
-        sequences = tryp_sequences['fully_tryptic']
-        if seqtype is not None:
-            sequences.extend(tryp_sequences[seqtype])
-        self.run_command(options)
-        self.assertTrue(self.all_seqs_in_db(self.resultfn,
-                                            sequences, seqtype))
+    def test_qvality(self):
+        self.infilename = 'splittd_target_out.xml'
+        self.decoyfn = 'splittd_decoy_out.xml'
+        self.decoy = os.path.join(self.fixdir, self.decoyfn)
 
-    def test_cutproline(self):
-        self.query_db_assert(['--cutproline'], 'proline_cuts')
+        options = ['--decoyfn', self.decoy, '--feattype', 'blaja', ]#'--qoptions']
+        #self.run_command(options)
+        self.fail('pycolator qvality integration testing not implemented yet')
 
-    def test_ntermwildcards(self):
-        self.query_db_assert(['--ntermwildcards'], 'ntermfalloff')
 
-    def test_noflags(self):
-        self.query_db_assert()

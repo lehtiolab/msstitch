@@ -49,7 +49,7 @@ existing percolator output.
 
 Example: filter unique peptides on best score of a merged percolator file
 
-`python3 pycolator.py -c filteruni -i percolator.xml`
+`python3 pycolator.py filteruni -i percolator.xml`
 
 <a name="mzidtsv"></a>
 ### mzidtsv

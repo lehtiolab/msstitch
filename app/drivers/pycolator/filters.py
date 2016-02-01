@@ -8,11 +8,14 @@ class FilterPeptideLength(base.PycolatorDriver):
     outputted."""
     outsuffix = '_filt_len.xml'
     command = 'filterlen'
+    commandhelp = 'Filters out peptides that exceed --maxlen and --minlen'
 
-    def __init__(self, **kwargs):
-        super(FilterPeptideLength, self).__init__(**kwargs)
-        self.minlength = kwargs.get('minlength', 0)
-        self.maxlength = kwargs.get('maxlength', None)
+    def set_options(self, options=None):
+        #if options is None:
+        #    options = []
+        #options.extend(self.get_parser_options(['maxlength', 'minlength']))
+        #super().set_options(options)
+        super().set_options(['maxlength', 'minlength'])
 
     def set_features(self):
         # FIXME psm filter len too!
@@ -29,12 +32,15 @@ class FilterUniquePeptides(base.PycolatorDriver):
     filters out the best scoring peptides."""
     outsuffix = '_filtuniq.xml'
     command = 'filteruni'
+    commandhelp = ('Only includes best scoring unique peptides in a (merged) '
+                   'file')
 
-    def __init__(self, **kwargs):
-        super(FilterUniquePeptides, self).__init__(**kwargs)
-        self.score = kwargs.get('score')
-        if self.score is None:
-            self.score = 'svm'
+    def set_options(self, options=None):
+        #if options is None:
+        #    options = []
+        #options.extend(self.get_parser_options(['score']))
+        #super().set_options(options)
+        super().set_options(['score'])
 
     def get_all_psms(self):
         """Override parent method so it returns strings instead"""
@@ -54,11 +60,11 @@ class FilterKnownPeptides(base.PycolatorDriver):
     outsuffix = '_filtknown.xml'
     lookuptype = 'searchspace'
     command = 'filterknown'
+    commandhelp = ('Filters out peptides that are found in a certain lookup '
+                   'DB')
 
-    def __init__(self, **kwargs):
-        super(FilterKnownPeptides, self).__init__(**kwargs)
-        self.db = kwargs.get('database')
-        self.falloff = kwargs.get('falloff')
+    def set_options(self, options=None):
+        super().set_options(['falloff', 'lookupfn'])
 
     def set_features(self):
         self.features = {
