@@ -1,6 +1,5 @@
 import os
-import shutil
-from tempfile import mkdtemp
+import sys
 
 from app.lookups import base as lookups
 from app.drivers.options import shared_options
@@ -50,10 +49,8 @@ class BaseDriver(object):
                     assert kwargs.get(opt_argkey) in option['picks']
                 except AssertionError:
                     print('Option {} should be one of [{}]'.format(
-                        option['
+                        option['clarg'], ','.join(option['picks'])))
                     sys.exit(1)
-                    raise
-                    # FIXME throw nice error to user
             setattr(self, opt_argkey, kwargs.get(opt_argkey))
 
     def start(self, **kwargs):
@@ -64,17 +61,6 @@ class BaseDriver(object):
     def finish(self):
         """Cleans up after work"""
         pass
-        #self.clean_workdir()
-
-    def set_workdir(self, parentworkdir):
-        """Creates temporary workdir and returns absolute path to it"""
-        # FIXME DEPRECATE no more workdirs
-        return mkdtemp(suffix='_msstitcher', dir=parentworkdir)
-
-    def clean_workdir(self):
-        """Removes workdir from filesystem"""
-        # FIXME DEPRECATE no more workdirs
-        shutil.rmtree(self.workdir)
 
     def create_outfilepath(self, fn, suffix=None):
         basefn = os.path.basename(fn)
