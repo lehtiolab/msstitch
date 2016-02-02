@@ -1,16 +1,21 @@
 from app.actions.mzidtsv import quant as prep
 from app.drivers.mzidtsv import MzidTSVDriver
+from app.drivers.options import mzidtsv_options
 
 
 class TSVQuantDriver(MzidTSVDriver):
     lookuptype = 'quant'
     outsuffix = '_quant.tsv'
     command = 'addquant'
+    commandhelp = ('Add quantitative data to a tab separated file with'
+                   'PSMs. Quant data is fetched from an SQLite lookup '
+                   'Specify --isobaric and/or --precursor.')
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.precursor = kwargs.get('precursor', False)
-        self.isobaric = kwargs.get('isobaric', False)
+    def set_options(self):
+        super().set_options()
+        options = self.define_options(['lookupfn', 'precursor', 'isobaric'],
+                                      mzidtsv_options)
+        self.options.update(options)
 
     def get_psms(self):
         """Creates iterator to write to new tsv. Contains input tsv

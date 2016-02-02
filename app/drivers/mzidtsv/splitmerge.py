@@ -1,21 +1,24 @@
 from app.actions.mzidtsv import splitmerge as prep
 from app.drivers.mzidtsv import MzidTSVDriver
 from app.writers import mzidtsv as writers
+from app.drivers.options import mzidtsv_options
 
 
 class MzidTSVConcatenateDriver(MzidTSVDriver):
     """Concatenates TSVs"""
     outsuffix = '_concat.tsv'
     command = 'merge'
+    commandhelp = ('Merges multiple TSV tables of MSGF+ output.'
+                   'Make sure headers are same in all files.')
 
-    def __init__(self, **kwargs):
-        super(MzidTSVConcatenateDriver, self).__init__(**kwargs)
-        self.allinfiles = [self.fn]
-        self.allinfiles.extend(kwargs.get('multifile_input', None))
+    def set_options(self):
+        super().set_options()
+        self.options.update(self.define_options(['multifiles'],
+                                                mzidtsv_options))
 
     def get_psms(self):
         self.header = self.oldheader
-        self.psms = prep.merge_mzidtsvs(self.allinfiles, self.oldheader)
+        self.psms = prep.merge_mzidtsvs(self.fn, self.oldheader)
 
 
 class MzidTSVSplitDriver(MzidTSVDriver):
@@ -25,12 +28,13 @@ class MzidTSVSplitDriver(MzidTSVDriver):
     column"""
     outsuffix = '_split.tsv'
     command = 'split'
+    commandhelp = 'Splits an MSGF TSV PSM table into multiple new tables'
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.bioset = kwargs.get('bioset', None)
-        self.setnames = kwargs.get('setnames', None)
-        self.splitcol = kwargs.get('splitcol', None)
+    def set_options(self):
+        super().set_options()
+        options = self.define_options(['bioset', 'setnames', 'splitcol'],
+                                      mzidtsv_options)
+        self.options.update(options)
 
     def get_psms(self):
         self.header = self.oldheader[:]

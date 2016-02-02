@@ -194,7 +194,7 @@ pycolator_options = {
 mzidtsv_options = {
     'confcol': {'driverattr': 'confcol', 'clarg': '--confidence-col',
                 'help': 'Confidence column number or name in the tsv file. '
-                'First column has number 1.'},
+                'First column has number 1.', 'type': int},
     'conflvl': {'driverattr': 'conflvl', 'clarg': '--confidence-lvl',
                 'help': 'Confidence cutoff level as a floating point number',
                 'type': float},

@@ -58,11 +58,11 @@ or other tools.
 
 Example: add MS2 quant data to PSM table from SQLite lookup (resulting from mslookup)
 
-`python3 mzidtsv.py -c quanttsv -i psmtable.txt --dbfile db.sqlite --isobaric`
+`python3 mzidtsv.py quanttsv -i psmtable.txt --dbfile db.sqlite --isobaric`
 
 Example 2: Split PSM table into multiple tables on column "Biological set"
 
-`python3 mzidtsv.py -c splittsv -i psmtable.txt --bioset`
+`python3 mzidtsv.py splittsv -i psmtable.txt --bioset`
 
 
 <a name="peptable"></a>

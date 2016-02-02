@@ -1,5 +1,6 @@
 import app.actions.mzidtsv.percolator as prep
 from app.drivers.mzidtsv import MzidTSVDriver
+from app.drivers.options import mzidtsv_options
 
 
 class MzidPercoTSVDriver(MzidTSVDriver):
@@ -8,25 +9,21 @@ class MzidPercoTSVDriver(MzidTSVDriver):
     """
     outsuffix = '_percolated.tsv'
     command = 'addperco'
+    commandhelp = ('Add percolator data to a  TSV with MSGF+ output. ')
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.idfn = kwargs.get('mzid', None)
-        self.multipsm_per_scan = kwargs.get('allpsms', False)
-        assert self.idfn is not None
+    def set_options(self):
+        super().set_options()
+        self.options.update(self.define_options(['mzidfn'], mzidtsv_options))
 
     def get_psms(self):
-        if self.multipsm_per_scan is True:
+        self.multipsm_per_scan = False
+        if self.multipsm_per_scan:
             # FIXME not supported yet
             # Create mzid PSM/sequence sqlite (fn, scan, rank, sequence)
             pass
-        else:
-            seqlookup = None
-
         self.header = prep.get_header_with_percolator(self.oldheader,
                                                       self.multipsm_per_scan)
-        self.psms = prep.add_percolator_to_mzidtsv(self.idfn,
+        self.psms = prep.add_percolator_to_mzidtsv(self.mzidfn,
                                                    self.fn,
                                                    self.multipsm_per_scan,
-                                                   self.oldheader,
-                                                   seqlookup)
+                                                   self.oldheader)
