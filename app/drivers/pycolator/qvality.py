@@ -2,6 +2,7 @@ import subprocess
 from app.drivers.pycolator import base
 from app.actions.pycolator import qvality as preparation
 from app.writers import pycolator as writers
+from app.drivers.options import pycolator_options
 
 
 class QvalityDriver(base.PycolatorDriver):
@@ -25,8 +26,11 @@ class QvalityDriver(base.PycolatorDriver):
             for option in self.qoptions:
                 self.qvalityoptions.append(option.replace('***', '--'))
 
-    def set_options(self, options=None):
-        super().set_options(['decoyfn', 'featuretype', 'qoptions'])
+    def set_options(self):
+        super().set_options()
+        options = self.define_options(['decoyfn', 'featuretype', 'qoptions'],
+                                      pycolator_options)
+        self.options.update(options)
 
     def extract_from_single_target_decoy_file(self):
         """Future method to split into target and decoy file"""

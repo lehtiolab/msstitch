@@ -1,5 +1,6 @@
 from app.drivers.pycolator import base
 from app.actions.pycolator import filters as preparation
+from app.drivers.options import pycolator_options
 
 
 class FilterPeptideLength(base.PycolatorDriver):
@@ -10,12 +11,11 @@ class FilterPeptideLength(base.PycolatorDriver):
     command = 'filterlen'
     commandhelp = 'Filters out peptides that exceed --maxlen and --minlen'
 
-    def set_options(self, options=None):
-        #if options is None:
-        #    options = []
-        #options.extend(self.get_parser_options(['maxlength', 'minlength']))
-        #super().set_options(options)
-        super().set_options(['maxlength', 'minlength'])
+    def set_options(self):
+        super().set_options()
+        options = self.define_options(['maxlength', 'minlength'],
+                                      pycolator_options)
+        self.options.update(options)
 
     def set_features(self):
         # FIXME psm filter len too!
@@ -35,12 +35,9 @@ class FilterUniquePeptides(base.PycolatorDriver):
     commandhelp = ('Only includes best scoring unique peptides in a (merged) '
                    'file')
 
-    def set_options(self, options=None):
-        #if options is None:
-        #    options = []
-        #options.extend(self.get_parser_options(['score']))
-        #super().set_options(options)
-        super().set_options(['score'])
+    def set_options(self):
+        super().set_options()
+        self.options.update(self.define_options(['score'], pycolator_options))
 
     def get_all_psms(self):
         """Override parent method so it returns strings instead"""
@@ -63,8 +60,10 @@ class FilterKnownPeptides(base.PycolatorDriver):
     commandhelp = ('Filters out peptides that are found in a certain lookup '
                    'DB')
 
-    def set_options(self, options=None):
-        super().set_options(['falloff', 'lookupfn'])
+    def set_options(self):
+        super().set_options()
+        self.options.update(self.define_options(['falloff', 'lookupfn'],
+                                                pycolator_options))
 
     def set_features(self):
         self.features = {

@@ -2,14 +2,12 @@ from app.drivers import base
 from app.readers import pycolator as readers
 from app.readers import xml
 from app.writers import pycolator as writers
-from app.drivers.options import pycolator_options
 
 
 class PycolatorDriver(base.BaseDriver):
     """Driver for pycolator functions"""
     def __init__(self):
         super().__init__()
-        self.parser_options = pycolator_options
 
     def prepare_percolator_output(self, fn):
         """Returns namespace and static xml from percolator output file"""

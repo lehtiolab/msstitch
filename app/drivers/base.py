@@ -8,8 +8,6 @@ from app.drivers.options import shared_options
 class BaseDriver(object):
     def __init__(self):
         self.lookupfn = None
-        self.shared_options = shared_options
-        self.options = ['fn', 'outdir']
 
     def set_lookup(self):
         if self.lookupfn is not None and hasattr(self, 'lookuptype'):
@@ -17,32 +15,33 @@ class BaseDriver(object):
         else:
             self.lookup = None
 
-    def set_options(self, options=None):
-        if options is not None:
-            self.options.extend(options)
-        self.options = self.get_parser_options(self.options)
+    def set_options(self):
+        self.options = self.define_options(['fn', 'outdir'], {})
 
     def get_commandhelp(self):
         return self.commandhelp
 
     def get_options(self):
-        return self.options
+        return self.options.values()
 
-    def get_parser_options(self, names):
+    def define_options(self, names, parser_options):
         """Given a list of option names, this returns a list of dicts
         defined in all_options and self.shared_options. These can then
         be used to populate the argparser with"""
-        options = []
+        options = {}
         for name in names:
             try:
-                option = self.parser_options[name]
+                option = parser_options[name]
             except KeyError:
-                option = self.shared_options[name]
-            options.append(option)
+                option = shared_options[name]
+            try:
+                options.update({option['clarg']: option})
+            except TypeError:
+                options.update({option['clarg'][0]: option})
         return options
 
     def parse_input(self, **kwargs):
-        for option in self.options:
+        for option in self.get_options():
             opt_argkey = option['driverattr']
             if 'type' in option and option['type'] == 'pick':
                 try:

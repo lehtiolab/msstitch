@@ -1,6 +1,7 @@
 from app.drivers.pycolator import base
 from app.actions.pycolator import splitmerge as preparation
 from app.readers import pycolator as readers
+from app.drivers.options import pycolator_options
 
 
 class SplitDriver(base.PycolatorDriver):
@@ -48,8 +49,10 @@ class MergeDriver(base.PycolatorDriver):
         self.mergefiles = self.fn[:]
         self.fn = self.fn[0]
 
-    def set_options(self, options=None):
-        super().set_options(['multifiles'])
+    def set_options(self):
+        super().set_options()
+        options = self.define_options(['multifiles'], pycolator_options)
+        self.options.update(options)
 
     def prepare(self):
         self.ns, self.static_xml = self.prepare_percolator_output(self.fn)
