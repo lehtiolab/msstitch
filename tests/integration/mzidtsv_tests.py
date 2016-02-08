@@ -1,6 +1,7 @@
 import os
 from lxml import etree
 
+from app.dataformats import mzidtsv as constants
 from tests.integration import basetests
 
 
@@ -190,6 +191,48 @@ class TestConffiltTSV(basetests.MzidTSVBaseTest):
     def test_omit_conf_val(self):
         options = ['--confidence-col', '18', '--confidence-better', 'lower']
         self.run_command_expect_error(options)
+
+
+class TestProteinGroup(basetests.MzidTSVBaseTest):
+    command = 'proteingroup'
+    infilename = 'mzidtsv_filtered_fr1-2.txt'
+    suffix = '_protgroups.txt'
+    dbfile = 'mzidtsv_db.sqlite'
+
+    def run_and_analyze(self, options):
+        self.run_command(options)
+        result = self.parse_proteingroups(self.resultfn)
+        expected = self.parse_proteingroups(
+            os.path.join(self.fixdir,
+                         'mzidtsv_filtered_fr1-2_proteingrouped.txt'))
+        self.do_asserting(result, expected)
+
+    def parse_proteingroups(self, fn):
+        with open(fn) as fp:
+            header = next(fp).strip().split('\t')
+            master_ix = header.index(constants.HEADER_MASTER_PROT)
+            pgcontent_ix = header.index(constants.HEADER_PG_CONTENT)
+            pgamount_ix = header.index(constants.HEADER_PG_AMOUNT_PROTEIN_HITS)
+            for line in fp:
+                line = line.strip().split('\t')
+                yield {'master': line[master_ix],
+                       'content': line[pgcontent_ix],
+                       'amount': line[pgamount_ix],
+                       }
+
+    def do_asserting(self, result, expected, unrolled=False):
+        for res, exp in zip(result, expected):
+            self.assertEqual(set(res['master'].split(';')),
+                             set(exp['master'].split(';')))
+            self.assertEqual(res['amount'], exp['amount'])
+            rescontent = res['content'].split(';')
+            expcontent = exp['content'].split(';')
+            self.assertEqual(set(rescontent), set(expcontent))
+
+    def test_proteingroups(self):
+        options = ['--dbfile', self.dbfile]
+        self.expected = None
+        self.run_and_analyze(options)
 
 
 class TestAddGenes(basetests.MzidTSVBaseTest):
