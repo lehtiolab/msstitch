@@ -211,7 +211,7 @@ mzidtsv_options = {
                'these must exist.', 'required': False},
     'splitcol': {'driverattr': 'splitcol', 'clarg': '--splitcol', 'type': int,
                  'help': 'Column number to split a PSM table on. First column '
-                 'is number 1'
+                 'is number 1', 'required': False
                  },
 }
 

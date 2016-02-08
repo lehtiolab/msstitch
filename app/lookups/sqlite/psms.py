@@ -66,7 +66,7 @@ class PSMDB(ResultLookupInterface):
             'LEFT OUTER JOIN associated_ids AS aid '
             'ON p.protein_acc=aid.protein_acc '
             'LEFT OUTER JOIN prot_desc AS d ON p.protein_acc=d.protein_acc'
-            )
+        )
         gpmap = {p_acc: {'gene': gene, 'symbol': sym, 'desc': desc}
                  for p_acc, gene, sym, desc in cursor}
         return gpmap

@@ -15,7 +15,7 @@ class ConfidenceFilterDriver(MzidTSVDriver):
         self.options.update(options)
 
     def parse_input(self, **kwargs):
-        super.parse_input(**kwargs)
+        super().parse_input(**kwargs)
         self.lowerbetter = self.conftype == 'lower'
 
     def get_psms(self):

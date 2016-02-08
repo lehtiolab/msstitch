@@ -12,7 +12,7 @@ class TSVSpectraDriver(MzidTSVDriver):
 
     def set_options(self):
         super().set_options()
-        self.options.update(self.define_options(['spectracol'],
+        self.options.update(self.define_options(['lookupfn', 'spectracol'],
                                                 mzidtsv_options))
 
     def get_psms(self):

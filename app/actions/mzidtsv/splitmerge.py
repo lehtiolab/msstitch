@@ -14,9 +14,9 @@ def merge_mzidtsvs(fns, header):
 def get_splitcolnr(header, bioset, splitcol):
     """Returns column nr on which to split PSM table. Chooses from flags
     given via bioset and splitcol"""
-    if bioset is not None:
+    if bioset:
         return header.index(mzidtsvdata.HEADER_SETNAME)
-    elif splitcol is not None:
+    elif splitcol:
         return splitcol - 1
     else:
         raise RuntimeError('Must specify either --bioset or --splitcol')

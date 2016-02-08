@@ -10,11 +10,15 @@ class MzidTSVDriver(base.BaseDriver):
         self.parser_options = mzidtsv_options
 
     def run(self):
-        self.oldheader = tsvreader.get_tsv_header(self.fn)
+        if type(self.fn) == list:
+            self.first_infile = self.fn[0]
+        else:
+            self.first_infile = self.fn
+        self.oldheader = tsvreader.get_tsv_header(self.first_infile)
         self.get_psms()
         self.write()
         self.finish()
 
     def write(self):
-        outfn = self.create_outfilepath(self.fn, self.outsuffix)
+        outfn = self.create_outfilepath(self.first_infile, self.outsuffix)
         writers.write_mzid_tsv(self.header, self.psms, outfn)

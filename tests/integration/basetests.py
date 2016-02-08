@@ -21,7 +21,6 @@ class BaseTest(unittest.TestCase):
                                      self.infilename + self.suffix)
 
     def tearDown(self):
-        print(os.listdir(self.workdir))
         shutil.rmtree(self.workdir)
 
     def run_command(self, options=[]):
@@ -36,7 +35,15 @@ class BaseTest(unittest.TestCase):
         except subprocess.CalledProcessError:
             print('Failed to run executable {}'.format(self.executable))
             raise
+        return cmd
 
+    def run_command_expect_error(self, options=[]):
+        try:
+            cmd = self.run_command(options)
+        except subprocess.CalledProcessError:
+            pass
+        else:
+            self.fail('Command {} should throw an error'.format(cmd))
 
 
 class BaseTestPycolator(BaseTest):
@@ -131,4 +138,62 @@ class LookupTestsPycolator(BaseTestPycolator):
 
 
 class MzidTSVBaseTest(BaseTest):
-    executable = 'mzidplus.py'
+    executable = 'mzidtsv.py'
+    infilename = 'mzidtsv.txt'
+
+    def setUp(self):
+        super().setUp()
+        self.dbfile = os.path.join(self.fixdir, 'mzidtsv_db.sqlite')
+
+    def get_values_from_db(self, dbfile, sql):
+        db = sqlite3.connect(dbfile)
+        return db.execute(sql)
+
+    def get_all_lines(self, fn):
+        with open(fn) as fp:
+            next(fp)
+            for line in fp:
+                yield line
+
+    def check_results(self, checkfields, expected_values):
+        for resultvals in self.get_values(checkfields):
+            for resultval, expectval in zip(resultvals, expected_values):
+                self.assertEqual([str(x) if x is not None else 'NA'
+                                  for x in expectval],
+                                 [str(x) for x in resultval])
+
+    def process_dbvalues_both(self, dbfile, sql, channel_fields, permfieldnrs,
+                              permfieldnames):
+        dbvals = self.get_values_from_db(dbfile, sql)
+        outresults, rownr, permvals = [], 0, []
+        for record in dbvals:
+            if record[0] != rownr:
+                for outresult in outresults:
+                    yield outresult
+                for pfname, pval in zip(permfieldnames, permvals):
+                    yield (rownr, pfname, pval)
+                if channel_fields != []:
+                    outresults = [tuple([record[0]] +
+                                        [record[x] for x in channel_fields])]
+                permvals = [record[nr] for nr in permfieldnrs]
+                rownr += 1
+            else:
+                permvals = [record[nr] for nr in permfieldnrs]
+                if channel_fields != []:
+                    result = [record[0]] + [record[x] for x in channel_fields]
+                    outresults.append(tuple(result))
+
+    def get_values(self, checkfields):
+        with open(self.resultfn) as fp:
+            header = next(fp).strip('\n').split('\t')
+            fieldindices = [header.index(field) for field in checkfields]
+            row = 0
+            for line in fp:
+                line = line.strip('\n').split('\t')
+                if len(checkfields) > 1:
+                    yield [(row, field, line[ix]) for field, ix in
+                           zip(checkfields, fieldindices)]
+                else:
+                    yield [(row, line[ix]) for field, ix in
+                           zip(checkfields, fieldindices)]
+                row += 1

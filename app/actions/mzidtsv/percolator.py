@@ -3,8 +3,7 @@ from app.readers import tsv as tsvreader
 from app.dataformats import mzidtsv as mzidtsvdata
 
 
-def add_percolator_to_mzidtsv(mzidfn, tsvfn, multipsm,
-                              oldheader, seqdb=None):
+def add_percolator_to_mzidtsv(mzidfn, tsvfn, multipsm, oldheader):
     """Takes a MSGF+ tsv and corresponding mzId, adds percolatordata
     to tsv lines. Generator yields the lines. Multiple PSMs per scan
     can be delivered, in which case rank is also reported.
@@ -18,7 +17,7 @@ def add_percolator_to_mzidtsv(mzidfn, tsvfn, multipsm,
     mzidpepmap = {}
     for peptide in readers.generate_mzid_peptides(mzidfn, namespace):
         pep_id, seq = readers.get_mzid_peptidedata(peptide, xmlns)
-        mzidpepmap[pep_id] = seq 
+        mzidpepmap[pep_id] = seq
     mzidpercomap = {}
     for specid_data in readers.generate_mzid_spec_id_items(mzidfn, namespace,
                                                            xmlns, specfnids):
