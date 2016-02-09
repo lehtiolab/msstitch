@@ -1,5 +1,5 @@
 import os
-from tests.integration.basetests import BaseTestPycolator, LookupTestsPycolator
+from tests.integration.basetests import BaseTestPycolator
 import sqlite3
 
 
@@ -175,7 +175,7 @@ class TestFilterLength(BaseTestPycolator):
                                 result['psm_seqs'])
 
 
-class TestFilterKnown(LookupTestsPycolator):
+class TestFilterKnown(BaseTestPycolator):
     command = 'filterknown'
     suffix = '_filtknown.xml'
     dbfn = 'known_peptide_lookup.sqlite'

@@ -45,6 +45,16 @@ class BaseTest(unittest.TestCase):
         else:
             self.fail('Command {} should throw an error'.format(cmd))
 
+    def seq_in_db(self, dbconn, seq, seqtype):
+        comparator = '='
+        if seqtype == 'ntermfalloff':
+            comparator = ' LIKE '
+            seq = '{0}%'.format(seq[::-1])
+        seq = seq.replace('L', 'I')
+        sql = ('SELECT EXISTS(SELECT seqs FROM known_searchspace WHERE '
+               'seqs{0}? LIMIT 1)'.format(comparator))
+        return dbconn.execute(sql, (seq,)).fetchone()[0] == 1
+
 
 class BaseTestPycolator(BaseTest):
     executable = 'pycolator.py'
@@ -117,26 +127,6 @@ class BaseTestPycolator(BaseTest):
         return re.sub('\[UNIMOD:\d*\]', '', pep)
 
 
-class LookupTestsPycolator(BaseTestPycolator):
-    def seq_in_db(self, dbconn, seq, seqtype):
-        comparator = '='
-        if seqtype == 'ntermfalloff':
-            comparator = ' LIKE '
-            seq = '{0}%'.format(seq[::-1])
-        seq = seq.replace('L', 'I')
-        sql = ('SELECT EXISTS(SELECT seqs FROM known_searchspace WHERE '
-               'seqs{0}? LIMIT 1)'.format(comparator))
-        return dbconn.execute(sql, (seq,)).fetchone()[0] == 1
-
-    def all_seqs_in_db(self, dbfn, sequences, seqtype):
-        db = sqlite3.connect(dbfn)
-        seqs_in_db = set()
-        for seq in sequences:
-            seqs_in_db.add(self.seq_in_db(db, seq, seqtype))
-        db.close()
-        return seqs_in_db == set([True])
-
-
 class MzidTSVBaseTest(BaseTest):
     executable = 'mzidtsv.py'
     infilename = 'mzidtsv.txt'
@@ -197,3 +187,20 @@ class MzidTSVBaseTest(BaseTest):
                     yield [(row, line[ix]) for field, ix in
                            zip(checkfields, fieldindices)]
                 row += 1
+
+
+class MSLookupTest(BaseTest):
+    executable = 'mslookup.py'
+    suffix = ''
+
+    def setUp(self):
+        super().setUp()
+        self.resultfn = os.path.join(self.workdir, 'mslookup_db.sqlite')
+        shutil.copy(os.path.join(self.fixdir, self.base_db_fn), self.resultfn)
+
+    def run_command(self, options=None):
+        if options is None:
+            options = []
+        options.extend(['--dbfile', self.resultfn])
+        super().run_command(options)
+
