@@ -22,7 +22,7 @@ class TestAddSpecData(basetests.MzidTSVBaseTest):
         fields = ['Biological set', 'Retention time(min)']
         expected_values = self.process_dbvalues_both(self.dbfile, sql, [],
                                                      [1, 2], fields)
-        self.check_results(fields, expected_values)
+        self.check_results(fields, self.rowify(expected_values))
 
 
 class TestQuantTSV(basetests.MzidTSVBaseTest):
@@ -41,7 +41,7 @@ class TestQuantTSV(basetests.MzidTSVBaseTest):
                                                        '128N', '128C', '129N',
                                                        '129C', '130N', '130C',
                                                        '131']]
-        self.check_results(fields, expected_values)
+        self.check_results(fields, self.rowify(expected_values))
 
     def test_quanttsv_precursor(self):
         dbfile = os.path.join(self.fixdir, 'mzidtsv_db.sqlite')
@@ -52,7 +52,7 @@ class TestQuantTSV(basetests.MzidTSVBaseTest):
                'LEFT OUTER JOIN ms1_align USING(spectra_id) '
                'LEFT OUTER JOIN ms1_quant AS pq USING(feature_id)')
         expected_values = self.get_values_from_db(self.dbfile, sql)
-        self.check_results(['MS1 area'], expected_values)
+        self.check_results(['MS1 area'], self.rowify(expected_values))
 
     def test_quanttsv_both(self):
         dbfile = os.path.join(self.fixdir, 'mzidtsv_db.sqlite')
@@ -65,14 +65,14 @@ class TestQuantTSV(basetests.MzidTSVBaseTest):
                'LEFT OUTER JOIN ms1_align USING(spectra_id) '
                'LEFT OUTER JOIN ms1_quant AS pq USING(feature_id) '
                'ORDER BY pr.rownr')
-        expected_values = self.process_dbvalues_both(self.dbfile, sql,
-                                                     [1, 2], [3], ['MS1 area'])
+        expected_values = self.process_dbvalues_both(self.dbfile, sql, [1, 2],
+                                                     [3], ['MS1 area'])
         fields = ['tmt10plex_{}'.format(ch) for ch in ['126', '127N', '127C',
                                                        '128N', '128C', '129N',
                                                        '129C', '130N', '130C',
                                                        '131']]
         fields.append('MS1 area')
-        self.check_results(fields, expected_values)
+        self.check_results(fields, self.rowify(expected_values))
 
 
 class TestPercoTSV(basetests.MzidTSVBaseTest):
@@ -109,7 +109,7 @@ class TestPercoTSV(basetests.MzidTSVBaseTest):
                 perco = {x.attrib['name'].replace('percolator:', ''):
                          x.attrib['value'] for x in perco}
                 if not perco:
-                    perco = {key: 'NA' for key in self.field_p_map.values()}
+                    perco = {key: None for key in self.field_p_map.values()}
                 #outresult = [(count, 'SpecID', sid)]
                 outresult = []
                 outresult.extend([(count, field,

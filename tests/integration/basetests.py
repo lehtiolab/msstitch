@@ -45,6 +45,10 @@ class BaseTest(unittest.TestCase):
         else:
             self.fail('Command {} should throw an error'.format(cmd))
 
+    def get_values_from_db(self, dbfile, sql):
+        db = sqlite3.connect(dbfile)
+        return db.execute(sql)
+
     def seq_in_db(self, dbconn, seq, seqtype):
         comparator = '='
         if seqtype == 'ntermfalloff':
@@ -145,15 +149,15 @@ class MzidTSVBaseTest(BaseTest):
         super().setUp()
         self.dbfile = os.path.join(self.fixdir, 'mzidtsv_db.sqlite')
 
-    def get_values_from_db(self, dbfile, sql):
-        db = sqlite3.connect(dbfile)
-        return db.execute(sql)
-
-    def get_all_lines(self, fn):
-        with open(fn) as fp:
-            next(fp)
-            for line in fp:
-                yield line
+    def rowify(self, records):
+        row, rownr = [], 0
+        for record in records:
+            if record[0] == rownr:
+                row.append(record)
+            else:
+                yield row
+                row = [record]
+                rownr += 1
 
     def check_results(self, checkfields, expected_values):
         for resultvals, exp_vals in zip(self.get_values(checkfields), expected_values):
