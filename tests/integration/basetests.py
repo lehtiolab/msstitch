@@ -55,6 +55,35 @@ class BaseTest(unittest.TestCase):
                'seqs{0}? LIMIT 1)'.format(comparator))
         return dbconn.execute(sql, (seq,)).fetchone()[0] == 1
 
+    def get_tsvheader(self, fn):
+        with open(fn) as fp:
+            return next(fp).strip('\n').split('\t')
+
+    def get_all_lines(self, fn):
+        with open(fn) as fp:
+            next(fp)
+            for line in fp:
+                yield line
+
+    def get_xml_namespace(self, fn):
+        root = self.get_root_el(fn)
+        ns = {}
+        for prefix in root.nsmap:
+            separator = ':'
+            nsprefix = prefix
+            if prefix is None:
+                nsprefix = ''
+                separator = ''
+            ns['xmlns{0}{1}'.format(separator, nsprefix)] = root.nsmap[prefix]
+        return ns
+
+    def get_root_el(self, fn):
+        rootgen = etree.iterparse(fn, events=('start',))
+        root = next(rootgen)[1]
+        for child in root.getchildren():
+            root.remove(child)
+        return root
+
 
 class BaseTestPycolator(BaseTest):
     executable = 'pycolator.py'
@@ -72,7 +101,7 @@ class BaseTestPycolator(BaseTest):
                 }
 
     def read_percolator_out(self, fn):
-        ns = self.get_namespace(fn)['xmlns']
+        ns = self.get_xml_namespace(fn)['xmlns']
         contents = {'ns': ns, 'psms': [], 'peptides': []}
         xml = etree.iterparse(fn)
         for ac, el in xml:
@@ -103,25 +132,6 @@ class BaseTestPycolator(BaseTest):
 
     def get_subelements(self, elements, subel, ns):
         return [element.find('{%s}%s' % (ns, subel)) for element in elements]
-
-    def get_root_el(self, fn):
-        rootgen = etree.iterparse(fn, events=('start',))
-        root = next(rootgen)[1]
-        for child in root.getchildren():
-            root.remove(child)
-        return root
-
-    def get_namespace(self, fn):
-        root = self.get_root_el(fn)
-        ns = {}
-        for prefix in root.nsmap:
-            separator = ':'
-            nsprefix = prefix
-            if prefix is None:
-                nsprefix = ''
-                separator = ''
-            ns['xmlns{0}{1}'.format(separator, nsprefix)] = root.nsmap[prefix]
-        return ns
 
     def strip_modifications(self, pep):
         return re.sub('\[UNIMOD:\d*\]', '', pep)
