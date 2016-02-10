@@ -146,8 +146,8 @@ class MzidTSVBaseTest(BaseTest):
                 yield line
 
     def check_results(self, checkfields, expected_values):
-        for resultvals in self.get_values(checkfields):
-            for resultval, expectval in zip(resultvals, expected_values):
+        for resultvals, exp_vals in zip(self.get_values(checkfields), expected_values):
+            for resultval, expectval in zip(resultvals, exp_vals):
                 self.assertEqual([str(x) if x is not None else 'NA'
                                   for x in expectval],
                                  [str(x) for x in resultval])
@@ -184,8 +184,7 @@ class MzidTSVBaseTest(BaseTest):
                     yield [(row, field, line[ix]) for field, ix in
                            zip(checkfields, fieldindices)]
                 else:
-                    yield [(row, line[ix]) for field, ix in
-                           zip(checkfields, fieldindices)]
+                    yield [(row, line[ix]) for ix in checkfields]
                 row += 1
 
 

@@ -84,7 +84,7 @@ class TestPercoTSV(basetests.MzidTSVBaseTest):
                    'PSM q-value': 'psm_q_value',
                    'PSM-PEP': 'psm_pep',
                    'peptide q-value': 'peptide_q_value',
-                   'peptide PEP': 'peptide PEP',
+                   'peptide PEP': 'peptide_pep',
                    }
 
     def test_add_percolator(self):
@@ -96,16 +96,22 @@ class TestPercoTSV(basetests.MzidTSVBaseTest):
         self.check_results(self.field_p_map.keys(), expected)
 
     def get_percolator_from_msgf(self, msgffile, checkfields):
-        for specidres in etree.iterparse(msgffile,
-                                         tag='SpectrumIdentificationResult'):
-            count = 0
-            for result in specidres:
-                sid = result.attrib['spectrumID']
-                perco = [x for x in result.findall('userParam')
+        count = 0
+        ns = self.get_xml_namespace(msgffile)
+        for ac, specidres in etree.iterparse(
+                msgffile, tag='{%s}'
+                'SpectrumIdentificationResult' % ns['xmlns']):
+            sid = specidres.attrib['spectrumID']
+            for result in specidres.findall(
+                    '{%s}SpectrumIdentificationItem' % ns['xmlns']):
+                perco = [x for x in result.findall('{%s}userParam' % ns['xmlns'])
                          if x.attrib['name'].split(':')[0] == 'percolator']
                 perco = {x.attrib['name'].replace('percolator:', ''):
                          x.attrib['value'] for x in perco}
-                outresult = [(count, 'SpecID', sid)]
+                if not perco:
+                    perco = {key: 'NA' for key in self.field_p_map.values()}
+                #outresult = [(count, 'SpecID', sid)]
+                outresult = []
                 outresult.extend([(count, field,
                                    perco[self.field_p_map[field]])
                                   for field in checkfields])
@@ -139,7 +145,6 @@ class TestSplitTSV(basetests.MzidTSVBaseTest):
 
     def test_auto_bioset_column(self):
         self.run_command(['--bioset', '--setnames', 'S1'])
-        print(os.listdir(self.workdir))
         resultfn = os.path.join(self.workdir, '{}_0{}'.format(
             os.path.basename(self.infile[0]), self.suffix))
         for line in self.get_all_lines(resultfn):
