@@ -46,14 +46,18 @@ class BaseDriver(object):
     def parse_input(self, **kwargs):
         for option in self.get_options():
             opt_argkey = option['driverattr']
+            opt_val = kwargs.get(opt_argkey)
             if 'type' in option and option['type'] == 'pick':
-                try:
-                    assert kwargs.get(opt_argkey) in option['picks']
-                except AssertionError:
-                    print('Option {} should be one of [{}]'.format(
-                        option['clarg'], ','.join(option['picks'])))
-                    sys.exit(1)
-            setattr(self, opt_argkey, kwargs.get(opt_argkey))
+                if not option.get('required') and not opt_val:
+                    pass
+                else:
+                    try:
+                        assert opt_val in option['picks']
+                    except AssertionError:
+                            print('Option {} should be one of [{}]'.format(
+                                option['clarg'], ','.join(option['picks'])))
+                            sys.exit(1)
+            setattr(self, opt_argkey, opt_val)
 
     def start(self, **kwargs):
         self.parse_input(**kwargs)
