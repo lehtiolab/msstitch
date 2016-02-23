@@ -28,12 +28,15 @@ class BaseDriver(object):
         """Given a list of option names, this returns a list of dicts
         defined in all_options and self.shared_options. These can then
         be used to populate the argparser with"""
+        def copy_option(options, name):
+            return {k: v for k, v in options[name].items()}
+
         options = {}
         for name in names:
             try:
-                option = parser_options[name]
+                option = copy_option(parser_options, name)
             except KeyError:
-                option = shared_options[name]
+                option = copy_option(shared_options, name)
             try:
                 options.update({option['clarg']: option})
             except TypeError:
