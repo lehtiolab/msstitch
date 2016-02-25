@@ -39,7 +39,7 @@ also does protein grouping and sequence filtering thanks to the power of the DB 
 
 Example: Store a multi-set tab-separated PSM table:
 
-`python3 mslookup.py -c psms -i psmtable.txt --spectracol 2 --fasta ENSEMBL80.fa --map ENS80_biomart.txt`
+`python3 mslookup.py psms -i psmtable.txt --spectracol 2 --fasta ENSEMBL80.fa --map ENS80_biomart.txt`
 
 <a name="pycolator"></a>
 ### pycolator
