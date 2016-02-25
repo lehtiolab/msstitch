@@ -19,7 +19,8 @@ shared_options = {
                    'type': int, 'clarg': '--spectracol', 'help':
                    'Column number in which spectra file names are, '
                    'in case some framework has changed the file '
-                   'names. First column number is 1.'},
+                   'names. First column number is 1.', 'required': False,
+                   'default': 1},
     'decoyfn': {'driverattr': 'decoyfn', 'dest': 'decoyfn',
                 'help': 'Decoy input file (percolator out XML) for qvality',
                 'type': 'file', 'clarg': '--decoyfn'},
@@ -80,7 +81,7 @@ shared_options = {
                         'clarg': '--isobquantcolpattern', 'type': str,
                         'default': None, 'required': False,
                         'help': 'Unique text pattern to identify '
-                        'isobaric quant column in protein table.'},
+                        'isobaric quant column in input table.'},
     # FIXME quantcolpattern is required for "addisoquant" in prottable,
     # but not for mslookup or peptable-psm2pep
     'precursorquantcolpattern': {'driverattr': 'precursorquantcolpattern',
@@ -89,7 +90,7 @@ shared_options = {
                                  'clarg': '--ms1quantcolpattern',
                                  'default': None,
                                  'help': 'Unique text pattern to identify '
-                                 'precursor quant column in protein table.'},
+                                 'precursor quant column in input table.'},
     'quantacccolpattern': {'driverattr': 'quantcolpattern',
                            'clarg': '--qaccpattern', 'type': str,
                            'help': 'Unique text pattern to identify '
@@ -99,9 +100,9 @@ shared_options = {
                    'from', 'type': 'file', 'clarg': ['-q', '--qvality']},
     'proteincol': {'driverattr': 'proteincol', 'clarg': '--protcol',
                    'type': int, 'required': False, 'help': 'Column number in '
-                   'PSM table in which protein or gene accessions are. '
+                   'table in which protein or gene accessions are. '
                    'stored. First column number is 1. Use in case of not '
-                   'using standard master protein column.'},
+                   'using standard {} column'},
     'fdrcolpattern': {'driverattr': 'fdrcolpattern', 'dest': 'fdrcolpattern',
                       'clarg': '--fdrcolpattern', 'type': str,
                       'required': False, 'default': None,
@@ -128,11 +129,12 @@ mslookup_options = {
               'table from proteins', 'required': False,
               'default': False, 'clarg': '--fasta'},
     'spectrafns': {'driverattr': 'spectrafns', 'dest': 'spectra',
-                   'type': 'file', 'help': 'Spectra files in mzML '
+                   'type': str, 'help': 'Spectra files in mzML '
                    'format. Multiple files can be specified, if '
                    'order is important, e.g. when matching them '
                    'with quant data, the order will be their input '
-                   'order at the command line.', 'clarg': '--spectra'},
+                   'order at the command line.', 'clarg': '--spectra',
+                   'nargs': '+'},
     'quantfiletype': {'driverattr': 'quantfiletype', 'dest': 'quanttype',
                       'clarg': '--quanttype', 'type': 'pick', 'help':
                       'Filetype of '
@@ -152,23 +154,33 @@ mslookup_options = {
                   'help': 'Type of tolerance in mass-to-charge when mapping '
                   'MS1 feature quant info to identifications in the PSM table.'
                   ' One of ppm, Da.'},
-    'psmnrcolpatter': {'driverattr': 'psmnrcolpattern',
-                       'dest': 'psmnrcolpattern', 'clarg': '--psmnrcolpattern',
-                       'type': str, 'default': None, 'required': False,
-                       'help': 'Unique text pattern to identify '
-                       'number-of-psms column in protein table.'},
+    'peptidecol': {'driverattr': 'peptidecol', 'dest': 'peptidecol',
+                   'type': int, 'clarg': '--peptidecol', 'help':
+                   'Column nr of peptide table where peptide sequences are '
+                   'stored. First column is nr. 1'},
+    'psmnrcolpattern': {'driverattr': 'psmnrcolpattern',
+                        'dest': 'psmnrcolpattern',
+                        'clarg': '--psmnrcolpattern',
+                        'type': str, 'default': None, 'required': False,
+                        'help': 'Unique text pattern to identify '
+                        'number-of-psms column in input table.'},
     'probcolpattern': {'driverattr': 'probcolpattern',
                        'dest': 'probcolpattern', 'clarg': '--probcolpattern',
                        'type': str, 'required': False,
                        'default': None,
                        'help': 'Unique text pattern to identify '
-                       'protein probability column in protein table.'},
+                       'protein probability column in input table.'},
     'pepcolpattern': {'driverattr': 'pepcolpattern', 'dest': 'pepcolpattern',
                       'clarg': '--pepcolpattern', 'type': str,
                       'required': False, 'default': None,
                       'help': 'Unique text pattern to identify '
-                      'protein PEP column in protein table.'},
+                      'protein PEP column in input table.'},
 }
+mslookup_options['proteincol'] = {k: v for k, v
+                                  in shared_options['proteincol'].items()}
+mslookup_options['proteincol'].update(
+    {'default': 1, 'help':
+     mslookup_options['proteincol']['help'].format('first')})
 
 pycolator_options = {
     'maxlength': {'driverattr': 'maxlength', 'dest': 'maxlength',

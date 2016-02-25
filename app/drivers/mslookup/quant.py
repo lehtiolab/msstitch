@@ -2,20 +2,26 @@ from app.drivers.mslookup import base
 from app.readers import openms as openmsreader
 from app.readers import tsv as tsvreader
 from app.actions.mslookup import quant as lookups
+from app.drivers.options import mslookup_options
 
 
 class QuantLookupDriver(base.LookupDriver):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.spectrafns = kwargs.get('spectra', None)  # not for all lookups
+    def set_options(self):
+        super().set_options()
+        self.options.update(self.define_options(['spectrafns', 'multifiles'],
+                                                mslookup_options))
 
 
 class IsobaricQuantLookupDriver(QuantLookupDriver):
     lookuptype = 'isoquant'
     command = 'isoquant'
+    commandhelp = ('Create lookup of isobaric quant data in OpenMS '
+                   'consensusXML format. Use requires --spectra, --dbfile '
+                   'with an sqlite lookup of spectra, and passing multiple'
+                   'consensusXML files to -i.')
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+    def parse_input(self, **kwargs):
+        super().parse_input(**kwargs)
         self.cons_fns = self.fn
 
     def create_lookup(self):
@@ -29,14 +35,22 @@ class IsobaricQuantLookupDriver(QuantLookupDriver):
 class PrecursorQuantLookupDriver(QuantLookupDriver):
     lookuptype = 'ms1quant'
     command = 'ms1quant'
+    commandhelp = ('Creates lookup of precursor quant data in OpenMS '
+                   'featureXML, or Kronik output formats. '
+                   'Use requires --spectra, --dbfile with an sqlite lookup of '
+                   'spectra, --quanttype to determine quant output, --mztol, '
+                   '--rttol, --mztoltype for tolerance specification, and '
+                   'passing a featureXML or kronik file to -i.')
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+    def set_options(self):
+        super().set_options()
+        self.options.update(self.define_options(['quantfiletype', 'rttol',
+                                                 'mztol', 'mztoltype'],
+                                                mslookup_options))
+
+    def parse_input(self, **kwargs):
+        super().parse_input(**kwargs)
         self.precursorfns = self.fn
-        self.quantfiletype = kwargs.get('quanttype')
-        self.rt_tol = kwargs.get('rttol', None)
-        self.mz_tol = kwargs.get('mztol', None)
-        self.mz_toltype = kwargs.get('mztoltype', None)
 
     def create_lookup(self):
         if self.quantfiletype == 'openms':

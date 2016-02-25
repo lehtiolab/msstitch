@@ -88,6 +88,9 @@ class BaseTest(unittest.TestCase):
             root.remove(child)
         return root
 
+    def copy_db_to_workdir(self, dbfn):
+        shutil.copy(os.path.join(self.fixdir, dbfn), self.resultfn)
+
 
 class BaseTestPycolator(BaseTest):
     executable = 'pycolator.py'
@@ -198,22 +201,24 @@ class MzidTSVBaseTest(BaseTest):
                     yield [(row, field, line[ix]) for field, ix in
                            zip(checkfields, fieldindices)]
                 else:
-                    yield [(row, line[ix]) for ix in checkfields]
+                    yield [(row, line[ix]) for ix in fieldindices]
                 row += 1
 
 
 class MSLookupTest(BaseTest):
     executable = 'mslookup.py'
+    base_db_fn = None
     suffix = ''
 
     def setUp(self):
         super().setUp()
         self.resultfn = os.path.join(self.workdir, 'mslookup_db.sqlite')
-        shutil.copy(os.path.join(self.fixdir, self.base_db_fn), self.resultfn)
+        if self.base_db_fn is not None:
+            self.copy_db_to_workdir(self.base_db_fn)
 
     def run_command(self, options=None):
         if options is None:
             options = []
-        options.extend(['--dbfile', self.resultfn])
+        if self.base_db_fn is not None:
+            options.extend(['--dbfile', self.resultfn])
         super().run_command(options)
-

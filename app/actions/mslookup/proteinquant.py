@@ -11,7 +11,7 @@ def create_peptidequant_lookup(fns, pqdb, poolnames, pepseq_colnr,
     storefuns = [pqdb.store_precursor_quants, pqdb.store_fdr,
                  pqdb.store_pep]
     create_pep_protein_quant_lookup(fns, pqdb, poolnames, pepseq_colnr,
-                                    patterns, storefuns, 
+                                    patterns, storefuns,
                                     isobqcolpattern, psmnrpattern)
 
 

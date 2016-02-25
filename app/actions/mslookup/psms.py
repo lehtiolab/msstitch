@@ -13,14 +13,13 @@ def create_psm_lookup(fn, fastafn, mapfn, header, pgdb, unroll=False,
     store_proteins_descriptions(pgdb, fastafn, fn, mapfn, header, decoy)
     mzmlmap = pgdb.get_mzmlfile_map()
     sequences = {}
-    for psm in tsvreader.generate_tsv_lines_multifile(fn, header):
+    for psm in tsvreader.generate_tsv_psms(fn, header):
         seq = tsvreader.get_psm_sequence(psm, unroll)
         sequences[seq] = 1
     pgdb.store_pepseqs(((seq,) for seq in sequences))
     pepseqmap = pgdb.get_peptide_seq_map()
     psms = []
-    for row, psm in enumerate(tsvreader.generate_tsv_lines_multifile(fn,
-                                                                     header)):
+    for row, psm in enumerate(tsvreader.generate_tsv_psms(fn, header)):
         specfn, psm_id, scan, seq, score = tsvreader.get_psm(psm, unroll,
                                                              specfncol)
         if len(psms) % DB_STORE_CHUNK == 0:
@@ -54,7 +53,7 @@ def get_protein_gene_map(mapfn, proteins, decoy):
 def store_proteins_descriptions(pgdb, fastafn, tsvfn, mapfn, header, decoy):
     if not fastafn:
         proteins = {}
-        for psm in tsvreader.generate_tsv_lines_multifile(tsvfn, header):
+        for psm in tsvreader.generate_tsv_psms(tsvfn, header):
             proteins.update({x: 1 for x in
                              tsvreader.get_proteins_from_psm(psm)})
             proteins = [(protein,) for protein in proteins.keys()]
@@ -87,13 +86,13 @@ def get_decoy_mod_string(protein):
     for mod in mods:
         if mod in protein:
             if protein.endswith('_{}'.format(mod)):
-                return '_{}'.format(mod) 
+                return '_{}'.format(mod)
             elif protein.endswith('{}'.format(mod)):
-                return mod 
+                return mod
             elif protein.startswith('{}_'.format(mod)):
-                return '{}_'.format(mod) 
+                return '{}_'.format(mod)
             elif protein.startswith('{}'.format(mod)):
-                return mod 
+                return mod
 
 
 def store_psm_protein_relations(fn, header, pgdb):
@@ -105,7 +104,7 @@ def store_psm_protein_relations(fn, header, pgdb):
     allpsms = OrderedDict()
     last_id, psmids_to_store = None, set()
     store_soon = False
-    for psm in tsvreader.generate_tsv_lines_multifile(fn, header):
+    for psm in tsvreader.generate_tsv_psms(fn, header):
         psm_id, prots = tsvreader.get_pepproteins(psm)
         try:
             allpsms[psm_id].extend(prots)
