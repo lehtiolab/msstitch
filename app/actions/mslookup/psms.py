@@ -56,7 +56,7 @@ def store_proteins_descriptions(pgdb, fastafn, tsvfn, mapfn, header, decoy):
         for psm in tsvreader.generate_tsv_psms(tsvfn, header):
             proteins.update({x: 1 for x in
                              tsvreader.get_proteins_from_psm(psm)})
-            proteins = [(protein,) for protein in proteins.keys()]
+        proteins = [(protein,) for protein in proteins.keys()]
         pgdb.store_proteins(proteins)
     else:
         proteins, sequences, evidences = fastareader.get_proteins_for_db(
