@@ -23,12 +23,16 @@ class BaseTest(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self.workdir)
 
-    def run_command(self, options=[]):
+    def get_std_options(self):
         cmd = ['python3', '{0}'.format(self.executable), self.command,
                '-d', self.workdir, '-i']
         if type(self.infile) != list:
             self.infile = [self.infile]
         cmd.extend(self.infile)
+        return cmd
+
+    def run_command(self, options=[]):
+        cmd = self.get_std_options()
         cmd.extend(options)
         try:
             subprocess.check_output(cmd)
@@ -62,6 +66,13 @@ class BaseTest(unittest.TestCase):
     def get_tsvheader(self, fn):
         with open(fn) as fp:
             return next(fp).strip('\n').split('\t')
+
+    def tsv_generator(self, fn):
+        header = self.get_tsvheader(fn)
+        tsv = self.get_all_lines(fn)
+        for line in tsv:
+            yield {field: val for field, val in
+                   zip(header, line.strip('\n').split('\t'))}
 
     def get_all_lines(self, fn):
         with open(fn) as fp:
@@ -227,3 +238,20 @@ class MSLookupTest(BaseTest):
         if self.base_db_fn is not None:
             options.extend(['--dbfile', self.resultfn])
         super().run_command(options)
+
+
+class PepProtableTest(BaseTest):
+    def isoquant_check(self, isotable, acc_field):
+        isoquant = {}
+        accession = self.get_tsvheader(isotable)[0]
+        for line in self.tsv_generator(isotable):
+            acc = line.pop(accession)
+            isoquant[acc] = line
+        for line in self.tsv_generator(self.resultfn):
+            [self.assertEqual(isoquant[line[acc_field]][ch], line[ch])
+             for ch in isoquant[line[acc_field]]]
+
+
+class PeptableTest(PepProtableTest):
+    executable = 'peptable.py'
+    infilename = 'peptable.txt'
