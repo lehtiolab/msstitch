@@ -93,26 +93,42 @@ def get_protein_data(peptide, pdata, headerfields):
 def get_proteins(peptide, pdata, headerfields):
     seq = peptide[peptabledata.HEADER_PEPTIDE]
     outdict = {}
-    outdict = {peptabledata.HEADER_PROTEINS:
-               ';'.join([str(x[0]) for x in pdata[seq]['proteins']])}
+    try:
+        proteins = ';'.join([x[0] for x in pdata[seq]['proteins']])
+    except TypeError:
+        pass
+    else:
+        outdict = {peptabledata.HEADER_PROTEINS: proteins}
     for pool, psms in pdata[seq]['psms'].items():
-        pool_values = [psms]
-        outdict.update({headerfields['proteindata'][peptabledata.HEADER_NO_PSM][pool]: psms})
+        outdict.update(
+            {headerfields['proteindata'][peptabledata.HEADER_NO_PSM][pool]:
+             psms})
     return outdict
 
 
 def get_cov_descriptions(peptide, pdata, report):
+    def format_val(value, valtype):
+        formatter = {int: lambda x: str(x),
+                     float: lambda x: str(float(x)),
+                     str: lambda x: x,
+                     }
+        return formatter[valtype](value)
+
     seq = peptide[peptabledata.HEADER_PEPTIDE]
-    for idx, key in zip([1, 2, 3, 4, 5], 
-                        [peptabledata.HEADER_DESCRIPTIONS,
-                         peptabledata.HEADER_COVERAGES,
+    for idx, key, keytype in zip([1, 2, 3, 4, 5],
+                        [peptabledata.HEADER_COVERAGES,
+                         peptabledata.HEADER_DESCRIPTIONS,
                          peptabledata.HEADER_GENES,
                          peptabledata.HEADER_ASSOCIATED,
-                         peptabledata.HEADER_NO_CONTENTPROTEINS]):
+                         peptabledata.HEADER_NO_CONTENTPROTEINS],
+                                 [float, str, str, str, int]):
+
         try:
-            report[key] = ';'.join([str(x[idx])
+            report[key] = ';'.join([format_val(x[idx], keytype)
                                     for x in pdata[seq]['proteins']])
-        except IndexError:
+        except (TypeError, IndexError):
+            #import sys; sys.stderr.write(str((idx, pdata[seq]['proteins'])))
+            # if None in the  list or index too high, skip, NA will be output
             pass
     return report
 
@@ -127,8 +143,9 @@ def add_record_to_peptidedata(peptidedata, p_acc, pool, psmdata, genecentric,
                               pgcontentmap=None):
     seq, psm_id = psmdata[2], psmdata[3]
     if genecentric:
+        gene = p_acc
         desc, assoc_id = psmdata[4], psmdata[5]
-        cov, gene, pgcontent = None, None, None
+        cov, pgcontent = None, None
     else:
         desc, cov = psmdata[4], psmdata[5]
         gene, assoc_id = psmdata[6], psmdata[7]
@@ -143,7 +160,7 @@ def add_record_to_peptidedata(peptidedata, p_acc, pool, psmdata, genecentric,
                                 'proteins': set()}
         peptidedata[seq]['psms'][pool].add(psm_id)
     if not genecentric:
-        protein = (p_acc, desc, cov, gene, assoc_id, len(pgcontent))
+        protein = (p_acc, cov, desc, gene, assoc_id, len(pgcontent))
     else:
-        protein = (p_acc, desc, cov, gene, assoc_id)
+        protein = (None, cov, desc, gene, assoc_id)
     peptidedata[seq]['proteins'].add(protein)
