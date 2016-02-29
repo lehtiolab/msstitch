@@ -4,8 +4,8 @@ from app.drivers.base import BaseDriver
 
 class PepProttableDriver(BaseDriver):
     """Base class for prottable.py"""
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(self):
+        super().__init__()
         self.oldheader = False
         self.probability = False
         self.poolnames = False

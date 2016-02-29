@@ -2,6 +2,7 @@ from app.drivers.prottable.base import PepProttableDriver
 from app.actions.headers import peptable as head
 from app.readers import tsv as tsvreader
 import app.actions.peptable.model_qvals as prep
+from app.drivers.options import peptable_options
 
 
 class ModelQValuesDriver(PepProttableDriver):
@@ -13,17 +14,22 @@ class ModelQValuesDriver(PepProttableDriver):
     """
     outsuffix = '_qmodel.txt'
     command = 'modelqvals'
+    commandhelp = ('Recalculate peptide q-values by creating a linear model'
+                   'of them against a score (partial least squares '
+                   'regression).')
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.scorecol = kwargs.get('scorecolpattern')
-        self.qvalcol = kwargs.get('qcolpattern')
+    def set_options(self):
+        super().set_options()
+        self.options.update(self.define_options(['scorecolpattern',
+                                                 'fdrcolpattern'],
+                                                peptable_options))
+        self.options['--fdrcolpattern'].update({'required': True})
 
     def initialize_input(self):
         self.oldheader = tsvreader.get_tsv_header(self.fn)
-        self.scorecol = tsvreader.get_cols_in_file(self.scorecol,
+        self.scorecol = tsvreader.get_cols_in_file(self.scorecolpattern,
                                                    self.oldheader, True)
-        self.qvalcol = tsvreader.get_cols_in_file(self.qvalcol,
+        self.qvalcol = tsvreader.get_cols_in_file(self.fdrcolpattern,
                                                   self.oldheader, True)
 
     def create_header(self):

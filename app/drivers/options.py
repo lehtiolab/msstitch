@@ -81,9 +81,7 @@ shared_options = {
                         'clarg': '--isobquantcolpattern', 'type': str,
                         'default': None, 'required': False,
                         'help': 'Unique text pattern to identify '
-                        'isobaric quant column in input table.'},
-    # FIXME quantcolpattern is required for "addisoquant" in prottable,
-    # but not for mslookup or peptable-psm2pep
+                        'isobaric quant columns in input table.'},
     'precursorquantcolpattern': {'driverattr': 'precursorquantcolpattern',
                                  'type': str, 'required': False,
                                  'dest': 'precursorquantcolpattern',
@@ -91,7 +89,7 @@ shared_options = {
                                  'default': None,
                                  'help': 'Unique text pattern to identify '
                                  'precursor quant column in input table.'},
-    'quantacccolpattern': {'driverattr': 'quantcolpattern',
+    'quantacccolpattern': {'driverattr': 'quantacccolpattern',
                            'clarg': '--qaccpattern', 'type': str,
                            'help': 'Unique text pattern to identify '
                            'accession column in table containing quant info.'},
@@ -107,7 +105,7 @@ shared_options = {
                       'clarg': '--fdrcolpattern', 'type': str,
                       'required': False, 'default': None,
                       'help': 'Unique text pattern to identify '
-                      'protein FDR column in protein table.'},
+                      'FDR column in input table.'},
 }
 
 mslookup_options = {
@@ -231,7 +229,7 @@ pepprottable_options = {
     # a mock infile to make sure we don't show or need an infile, e.g. in
     # case of building something from lookup
     'mock_infn': {'driverattr': 'fn', 'clarg': '-i', 'required': False,
-                  'help': argparse.SUPPRESS},
+                  'help': argparse.SUPPRESS, 'type': 'file'},
     'fdr': {'driverattr': 'fdr', 'clarg': '--fdr', 'action': 'store_const',
             'default': False, 'const': True, 'required': False,
             'help': 'Output FDR data to table'},
@@ -294,4 +292,11 @@ peptable_options.update({
                    'containing PSM table spectrafiles (e.g. mzML) '
                    'if you want to track PSMs when creating peptide '
                    'tables', 'required': False},
+    'genecentric': {'driverattr': 'genecentric', 'dest': 'genecentric',
+                    'clarg': '--genecentric', 'action': 'store_const',
+                    'const': True, 'default': False, 'required': False,
+                    'help': 'Do not include protein group '
+                    'data in output, but use gene names instead. '
+                    'These need to have been stored when '
+                    'creating a PSM lookup.'},
 })

@@ -72,11 +72,11 @@ Creates and modifies peptide tables
 Example: create a peptide table by filtering best peptides from PSM table and removing isobaric quant data.
 Retains MS1 quant data by taking the highest MS1 quant for a given peptide sequence.
 
-`python3 peptable.py -c psm2pep -i psmtable.txt --spectracol 2 --scorecolpattern svm --ms1quantcolpattern area --isobquantcolpattern tmt10plex`
+`python3 peptable.py psm2pep -i psmtable.txt --spectracol 2 --scorecolpattern svm --ms1quantcolpattern area --isobquantcolpattern tmt10plex`
 
 Example: Create column in peptide table with linear modeled q-values
 
-`python3 peptable.py -c modelqvals -i peptides.txt --qcolpattern "^q-value" --scorecolpattern svm`
+`python3 peptable.py modelqvals -i peptides.txt --qcolpattern "^q-value" --scorecolpattern svm`
 
 <a name="prottable"></a>
 ### prottable

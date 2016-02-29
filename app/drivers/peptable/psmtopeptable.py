@@ -2,6 +2,7 @@ from app.drivers.prottable.base import PepProttableDriver
 from app.actions.headers import peptable as head
 from app.readers import tsv as tsvreader
 import app.actions.peptable.psmtopeptable as prep
+from app.drivers.options import peptable_options
 
 
 class MzidTSVPeptableDriver(PepProttableDriver):
@@ -11,19 +12,27 @@ class MzidTSVPeptableDriver(PepProttableDriver):
     """
     outsuffix = '_peptable.tsv'
     command = 'psm2pep'
+    commandhelp = ('Create peptide table from PSM TSV input, uses best '
+                   'scoring PSM for each peptide and strips PSM '
+                   'isobaric quant information. Retains MS1 quant info if '
+                   'specified, by taking the highest precursor quant value '
+                   'for a peptide.')
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.fncol = kwargs.get('speccol', False)
-        self.scorecol = kwargs.get('scorecolpattern')
-        self.quantcolpattern = kwargs.get('quantcolpattern', None)
-        self.precursorquantcolpattern = kwargs.get('precursorquantcolpattern',
-                                                   None)
+    def set_options(self):
+        super().set_options()
+        self.options.update(self.define_options(['spectracol',
+                                                 'scorecolpattern',
+                                                 'quantcolpattern',
+                                                 'precursorquantcolpattern'],
+                                                peptable_options))
+        self.options['--isobquantcolpattern']['help'] += (
+            'Isobaric quantification values will be removed from the table '
+            'since they represent PSMs')
 
     def initialize_input(self):
         self.oldheader = tsvreader.get_tsv_header(self.fn)
-        self.get_column_header_for_number(['fncol'])
-        self.scorecol = tsvreader.get_cols_in_file(self.scorecol,
+        self.get_column_header_for_number(['spectracol'])
+        self.scorecol = tsvreader.get_cols_in_file(self.scorecolpattern,
                                                    self.oldheader, True)
         self.precurquantcol = prep.get_quantcols(self.precursorquantcolpattern,
                                                  self.oldheader, 'precur')
@@ -36,4 +45,5 @@ class MzidTSVPeptableDriver(PepProttableDriver):
     def set_feature_generator(self):
         self.features = prep.generate_peptides(self.fn, self.oldheader,
                                                self.scorecol,
-                                               self.precurquantcol, self.fncol)
+                                               self.precurquantcol,
+                                               self.spectracol)
