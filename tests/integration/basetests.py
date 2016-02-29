@@ -91,6 +91,11 @@ class BaseTest(unittest.TestCase):
     def copy_db_to_workdir(self, dbfn):
         shutil.copy(os.path.join(self.fixdir, dbfn), self.resultfn)
 
+    def get_float_or_na(self, value):
+        try:
+            return float(value)
+        except ValueError:
+            return value
 
 class BaseTestPycolator(BaseTest):
     executable = 'pycolator.py'

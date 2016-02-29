@@ -406,10 +406,7 @@ class TestProtPepTableLookup(basetests.MSLookupTest):
                     self.check_float(key, exp, res[i])
 
     def check_float(self, key, exp, result):
-        try:
-            expected = float(exp[key])
-        except ValueError:
-            expected = exp[key]
+        expected = self.get_float_or_na(exp[key])
         self.assertEqual(result, expected)
 
     def check_isobaric(self, sql):
