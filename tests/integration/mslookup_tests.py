@@ -465,7 +465,7 @@ class TestPeptidetableLookup(TestProtPepTableLookup):
 
 class TestProteintableLookup(TestProtPepTableLookup):
     command = 'proteins'
-    infilename = 'prottable.txt'
+    infilename = 'full_prottable.txt'
     base_db_fn = 'mzidtsv_db.sqlite'
 
     def test_proteincentric(self):
