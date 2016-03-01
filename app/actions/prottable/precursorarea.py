@@ -15,25 +15,25 @@ def generate_top_psms(psms, protcol):
         precursor_amount = float(precursor_amount)
         psm_seq = psm[mzidtsvdata.HEADER_PEPTIDE]
         try:
-            min_precursor_amount = min(top_ms1_psms[protacc])
+            peptide_area = top_ms1_psms[protacc][psm_seq]
         except KeyError:
-            top_ms1_psms[protacc] = {-1: None, -2: None,
-                                     precursor_amount: psm_seq}
-            continue
+            try:
+                top_ms1_psms[protacc][psm_seq] = precursor_amount
+            except KeyError:
+                top_ms1_psms[protacc] = {psm_seq: precursor_amount}
         else:
-            if precursor_amount > min_precursor_amount:
-                top_ms1_psms[protacc][precursor_amount] = psm_seq
-                top_ms1_psms[protacc].pop(min_precursor_amount)
+            if precursor_amount > peptide_area:
+                top_ms1_psms[protacc][psm_seq] = precursor_amount
     return top_ms1_psms
 
 
 def calculate_protein_precursor_quant(top_ms1_psms, prot_acc):
     try:
-        amounts = top_ms1_psms[prot_acc]
+        amounts = top_ms1_psms[prot_acc].values()
     except KeyError:
         return 'NA'
     else:
-        amounts = [x for x in amounts if x > 0]
+        amounts = sorted([x for x in amounts if x > 0], reverse=True)[:3]
         return sum(amounts) / len(amounts)
 
 
