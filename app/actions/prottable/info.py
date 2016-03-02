@@ -1,33 +1,6 @@
 from app.dataformats import prottable as prottabledata
-from app.actions.mergetable import create_featuredata_map
-
-
-def add_record_to_proteindata(proteindata, p_acc, pool, psmdata, genecentric,
-                              pgcontentmap=None):
-    """Fill function for create_featuredata_map"""
-    seq, psm_id = psmdata[2], psmdata[3]
-    if genecentric:
-        desc, assoc_id = psmdata[4], psmdata[5]
-        cov, gene, pgcontent = None, None, None
-    else:
-        desc, cov = psmdata[4], psmdata[5]
-        gene, assoc_id = psmdata[6], psmdata[7]
-        pgcontent = pgcontentmap[p_acc]
-    try:
-        proteindata[p_acc]['pools'][pool]['psms'].add(psm_id)
-    except KeyError:
-        emptyinfo = {'psms': set(), 'peptides': set(), 'unipeps': 0}
-        try:
-            proteindata[p_acc]['pools'][pool] = emptyinfo
-        except KeyError:
-            proteindata[p_acc] = {'pools': {pool: emptyinfo},
-                                  'desc': desc, 'cov': cov, 
-                                  'proteins': pgcontent,
-                                  'gene': set(), 'aid': set()}
-    proteindata[p_acc]['pools'][pool]['psms'].add(psm_id)
-    proteindata[p_acc]['pools'][pool]['peptides'].add(seq)
-    proteindata[p_acc]['gene'].add(gene)
-    proteindata[p_acc]['aid'].add(assoc_id)
+from app.actions.proteindata import (add_record_to_proteindata,
+                                     create_featuredata_map)
 
 
 def count_peps_psms(proteindata, p_acc, pool):

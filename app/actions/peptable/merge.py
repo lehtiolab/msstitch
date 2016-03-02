@@ -1,7 +1,7 @@
 from app.dataformats import peptable as peptabledata
 from app.actions.mergetable import (simple_val_fetch, fill_mergefeature,
                                     parse_NA)
-from app.actions.mergetable import create_featuredata_map
+from app.actions.proteindata import create_featuredata_map
 
 
 def build_peptidetable(pqdb, header, headerfields, isobaric=False,

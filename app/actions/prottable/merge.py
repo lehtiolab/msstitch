@@ -1,7 +1,8 @@
 from app.dataformats import prottable as prottabledata
 from app.actions.prottable import info as pinfo
 from app.actions.mergetable import (simple_val_fetch, fill_mergefeature,
-                                    parse_NA, create_featuredata_map)
+                                    parse_NA)
+from app.actions.proteindata import create_featuredata_map
 
 
 def build_proteintable(pqdb, header, headerfields, isobaric=False,
