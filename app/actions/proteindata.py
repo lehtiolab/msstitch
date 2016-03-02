@@ -88,5 +88,4 @@ def get_unique_peptides(pgdb, proteindata):
     for pool, peptides in seq_protein_map.items():
         for proteins in peptides.values():
             if len(proteins) == 1:
-                proteindata[
-                    next(iter(proteins))]['pools'][pool]['unipeps'] += 1
+                proteindata[proteins.pop()]['pools'][pool]['unipeps'] += 1
