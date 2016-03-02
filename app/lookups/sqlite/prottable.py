@@ -22,17 +22,11 @@ class ProtTableDB(ProtPepTable):
                             'protein_probability', 'protein_fdr',
                             'protein_pep'])
 
-    def get_all_proteins_psms_for_unipeps(self, genecentric):
-        # FIXME isnt genecentric ready to removed since the DB interface
-        # also changes with genecentric/not gene centric?
+    def get_all_proteins_psms_for_unipeps(self):
         fields = ['p.protein_acc', 'sets.set_name',
                   'pep.sequence']
-        if genecentric:
-            firstjoin = ('protein_psm', 'pp', 'protein_acc')
-            firsttable = 'proteins'
-        else:
-            firstjoin = ('psm_protein_groups', 'ppg', 'master_id')
-            firsttable = 'protein_group_master'
+        firstjoin = ('psm_protein_groups', 'ppg', 'master_id')
+        firsttable = 'protein_group_master'
         return self.get_proteins_psms(firsttable, fields, firstjoin)
 
     def get_isoquant_amountpsms_channels(self):
@@ -70,18 +64,11 @@ class GeneTableDB(ProtPepTable):
                             'gene_probability', 'gene_fdr',
                             'gene_pep'])
 
-    def get_all_proteins_psms_for_unipeps(self, genecentric):
-        # FIXME isnt genecentric ready to removed since the DB interface
-        # also changes with genecentric/not gene centric?
-        # I mean: gene table of which the first table is protein_group_master?
+    def get_all_proteins_psms_for_unipeps(self):
         fields = ['p.gene_acc', 'sets.set_name',
                   'pep.sequence']
-        if genecentric:
-            firstjoin = ('protein_psm', 'pp', 'protein_acc')
-            firsttable = 'genes'
-        else:
-            firstjoin = ('psm_protein_groups', 'ppg', 'master_id')
-            firsttable = 'protein_group_master'
+        firstjoin = ('protein_psm', 'pp', 'protein_acc')
+        firsttable = 'genes'
         return self.get_proteins_psms(firsttable, fields, firstjoin)
 
     def get_proteins_psms_for_map(self):
@@ -130,10 +117,7 @@ class GeneTableAssocIDsDB(GeneTableDB):
                             'assoc_probability', 'assoc_fdr',
                             'assoc_pep'])
 
-    def get_all_proteins_psms_for_unipeps(self, genecentric):
-        # FIXME isnt genecentric ready to removed since the DB interface
-        # also changes with genecentric/not gene centric?
-        # this is a test function and it is not used at all.
+    def get_all_proteins_psms_for_unipeps(self):
         fields = ['p.assoc_id', 'sets.set_name',
                   'pep.sequence']
         firstjoin = ('protein_psm', 'pp', 'protein_acc')
