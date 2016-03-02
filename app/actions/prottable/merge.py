@@ -1,11 +1,11 @@
 from app.dataformats import prottable as prottabledata
 from app.actions.prottable import info as pinfo
-from app.actions.mergetable import (simple_val_fetch, fill_mergefeature,
-                                    parse_NA)
+from app.actions.mergetable import simple_val_fetch, fill_mergefeature
+
 from app.actions.proteindata import create_featuredata_map
 
 
-def build_proteintable(pqdb, header, headerfields, isobaric=False,
+def build_proteintable(pqdb, headerfields, isobaric=False,
                        precursor=False, probability=False, fdr=False,
                        pep=False, genecentric=False):
     """Fetches proteins and quants from joined lookup table, loops through
@@ -40,13 +40,13 @@ def build_proteintable(pqdb, header, headerfields, isobaric=False,
         p_acc = protein[sqlfieldmap['p_acc']]
         if p_acc != outprotein[prottabledata.HEADER_PROTEIN]:
             if outprotein != check_prot:
-                yield parse_NA(outprotein, header)
+                yield outprotein
             outprotein = {prottabledata.HEADER_PROTEIN: p_acc}
             check_prot = {k: v for k, v in outprotein.items()}
         fill_mergefeature(outprotein, iso_fun, ms1_fun, prob_fun, fdr_fun,
                           pep_fun, pdata_fun, protein, sqlfieldmap,
                           headerfields, pdmap)
-    yield parse_NA(outprotein, header)
+    yield outprotein
 
 
 def get_protein_data_genecentric(outprotein, proteindata_map, headerfields):

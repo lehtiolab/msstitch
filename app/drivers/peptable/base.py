@@ -1,4 +1,5 @@
 from app.drivers.pepprottable import PepProttableDriver
+from app.writers import prottable as writers
 from app.actions.headers import peptable as head
 from app.readers import tsv as reader
 
@@ -29,3 +30,7 @@ class PeptableMergeDriver(PeptableDriver):
             if inflag:
                 self.headertypes.append(htype)
         self.poolnames = [x[0] for x in self.lookup.get_all_poolnames()]
+
+    def write(self):
+        outfn = self.create_outfilepath(self.fn, self.outsuffix)
+        writers.write_prottable_with_na(self.header, self.features, outfn)

@@ -16,12 +16,3 @@ def fill_mergefeature(outfeature, iso_fun, ms1_fun, prob_fun, fdr_fun, pep_fun,
     if outfeature == check_feat:
         return
     outfeature.update(pdata_fun(outfeature, featuredata_map, headerfields))
-
-
-def parse_NA(feature, header):
-    for field in header:
-        try:
-            feature[field] = str(feature[field])
-        except KeyError:
-            feature[field] = 'NA'
-    return feature

@@ -33,7 +33,6 @@ class BuildPeptideTableDriver(PeptableMergeDriver):
     def set_feature_generator(self):
         """Generates proteins with quant from the lookup table"""
         self.features = preparation.build_peptidetable(self.lookup,
-                                                       self.header,
                                                        self.headerfields,
                                                        self.isobaric,
                                                        self.precursor,

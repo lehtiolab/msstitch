@@ -1,10 +1,10 @@
 from app.dataformats import peptable as peptabledata
-from app.actions.mergetable import (simple_val_fetch, fill_mergefeature,
-                                    parse_NA)
+from app.actions.mergetable import simple_val_fetch, fill_mergefeature
+
 from app.actions.proteindata import create_featuredata_map
 
 
-def build_peptidetable(pqdb, header, headerfields, isobaric=False,
+def build_peptidetable(pqdb, headerfields, isobaric=False,
                        precursor=False, fdr=False, pep=False,
                        genecentric=False):
     """Fetches peptides and quants from joined lookup table, loops through
@@ -35,13 +35,13 @@ def build_peptidetable(pqdb, header, headerfields, isobaric=False,
         p_seq = peptide[sqlfieldmap['p_acc']]
         if p_seq != outpeptide[peptabledata.HEADER_PEPTIDE]:
             if outpeptide != check_pep:
-                yield parse_NA(outpeptide, header)
+                yield outpeptide
             outpeptide = {peptabledata.HEADER_PEPTIDE: p_seq}
             check_pep = {k: v for k, v in outpeptide.items()}
         fill_mergefeature(outpeptide, iso_fun, ms1_fun, empty_return, fdr_fun,
                           pep_fun, pdata_fun, peptide, sqlfieldmap,
                           headerfields, peptidedatamap)
-    yield parse_NA(outpeptide, header)
+    yield outpeptide
 
 
 def get_isobaric_quant(peptide, sqlmap, headerfields):

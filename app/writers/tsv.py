@@ -17,3 +17,12 @@ def write_tsv_line_from_list(linelist, outfp):
     line = '\t'.join(linelist)
     outfp.write(line)
     outfp.write('\n')
+
+
+def parse_NA(feature, header):
+    for field in header:
+        try:
+            feature[field] = str(feature[field])
+        except KeyError:
+            feature[field] = 'NA'
+    return feature

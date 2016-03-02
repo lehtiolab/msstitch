@@ -29,7 +29,6 @@ class BuildProteinTableDriver(ProttableMergeDriver):
     def set_feature_generator(self):
         """Generates proteins with quant from the lookup table"""
         self.features = preparation.build_proteintable(self.lookup,
-                                                       self.header,  # FIXME?
                                                        self.headerfields,
                                                        self.isobaricquant,
                                                        self.precursorquant,
