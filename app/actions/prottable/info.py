@@ -22,12 +22,10 @@ def add_protein_data(proteins, pgdb, headerfields, genecentric=False,
                                          pool_to_output=pool_to_output,
                                          get_uniques=True)
     dataget_fun = {True: get_protein_data_genecentric,
-                   False: get_protein_data_pgrouped}[genecentric]
+                   False: get_protein_data_pgrouped}[genecentric is not False]
     for protein in proteins:
         outprotein = {k: v for k, v in protein.items()}
         protein_acc = protein[prottabledata.HEADER_PROTEIN]
-        if not protein_acc in proteindata:
-            continue
         outprotein.update(dataget_fun(proteindata, protein_acc, headerfields))
         outprotein = {k: str(v) for k, v in outprotein.items()}
         yield outprotein
