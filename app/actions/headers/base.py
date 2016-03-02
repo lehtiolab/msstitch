@@ -30,13 +30,16 @@ def generate_general_header(headerfields, fieldtypes, firstfield,
     return header
 
 
-def generate_headerfields(headertypes, allfield_defs):
+def generate_headerfields(headertypes, allfield_defs, poolnames, db=False):
     """Returns a headerfields object (dict) which contains information on
     fields of the header, including optional pool names"""
     hfields = {}
     for fieldtype in headertypes:
         hfields[fieldtype] = OrderedDict()
-        hfield_definitions = allfield_defs[fieldtype]
+        if fieldtype == 'isoquant':
+            hfield_definitions = allfield_defs[fieldtype](db, poolnames)
+        else:
+            hfield_definitions = allfield_defs[fieldtype](poolnames)
         for fieldname, poolnames in hfield_definitions.items():
             hfields[fieldtype][fieldname] = get_header_field(fieldname,
                                                              poolnames)

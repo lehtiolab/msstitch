@@ -52,13 +52,13 @@ def generate_header(headerfields, oldheader=False):
 
 def get_peptable_headerfields(headertypes, lookup=False, poolnames=False):
     """Called by driver to generate headerfields object"""
-    field_defs = {'isoquant': get_isoquant_fields(lookup, poolnames),
-                  'precursorquant': get_precursorquant_fields(poolnames),
-                  'peptidefdr': get_peptidefdr_fields(poolnames),
-                  'peptidepep': get_peptidepep_fields(poolnames),
-                  'proteindata': get_proteininfo_fields(poolnames),
+    field_defs = {'isoquant': get_isoquant_fields,
+                  'precursorquant': get_precursorquant_fields,
+                  'peptidefdr': get_peptidefdr_fields,
+                  'peptidepep': get_peptidepep_fields,
+                  'proteindata': get_proteininfo_fields,
                   }
-    return generate_headerfields(headertypes, field_defs)
+    return generate_headerfields(headertypes, field_defs, poolnames, lookup)
 
 
 def get_precursorquant_fields(poolnames=False):

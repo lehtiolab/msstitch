@@ -15,15 +15,15 @@ def generate_header(headerfields, oldheader=False):
 
 def get_prottable_headerfields(headertypes, lookup=False, poolnames=False):
     """Called by driver to generate headerfields object"""
-    field_defs = {'isoquant': get_isoquant_fields(lookup, poolnames),
-                  'precursorquant': get_precursorquant_fields(poolnames),
-                  'probability': get_probability_fields(poolnames),
-                  'proteindata': get_proteininfo_fields(poolnames),
-                  'proteinfdr': get_proteinfdr_fields(poolnames),
-                  'proteinpep': get_proteinpep_fields(poolnames),
-                  'bestpepscore': get_bestpeptide_fields(poolnames),
+    field_defs = {'isoquant': get_isoquant_fields,
+                  'precursorquant': get_precursorquant_fields,
+                  'probability': get_probability_fields,
+                  'proteindata': get_proteininfo_fields,
+                  'proteinfdr': get_proteinfdr_fields,
+                  'proteinpep': get_proteinpep_fields,
+                  'bestpepscore': get_bestpeptide_fields,
                   }
-    return generate_headerfields(headertypes, field_defs)
+    return generate_headerfields(headertypes, field_defs, poolnames, lookup)
 
 
 def get_precursorquant_fields(poolnames=False):
