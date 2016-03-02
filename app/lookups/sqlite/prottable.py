@@ -77,12 +77,9 @@ class GeneTableDB(ProtPepTable):
         not per gene, so there may be a lot of *plicates"""
         fields = ['p.gene_acc', 'sets.set_name',
                   'pep.sequence', 'psm.psm_id',
-                  'pd.description', 'aid.assoc_id']
+                  'pd.description']
         firstjoin = ('protein_psm', 'pp', 'protein_acc')
-        extrajoins = ('LEFT OUTER JOIN prot_desc AS pd USING(protein_acc) '
-                      'LEFT OUTER JOIN associated_ids AS aid '
-                      'USING(protein_acc)'
-                      )
+        extrajoins = 'LEFT OUTER JOIN prot_desc AS pd USING(protein_acc) '
         genetable = self.table_map[self.datatype]['feattable']
         return self.get_unique_gene_psms(genetable, fields, firstjoin, extrajoins)
 
@@ -130,11 +127,8 @@ class GeneTableAssocIDsDB(GeneTableDB):
         not per gene, so there may be a lot of *plicates"""
         fields = ['p.assoc_id', 'sets.set_name',
                   'pep.sequence', 'psm.psm_id',
-                  'pd.description', 'g.gene_acc']
+                  'pd.description']
         firstjoin = ('protein_psm', 'pp', 'protein_acc')
-        extrajoins = ('LEFT OUTER JOIN prot_desc AS pd USING(protein_acc) '
-                      'LEFT OUTER JOIN genes AS g '
-                      'USING(protein_acc)'
-                      )
+        extrajoins = 'LEFT OUTER JOIN prot_desc AS pd USING(protein_acc) '
         genetable = self.table_map[self.datatype]['feattable']
         return self.get_unique_gene_psms(genetable, fields, firstjoin, extrajoins)

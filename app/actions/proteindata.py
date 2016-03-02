@@ -3,8 +3,8 @@ def add_record_to_proteindata(proteindata, p_acc, pool, psmdata, genecentric,
     """Fill function for create_featuredata_map"""
     seq, psm_id = psmdata[2], psmdata[3]
     if genecentric:
-        desc, assoc_id = psmdata[4], psmdata[5]
-        cov, gene, pgcontent = None, None, None
+        desc = psmdata[4]
+        cov, assoc_id, gene, pgcontent = None, None, None, None
     else:
         desc, cov = psmdata[4], psmdata[5]
         gene, assoc_id = psmdata[6], psmdata[7]
