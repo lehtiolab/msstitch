@@ -46,7 +46,8 @@ def add_protein_data(proteins, pgdb, headerfields, genecentric=False,
     proteindata = create_featuredata_map(pgdb, genecentric=genecentric,
                                          fill_fun=add_record_to_proteindata,
                                          count_fun=count_peps_psms,
-                                         pool_to_output=pool_to_output)
+                                         pool_to_output=pool_to_output,
+                                         get_uniques=True)
     dataget_fun = {True: get_protein_data_genecentric,
                    False: get_protein_data_pgrouped}[genecentric]
     for protein in proteins:
