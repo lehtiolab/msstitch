@@ -367,9 +367,16 @@ class DatabaseConnection(object):
         cursor = self.get_cursor()
         for table in tables:
             columns = mslookup_tables[table]
-            cursor.execute('CREATE TABLE {0}({1})'.format(
-                table, ', '.join(columns)))
-        self.conn.commit()
+            try:
+                cursor.execute('CREATE TABLE {0}({1})'.format(
+                    table, ', '.join(columns)))
+            except sqlite3.OperationalError as error:
+                print(error)
+                print('Warning: Table {} already exists in database, will '
+                      'add to existing tables instead of creating '
+                      'new.'.format(table))
+            else:
+                self.conn.commit()
 
     def connect(self, fn):
         """SQLite connect method and enabling foreign keys"""
@@ -388,9 +395,14 @@ class DatabaseConnection(object):
     def index_column(self, index_name, table, column):
         """Called by interfaces to index specific column in table"""
         cursor = self.get_cursor()
-        cursor.execute(
-            'CREATE INDEX {0} on {1}({2})'.format(index_name, table, column))
-        self.conn.commit()
+        try:
+            cursor.execute(
+                'CREATE INDEX {0} on {1}({2})'.format(index_name, table, column))
+        except sqlite3.OperationalError as error:
+            print(error)
+            print('Skipping index creation and assuming it exists already')
+        else:
+            self.conn.commit()
 
     def get_inclause(self, inlist):
         """Returns SQL IN clauses"""
