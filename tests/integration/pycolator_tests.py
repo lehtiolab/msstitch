@@ -48,7 +48,7 @@ class TestReassign(BaseTestPycolator):
             self.assertEqual(oid, rid)
             self.assertEqual(osvm, rsvm)
             try:
-                mapvals = qvmap[osvm]
+                mapvals = qvmap[str(round(float(osvm), 5))]
             except KeyError:
                 mapvals = get_mapvals_interpolated(qvmap, osvm)
             self.assertEqual(rq, mapvals[1])

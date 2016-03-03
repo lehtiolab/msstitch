@@ -20,7 +20,8 @@ def parse_qvality_output(fn):
 
 def reassign_elements(elements, stats, ns):
     for el in elements:
-        score = float(el.xpath('xmlns:svm_score', namespaces=ns)[0].text)
+        score = round(float(el.xpath('xmlns:svm_score',
+                                     namespaces=ns)[0].text), 5)
         oldq = el.xpath('xmlns:q_value', namespaces=ns)[0]
         oldpep = el.xpath('xmlns:pep', namespaces=ns)[0]
         newq, newpep, warning = lookup_statistic(score, stats)
