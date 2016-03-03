@@ -66,13 +66,31 @@ def parse_fasta(fn):
 
 
 def get_record_type(record):
-    if record.id.split('|')[0] in ['sp', 'tr']:
+    dmod = get_decoy_mod_string(record.id)
+    test_name = record.id
+    if dmod is not None:
+        test_name = record.id.replace(dmod, '')
+    if test_name.split('|')[0] in ['sp', 'tr']:
         return 'swiss'
-    elif record.id[:4] == 'ENSP':
+    elif test_name[:3] == 'ENS':
         return 'ensembl'
     else:
         raise RuntimeError('Cannot detect type of FASTA file. '
                            'Should be Uniprot or ENSEMBL')
+
+
+def get_decoy_mod_string(protein):
+    mods = ['tryp_reverse', 'reverse', 'decoy', 'random', 'shuffle']
+    for mod in mods:
+        if mod in protein:
+            if protein.endswith('_{}'.format(mod)):
+                return '_{}'.format(mod) 
+            elif protein.endswith('{}'.format(mod)):
+                return mod 
+            elif protein.startswith('{}_'.format(mod)):
+                return '{}_'.format(mod) 
+            elif protein.startswith('{}'.format(mod)):
+                return mod 
 
 
 def get_gene(description, rectype):

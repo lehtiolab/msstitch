@@ -73,26 +73,12 @@ def store_proteins_descriptions(pgdb, fastafn, tsvfn, mapfn, header, decoy):
             pgdb.store_genes(genes)
     if mapfn:
         if decoy:
-            mod = get_decoy_mod_string(proteins[0][0])
+            mod = fastareader.get_decoy_mod_string(proteins[0][0])
             proteins = {x[0].replace(mod, ''): x[0] for x in proteins}
         else:
             proteins = {x[0]: 1 for x in proteins}
         gpmap = get_protein_gene_map(mapfn, proteins, decoy)
         pgdb.store_gene_and_associated_id(gpmap)
-
-
-def get_decoy_mod_string(protein):
-    mods = ['tryp_reverse', 'reverse', 'decoy', 'random', 'shuffle']
-    for mod in mods:
-        if mod in protein:
-            if protein.endswith('_{}'.format(mod)):
-                return '_{}'.format(mod)
-            elif protein.endswith('{}'.format(mod)):
-                return mod
-            elif protein.startswith('{}_'.format(mod)):
-                return '{}_'.format(mod)
-            elif protein.startswith('{}'.format(mod)):
-                return mod
 
 
 def store_psm_protein_relations(fn, header, pgdb):

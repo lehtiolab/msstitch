@@ -42,6 +42,14 @@ def get_protein_data_pgrouped(proteindata, p_acc, headerfields):
     return get_cov_protnumbers(proteindata, p_acc, report)
 
 
+def get_headerfieldtext(headerfields, hfieldtype, pool):
+    try:
+        text = headerfields['proteindata'][hfieldtype][pool]
+    except KeyError:
+        text = headerfields['proteindata'][hfieldtype][None]
+    return text
+
+
 def get_protein_data_base(proteindata, p_acc, headerfields):
     proteincount = 'na'
     outdict = {}
@@ -51,7 +59,7 @@ def get_protein_data_base(proteindata, p_acc, headerfields):
                ]
     for pool, pdata in proteindata[p_acc]['pools'].items():
         pool_values = [pdata['unipeps'], pdata['peptides'], pdata['psms']]
-        outdict.update({headerfields['proteindata'][hfield][pool]: val
+        outdict.update({get_headerfieldtext(headerfields, hfield, pool): val
                         for (hfield, val) in zip(hfields, pool_values)})
     outdict.update({prottabledata.HEADER_NO_PROTEIN: proteincount,
                     prottabledata.HEADER_DESCRIPTION: proteindata[p_acc]['desc']})

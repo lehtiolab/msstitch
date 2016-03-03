@@ -49,14 +49,23 @@ def get_mzid_peptidedata(peptide, xmlns):
     sequence = peptide.find('{}PeptideSequence'.format(xmlns)).text
     mods = {}
     for mod in peptide.findall('{}Modification'.format(xmlns)):
-        mods[int(mod.attrib['location'])] = mod.attrib['monoisotopicMassDelta']
+        modweight = round(float(mod.attrib['monoisotopicMassDelta']), 3)
+        if modweight > 0:
+            modweight = '+{}'.format(modweight)
+        else:
+            modweight = str(modweight)
+        location = int(mod.attrib['location'])
+        try:
+            mods[location] += modweight
+        except KeyError:
+            mods[location] = modweight
     outseq = []
     for pos, aa in enumerate(sequence):
         if pos in mods:
-            outseq.append('+{}'.format(round(float(mods[pos]), 3)))
+            outseq.append('{}'.format(mods[pos]))
         outseq.append(aa)
     if pos + 1 in mods:
-            outseq.append('+{}'.format(round(float(mods[pos + 1]), 3)))
+            outseq.append('{}'.format(mods[pos + 1]))
     return pep_id, ''.join(outseq)
 
 

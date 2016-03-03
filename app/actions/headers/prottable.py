@@ -3,6 +3,7 @@ from collections import OrderedDict
 from app.actions.headers.base import (generate_general_header,
                                       generate_headerfields)
 from app.dataformats import prottable as prottabledata
+from sqlite3 import OperationalError
 
 
 def generate_header(headerfields, oldheader=False):
@@ -71,7 +72,11 @@ def get_isoquant_fields(pqdb=False, poolnames=False):
     if pqdb is None:
         return {}
     quantheader = OrderedDict()
-    for chan_name, amnt_psms_name in pqdb.get_isoquant_amountpsms_channels():
+    try:
+        channels_psms = pqdb.get_isoquant_amountpsms_channels()
+    except OperationalError:
+        return {}
+    for chan_name, amnt_psms_name in channels_psms:
         quantheader[chan_name] = poolnames
         if amnt_psms_name:
             quantheader[amnt_psms_name] = poolnames
