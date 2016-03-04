@@ -251,7 +251,150 @@ class PepProtableTest(BaseTest):
             [self.assertEqual(isoquant[line[acc_field]][ch], line[ch])
              for ch in isoquant[line[acc_field]]]
 
+    def check_build_values(self, sql, fields, accession):
+        expected = {}
+        for rec in self.get_values_from_db(self.dbfile, sql):
+            # skip multiple entries of e.g protein group per peptide
+            # or gene per protein
+            try:
+                expected[rec[0]][rec[1]] = rec[2:]
+            except KeyError:
+                expected[rec[0]] = {rec[1]: rec[2:]}
+        for line in self.tsv_generator(self.resultfn):
+            acc = line[accession]
+            if acc not in expected:
+                continue
+            for setname, pepvals in expected[acc].items():
+                for val, field in zip(pepvals, fields):
+                    self.assertEqual(str(val),
+                                     line['{}_{}'.format(setname, field)])
+
+    def check_built_isobaric(self, sql, accession):
+        expected = {}
+        for rec in self.get_values_from_db(self.dbfile, sql):
+            try:
+                expected[rec[0]][rec[1]][rec[2]] = rec[3:]
+            except KeyError:
+                try:
+                    expected[rec[0]][rec[1]] = {rec[2]: rec[3:]}
+                except KeyError:
+                    expected[rec[0]] = {rec[1]: {rec[2]: rec[3:]}}
+        for line in self.tsv_generator(self.resultfn):
+            for setname, fields in expected[line[accession]].items():
+                for field in fields:
+                    setfield = '{}_{}'.format(setname, field)
+                    exp_val = fields[field]
+                self.assertEqual(line[setfield], str(exp_val[0]))
+                try:
+                    nr_psms = line['{} - # quanted PSMs'.format(setfield)]
+                except KeyError:
+                    pass
+                    # FIXME currently no # PSMs in peptide table isoquant!
+                else:
+                    self.assertEqual(nr_psms, str(exp_val[1]))
+
 
 class PeptableTest(PepProtableTest):
     executable = 'peptable.py'
-    infilename = 'peptable.txt'
+
+
+class ProttableTest(PepProtableTest):
+    executable = 'prottable.py'
+    infilename = 'prottable.txt'
+
+    def get_top_psms(self, fn, pepkey, valuekey, lowerbetter=False):
+        top_vals = {}
+        for psm in self.tsv_generator(fn):
+            prot = psm['Master protein(s)']
+            seq = psm[pepkey]
+            try:
+                value = float(psm[valuekey])
+            except ValueError:
+                continue
+            if prot in top_vals and seq in top_vals[prot]:
+                if lowerbetter and value > top_vals[prot][seq]:
+                    continue
+                elif not lowerbetter and value < top_vals[prot][seq]:
+                    continue
+            try:
+                top_vals[prot][seq] = value
+            except KeyError:
+                top_vals[prot] = {seq: value}
+        return top_vals
+
+    def check_protein_data(self, centrictype):
+        centric = {'proteincentric': 'pc', 'genecentric': 'gc',
+                   'assoccentric': 'ac'}[centrictype]
+        sql_map = {'pc': {'primary':
+                          ['pgm', 'protein_acc', 'protein_group_master'],
+                          'fields': ['g.gene_acc', 'aid.assoc_id',
+                                     'pc.coverage'],
+                          'joins':
+                          ['JOIN genes AS g USING(protein_acc) ',
+                           'JOIN associated_ids AS aid USING(protein_acc) ',
+                           'JOIN protein_coverage AS pc USING(protein_acc)',
+                           ]},
+                   'gc': {'primary': ['g', 'gene_acc', 'genes'],
+                          'fields': ['"NA"'] * 3,
+                          'joins':
+                          ['JOIN associated_ids USING(protein_acc) ',
+                           ]},
+                   'ac': {'primary': ['aid', 'assoc_id', 'associated_ids'],
+                          'fields': ['"NA"'] * 3,
+                          'joins':
+                          ['JOIN genes USING(protein_acc) ',
+                           ]},
+                   }[centric]
+
+        sql = ('SELECT {0}.{1}, {3}, {4}, pd.description, {5} '
+               'FROM {2} AS {0} '
+               '{6} '
+               'JOIN prot_desc AS pd USING(protein_acc)')
+        sql_adds = sql_map['primary'] + sql_map['fields']
+        sql_adds.append(' '.join(sql_map['joins']))
+        sql = sql.format(*sql_adds)
+        psm_sql_map = {'pc': ('pgm', 'protein_acc', 'protein_group_master'),
+                       'gc': ('g', 'gene_acc', 'genes'),
+                       'ac': ('aid', 'assoc_id', 'associated_ids')}[centric]
+        psm_sql = ('SELECT {0}.{1}, pp.psm_id, ps.sequence '
+                   'FROM {2} AS {0} '
+                   'JOIN protein_psm AS pp USING(protein_acc) '
+                   'JOIN psms USING(psm_id) '
+                   'JOIN peptide_sequences AS ps USING(pep_id) '
+                   )
+        psm_sql = psm_sql.format(*psm_sql_map)
+        expected = {rec[0]: rec[1:] for rec in
+                    self.get_values_from_db(self.dbfile, sql)}
+        for protein in self.tsv_generator(self.resultfn):
+            pacc = protein['Protein accession']
+            self.assertEqual(protein['Gene'], expected[pacc][0])
+            self.assertEqual(protein['Associated gene ID'], expected[pacc][1])
+            self.assertEqual(protein['Description'], expected[pacc][2])
+            self.assertEqual(protein['Coverage'], str(expected[pacc][3]))
+
+        expected, unipeps = {}, {}
+        for rec in self.get_values_from_db(self.dbfile, psm_sql):
+            pacc = rec[0]
+            try:
+                unipeps[rec[2]].add(pacc)
+            except KeyError:
+                unipeps[rec[2]] = set([pacc])
+            try:
+                expected[pacc]['psms'].add(rec[1])
+            except KeyError:
+                expected[pacc] = {'psms': set([rec[1]]), 'pep': set([rec[2]]),
+                                  'unipep': 0}
+            else:
+                expected[pacc]['pep'].add(rec[2])
+        for pep, prot in unipeps.items():
+            if len(prot) == 1:
+                expected[prot.pop()]['unipep'] += 1
+        for protein in self.tsv_generator(self.resultfn):
+            pacc = protein['Protein accession']
+            poolname = 'S1'
+            self.assertEqual(protein['{}_# Unique peptides'.format(poolname)],
+                             str(expected[pacc]['unipep']))
+            self.assertEqual(protein['{}_# Peptides'.format(poolname)],
+                             str(len(expected[pacc]['pep'])))
+            self.assertEqual(protein['{}_# PSMs'.format(poolname)],
+                             str(len(expected[pacc]['psms'])))

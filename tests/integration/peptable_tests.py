@@ -131,21 +131,8 @@ class TestBuild(basetests.PeptableTest):
                'JOIN peptide_fdr AS pf USING(pep_id) '
                'JOIN peptide_pep AS pp USING(pep_id) '
                )
-        expected, psm_id, pep = {}, None, None
-        for rec in self.get_values_from_db(self.dbfile, sql):
-            # skip multiple psms/protein groups, etc per peptide right now
-            try:
-                expected[rec[0]][rec[1]] = rec[2:]
-            except KeyError:
-                expected[rec[0]] = {rec[1]: rec[2:]}
-        for line in self.tsv_generator(self.resultfn):
-            pep = line['Peptide sequence']
-            for setname, pepvals in expected[pep].items():
-                for val, field in zip(pepvals,
-                                      ['MS1 area (highest of all PSMs)',
-                                       'q-value', 'PEP']):
-                    self.assertEqual(str(val),
-                                     line['{}_{}'.format(setname, field)])
+        self.check_build_values(sql, ['MS1 area (highest of all PSMs)',
+                                      'q-value', 'PEP'], 'Peptide sequence')
 
     def check_genes(self):
         # FIXME get a db WITHOUT protein groups for genecentric peptides
@@ -212,27 +199,13 @@ class TestBuild(basetests.PeptableTest):
 
     def check_isobaric(self):
         sql = ('SELECT ps.sequence, bs.set_name, ch.channel_name, '
-               'iq.quantvalue '
+               'iq.quantvalue, iq.amount_psms '
                'FROM peptide_sequences AS ps '
                'JOIN biosets AS bs '
                'JOIN peptide_iso_quanted AS iq USING(pep_id) '
                'JOIN pepquant_channels AS ch USING(channel_id) '
                )
-        expected = {}
-        for rec in self.get_values_from_db(self.dbfile, sql):
-            try:
-                expected[rec[0]][rec[1]][rec[2]] = rec[3]
-            except KeyError:
-                try:
-                    expected[rec[0]][rec[1]] = {rec[2]: rec[3]}
-                except KeyError:
-                    expected[rec[0]] = {rec[1]: {rec[2]: rec[3]}}
-        for line in self.tsv_generator(self.resultfn):
-            for setname, fields in expected[line['Peptide sequence']].items():
-                for field in fields:
-                    setfield = '{}_{}'.format(setname, field)
-                    exp_val = fields[field]
-                self.assertEqual(line[setfield], exp_val)
+        self.check_built_isobaric(sql, 'Peptide sequence')
 
     def test_proteincentric(self):
         options = ['--fdr', '--pep', '--isobaric', '--precursor',
