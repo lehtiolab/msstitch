@@ -1,25 +1,33 @@
 from app.readers import tsv as reader
 from app.actions.prottable import isoquant as preparation
 from app.drivers.prottable.base import ProttableAddData
+from app.drivers.options import prottable_options
 
 
 class AddIsobaricQuantDriver(ProttableAddData):
     outsuffix = '_isoq.txt'
-    command = 'addisoquant'
+    command = 'isoquant'
+    commandhelp = ('Add isobaric quantification data from another '
+                   'proteintable containing this.')
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.quantfile = kwargs.get('quantfile', False)
-        self.quantpattern = kwargs.get('isobquantcolpattern', False)
-        self.quantacccol = kwargs.get('quantacccolpattern', False)
+    def set_options(self):
+        super().set_options()
+        self.options.update(self.define_options(['quantfile',
+                                                 'quantacccolpattern',
+                                                 'quantcolpattern'],
+                                                prottable_options))
+
+    def parse_input(self, **kwargs):
+        super().parse_input(**kwargs)
         self.headertypes = ['isoquant']
 
     def initialize_input(self):
         super().initialize_input()
         quantheader = reader.get_tsv_header(self.quantfile)
-        self.quantfields = reader.get_cols_in_file(self.quantpattern, quantheader)
-        self.quantacc = reader.get_cols_in_file(self.quantacccol, quantheader,
-                                                single_col=True)
+        self.quantfields = reader.get_cols_in_file(self.quantcolpattern,
+                                                   quantheader)
+        self.quantacc = reader.get_cols_in_file(self.quantacccolpattern,
+                                                quantheader, single_col=True)
         self.quantproteins = reader.generate_tsv_proteins(self.quantfile,
                                                           quantheader)
 

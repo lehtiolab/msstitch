@@ -1,6 +1,7 @@
 from app.drivers.prottable.base import ProttableAddData
 from app.readers import tsv as tsvreader
 import app.actions.prottable.bestpeptide as prep
+from app.drivers.options import prottable_options
 
 
 class BestPeptidePerProtein(ProttableAddData):
@@ -9,23 +10,30 @@ class BestPeptidePerProtein(ProttableAddData):
     """
     outsuffix = '_bestpep.tsv'
     command = 'bestpeptide'
+    commandhelp = ('Given the protein table and corresponding peptide table '
+                   ', fetch the best scoring peptide for each protein '
+                   'and annotate that score in the protein table.')
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.peptable = kwargs.get('pepfile')
-        self.scorecol = kwargs.get('scorecolpattern')
-        self.minlogscore = kwargs.get('logscore', False)
+    def set_options(self):
+        super().set_options()
+        self.options.update(self.define_options(['pepfile', 'proteincol',
+                                                 'scorecolpattern',
+                                                 'minlogscore'],
+                                                prottable_options))
+
+    def parse_input(self, **kwargs):
+        super().parse_input(**kwargs)
         self.headertypes = ['bestpepscore']
 
     def initialize_input(self):
         super().initialize_input()
-        self.pepheader = tsvreader.get_tsv_header(self.peptable)
+        self.pepheader = tsvreader.get_tsv_header(self.pepfile)
         self.get_column_header_for_number(['proteincol'], self.pepheader)
-        self.scorecol = tsvreader.get_cols_in_file(self.scorecol,
+        self.scorecol = tsvreader.get_cols_in_file(self.scorecolpattern,
                                                    self.pepheader, True)
 
     def set_feature_generator(self):
-        self.features = prep.generate_proteins(self.peptable, self.in_proteins,
+        self.features = prep.generate_proteins(self.pepfile, self.in_proteins,
                                                self.pepheader, self.scorecol,
                                                self.minlogscore,
                                                protcol=self.proteincol)

@@ -84,9 +84,9 @@ Creates and modifies protein tables, also runs qvality on these for FDR calculat
 
 Example: Add best-scoring peptide to protein table (Q-score by Savitsky et al 2014)
 
-`python3 prottable.py -c bestpeptide -i proteins.txt --peptable peptides.txt --scorecolpattern svm --logscore`
+`python3 prottable.py bestpeptide -i proteins.txt --peptable peptides.txt --scorecolpattern svm --logscore`
 
 Example: Add FDR from qvality result to protein table using Q-scores as keys to look up
 corresponding q-values and PEPs
 
-`python3 prottable.py -c addfdr -i proteins.txt --qvality qvals.txt --scorecolpattern "^Q-score"`
+`python3 prottable.py addfdr -i proteins.txt --qvality qvals.txt --scorecolpattern "^Q-score"`

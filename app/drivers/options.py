@@ -242,12 +242,17 @@ pepprottable_options = {
     'scorecolpattern': {'driverattr': 'scorecolpattern', 'type': str,
                         'clarg': '--scorecolpattern', 'help': 'Regular '
                         'expression pattern to find column where score '
-                        'to filter on is written.'},
+                        'to use (e.g. percolator svm-score) is written.'},
 
 }
 
 
 prottable_options = {k: v for k, v in pepprottable_options.items()}
+prottable_options['proteincol'] = {k: v for k, v
+                                   in shared_options['proteincol'].items()}
+prottable_options['proteincol'].update(
+    {'default': False, 'help':
+     prottable_options['proteincol']['help'].format('Master protein')})
 prottable_options.update({
     'setname': {'driverattr': 'setname', 'clarg': '--setname', 'type': str,
                 'help': 'Name of biological set to use when adding protein '
@@ -267,16 +272,18 @@ prottable_options.update({
                     'be converted to -log10 values.'},
     'featuretype': {'driverattr': 'featuretype', 'dest': 'featuretype',
                     'help': 'Feature type to use for qvality. Can be one of '
-                    '[probability, svm, qvalue].', 'clarg': '--feattype',
-                    'type': 'pick', 'picks': ['probability', 'svm', 'qvalue']},
+                    '[qvalue, probability].', 'clarg': '--feattype',
+                    'type': 'pick', 'picks': ['qvalue', 'probability']},
     't_fasta': {'driverattr': 't_fasta', 'clarg': '--targetfasta',
                 'type': 'file', 'help': 'FASTA file with target proteins '
                 'to determine best scoring proteins of target/decoy pairs '
-                'for pickqvality.'},
+                'for pickqvality. In case using --picktype fasta',
+                'required': False},
     'd_fasta': {'driverattr': 'd_fasta', 'clarg': '--decoyfasta',
                 'type': 'file', 'help': 'FASTA file with decoy proteins '
                 'to determine best scoring proteins of target/decoy pairs '
-                'for pickqvality.'},
+                'for pickqvality. In case using --picktype fasta',
+                'required': False},
     'picktype': {'driverattr': 'picktype', 'clarg': '--picktype',
                  'type': 'pick', 'picks': ['fasta', 'result'],
                  'help': 'Feature type to use for qvality. Can be one of '

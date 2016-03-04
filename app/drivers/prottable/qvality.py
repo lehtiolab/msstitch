@@ -2,29 +2,37 @@ from app.drivers.pycolator.qvality import QvalityDriver
 from app.actions.prottable import qvality as preparation
 from app.actions.prottable import picktdprotein as pickprotein
 from app.readers import tsv
+from app.drivers.options import prottable_options
 
 
 class ProttableQvalityDriver(QvalityDriver):
     """Runs qvality on two TSV tables"""
     outsuffix = '_protqvality.txt'
     command = 'qvality'
+    commandhelp = ('Run qvality on protein (or tsv) tables '
+                   'containing target (-i) proteins and decoy (--decoy) '
+                   'proteins. Use with --feattype to use either protein '
+                   'error probability (Nesvizhskii 2003) or Q score from '
+                   'Savitski 2014 MCP.')
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        if self.featuretype not in ['probability', 'qvalue', 'svm']:
-            raise Exception('Featuretype (-f) should be (protein) probability '
-                            'or Q-score (qvalue)')
+    def set_options(self):
+        super().set_options()
+        options = self.define_options(['featuretype'], prottable_options)
+        self.options.update(options)
+
+    def parse_input(self, **kwargs):
+        super().parse_input(**kwargs)
         self.score_get_fun = preparation.prepare_qvality_input
 
     def prepare(self):
         """No percolator XML for protein tables"""
         self.targetheader = tsv.get_tsv_header(self.fn)
-        self.decoyheader = tsv.get_tsv_header(self.decoy)
+        self.decoyheader = tsv.get_tsv_header(self.decoyfn)
 
     def set_features(self):
         """Creates scorefiles for qvality's target and decoy distributions"""
         self.target = tsv.generate_tsv_proteins(self.fn, self.targetheader)
-        self.decoy = tsv.generate_tsv_proteins(self.decoy, self.decoyheader)
+        self.decoy = tsv.generate_tsv_proteins(self.decoyfn, self.decoyheader)
         super().set_features()
 
 
@@ -38,16 +46,32 @@ class PickedQvalityDriver(ProttableQvalityDriver):
     """
     outsuffix = '_pickedqvality.txt'
     command = 'pickqvality'
+    commandhelp = ('Run qvality on protein tables containing target (-i) '
+                   'proteins and decoy (--decoy) proteins. Targets and '
+                   'decoys will be filtered according to Savitski et al. '
+                   '2014 MCP, where the best scoring of a pair of '
+                   'target/decoy proteins is retained and the other '
+                   'protein discarded. Matching (reversed, tryptic reversed,'
+                   ' scrambled) target and decoy FASTA files are needed to '
+                   'determine the pairs, use --targetfasta, --decoyfasta. '
+                   'Specify gene type with --picktype to distinguish between '
+                   'creating target-decoy pairs from '
+                   'matched FASTA files or from the protein table input.')
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        if self.featuretype not in ['qvalue']:
-            raise Exception('Featuretype (-f) should be '
-                            'Q-score (qvalue).')
-        self.t_fasta = kwargs.get('targetfasta')
-        self.d_fasta = kwargs.get('decoyfasta')
-        self.picktype = kwargs.get('picktype')
+    def set_options(self):
+        super().set_options()
+        options = self.define_options(['t_fasta', 'd_fasta', 'picktype'],
+                                      prottable_options)
+        self.options.update(options)
+        tmp_options = {}
+        for clarg, option in self.options.items():
+            if option['driverattr'] != 'featuretype':
+                tmp_options.update({clarg: option})
+        self.options = tmp_options
 
+    def parse_input(self, **kwargs):
+        super().parse_input(**kwargs)
+        self.featuretype = 'qvalue'
 
     def set_features(self):
         """Using this to write picked score tables for qvality"""

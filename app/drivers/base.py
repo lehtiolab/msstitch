@@ -85,7 +85,7 @@ class BaseDriver(object):
             header = self.oldheader
         for col in column_var_names:
             value = getattr(self, col)
-            if value is None:
+            if not value or value is None:
                 continue
             setattr(self, col, header[int(value) - 1])
 

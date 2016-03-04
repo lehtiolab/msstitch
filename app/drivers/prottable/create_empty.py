@@ -1,14 +1,24 @@
 from app.actions.prottable import create_empty as preparation
 from app.readers import tsv as reader
 from app.drivers.prottable.base import ProttableDriver
+from app.drivers.options import prottable_options
 
 
 class CreateEmptyDriver(ProttableDriver):
     outsuffix = '.txt'
     command = 'emptytable'
+    commandhelp = ('Create protein table from PSM table containing no '
+                   'quant data, resulting in one column with (master) '
+                   'proteins only. Use --protcol if input PSMs '
+                   'are not of standard protein grouped variety.')
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+    def set_options(self):
+        super().set_options()
+        self.options.update(self.define_options(['proteincol'],
+                                                prottable_options))
+
+    def parse_input(self, **kwargs):
+        super().parse_input(**kwargs)
         self.headertypes = []
 
     def initialize_input(self):

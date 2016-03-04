@@ -18,9 +18,10 @@ class QvalityDriver(base.PycolatorDriver):
     def parse_input(self, **kwargs):
         super().parse_input(**kwargs)
         self.score_get_fun = preparation.prepare_qvality_input
-        self.targetfn = self.fn  # for clarity
+        self.target = self.fn  # for clarity
         if self.decoyfn is None:
             raise Exception('Not implemented single file qvality yet')
+        self.decoy = self.decoyfn
         self.qvalityoptions = []
         if self.qoptions is not None:
             for option in self.qoptions:
@@ -40,11 +41,11 @@ class QvalityDriver(base.PycolatorDriver):
     def set_features(self):
         """Creates scorefiles for qvality's target and decoy distributions"""
         self.scores = {}
-        for t_or_d, fn in zip(['target', 'decoy'], [self.targetfn,
-                                                    self.decoyfn]):
+        for t_or_d, feats in zip(['target', 'decoy'], [self.target,
+                                                       self.decoy]):
             self.scores[t_or_d] = {}
             self.scores[t_or_d]['scores'] = self.score_get_fun(
-                fn, self.featuretype, self.prepare_percolator_output)
+                feats, self.featuretype, self.prepare_percolator_output)
             self.scores[t_or_d]['fn'] = self.create_outfilepath(
                 t_or_d, self.outsuffix)
             writers.write_qvality_input(self.scores[t_or_d]['scores'],

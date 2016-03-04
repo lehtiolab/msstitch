@@ -6,7 +6,7 @@ def generate_master_proteins(psms, protcol):
     """Fed with a psms generator, this returns the master proteins present
     in the PSM table. PSMs with multiple master proteins are excluded."""
     master_proteins = {}
-    if protcol is None:
+    if not protcol:
         protcol = mzidtsvdata.HEADER_MASTER_PROT
     for psm in psms:
         protacc = psm[protcol]
