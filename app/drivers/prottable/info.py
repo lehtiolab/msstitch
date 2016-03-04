@@ -29,7 +29,8 @@ class AddProteinInfoDriver(ProttableAddData):
         self.features = preparation.add_protein_data(self.in_proteins,
                                                      self.lookup,
                                                      self.headerfields,
-                                                     self.genecentric
+                                                     self.genecentric,
+                                                     self.setname
                                                      )
 
     def write(self):

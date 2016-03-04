@@ -9,7 +9,11 @@ def assign_protein_fdr(qvalityfn, proteins, headerfields, scorefield):
     pepheader = headerfields['proteinpep'][prottabledata.HEADER_PEP][None]
     for protein in proteins:
         outprotein = {k: v for k, v in protein.items()}
-        score = round(float(outprotein[scorefield]), 5)
-        qval, pep, warning = pyreassign.lookup_statistic(score, qvalityout)
+        try:
+            score = round(float(outprotein[scorefield]), 5)
+        except ValueError:
+            qval, pep = 'NA', 'NA'
+        else:
+            qval, pep, warning = pyreassign.lookup_statistic(score, qvalityout)
         outprotein.update({fdrheader: qval, pepheader: pep})
         yield outprotein

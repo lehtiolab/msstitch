@@ -7,8 +7,8 @@ def write_mzid_tsv(header, psms, outfn):
 
 def write_multi_mzidtsv(header, oldheader, psms, setnames, base_outfile):
     outfile_handles = {}
-    for i, setname in enumerate(setnames):
-        outfile_handles[setname] = open(base_outfile.format(str(i)), 'w')
+    for setname in setnames:
+        outfile_handles[setname] = open(base_outfile.format(setname), 'w')
         tsv.write_tsv_line_from_list(header, outfile_handles[setname])
     for psm in psms:
         line = psm['psm']
