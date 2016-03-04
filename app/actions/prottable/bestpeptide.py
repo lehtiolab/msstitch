@@ -21,8 +21,16 @@ def generate_proteins(pepfn, proteins, pepheader, scorecol, minlog,
                                             higherbetter, scorecol,
                                             fncol=False)
     if minlog:
-        nextbestscore = min([pep['score'] for pep in protein_peptides.values()
-                             if pep['score'] > 0])
+        try:
+            nextbestscore = min([pep['score'] for pep in
+                                 protein_peptides.values()
+                                 if pep['score'] > 0])
+        except ValueError:
+            import sys
+            sys.stderr.write('Cannot find score of type {} which is above 0. '
+                             'Only scores above zero can have a -log value. '
+                             'Exiting.'.format(scorecol))
+            sys.exit(1)
         nextbestscore = -log(nextbestscore, 10)
     for protein in proteins:
         peptide = protein_peptides[protein[prottabledata.HEADER_PROTEIN]]
