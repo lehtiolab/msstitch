@@ -13,7 +13,7 @@ def mzmlfn_ms2_spectra_generator(mzmlfiles):
         scannr = get_spec_scan_nr(spec)
         rt = fetch_cvparams_values_from_subel(spec, 'scan', ['scan start time'], ns)
         mz, charge = fetch_cvparams_values_from_subel(spec, 'selectedIon', ['selected ion m/z', 'charge state'], ns)
-        yield fn, {'scan': scannr, 'rt': rt[0], 'mz': mz, 'charge': charge} 
+        yield fn, {'scan': scannr, 'rt': rt[0], 'mz': mz, 'charge': charge}
         formatting.clear_el(spec)
 
 
@@ -32,7 +32,7 @@ def mzmlfn_spectra_generator(mzmlfiles):
 
 def fetch_cvparams_values_from_subel(base, subelname, paramnames, ns):
     """Searches a base element for subelement by name, then takes the
-    cvParams of that subelement and returns the values as a list 
+    cvParams of that subelement and returns the values as a list
     for the paramnames that match. Value order in list equals input
     paramnames order."""
     sub_el = basereader.find_element_xpath(base, subelname, ns)
@@ -50,22 +50,11 @@ def fetch_cvparam_value_by_name(params, name):
                 return cvparam.attrib['value']
         except KeyError:
             pass
-    return False 
+    return False
 
- 
+
 def get_all_cvparams(element, ns):
     return element.findall('{%s}cvParam' % ns['xmlns'])
-
-
-def get_mzml_mz(spectrum, ns):
-    """Return mass to charge from mzml spectrum element, in minutes"""
-    scan = spectrum.find('.//{%s}scan' % ns['xmlns'])
-    for cvparam in scan.findall('{%s}cvParam' % ns['xmlns']):
-        try:
-            if cvparam.attrib['name'] == 'scan start time':
-                return cvparam.attrib['value']
-        except KeyError:
-            pass
 
 
 def get_spec_scan_nr(spectrum):

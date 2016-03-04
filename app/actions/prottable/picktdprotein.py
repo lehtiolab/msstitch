@@ -1,7 +1,7 @@
 from app.readers import tsv as reader
 from app.readers import fasta
 from app.dataformats import prottable as prottabledata
-from app.dataformats import mzidtsv as mzidtsvdata 
+from app.dataformats import mzidtsv as mzidtsvdata
 
 
 TARGET = 't'
@@ -86,7 +86,7 @@ def pick_target_decoy(tscore, dscore):
         dscore = float(dscore)
     except (ValueError, TypeError):
         dscore = False
-    falsecheck = {score: (ptype, score) for score, ptype 
+    falsecheck = {score: (ptype, score) for score, ptype
                   in zip([tscore, dscore], [TARGET, DECOY])}
     if len(falsecheck) == 1:
         return False

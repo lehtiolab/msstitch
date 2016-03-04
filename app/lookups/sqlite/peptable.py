@@ -28,7 +28,7 @@ class PepTableDB(ProtPepTable):
 
 class PepTableGeneCentricDB(PepTableDB):
     datatype = 'peptide'
-    
+
     def get_proteins_psms_for_map(self):
         """Gets gene-PSM combinations from DB and filters out uniques
         on the fly. Filtering is done since PSM are stored per protein,

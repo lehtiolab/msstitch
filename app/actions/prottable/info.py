@@ -62,7 +62,8 @@ def get_protein_data_base(proteindata, p_acc, headerfields):
         outdict.update({get_headerfieldtext(headerfields, hfield, pool): val
                         for (hfield, val) in zip(hfields, pool_values)})
     outdict.update({prottabledata.HEADER_NO_PROTEIN: proteincount,
-                    prottabledata.HEADER_DESCRIPTION: proteindata[p_acc]['desc']})
+                    prottabledata.HEADER_DESCRIPTION:
+                    proteindata[p_acc]['desc']})
     for field, pdfield in zip([prottabledata.HEADER_GENE,
                                prottabledata.HEADER_ASSOCIATED],
                               ['gene', 'aid']):

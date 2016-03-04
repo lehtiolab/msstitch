@@ -32,7 +32,6 @@ class BaseDriver(object):
         be used to populate the argparser with"""
         def copy_option(options, name):
             return {k: v for k, v in options[name].items()}
-
         options = {}
         for name in names:
             try:

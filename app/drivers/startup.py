@@ -22,14 +22,6 @@ def populate_parser(drivers):
         subparsermap[cmd].set_defaults(func=driver.start)
         options = [{k: v for k, v in opt.items()}
                    for opt in driver.get_options()]
-#        try:
-#            options = {opt['clarg']: {k: v for k, v in opt.items()
-#                                      if k dd!= 'clarg'}
-#                       for opt in driver.get_options()}
-#        except TypeError:
-#            options = {opt['clarg'][0]: {k: v for k, v in opt.items()
-#                                         if k != 'clarg'}
-#                       for opt in driver.get_options()}
         for argoptions in options:
             argoptions['dest'] = argoptions.pop('driverattr')
             clarg = argoptions.pop('clarg')
@@ -83,4 +75,3 @@ def start_msstitch(exec_drivers, sysargs):
     parser = populate_parser(exec_drivers)
     args = parser.parse_args(sysargs[1:])
     args.func(**vars(args))
-    #driver.ssart(**vars(args))

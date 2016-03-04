@@ -13,7 +13,8 @@ class ProtTableDB(ProtPepTable):
               'protquant_channels': ['channel_id', 'prottable_id',
                                      'channel_name', 'amount_psms_name'],
               'protein_iso_quanted': ['proteinquant_id', 'pacc_id',
-                                      'channel_id', 'quantvalue', 'amount_psms'],
+                                      'channel_id', 'quantvalue',
+                                      'amount_psms'],
               }
 
     def add_tables(self):
@@ -81,7 +82,8 @@ class GeneTableDB(ProtPepTable):
         firstjoin = ('protein_psm', 'pp', 'protein_acc')
         extrajoins = 'LEFT OUTER JOIN prot_desc AS pd USING(protein_acc) '
         genetable = self.table_map[self.datatype]['feattable']
-        return self.get_unique_gene_psms(genetable, fields, firstjoin, extrajoins)
+        return self.get_unique_gene_psms(genetable, fields, firstjoin,
+                                         extrajoins)
 
     def get_isoquant_amountpsms_channels(self):
         cursor = self.get_cursor()
@@ -100,12 +102,14 @@ class GeneTableDB(ProtPepTable):
 
 class GeneTableAssocIDsDB(GeneTableDB):
     datatype = 'assoc'
+
     def __init__(self, fn=None):
         super().__init__(fn)
         self.colmap.pop('genes')
         self.colmap = {table.replace('gene', 'assoc'): cols
                        for table, cols in self.colmap.items()}
-        self.colmap['genequant_channels'] = self.colmap.pop('assocquant_channels')
+        self.colmap['genequant_channels'] = self.colmap.pop(
+            'assocquant_channels')
         self.colmap['associated_ids'] = ['gene_id', 'assoc_id', 'protein_acc']
 
     def add_tables(self):
@@ -131,4 +135,5 @@ class GeneTableAssocIDsDB(GeneTableDB):
         firstjoin = ('protein_psm', 'pp', 'protein_acc')
         extrajoins = 'LEFT OUTER JOIN prot_desc AS pd USING(protein_acc) '
         genetable = self.table_map[self.datatype]['feattable']
-        return self.get_unique_gene_psms(genetable, fields, firstjoin, extrajoins)
+        return self.get_unique_gene_psms(genetable, fields, firstjoin,
+                                         extrajoins)

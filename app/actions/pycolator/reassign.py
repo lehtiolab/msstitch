@@ -37,7 +37,6 @@ def lookup_statistic(score, stats):
     values closest to the feature's svm_score."""
     if score in stats:
         return stats[score]['q'], stats[score]['PEP'], None
-
     else:
         lower, warning = None, None
         for stat_score in sorted(stats.keys()):
@@ -52,27 +51,6 @@ def lookup_statistic(score, stats):
                        'qvality recalculation were set to PEP=1, qval=1.')
             return '1', '1', warning
         qval = (float(stats[stat_score]['q']) + float(stats[lower]['q'])) / 2
-        pep = (float(stats[stat_score]['PEP']) + float(stats[lower]['PEP']))/2
-
+        pep = (float(stats[stat_score]['PEP']) +
+               float(stats[lower]['PEP'])) / 2
     return str(qval), str(pep), warning
-
-
-def fix_psmid_with_incomplete_filename(psm_id, fn):
-    """It looks like that filenames are cut by msgf2pin for inclusion
-    in the psm id. Either by removing extension (may contain fraction or task),
-    or by truncating a certain length."""
-    if psm_id.startswith(fn):
-        return psm_id
-
-    charindex = 0
-    while True:
-        charindex += 1
-        # cut incomplete filename from psm id
-        if psm_id[:charindex] != fn[:charindex]:
-            new_psm_id = psm_id[charindex - 1:]
-            break
-    # add underscore if needed, then filename
-    if not new_psm_id[0] == '_':
-        new_psm_id = '_{0}'.format(new_psm_id)
-    new_psm_id = '{0}{1}'.format(fn, new_psm_id)
-    return new_psm_id

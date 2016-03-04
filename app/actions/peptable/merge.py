@@ -116,18 +116,17 @@ def get_cov_descriptions(peptide, pdata, report):
 
     seq = peptide[peptabledata.HEADER_PEPTIDE]
     for idx, key, keytype in zip([1, 2, 3, 4, 5],
-                        [peptabledata.HEADER_COVERAGES,
-                         peptabledata.HEADER_DESCRIPTIONS,
-                         peptabledata.HEADER_GENES,
-                         peptabledata.HEADER_ASSOCIATED,
-                         peptabledata.HEADER_NO_CONTENTPROTEINS],
+                                 [peptabledata.HEADER_COVERAGES,
+                                  peptabledata.HEADER_DESCRIPTIONS,
+                                  peptabledata.HEADER_GENES,
+                                  peptabledata.HEADER_ASSOCIATED,
+                                  peptabledata.HEADER_NO_CONTENTPROTEINS],
                                  [float, str, str, str, int]):
 
         try:
             report[key] = ';'.join([format_val(x[idx], keytype)
                                     for x in pdata[seq]['proteins']])
         except (TypeError, IndexError):
-            #import sys; sys.stderr.write(str((idx, pdata[seq]['proteins'])))
             # if None in the  list or index too high, skip, NA will be output
             pass
     return report

@@ -14,7 +14,7 @@ class ModelQValuesDriver(PepProttableDriver):
     """
     outsuffix = '_qmodel.txt'
     command = 'modelqvals'
-    commandhelp = ('Recalculate peptide q-values by creating a linear model'
+    commandhelp = ('Recalculate peptide q-values by creating a linear model '
                    'of them against a score (partial least squares '
                    'regression).')
 
