@@ -8,6 +8,7 @@ from app.drivers.options import shared_options
 class BaseDriver(object):
     def __init__(self):
         self.lookupfn = None
+        self.infiletype = ''
 
     def set_lookup(self):
         if self.lookupfn is not None and hasattr(self, 'lookuptype'):
@@ -17,6 +18,7 @@ class BaseDriver(object):
 
     def set_options(self):
         self.options = self.define_options(['fn', 'outdir'], {})
+        self.options['-i']['help'].format(self.infiletype)
 
     def get_commandhelp(self):
         return self.commandhelp

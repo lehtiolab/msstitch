@@ -8,6 +8,7 @@ class PycolatorDriver(base.BaseDriver):
     """Driver for pycolator functions"""
     def __init__(self):
         super().__init__()
+        self.infiletype = 'percolator out XML'
 
     def prepare_percolator_output(self, fn):
         """Returns namespace and static xml from percolator output file"""

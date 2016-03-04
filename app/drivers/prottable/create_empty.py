@@ -12,6 +12,10 @@ class CreateEmptyDriver(ProttableDriver):
                    'proteins only. Use --protcol if input PSMs '
                    'are not of standard protein grouped variety.')
 
+    def __init__(self):
+        super().__init__()
+        self.infiletype = 'TSV PSM table (MSGF+)'
+
     def set_options(self):
         super().set_options()
         self.options.update(self.define_options(['proteincol'],

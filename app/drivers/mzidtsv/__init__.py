@@ -7,6 +7,7 @@ from app.drivers.options import mzidtsv_options
 class MzidTSVDriver(base.BaseDriver):
     def __init__(self):
         super().__init__()
+        self.infiletype = 'TSV PSM table (MSGF+)'
         self.parser_options = mzidtsv_options
 
     def run(self):

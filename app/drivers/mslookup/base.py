@@ -7,6 +7,7 @@ from app.drivers.options import mslookup_options
 
 class LookupDriver(BaseDriver):
     def __init__(self):
+        super().__init__()
         self.parser_options = mslookup_options
 
     def set_options(self):

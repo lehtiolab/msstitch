@@ -16,6 +16,10 @@ class SeqspaceLookupDriver(base.LookupDriver):
     for N-terminal falloff indexing, and it can be specified to cut
     tryptic before proline."""
 
+    def __init__(self):
+        super().__init__()
+        self.infiletype = 'FASTA'
+
     def set_options(self):
         super().set_options()
         self.options['--dbfile'].update({'required': False, 'default': None})

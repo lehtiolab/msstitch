@@ -5,6 +5,10 @@ from app.readers import tsv as reader
 
 
 class PeptableDriver(PepProttableDriver):
+    def __init__(self):
+        super().__init__()
+        self.infiletype = 'peptide table'
+
     def create_header(self):
         self.headerfields = head.get_peptable_headerfields(self.headertypes,
                                                            self.lookup,

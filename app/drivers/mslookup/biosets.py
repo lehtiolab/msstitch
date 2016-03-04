@@ -11,6 +11,10 @@ class BioSetLookupDriver(base.LookupDriver):
                    'biological set names. Input files are passed to -i, '
                    'respective set names are passed to --setnames.')
 
+    def __init__(self):
+        super().__init__()
+        self.infiletype = 'mzML spectra'
+
     def set_options(self):
         super().set_options()
         del(self.options['--dbfile'])

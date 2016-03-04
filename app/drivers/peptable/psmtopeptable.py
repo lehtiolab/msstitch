@@ -18,6 +18,10 @@ class MzidTSVPeptableDriver(PepProttableDriver):
                    'specified, by taking the highest precursor quant value '
                    'for a peptide.')
 
+    def __init__(self):
+        super().__init__()
+        self.infiletype = 'TSV PSM table (MSGF+)'
+
     def set_options(self):
         super().set_options()
         self.options.update(self.define_options(['spectracol',

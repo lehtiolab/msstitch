@@ -13,6 +13,10 @@ class SpectraLookupDriver(base.LookupDriver):
                    'neither --spectra nor --dbfile. Biological set names '
                    'for each file should be specified using --setnames')
 
+    def __init__(self):
+        super().__init__()
+        self.infiletype = 'mzML spectra'
+
     def parse_input(self, **kwargs):
         super().parse_input(**kwargs)
         self.spectrafns = self.fn

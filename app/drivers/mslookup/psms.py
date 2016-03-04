@@ -14,6 +14,10 @@ class PSMLookupDriver(base.LookupDriver):
                    'file with --fasta, a Biomart map file with --map. When '
                    'using --map for a decoy lookup, use --decoy.')
 
+    def __init__(self):
+        super().__init__()
+        self.infiletype = 'TSV PSM table (MSGF+)'
+
     def set_options(self):
         super().set_options()
         self.options.update(self.define_options(['spectracol', 'mapfn',

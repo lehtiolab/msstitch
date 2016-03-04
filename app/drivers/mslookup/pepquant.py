@@ -8,6 +8,10 @@ class PeptideQuantLookupDriver(ProteinQuantLookupDriver):
     lookuptype = 'peptidetable'
     command = 'peptides'
 
+    def __init__(self):
+        super().__init__()
+        self.infiletype = 'peptide table'
+
     def set_options(self):
         super().set_options()
         self.options.update(self.define_options(['peptidecol', 'setnames'],

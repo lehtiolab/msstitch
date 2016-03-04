@@ -5,6 +5,10 @@ from app.drivers.pepprottable import PepProttableDriver
 
 
 class ProttableDriver(PepProttableDriver):
+    def __init__(self):
+        super().__init__()
+        self.infiletype = 'protein table'
+
     def create_header(self):
         self.headerfields = head.get_prottable_headerfields(self.headertypes,
                                                             self.lookup,

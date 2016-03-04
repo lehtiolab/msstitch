@@ -14,6 +14,10 @@ class ProteinQuantLookupDriver(base.LookupDriver):
                    'respective channels. Can be used with --genecentric '
                    'Lookup should already include proteins.')
 
+    def __init__(self):
+        super().__init__()
+        self.infiletype = 'protein table'
+
     def set_options(self):
         super().set_options()
         self.options.update(self.define_options(['genecentric', 'setnames',

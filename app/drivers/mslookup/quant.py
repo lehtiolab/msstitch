@@ -17,8 +17,12 @@ class IsobaricQuantLookupDriver(QuantLookupDriver):
     command = 'isoquant'
     commandhelp = ('Create lookup of isobaric quant data in OpenMS '
                    'consensusXML format. Use requires --spectra, --dbfile '
-                   'with an sqlite lookup of spectra, and passing multiple'
+                   'with an sqlite lookup of spectra, and passing multiple '
                    'consensusXML files to -i.')
+
+    def __init__(self):
+        super().__init__()
+        self.infiletype = 'consensusXML'
 
     def parse_input(self, **kwargs):
         super().parse_input(**kwargs)
@@ -41,6 +45,10 @@ class PrecursorQuantLookupDriver(QuantLookupDriver):
                    'spectra, --quanttype to determine quant output, --mztol, '
                    '--rttol, --mztoltype for tolerance specification, and '
                    'passing a featureXML or kronik file to -i.')
+
+    def __init__(self):
+        super().__init__()
+        self.infiletype = 'featureXML or Kronik'
 
     def set_options(self):
         super().set_options()
