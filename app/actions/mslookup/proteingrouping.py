@@ -41,77 +41,47 @@ def build_master_db(pgdb):
     pgdb.store_masters(allmasters, psm_masters)
 
 
+def process_pgroup_candidates(candidates, protein_psm_map):
+    prepgroup = {}
+    for candidate in candidates:
+        master, psm_id, prot_id, seq, score, evid, cov = candidate
+        prepgroup = add_protein_psm_to_pre_proteingroup(prepgroup, prot_id,
+                                                        seq, psm_id, score,
+                                                        evid, cov)
+    pgroup = filter_proteins_with_missing_psms(prepgroup, protein_psm_map)
+    return get_protein_group_content(pgroup, master)
+
+
 def build_content_db(pgdb):
+    protein_psms = {}
+    for prot, psm in pgdb.get_protein_psm_records():
+        try:
+            protein_psms[prot].add(psm)
+        except KeyError:
+            protein_psms[prot] = set([psm])
     use_evi = pgdb.check_evidence_tables()
-    all_master_psm_proteins = pgdb.get_master_contentproteins_psms()
-    all_master_psms = pgdb.get_all_master_psms()
-    lastpsmmaster, masterpsm = next(all_master_psms)
-    master_psms = {masterpsm}
-    (lastcontentmaster, contentpsm, protein,
-     pepseq, score, evid, cover) = next(all_master_psm_proteins)
-    content = add_protein_psm_to_pre_proteingroup(dict(), protein, pepseq,
-                                                  contentpsm, score, evid,
-                                                  cover)
-    protein_groups = []
-    new_masters = {}
-    for master, masterpsm in all_master_psms:
-        # outer loop gets all master PSMs
-        if master != lastpsmmaster:
-            lastcontentmaster, pgroup, content = fetch_pg_content(
-                all_master_psm_proteins, lastcontentmaster, lastpsmmaster,
-                content, master_psms)
+    pg_candidates = pgdb.get_protein_group_candidates()
+    pre_protein_group = [next(pg_candidates)]
+    lastmaster = pre_protein_group[0][0]
+    protein_groups, new_masters = [], {}
+    for protein_candidate in pg_candidates:
+        if protein_candidate[0] != lastmaster:
+            pgroup = process_pgroup_candidates(pre_protein_group, protein_psms)
             new_master = sorters.sort_to_get_master(pgroup, use_evi)
             new_masters[new_master['master_id']] = new_master['protein_acc']
-            pgroup = [[pg[2], pg[1], pg[3], pg[4], pg[5]] for pg in pgroup]
             protein_groups.extend(pgroup)
-            master_psms = set()
-            lastpsmmaster = master
-        master_psms.add(masterpsm)
-    lastcontentmaster, pgroup, content = fetch_pg_content(
-        all_master_psm_proteins, lastcontentmaster,
-        lastpsmmaster, content, master_psms)
+            lastmaster, pre_protein_group = protein_candidate[0], []
+        pre_protein_group.append(protein_candidate)
+    pgroup = process_pgroup_candidates(pre_protein_group, protein_psms)
     new_master = sorters.sort_to_get_master(pgroup, use_evi)
     new_masters[new_master['master_id']] = new_master['protein_acc']
-    new_masters = ((acc, mid) for mid, acc in new_masters.items())
-    pgroup = [[pg[2], pg[1], pg[3], pg[4], pg[5]] for pg in pgroup]
     protein_groups.extend(pgroup)
+    protein_groups = [[pg[2], pg[1], pg[3], pg[4], pg[5]]
+                      for pg in protein_groups]
+    new_masters = ((acc, mid) for mid, acc in new_masters.items())
     pgdb.update_master_proteins(new_masters)
     pgdb.store_protein_group_content(protein_groups)
     pgdb.index_protein_group_content()
-
-
-def fetch_pg_content(all_master_psm_proteins, lastcontentmaster, psmmaster,
-                     content, master_psms):
-    filtered = False
-    for (contentmaster, contentpsm, protein, pepseq,
-         score, evid, cover) in all_master_psm_proteins:
-        # Inner loop gets protein group content from DB join table
-        if contentmaster != lastcontentmaster:
-            p_group = filter_proteins_with_missing_psms(content,
-                                                        master_psms)
-            lastcontentmaster, content = contentmaster, dict()
-            content = add_protein_psm_to_pre_proteingroup(content,
-                                                          protein,
-                                                          pepseq,
-                                                          contentpsm,
-                                                          score,
-                                                          evid,
-                                                          cover)
-            filtered = True
-            break
-        content = add_protein_psm_to_pre_proteingroup(content, protein,
-                                                      pepseq,
-                                                      contentpsm,
-                                                      score, evid, cover)
-    # The last protein-psm will not be caught by the if statement and thus
-    # will there be one missing. But the break-construction makes that breaking
-    # from the loop and loop exiting with StopIteration will both come to the
-    # same point. Therefore we check if filtering has occurred before returning
-    if not filtered:
-        p_group = filter_proteins_with_missing_psms(content,
-                                                    master_psms)
-    pgroup_out = get_protein_group_content(p_group, psmmaster)
-    return lastcontentmaster, pgroup_out, content
 
 
 def add_protein_psm_to_pre_proteingroup(prepgmap, protein, pepseq,
@@ -127,16 +97,12 @@ def add_protein_psm_to_pre_proteingroup(prepgmap, protein, pepseq,
     return prepgmap
 
 
-def filter_proteins_with_missing_psms(proteins, pg_psms):
+def filter_proteins_with_missing_psms(proteins, allprotein_psms):
     filtered_protein_map = {}
     for protein, protein_psms in proteins.items():
-        filter_out = False
-        for psm_id in [psm[0] for peptide in protein_psms.values()
-                       for psm in peptide]:
-            if psm_id not in pg_psms:
-                filter_out = True
-                break
-        if filter_out:
+        protein_masterpsms = {psm[0] for peptide in protein_psms.values()
+                              for psm in peptide}
+        if allprotein_psms[protein].difference(protein_masterpsms):
             continue
         else:
             filtered_protein_map[protein] = protein_psms

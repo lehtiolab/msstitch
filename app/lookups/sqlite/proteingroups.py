@@ -110,28 +110,26 @@ class ProteinGroupDB(ResultLookupInterface):
         cursor = self.get_cursor()
         return cursor.execute(sql)
 
-    def get_master_contentproteins_psms(self):
-        sql = ('SELECT ppg.master_id, ppg.psm_id, pp.protein_acc, '
-               'peps.sequence, p.score, pev.evidence_lvl, pc.coverage '
-               'FROM psm_protein_groups AS ppg '
-               'JOIN protein_psm AS pp USING(psm_id) '
-               'JOIN psms AS p USING(psm_id) '
-               'JOIN peptide_sequences AS peps USING(pep_id) '
-               'LEFT OUTER JOIN protein_evidence AS pev USING(protein_acc) '
-               'LEFT OUTER JOIN protein_coverage AS pc USING(protein_acc) '
-               'ORDER BY ppg.master_id'
-               )
+    def get_protein_psm_records(self):
+        sql = ('SELECT protein_acc, psm_id FROM protein_psm')
         cursor = self.get_cursor()
         return cursor.execute(sql)
 
-    def get_all_master_psms(self):
-        sql = ('SELECT master_id, psm_id '
-               'FROM psm_protein_groups '
-               'ORDER BY master_id'
+    def get_protein_group_candidates(self):
+        sql = ('SELECT pgm.master_id, pgm.psm_id, pp.protein_acc, '
+               'peps.sequence, p.score, pev.evidence_lvl, pc.coverage '
+               'FROM psm_protein_groups AS pgm '
+               'JOIN protein_psm AS pp USING(psm_id) '
+               'JOIN psms AS p USING(psm_id) '
+               'JOIN peptide_sequences AS peps USING(pep_id) '
+               'LEFT OUTER JOIN protein_evidence AS pev '
+               'ON pev.protein_acc=pp.protein_acc '
+               'LEFT OUTER JOIN protein_coverage AS pc '
+               'ON pc.protein_acc=pp.protein_acc '
+               'ORDER BY pgm.master_id'
                )
         cursor = self.get_cursor()
-        return ((master, psm)
-                for master, psm in cursor.execute(sql).fetchall())
+        return cursor.execute(sql)
 
     def check_evidence_tables(self):
         """Returns True if there are records in evidence

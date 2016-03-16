@@ -385,7 +385,11 @@ class TestProteingroupLookup(basetests.MSLookupTest):
         self.check(sql, lambda x: x[0], lambda x: x[1])
 
     def check_pg_content(self):
-        sql = 'SELECT * FROM protein_coverage'
+        sql = ('SELECT pgm.protein_acc, pgc.protein_acc, pgc.peptide_count, '
+               'pgc.psm_count, pgc.protein_score '
+               'FROM protein_group_content AS pgc '
+               'JOIN protein_group_master AS pgm USING(master_id) '
+               'ORDER BY pgm.protein_acc, pgc.protein_acc')
         self.check(sql, lambda x: x[0], lambda x: x[1:])
 
     def check_pgmasters(self):
