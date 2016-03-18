@@ -191,14 +191,13 @@ pycolator_options = {
                   'required': False},
     'score': {'driverattr': 'score', 'dest': 'score', 'default': 'svm',
               'help': 'Score to filter unique peptides on, e.g. svm',
-              'type': 'pick', 'picks': ['svm', 'q', 'pep', 'p'], 'clarg': '-s',
-              'required': False},
+              'type': 'pick', 'picks': ['svm', 'q', 'pep', 'p'],
+              'clarg': '--score', 'required': False},
     'qoptions': {'driverattr': 'qoptions', 'dest': 'qoptions',
                  'required': False, 'clarg': '--qoptions', 'default': None,
                  'help': 'Extra options that may be passed to qvality. '
                  'Option form: --qoptions ***flag value ***flag ***flag value',
                  'nargs': '+', 'type': str},
-    # FIXME qoptions is now --qoptions, not -o
 }
 
 mzidtsv_options = {

@@ -6,7 +6,7 @@ from app.drivers.options import mzidtsv_options
 class TSVSpectraDriver(MzidTSVDriver):
     lookuptype = 'spectra'
     outsuffix = '_spectradata.tsv'
-    command = 'addspecdata'
+    command = 'specdata'
     commandhelp = ('Add spectra data such as retention time '
                    'biological set name to PSM table.')
 

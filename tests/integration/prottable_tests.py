@@ -203,7 +203,7 @@ class TestProbability(basetests.ProttableTest):
 class TestEmpty(basetests.ProttableTest):
     command = 'emptytable'
     infilename = 'mzidtsv_filtered_fr1-2_proteingrouped.txt'
-    suffix = '.txt'
+    suffix = '_prottable.txt'
 
     def check(self):
         expected_proteins = set()
@@ -297,12 +297,12 @@ class TestPickqvality(basetests.ProttableTest):
         self.assertEqual(1, 2)
 
     def test_fasta(self):
+        self.fail('Not yet implemented qvality tests')
         tfasta = os.path.join(self.fixdir, 'ensembl.fasta')
         dfasta = os.path.join(self.fixdir, 'decoy_ensembl.fasta')
         options = ['--decoyfn', self.decoyfn, '--targetfasta', tfasta,
                    '--decoyfasta', dfasta, '--picktype', 'fasta']
         self.run_command(options)
-        self.fail('Not yet implemented qvality tests')
         self.assertEqual(1, 2)
 
 

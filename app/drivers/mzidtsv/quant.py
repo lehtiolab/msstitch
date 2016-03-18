@@ -6,7 +6,7 @@ from app.drivers.options import mzidtsv_options
 class TSVQuantDriver(MzidTSVDriver):
     lookuptype = 'quant'
     outsuffix = '_quant.tsv'
-    command = 'addquant'
+    command = 'quant'
     commandhelp = ('Add quantitative data to a tab separated file with'
                    'PSMs. Quant data is fetched from an SQLite lookup '
                    'Specify --isobaric and/or --precursor.')

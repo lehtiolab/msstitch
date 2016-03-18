@@ -5,7 +5,7 @@ from app.drivers.options import prottable_options
 
 
 class CreateEmptyDriver(ProttableDriver):
-    outsuffix = '.txt'
+    outsuffix = '_prottable.txt'
     command = 'emptytable'
     commandhelp = ('Create protein table from PSM table containing no '
                    'quant data, resulting in one column with (master) '

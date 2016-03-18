@@ -122,7 +122,7 @@ class TestMerge(BaseTestPycolator):
 
 class TestFilterUnique(BaseTestPycolator):
     command = 'filteruni'
-    suffix = '_filtuniq.xml'
+    suffix = '_filtuni.xml'
     # FIXME other scores than svm
     # FIXME make sure BEST psm is retained, not worst.
     # FIXME illegal scores handling
@@ -131,7 +131,7 @@ class TestFilterUnique(BaseTestPycolator):
     def test_filter_uniques(self):
         """Checks if resultpeps gets uniques, and also that input peptides
         were not unique to start with."""
-        self.run_command(['-s', 'svm'])
+        self.run_command(['--score', 'svm'])
         result = self.read_percolator_out(self.resultfn)
         origin = self.read_percolator_out(self.infile[0])
         resultpeps = self.get_element_ids(result['peptides'],
@@ -144,7 +144,7 @@ class TestFilterUnique(BaseTestPycolator):
 
 class TestFilterLength(BaseTestPycolator):
     command = 'filterlen'
-    suffix = '_filt_len.xml'
+    suffix = '_filtlen.xml'
     # FIXME need to check maxlen minlen input?
 
     def length_correct(self, seqs, minlen, maxlen):

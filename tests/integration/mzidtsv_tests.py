@@ -6,7 +6,7 @@ from tests.integration import basetests
 
 
 class TestAddSpecData(basetests.MzidTSVBaseTest):
-    command = 'addspecdata'
+    command = 'specdata'
     suffix = '_spectradata.tsv'
     infilename = 'mzidtsv_filtered_fr1-2_nospecdata.txt'
 
@@ -26,7 +26,7 @@ class TestAddSpecData(basetests.MzidTSVBaseTest):
 
 
 class TestQuantTSV(basetests.MzidTSVBaseTest):
-    command = 'addquant'
+    command = 'quant'
     suffix = '_quant.tsv'
 
     def test_quanttsv_isobaric(self):
@@ -76,7 +76,7 @@ class TestQuantTSV(basetests.MzidTSVBaseTest):
 
 
 class TestPercoTSV(basetests.MzidTSVBaseTest):
-    command = 'addperco'
+    command = 'percolator'
     suffix = '_percolated.tsv'
     infilename = 'mzidtsv_fr0.txt'
     field_p_map = {'percolator svm-score': 'score',

@@ -7,7 +7,7 @@ class FilterPeptideLength(base.PycolatorDriver):
     """Filters on peptide length, to be specified in calling. Outputs to
     multiple files if multiple file input is given. No PSMs will be
     outputted."""
-    outsuffix = '_filt_len.xml'
+    outsuffix = '_filtlen.xml'
     command = 'filterlen'
     commandhelp = 'Filters out peptides that exceed --maxlen and --minlen'
 
@@ -30,7 +30,7 @@ class FilterPeptideLength(base.PycolatorDriver):
 class FilterUniquePeptides(base.PycolatorDriver):
     """This class processes multiple percolator runs from fractions and
     filters out the best scoring peptides."""
-    outsuffix = '_filtuniq.xml'
+    outsuffix = '_filtuni.xml'
     command = 'filteruni'
     commandhelp = ('Only includes best scoring unique peptides in a (merged) '
                    'file')
