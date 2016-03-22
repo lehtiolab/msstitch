@@ -371,6 +371,7 @@ class TestProteingroupLookup(basetests.MSLookupTest):
         expected = {keyfun(x): valfun(x) for x in
                     self.get_values_from_db(exp_file, sql)}
         #self.assertEqual(result, expected)
+        print(result)
         for key, value in result.items():
             self.assertIn(key, expected.keys())
             self.assertEqual(value, expected[key])

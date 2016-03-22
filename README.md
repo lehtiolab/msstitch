@@ -89,4 +89,4 @@ Example: Add best-scoring peptide to protein table (Q-score by Savitsky et al 20
 Example: Add FDR from qvality result to protein table using Q-scores as keys to look up
 corresponding q-values and PEPs
 
-`python3 prottable.py addfdr -i proteins.txt --qvality qvals.txt --scorecolpattern "^Q-score"`
+`python3 prottable.py fdr -i proteins.txt --qvality qvals.txt --scorecolpattern "^Q-score"`
