@@ -104,6 +104,7 @@ def store_psm_protein_relations(fn, header, pgdb):
             psmids_to_store = set()
         psmids_to_store.add(psm_id)
         last_id = psm_id
-    pgdb.store_peptides_proteins(allpsms, psmids_to_store)
+    if len(psmids_to_store) > 0:
+        pgdb.store_peptides_proteins(allpsms, psmids_to_store)
     pgdb.index_protein_peptides()
     return allpsms
