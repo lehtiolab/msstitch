@@ -272,7 +272,7 @@ prottable_options.update({
     'featuretype': {'driverattr': 'featuretype', 'dest': 'featuretype',
                     'help': 'Feature type to use for qvality. Can be one of '
                     '[qvalue, probability].', 'clarg': '--feattype',
-                    'type': 'pick', 'picks': ['qvalue', 'probability']},
+                    'type': 'pick', 'picks': ['qvalue', 'probability', 'svm']},
     't_fasta': {'driverattr': 't_fasta', 'clarg': '--targetfasta',
                 'type': 'file', 'help': 'FASTA file with target proteins '
                 'to determine best scoring proteins of target/decoy pairs '
