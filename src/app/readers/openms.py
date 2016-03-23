@@ -1,5 +1,5 @@
 import os
-import app.readers.xml as basereader
+from app.readers import xml as basereader
 
 
 def specfn_quant_generator(specfiles, quantfiles, tag, ignore_tags):

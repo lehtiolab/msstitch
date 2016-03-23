@@ -43,8 +43,7 @@ class TestBuild(basetests.ProttableTest):
     infilename = 'built_protein_table.txt'
 
     def get_std_options(self):
-        cmd = ['python3', '{0}'.format(self.executable), self.command,
-               '-d', self.workdir]
+        cmd = [self.executable, self.command, '-d', self.workdir]
         return cmd
 
     def test_proteincentric(self):

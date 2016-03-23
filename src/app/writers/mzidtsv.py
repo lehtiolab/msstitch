@@ -1,4 +1,4 @@
-from . import tsv
+from app.writers import tsv
 
 
 def write_mzid_tsv(header, psms, outfn):

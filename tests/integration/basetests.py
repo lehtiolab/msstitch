@@ -24,8 +24,7 @@ class BaseTest(unittest.TestCase):
         shutil.rmtree(self.workdir)
 
     def get_std_options(self):
-        cmd = ['python3', '{0}'.format(self.executable), self.command,
-               '-d', self.workdir, '-i']
+        cmd = [self.executable, self.command, '-d', self.workdir, '-i']
         if type(self.infile) != list:
             self.infile = [self.infile]
         cmd.extend(self.infile)
@@ -108,8 +107,9 @@ class BaseTest(unittest.TestCase):
         except ValueError:
             return value
 
+
 class BaseTestPycolator(BaseTest):
-    executable = 'pycolator.py'
+    executable = 'msspercolator'
     infilename = 'percolator_out.xml'
 
     def get_psm_pep_ids_from_file(self, fn):
@@ -161,7 +161,7 @@ class BaseTestPycolator(BaseTest):
 
 
 class MzidTSVBaseTest(BaseTest):
-    executable = 'mzidtsv.py'
+    executable = 'msspsmtable'
     infilename = 'mzidtsv.txt'
 
     def setUp(self):
@@ -179,7 +179,8 @@ class MzidTSVBaseTest(BaseTest):
                 rownr += 1
 
     def check_results(self, checkfields, expected_values):
-        for resultvals, exp_vals in zip(self.get_values(checkfields), expected_values):
+        for resultvals, exp_vals in zip(self.get_values(checkfields),
+                                        expected_values):
             for resultval, expectval in zip(resultvals, exp_vals):
                 self.assertEqual([str(x) if x is not None else 'NA'
                                   for x in expectval],
@@ -222,7 +223,7 @@ class MzidTSVBaseTest(BaseTest):
 
 
 class MSLookupTest(BaseTest):
-    executable = 'mslookup.py'
+    executable = 'msslookup'
     base_db_fn = None
     suffix = ''
 
@@ -295,11 +296,11 @@ class PepProtableTest(BaseTest):
 
 
 class PeptableTest(PepProtableTest):
-    executable = 'peptable.py'
+    executable = 'msspeptable'
 
 
 class ProttableTest(PepProtableTest):
-    executable = 'prottable.py'
+    executable = 'mssprottable'
     infilename = 'prottable.txt'
 
     def get_top_psms(self, fn, pepkey, valuekey, lowerbetter=False):

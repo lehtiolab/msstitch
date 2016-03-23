@@ -1,4 +1,4 @@
-import app.lookups.sqlite.proteingroups as lookups
+from app.lookups.sqlite import proteingroups as lookups
 
 
 def get_sortfnxs(evidence):

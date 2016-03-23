@@ -1,6 +1,6 @@
 import os
-import app.readers.xml as basereader
-import app.readers.ml as ml
+from app.readers import xml as basereader
+from app.readers import ml
 from app.readers import xmlformatting as formatting
 
 
@@ -11,8 +11,11 @@ def mzmlfn_ms2_spectra_generator(mzmlfiles):
         if mslvl != '2':
             continue
         scannr = get_spec_scan_nr(spec)
-        rt = fetch_cvparams_values_from_subel(spec, 'scan', ['scan start time'], ns)
-        mz, charge = fetch_cvparams_values_from_subel(spec, 'selectedIon', ['selected ion m/z', 'charge state'], ns)
+        rt = fetch_cvparams_values_from_subel(spec, 'scan',
+                                              ['scan start time'], ns)
+        mz, charge = fetch_cvparams_values_from_subel(spec, 'selectedIon',
+                                                      ['selected ion m/z',
+                                                       'charge state'], ns)
         yield fn, {'scan': scannr, 'rt': rt[0], 'mz': mz, 'charge': charge}
         formatting.clear_el(spec)
 

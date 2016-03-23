@@ -1,4 +1,4 @@
-import app.actions.mzidtsv.percolator as prep
+from app.actions.mzidtsv import percolator as prep
 from app.drivers.mzidtsv import MzidTSVDriver
 from app.drivers.options import mzidtsv_options
 

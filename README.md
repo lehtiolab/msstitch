@@ -24,11 +24,11 @@ to include more tool output formats.
 
 ## Tools
 
-- [mslookup](#mslookup) - Creates SQLite databases from spectra, search and quantification data
-- [pycolator](#pycolator) - Splits, merges, filters percolator XML results, and runs qvality
-- [mzidtsv](#mzidtsv) - Filters, splits, merges, and proteingroups on PSM tables from MSGF+. Also adds columns with extra data (quant, percolator, genes, etc)
-- [peptable](#peptable) - Creates and manipulates peptide tables (merging, quant data additions, etc)
-- [prottable](#prottable) - Idem for protein tables, including determining protein FDR
+- [msslookup](#mslookup) - Creates SQLite databases from spectra, search and quantification data
+- [msspercolator](#pycolator) - Splits, merges, filters percolator XML results, and runs qvality
+- [msspsmtable](#mzidtsv) - Filters, splits, merges, and proteingroups on PSM tables from MSGF+. Also adds columns with extra data (quant, percolator, genes, etc)
+- [msspeptable](#peptable) - Creates and manipulates peptide tables (merging, quant data additions, etc)
+- [mssprottable](#prottable) - Idem for protein tables, including determining protein FDR
 
 
 <a name="mslookup"></a>
@@ -39,7 +39,7 @@ also does protein grouping and sequence filtering thanks to the power of the DB 
 
 Example: Store a multi-set tab-separated PSM table:
 
-`python3 mslookup.py psms -i psmtable.txt --spectracol 2 --fasta ENSEMBL80.fa --map ENS80_biomart.txt`
+`msslookup psms -i psmtable.txt --spectracol 2 --fasta ENSEMBL80.fa --map ENS80_biomart.txt`
 
 <a name="pycolator"></a>
 ### pycolator
@@ -49,7 +49,7 @@ existing percolator output.
 
 Example: filter unique peptides on best score of a merged percolator file
 
-`python3 pycolator.py filteruni -i percolator.xml`
+`msspercolator filteruni -i percolator.xml`
 
 <a name="mzidtsv"></a>
 ### mzidtsv
@@ -58,11 +58,11 @@ or other tools.
 
 Example: add MS2 quant data to PSM table from SQLite lookup (resulting from mslookup)
 
-`python3 mzidtsv.py quanttsv -i psmtable.txt --dbfile db.sqlite --isobaric`
+`msspsmtable quanttsv -i psmtable.txt --dbfile db.sqlite --isobaric`
 
 Example 2: Split PSM table into multiple tables on column "Biological set"
 
-`python3 mzidtsv.py splittsv -i psmtable.txt --bioset`
+`msspsmtable splittsv -i psmtable.txt --bioset`
 
 
 <a name="peptable"></a>
@@ -72,11 +72,11 @@ Creates and modifies peptide tables
 Example: create a peptide table by filtering best peptides from PSM table and removing isobaric quant data.
 Retains MS1 quant data by taking the highest MS1 quant for a given peptide sequence.
 
-`python3 peptable.py psm2pep -i psmtable.txt --spectracol 2 --scorecolpattern svm --ms1quantcolpattern area --isobquantcolpattern tmt10plex`
+`msspeptable psm2pep -i psmtable.txt --spectracol 2 --scorecolpattern svm --ms1quantcolpattern area --isobquantcolpattern tmt10plex`
 
 Example: Create column in peptide table with linear modeled q-values
 
-`python3 peptable.py modelqvals -i peptides.txt --qcolpattern "^q-value" --scorecolpattern svm`
+`msspeptable modelqvals -i peptides.txt --qcolpattern "^q-value" --scorecolpattern svm`
 
 <a name="prottable"></a>
 ### prottable
@@ -84,9 +84,9 @@ Creates and modifies protein tables, also runs qvality on these for FDR calculat
 
 Example: Add best-scoring peptide to protein table (Q-score by Savitsky et al 2014)
 
-`python3 prottable.py bestpeptide -i proteins.txt --peptable peptides.txt --scorecolpattern svm --logscore`
+`mssprottable bestpeptide -i proteins.txt --peptable peptides.txt --scorecolpattern svm --logscore`
 
 Example: Add FDR from qvality result to protein table using Q-scores as keys to look up
 corresponding q-values and PEPs
 
-`python3 prottable.py fdr -i proteins.txt --qvality qvals.txt --scorecolpattern "^Q-score"`
+`mssprottable fdr -i proteins.txt --qvality qvals.txt --scorecolpattern "^Q-score"`

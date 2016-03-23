@@ -1,6 +1,8 @@
 *.pyc
-*.swp
+*.sw[op]
 
 .ropeproject/
-
+build/
+dist/
+*.egg-info
 tests/test_output/

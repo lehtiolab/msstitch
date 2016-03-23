@@ -10,7 +10,7 @@ from lxml import etree
 class TestTrypticLookup(basetests.BaseTest):
     command = 'seqspace'
     suffix = ''
-    executable = 'mslookup.py'
+    executable = 'msslookup'
     infilename = 'proteins.fasta'
 
     def all_seqs_in_db(self, dbfn, sequences, seqtype):

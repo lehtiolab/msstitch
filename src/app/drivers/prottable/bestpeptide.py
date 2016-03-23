@@ -1,6 +1,6 @@
 from app.drivers.prottable.base import ProttableAddData
 from app.readers import tsv as tsvreader
-import app.actions.prottable.bestpeptide as prep
+from app.actions.prottable import bestpeptide as prep
 from app.drivers.options import prottable_options
 
 

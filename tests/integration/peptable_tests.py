@@ -110,8 +110,7 @@ class TestBuild(basetests.PeptableTest):
         self.dbfile = os.path.join(self.fixdir, 'peptable_db.sqlite')
 
     def get_std_options(self):
-        cmd = ['python3', '{0}'.format(self.executable), self.command,
-               '-d', self.workdir]
+        cmd = [self.executable, self.command, '-d', self.workdir]
         return cmd
 
     def check(self, genecentric=False):

@@ -1,7 +1,7 @@
 from app.drivers.prottable.base import PepProttableDriver
 from app.actions.headers import peptable as head
 from app.readers import tsv as tsvreader
-import app.actions.peptable.model_qvals as prep
+from app.actions.peptable import model_qvals as prep
 from app.drivers.options import peptable_options
 
 

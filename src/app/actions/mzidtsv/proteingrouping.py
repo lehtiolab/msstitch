@@ -1,7 +1,7 @@
 from app.readers import tsv as tsvreader
 from app.dataformats import mzidtsv as mzidtsvdata
-import app.lookups.sqlite.proteingroups as lookups
-import app.actions.mzidtsv.proteingroup_sorters as sorters
+from app.lookups.sqlite import proteingroups as lookups
+from app.actions.mzidtsv import proteingroup_sorters as sorters
 
 
 def get_header_with_proteingroups(header):
