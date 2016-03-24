@@ -44,35 +44,6 @@ def populate_parser(drivers):
     return parser
 
 
-def set_command_on_parser(drivers, commandmap, parser):
-    commandhelptxt = ['\033[1m{}\033[0m\n{}'.format(name,
-                                                    driver.get_commandhelp())
-                      for name, driver in commandmap.items()]
-    parser.add_argument(dest='command', type=str,
-                        help='How to manipulate the input:'
-                        '\n\n{}'.format('\n\n'.join(commandhelptxt)))
-    return commandmap
-
-
-def get_cmd_driver(drivers, commandline):
-    cmdparser = ArgumentParser(formatter_class=RawTextHelpFormatter)
-    commandmap = {driver.get_commandname(): driver for driver in drivers}
-    set_command_on_parser(drivers, commandmap, cmdparser)
-    try:
-        passed_command = [commandline[1]]
-    except IndexError:
-        passed_command = []
-    cmdargs = cmdparser.parse_args(passed_command)
-    try:
-        driver = commandmap[cmdargs.command]
-    except KeyError:
-        # Can we use argparse to deliver a friendly message?
-        raise RuntimeError('Command not recognized: {}'.format(
-            cmdargs.command))
-    else:
-        return driver, passed_command
-
-
 def start_msstitch(exec_drivers, sysargs):
     """Passed all drivers of executable, checks which command is passed to
     the executable and then gets the options for a driver, parses them from
