@@ -1,6 +1,8 @@
 import os
 from argparse import ArgumentParser, RawTextHelpFormatter
 
+VERSION_NUMBER = '1.0'
+
 
 def parser_file_exists(currentparser, fn):
     if not os.path.exists(fn):
@@ -11,6 +13,7 @@ def parser_file_exists(currentparser, fn):
 
 def populate_parser(drivers):
     parser = ArgumentParser(formatter_class=RawTextHelpFormatter)
+    parser.add_argument('--version', action='version', version=VERSION_NUMBER)
     subparsers = parser.add_subparsers(dest='subcommand')
     subparsers.required = True
     subparsermap = {}
@@ -20,6 +23,8 @@ def populate_parser(drivers):
         subparsermap[cmd] = subparsers.add_parser(
             cmd, conflict_handler='resolve', help=driver.get_commandhelp())
         subparsermap[cmd].set_defaults(func=driver.start)
+        subparsermap[cmd].add_argument('--version', action='version',
+                                       version=VERSION_NUMBER)
         options = [{k: v for k, v in opt.items()}
                    for opt in driver.get_options()]
         for argoptions in options:

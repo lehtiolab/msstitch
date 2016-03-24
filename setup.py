@@ -41,7 +41,7 @@ CLI = {'console_scripts': ['msspercolator=app.pycolator:main',
 
 try:
     import pypandoc
-    long_description = pypandoc.convert('README.md', 'rst')
+    long_description = pypandoc.convert('README.md', 'rst', format='md')
 except(IOError, ImportError):
     long_description = open('README.md').read()
 
