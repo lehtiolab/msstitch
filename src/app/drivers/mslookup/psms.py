@@ -21,12 +21,15 @@ class PSMLookupDriver(base.LookupDriver):
     def set_options(self):
         super().set_options()
         self.options.update(self.define_options(['spectracol', 'mapfn',
-                                                 'decoy', 'fasta', 'unroll'],
+                                                 'decoy', 'fasta', 'unroll',
+                                                 'genefield', 'fastadelim'],
                                                 mslookup_options))
 
     def create_lookup(self):
         header = tsvreader.get_tsv_header(self.fn)
         specfncol = header[int(self.spectracol) - 1]
+        fastadelim, genefield = self.get_fastadelim_genefield(self.fastadelim,
+                                                              self.genefield)
         lookup.create_psm_lookup(self.fn, self.fasta, self.mapfn, header,
                                  self.lookup, self.unroll, specfncol,
-                                 self.decoy)
+                                 self.decoy, fastadelim, genefield)

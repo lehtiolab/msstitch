@@ -87,3 +87,13 @@ class BaseDriver(object):
 
     def get_commandname(self):
         return self.command
+
+    def get_fastadelim_genefield(self, delimtype, genefield):
+        if delimtype is not None:
+            fastadelim = {'tab': '\t',
+                          'semicolon': ';', 'pipe': '|'}[delimtype]
+        else:
+            fastadelim = None
+        if genefield is not None:
+            genefield -= 1
+        return fastadelim, genefield

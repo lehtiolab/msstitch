@@ -106,6 +106,15 @@ shared_options = {
                       'required': False, 'default': None,
                       'help': 'Unique text pattern to identify '
                       'FDR column in input table.'},
+    'fastadelim': {'driverattr': 'fastadelim', 'clarg': '--fastadelim',
+                   'dest': 'fastadelim', 'required': False, 'type': 'pick',
+                   'picks': ['tab', 'pipe', 'semicolon'],
+                   'help': 'Delimiter in FASTA header, used to parse gene '
+                   'names in case of non-ENSEMBL/Uniprot'},
+    'genefield': {'driverattr': 'genefield', 'clarg': '--genefield',
+                  'dest': 'genefield', 'required': False, 'type': int,
+                  'help': 'Field nr (first=1) in FASTA that contains gene '
+                  'name when using --fastadelim to parse the gene names'},
 }
 
 mslookup_options = {

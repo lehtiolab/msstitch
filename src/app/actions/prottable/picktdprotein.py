@@ -9,23 +9,27 @@ DECOY = 'd'
 
 
 def write_pick_td_tables(target, decoy, theader, dheader,
-                         targetfasta, decoyfasta, inferencetype):
+                         targetfasta, decoyfasta, inferencetype,
+                         fastadelim, genefield):
     tfile, dfile = 'target.txt', 'decoy.txt'
     tdmap = {}
     with open(tfile, 'w') as tdmap[TARGET], open(dfile, 'w') as tdmap[DECOY]:
         for ptype, score in generate_pick_fdr(target, decoy, theader, dheader,
                                               targetfasta, decoyfasta,
-                                              inferencetype):
+                                              inferencetype,
+                                              fastadelim, genefield):
             tdmap[ptype].write('\n{}'.format(score))
     return tfile, dfile
 
 
 def generate_pick_fdr(targetprot, decoyprot, theader, dheader,
-                      targetfasta, decoyfasta, picktype):
+                      targetfasta, decoyfasta, picktype,
+                      fastadelim, genefield):
     t_scores, d_scores = generate_scoremaps(targetprot, decoyprot,
                                             theader, dheader)
     if picktype == 'fasta':
-        tdmap = create_td_gene_map(targetfasta, decoyfasta)
+        tdmap = create_td_gene_map(targetfasta, decoyfasta,
+                                   fastadelim, genefield)
     elif picktype == 'result':
         tdmap = create_td_assoc_map(targetprot, decoyprot, theader, dheader)
     td_picked = generate_picked_genes(tdmap, t_scores, d_scores)

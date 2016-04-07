@@ -60,7 +60,8 @@ class PickedQvalityDriver(ProttableQvalityDriver):
 
     def set_options(self):
         super().set_options()
-        options = self.define_options(['t_fasta', 'd_fasta', 'picktype'],
+        options = self.define_options(['t_fasta', 'd_fasta', 'picktype',
+                                       'genefield', 'fastadelim'],
                                       prottable_options)
         self.options.update(options)
         tmp_options = {}
@@ -75,7 +76,10 @@ class PickedQvalityDriver(ProttableQvalityDriver):
 
     def set_features(self):
         """Using this to write picked score tables for qvality"""
+        fastadelim, genefield = self.get_fastadelim_genefield(self.fastadelim,
+                                                              self.genefield)
         target, decoy = pickprotein.write_pick_td_tables(
             self.target, self.decoy, self.targetheader, self.decoyheader,
-            self.t_fasta, self.d_fasta, self.picktype)
+            self.t_fasta, self.d_fasta, self.picktype, fastadelim,
+            genefield)
         self.scores = {'target': {'fn': target}, 'decoy': {'fn': decoy}}

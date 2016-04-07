@@ -25,7 +25,7 @@ def get_proteins_descriptions(fastafn):
         yield (record.id, record.description)
 
 
-def get_proteins_genes(fastafn):
+def get_proteins_genes(fastafn, fastadelim=None, genefield=None):
     """This returns a tuple of (protein, gene, HGNC symbol, description) from
     a passed file. If the file is FASTA from ENSEMBL or UniProt, only genes and
     descriptions are given and symbol will be None. If the file is a ENSEMBL
@@ -35,7 +35,8 @@ def get_proteins_genes(fastafn):
     if firstline[0] == '>':
         for record in parse_fasta(fastafn):
             rectype = get_record_type(record)
-            yield (record.id, get_gene(record.description, rectype),
+            yield (record.id, get_gene(record.description, rectype,
+                                       fastadelim, genefield),
                    None, record.description)
     elif 'Ensembl Gene ID' in firstline.split('\t'):
         with open(fastafn) as fp:
@@ -75,8 +76,7 @@ def get_record_type(record):
     elif test_name[:3] == 'ENS':
         return 'ensembl'
     else:
-        raise RuntimeError('Cannot detect type of FASTA file. '
-                           'Should be Uniprot or ENSEMBL')
+        return False
 
 
 def get_decoy_mod_string(protein):
@@ -93,7 +93,12 @@ def get_decoy_mod_string(protein):
                 return mod 
 
 
-def get_gene(description, rectype):
+def get_gene(description, rectype, fastadelim, genefield):
+    if not rectype:
+        if None not in [fastadelim, genefield]:
+            return description.split(fastadelim)[genefield]
+        else:
+            return None
     splitter = {'ensembl': ':',
                 'swiss': '='}[rectype]
     field = {'ensembl': 'gene',

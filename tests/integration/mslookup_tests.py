@@ -131,8 +131,26 @@ class TestSpectraLookup(basetests.MSLookupTest):
 
 class TestPSMLookup(basetests.MSLookupTest):
     command = 'psms'
-    infilename = 'mzidtsv_filtered_fr1-2.txt'
     base_db_fn = 'spectra_lookup.sqlite'
+
+    def check_db_fasta(self, fasta, exp_proteins=None, desc=True):
+        if exp_proteins is None:
+            exp_proteins = {rec.id: {'seq': rec.seq, 'desc': rec.description}
+                            for rec in SeqIO.parse(fasta, 'fasta')}
+        self.check_db_base(exp_proteins)
+        sql = ('SELECT ps.protein_acc, ps.sequence, pd.description '
+               'FROM protein_seq AS ps '
+               'JOIN prot_desc AS pd USING(protein_acc)')
+        if not desc:
+            sql = ('SELECT ps.protein_acc, ps.sequence '
+                   'FROM protein_seq AS ps '
+                   'JOIN prot_desc AS pd USING(protein_acc)')
+        for result_protein in self.get_values_from_db(self.resultfn, sql):
+            self.assertEqual(exp_proteins[result_protein[0]]['seq'],
+                             result_protein[1])
+            if desc:
+                self.assertEqual(exp_proteins[result_protein[0]]['desc'],
+                                 result_protein[2])
 
     def check_db_base(self, expected_proteins=None):
         expected_psms = self.get_expected_psms()
@@ -154,24 +172,24 @@ class TestPSMLookup(basetests.MSLookupTest):
         for protpsm in self.get_values_from_db(self.resultfn, ppsql):
             self.assertIn(protpsm[0], expected_psms[protpsm[1]]['proteins'])
 
-    def check_db_fasta(self, fasta, exp_proteins=None, desc=True):
-        if exp_proteins is None:
-            exp_proteins = {rec.id: {'seq': rec.seq, 'desc': rec.description}
-                            for rec in SeqIO.parse(fasta, 'fasta')}
-        self.check_db_base(exp_proteins)
-        sql = ('SELECT ps.protein_acc, ps.sequence, pd.description '
-               'FROM protein_seq AS ps '
-               'JOIN prot_desc AS pd USING(protein_acc)')
-        if not desc:
-            sql = ('SELECT ps.protein_acc, ps.sequence '
-                   'FROM protein_seq AS ps '
-                   'JOIN prot_desc AS pd USING(protein_acc)')
-        for result_protein in self.get_values_from_db(self.resultfn, sql):
-            self.assertEqual(exp_proteins[result_protein[0]]['seq'],
-                             result_protein[1])
-            if desc:
-                self.assertEqual(exp_proteins[result_protein[0]]['desc'],
-                                 result_protein[2])
+    def get_expected_psms(self):
+        header = self.get_tsvheader(self.infile[0])
+        prot_ix = header.index('Protein')
+        seq_ix = header.index('Peptide')
+        score_ix = header.index('MSGFScore')
+        psms = {}
+        for row, line in enumerate(self.get_all_lines(self.infile[0])):
+            line = line.strip('\n').split('\t')
+            psms[row] = {'proteins': [x.split('(pre')[0] for x in
+                                      line[prot_ix].split(';')],
+                         'seq': line[seq_ix],
+                         'score': line[score_ix],
+                         }
+        return psms
+
+
+class TestPSMLookupEnsembl(TestPSMLookup):
+    infilename = 'mzidtsv_filtered_fr1-2.txt'
 
     def check_db_map(self, fasta, martmap):
         exp_proteins = {rec.id: {'seq': rec.seq}
@@ -215,28 +233,11 @@ class TestPSMLookup(basetests.MSLookupTest):
                                        'desc': decoymod(line[dix]),
                                        })
         self.check_db_fasta(fasta, exp_proteins, desc=False)
-        sql = ('SELECT g.protein_acc, g.gene_acc, aid.assoc_id'
-               ' FROM genes AS g JOIN associated_ids AS aid USING(protein_acc)'
-               ' JOIN prot_desc AS pd USING(protein_acc)')
+        sql = ('SELECT g.protein_acc, g.gene_acc, aid.assoc_id '
+               'FROM genes AS g JOIN associated_ids AS aid USING(protein_acc)')
         for prot, gene, aid in self.get_values_from_db(self.resultfn, sql):
-            print(prot, gene)
             self.assertEqual(gene, exp_proteins[prot]['gene'])
             self.assertEqual(aid, exp_proteins[prot]['symb'])
-
-    def get_expected_psms(self):
-        header = self.get_tsvheader(self.infile[0])
-        prot_ix = header.index('Protein')
-        seq_ix = header.index('Peptide')
-        score_ix = header.index('MSGFScore')
-        psms = {}
-        for row, line in enumerate(self.get_all_lines(self.infile[0])):
-            line = line.strip('\n').split('\t')
-            psms[row] = {'proteins': [x.split('(pre')[0] for x in
-                                      line[prot_ix].split(';')],
-                         'seq': line[seq_ix],
-                         'score': line[score_ix],
-                         }
-        return psms
 
     def test_no_fasta(self):
         options = ['--spectracol', '2']
@@ -265,6 +266,27 @@ class TestPSMLookup(basetests.MSLookupTest):
                    '--map', mapfn, '--decoy']
         self.run_command(options)
         self.check_db_decoy(fastafn, mapfn)
+
+
+class TestPSMLookupDelimitedFasta(TestPSMLookup):
+    infilename = 'mzidtsv_filtered_fr1-2_notensembl.txt'
+
+    def test_with_fasta_with_delim(self):
+        fastafn = os.path.join(self.fixdir, 'delim_header.fasta')
+        field, delim, delimname = '2', '|', 'pipe'
+        options = ['--spectracol', '2', '--fasta', fastafn,
+                   '--fastadelim', delimname, '--genefield', field]
+        self.run_command(options)
+        self.check_db_fasta_with_own_format_delimiter(fastafn, delim, field)
+
+    def check_db_fasta_with_own_format_delimiter(self, fasta, delim, field):
+        self.check_db_fasta(fasta)
+        exp_proteins = {rec.id:
+                        {'gene': rec.description.split(delim)[int(field) - 1]}
+                        for rec in SeqIO.parse(fasta, 'fasta')}
+        sql = ('SELECT g.protein_acc, g.gene_acc FROM genes AS g ')
+        for prot, gene in self.get_values_from_db(self.resultfn, sql):
+            self.assertEqual(gene, exp_proteins[prot]['gene'])
 
 
 class TestIsoquantLookup(basetests.MSLookupTest):

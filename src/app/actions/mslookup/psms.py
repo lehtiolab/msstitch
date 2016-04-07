@@ -7,10 +7,12 @@ DB_STORE_CHUNK = 100000
 
 
 def create_psm_lookup(fn, fastafn, mapfn, header, pgdb, unroll=False,
-                      specfncol=None, decoy=False):
+                      specfncol=None, decoy=False,
+                      fastadelim=None, genefield=None):
     """Reads PSMs from file, stores them to a database backend in chunked PSMs.
     """
-    store_proteins_descriptions(pgdb, fastafn, fn, mapfn, header, decoy)
+    store_proteins_descriptions(pgdb, fastafn, fn, mapfn, header, decoy,
+                                fastadelim, genefield)
     mzmlmap = pgdb.get_mzmlfile_map()
     sequences = {}
     for psm in tsvreader.generate_tsv_psms(fn, header):
@@ -50,7 +52,8 @@ def get_protein_gene_map(mapfn, proteins, decoy):
     return gpmap
 
 
-def store_proteins_descriptions(pgdb, fastafn, tsvfn, mapfn, header, decoy):
+def store_proteins_descriptions(pgdb, fastafn, tsvfn, mapfn, header, decoy,
+                                fastadelim, genefield):
     if not fastafn:
         proteins = {}
         for psm in tsvreader.generate_tsv_psms(tsvfn, header):
@@ -64,7 +67,8 @@ def store_proteins_descriptions(pgdb, fastafn, tsvfn, mapfn, header, decoy):
         proteins = [x for x in proteins]
         pgdb.store_proteins(proteins, evidences, sequences)
         if not mapfn:
-            associations = fastareader.get_proteins_genes(fastafn)
+            associations = fastareader.get_proteins_genes(fastafn, fastadelim,
+                                                          genefield)
             genes, descriptions = [], []
             for assoc in associations:
                 genes.append((assoc[1], assoc[0]))
