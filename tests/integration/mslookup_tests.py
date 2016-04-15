@@ -30,7 +30,6 @@ class TestTrypticLookup(basetests.BaseTest):
         if seqtype is not None:
             sequences.extend(tryp_sequences[seqtype])
         self.run_command(options)
-        print(os.listdir(self.workdir))
         self.assertTrue(self.all_seqs_in_db(self.resultfn,
                                             sequences, seqtype))
 
@@ -392,8 +391,6 @@ class TestProteingroupLookup(basetests.MSLookupTest):
                   self.get_values_from_db(self.resultfn, sql)}
         expected = {keyfun(x): valfun(x) for x in
                     self.get_values_from_db(exp_file, sql)}
-        #self.assertEqual(result, expected)
-        print(result)
         for key, value in result.items():
             self.assertIn(key, expected.keys())
             self.assertEqual(value, expected[key])
@@ -446,7 +443,6 @@ class TestProtPepTableLookup(basetests.MSLookupTest):
         with open(self.infile[0]) as fp:
             header = next(fp).strip().split('\t')
             for rec in self.get_values_from_db(self.resultfn, sql):
-                print(rec[0], protein_acc)
                 if rec[0] != protein_acc and protein_acc is not None:
                     do_check(resultquant, next(fp), header)
                     resultquant = {}

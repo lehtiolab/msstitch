@@ -84,13 +84,13 @@ def get_decoy_mod_string(protein):
     for mod in mods:
         if mod in protein:
             if protein.endswith('_{}'.format(mod)):
-                return '_{}'.format(mod) 
+                return '_{}'.format(mod)
             elif protein.endswith('{}'.format(mod)):
-                return mod 
+                return mod
             elif protein.startswith('{}_'.format(mod)):
-                return '{}_'.format(mod) 
+                return '{}_'.format(mod)
             elif protein.startswith('{}'.format(mod)):
-                return mod 
+                return mod
 
 
 def get_gene(description, rectype, fastadelim, genefield):
