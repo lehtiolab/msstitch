@@ -26,7 +26,12 @@ def generate_psms_split(fn, oldheader, bioset, splitcol):
     """Loops PSMs and outputs dictionaries passed to writer. Dictionaries
     contain the PSMs and info to which split pool the
     respective PSM belongs"""
-    splitcolnr = get_splitcolnr(oldheader, bioset, splitcol)
+    try:
+        splitcolnr = get_splitcolnr(oldheader, bioset, splitcol)
+    except IndexError:
+        raise RuntimeError('Cannot find bioset header column in '
+                           'input file {}, though --bioset has '
+                           'been passed'.format(fn))
     for psm in tsvreader.generate_tsv_psms(fn, oldheader):
         yield {'psm': psm,
                'split_pool': psm[oldheader[splitcolnr]]
