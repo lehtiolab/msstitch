@@ -34,7 +34,7 @@ class MzidTSVSplitDriver(MzidTSVDriver):
 
     def set_options(self):
         super().set_options()
-        options = self.define_options(['bioset', 'setnames', 'splitcol'],
+        options = self.define_options(['bioset', 'splitcol'],
                                       mzidtsv_options)
         self.options.update(options)
 
@@ -46,4 +46,4 @@ class MzidTSVSplitDriver(MzidTSVDriver):
     def write(self):
         base_outfile = os.path.join(self.outdir, '{}.tsv')
         writers.write_multi_mzidtsv(self.header, self.oldheader, self.psms,
-                                    self.setnames, base_outfile)
+                                    base_outfile)

@@ -144,7 +144,7 @@ class TestSplitTSV(basetests.MzidTSVBaseTest):
         self.expectlines = self.get_all_lines(self.infile)
 
     def test_auto_bioset_column(self):
-        self.run_command(['--bioset', '--setnames', 'S1'])
+        self.run_command(['--bioset'])
         resultfn = os.path.join(self.workdir, 'S1.tsv')
         for line in self.get_all_lines(resultfn):
             self.assertEqual(line, next(self.expectlines))
@@ -152,8 +152,7 @@ class TestSplitTSV(basetests.MzidTSVBaseTest):
     def test_splitcol(self):
         setnames = ['dataset_17694.dat_task_0.mzml',
                     'dataset_17694.dat_task_1.mzml']
-        options = ['--splitcol', '1', '--setnames']
-        options.extend(setnames)
+        options = ['--splitcol', '1']
         self.run_command(options)
         resultfiles = [os.path.join(self.workdir, '{}.tsv'.format(setname))
                        for setname in setnames]
