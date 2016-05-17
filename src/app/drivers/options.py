@@ -231,6 +231,16 @@ mzidtsv_options = {
                  'help': 'Column number to split a PSM table on. First column '
                  'is number 1', 'required': False
                  },
+    'denomcols': {'driverattr': 'denomcols', 'clarg': '--denominators',
+                  'type': int, 'nargs': '+', 'required': False,
+                  'help': 'Column numbers of denominator channels when '
+                  'creating a PSM table with normalized ratios',
+                  },
+    'minint': {'driverattr': 'minint', 'clarg': '--minint', 'type': float,
+               'help': 'Intensity threshold of PSMs when calculating '
+               'isobaric ratios. Values below threshold will be set to NA.',
+               'required': False, 'default': -1,
+               },
 }
 
 pepprottable_options = {

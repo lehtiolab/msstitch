@@ -74,6 +74,9 @@ class BaseDriver(object):
         outfn = basefn + suffix
         return os.path.join(self.outdir, outfn)
 
+    def number_to_headerfield(self, columnr, header):
+        return header[int(columnr) - 1]
+
     def get_column_header_for_number(self, column_var_names, header=False):
         """This function subtracts 1 from inputted column number to comply
         with programmers counting (i.e. from 0, not from 1). For TSV data."""
@@ -83,7 +86,7 @@ class BaseDriver(object):
             value = getattr(self, col)
             if not value or value is None:
                 continue
-            setattr(self, col, header[int(value) - 1])
+            setattr(self, col, self.number_to_headerfield(value, header))
 
     def get_commandname(self):
         return self.command

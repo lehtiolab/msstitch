@@ -1,5 +1,6 @@
 import os
 from lxml import etree
+from statistics import median
 
 from app.dataformats import mzidtsv as constants
 from tests.integration import basetests
@@ -268,3 +269,63 @@ class TestAddGenes(basetests.MzidTSVBaseTest):
             for exp_set, result in zip([exp_g, exp_assoc, exp_desc],
                                        [genes, assoc_ids, descriptions]):
                 self.assertEqual(0, len(exp_set.difference(result)))
+
+
+class TestIsoNormalize(basetests.MzidTSVBaseTest):
+    suffix = '_normalized_isobaric.txt'
+    command = 'isonormalize'
+    infilename = 'mzidtsv.txt'
+
+    def get_infile_lines(self):
+        with open(self.infile[0]) as fp:
+            header = next(fp).strip('\n').split('\t')
+            for line in fp:
+                line = line.strip('\n').split('\t')
+                yield {field: val for field, val in zip(header, line)}
+
+    def get_denominator(self, line, denom_ch):
+        return sum([float(line[ch]) for ch in denom_ch
+                    if line[ch] != 'NA']) / 2
+
+    def test_normalize(self):
+        self.run_command(['--isobquantcolpattern', 'fake_ch', '--denominators',
+                          '21', '22'])
+        self.do_check(-1)
+
+    def test_normalize_minint(self):
+        minint = 3000
+        self.run_command(['--isobquantcolpattern', 'fake_ch', '--denominators',
+                          '21', '22', '--minint', str(minint)])
+        self.do_check(minint)
+
+    def do_check(self, minint):
+        channels = ['fake_ch{}'.format(x) for x in range(8)]
+        denom_ch = channels[0:2]
+        ch_medians = {ch: [] for ch in channels}
+        for line in self.get_infile_lines():
+            line.update({ch: line[ch]
+                         if line[ch] != 'NA' and float(line[ch]) > minint
+                         else 'NA' for ch in channels})
+            denom = self.get_denominator(line, denom_ch)
+            if denom == 0:
+                continue
+            for ch in channels:
+                if line[ch] == 'NA':
+                    continue
+                ch_medians[ch].append(float(line[ch]) / denom)
+        ch_medians = {ch: median(vals) for ch, vals in ch_medians.items()}
+        for in_line, resultline in zip(self.get_infile_lines(),
+                                       self.get_values(channels)):
+            in_line.update({ch: in_line[ch]
+                            if in_line[ch] != 'NA' and
+                            float(in_line[ch]) > minint else 'NA'
+                            for ch in channels})
+            resultline = [x[2] for x in resultline]
+            denom = self.get_denominator(in_line, denom_ch)
+            if denom == 0:
+                exp_line = ['NA'] * len(channels)
+            else:
+                exp_line = [str((float(in_line[ch]) / denom) / ch_medians[ch])
+                            if in_line[ch] != 'NA' else 'NA'
+                            for ch in channels]
+            self.assertEqual(resultline, exp_line)
