@@ -27,11 +27,16 @@ def get_normalized_ratios(psmfn, header, channels, denom_channels,
         denom = sum([psmratios[ch] for ch in denom_channels
                      if psmratios[ch] != 'NA']) / len(denom_channels)
         ratios.append(calc_psm_ratios(psmratios, channels, denom))
-    ch_medians = {}
-    for ix, channel in enumerate(channels):
-        ch_medians[channel] = median([x[ix] for x in ratios if x[ix] != 'NA'])
+    ch_medians = get_medians(channels, ratios)
     for psm, psmratios in zip(reader.generate_tsv_psms(psmfn, header), ratios):
         psm.update({ch: str(psmratios[ix] / ch_medians[ch])
                     if psmratios[ix] != 'NA' else 'NA'
                     for ix, ch in enumerate(channels)})
         yield psm
+
+
+def get_medians(channels, ratios):
+    ch_medians = {}
+    for ix, channel in enumerate(channels):
+        ch_medians[channel] = median([x[ix] for x in ratios if x[ix] != 'NA'])
+    return ch_medians
