@@ -17,10 +17,6 @@ class AddIsobaricQuantDriver(ProttableAddData):
                                                  'quantcolpattern'],
                                                 prottable_options))
 
-    def parse_input(self, **kwargs):
-        super().parse_input(**kwargs)
-        self.headertypes = ['isoquant']
-
     def initialize_input(self):
         super().initialize_input()
         quantheader = reader.get_tsv_header(self.quantfile)
