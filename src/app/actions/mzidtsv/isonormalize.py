@@ -1,5 +1,5 @@
 from app.readers import tsv as reader
-from statistics import median
+from statistics import median, StatisticsError
 
 
 def calc_psm_ratios(psm, channels, denom_intensity):
@@ -38,5 +38,10 @@ def get_normalized_ratios(psmfn, header, channels, denom_channels,
 def get_medians(channels, ratios):
     ch_medians = {}
     for ix, channel in enumerate(channels):
-        ch_medians[channel] = median([x[ix] for x in ratios if x[ix] != 'NA'])
+        try:
+            ch_medians[channel] = median([x[ix] for x in ratios
+                                          if x[ix] != 'NA'])
+        except StatisticsError:
+            # channel is empty, common in protein quant but not in normalizing
+            ch_medians[channel] = 'NA'
     return ch_medians
