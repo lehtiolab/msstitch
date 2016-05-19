@@ -18,8 +18,7 @@ class CreateEmptyDriver(ProttableDriver):
 
     def set_options(self):
         super().set_options()
-        self.options.update(self.define_options(['proteincol'],
-                                                prottable_options))
+        self.options.update(self.define_options(['proteincol']))
 
     def parse_input(self, **kwargs):
         super().parse_input(**kwargs)

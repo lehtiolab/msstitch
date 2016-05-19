@@ -26,12 +26,14 @@ class BaseDriver(object):
     def get_options(self):
         return self.options.values()
 
-    def define_options(self, names, parser_options):
+    def define_options(self, names, parser_options=None):
         """Given a list of option names, this returns a list of dicts
         defined in all_options and self.shared_options. These can then
         be used to populate the argparser with"""
         def copy_option(options, name):
             return {k: v for k, v in options[name].items()}
+        if parser_options is None:
+            parser_options = {}
         options = {}
         for name in names:
             try:
