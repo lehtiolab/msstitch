@@ -1,5 +1,7 @@
-from app.readers import tsv as reader
+import sys
 from statistics import median, StatisticsError
+
+from app.readers import tsv as reader
 
 
 def calc_psm_ratios(psm, channels, denom_intensity):
@@ -28,6 +30,10 @@ def get_normalized_ratios(psmfn, header, channels, denom_channels,
                      if psmratios[ch] != 'NA']) / len(denom_channels)
         ratios.append(calc_psm_ratios(psmratios, channels, denom))
     ch_medians = get_medians(channels, ratios)
+    report = ('Channel intensity medians used for normalization:\n'
+              '{}'.format('\n'.join(['{} - {}'.format(ch, ch_medians[ch])
+                                     for ch in channels])))
+    sys.stdout.write(report)
     for psm, psmratios in zip(reader.generate_tsv_psms(psmfn, header), ratios):
         psm.update({ch: str(psmratios[ix] / ch_medians[ch])
                     if psmratios[ix] != 'NA' else 'NA'

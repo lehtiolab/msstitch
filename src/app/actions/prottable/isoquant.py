@@ -43,7 +43,6 @@ def isobaric_quant_psms(psms, protcol, quantcols):
         outprotein = {prottabledata.HEADER_PROTEIN: protein}
         outprotein.update(get_medians(quantcols, quants))
         outprotein.update(get_no_psms(quantcols, quants))
-        print(outprotein)
         yield outprotein
 
 

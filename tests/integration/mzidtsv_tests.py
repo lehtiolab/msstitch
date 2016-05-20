@@ -288,17 +288,18 @@ class TestIsoNormalize(basetests.MzidTSVBaseTest):
                     if line[ch] != 'NA']) / 2
 
     def test_normalize(self):
-        self.run_command(['--isobquantcolpattern', 'fake_ch', '--denominators',
-                          '21', '22'])
-        self.do_check(-1)
+        stdout = self.run_command_stdout(['--isobquantcolpattern', 'fake_ch',
+                                          '--denominators', '21', '22'])
+        self.do_check(-1, stdout)
 
     def test_normalize_minint(self):
         minint = 3000
-        self.run_command(['--isobquantcolpattern', 'fake_ch', '--denominators',
-                          '21', '22', '--minint', str(minint)])
-        self.do_check(minint)
+        stdout = self.run_command_stdout(['--isobquantcolpattern', 'fake_ch',
+                                          '--denominators', '21', '22',
+                                          '--minint', str(minint)])
+        self.do_check(minint, stdout)
 
-    def do_check(self, minint):
+    def do_check(self, minint, stdout):
         channels = ['fake_ch{}'.format(x) for x in range(8)]
         denom_ch = channels[0:2]
         ch_medians = {ch: [] for ch in channels}
@@ -314,6 +315,13 @@ class TestIsoNormalize(basetests.MzidTSVBaseTest):
                     continue
                 ch_medians[ch].append(float(line[ch]) / denom)
         ch_medians = {ch: median(vals) for ch, vals in ch_medians.items()}
+        stdout = stdout.decode().split('\n')
+        self.assertEqual(stdout[0],
+                         'Channel intensity medians used for normalization:')
+        stdout_channels = {x.split(' - ')[0]: x.split(' - ')[1]
+                           for x in stdout[1:]}
+        for ch in channels:
+            self.assertEqual(float(stdout_channels[ch]), ch_medians[ch])
         for in_line, resultline in zip(self.get_infile_lines(),
                                        self.get_values(channels)):
             in_line.update({ch: in_line[ch]
