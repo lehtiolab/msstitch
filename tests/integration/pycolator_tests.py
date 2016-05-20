@@ -57,41 +57,73 @@ class TestReassign(BaseTestPycolator):
             self.assertEqual(rpep, mapvals[0])
 
 
-class TestSplitTD(BaseTestPycolator):
+class TestSplit(BaseTestPycolator):
+    def do_check(self, first_exp_fn, sec_exp_fn, first_result, second_result):
+        first_expected = os.path.join(self.fixdir, first_exp_fn)
+        second_expected = os.path.join(self.fixdir, sec_exp_fn)
+        first_exp_contents = self.read_percolator_out(first_expected)
+        second_exp_contents = self.read_percolator_out(second_expected)
+        first_contents = self.read_percolator_out(first_result)
+        second_contents = self.read_percolator_out(second_result)
+
+        self.assertEqual(len(first_contents['psms']),
+                         len(first_exp_contents['psms']))
+        self.assertEqual(len(first_contents['peptides']),
+                         len(first_exp_contents['peptides']))
+        self.assertEqual(len(second_contents['psms']),
+                         len(second_exp_contents['psms']))
+        self.assertEqual(len(second_contents['peptides']),
+                         len(second_exp_contents['peptides']))
+        return first_contents, second_contents
+
+
+class TestSplitProteinHeader(TestSplit):
+    command = 'splitprotein'
+    suffix = ''
+
+    def test_splitprotein(self):
+        protheaders = ['ENSP', 'random;decoy']
+        self.suffix = ''
+        options = ['--protheaders'] + protheaders
+        self.run_command(options)
+        ensp_result = os.path.join(self.workdir, self.infilename + '_h0.xml')
+        fake_result = os.path.join(self.workdir, self.infilename + '_h1.xml')
+        ensp_contents, dr_contents = self.do_check('splitprotein_h0.xml',
+                                                   'splitprotein_h1.xml',
+                                                   ensp_result, fake_result)
+        ns = self.get_xml_namespace(ensp_result)
+        for feat in ['psms', 'peptides']:
+            for el in ensp_contents[feat]:
+                self.assertEqual(
+                    el.find('{%s}protein_id' % ns['xmlns']).text[:4], 'ENSP')
+            for el in dr_contents[feat]:
+                self.assertIn(el.find('{%s}protein_id' % ns['xmlns']).text[:6],
+                              ['decoy_', 'random'])
+
+
+class TestSplitTD(TestSplit):
     command = 'splittd'
     suffix = ''
 
-    def test_split(self):
+    def test_splittd(self):
         """Tests that splitted files contain equal amount of PSMS
         when compared with expected output, and checks that each psm/peptide
         has correct 'decoy' attribute."""
-        self.target = os.path.join(self.workdir,
-                                   self.infilename + '_target.xml')
-        self.decoy = os.path.join(self.workdir,
-                                  self.infilename + '_decoy.xml')
+        target_result = os.path.join(self.workdir,
+                                     self.infilename + '_target.xml')
+        decoy_result = os.path.join(self.workdir,
+                                    self.infilename + '_decoy.xml')
         self.run_command()
-        target_expected = os.path.join(self.fixdir, 'splittd_target_out.xml')
-        decoy_expected = os.path.join(self.fixdir, 'splittd_decoy_out.xml')
-        target_exp_contents = self.read_percolator_out(target_expected)
-        decoy_exp_contents = self.read_percolator_out(decoy_expected)
-        target_contents = self.read_percolator_out(self.target)
-        decoy_contents = self.read_percolator_out(self.decoy)
-
-        self.assertEqual(len(target_contents['psms']),
-                         len(target_exp_contents['psms']))
-        self.assertEqual(len(target_contents['peptides']),
-                         len(target_exp_contents['peptides']))
-        self.assertEqual(len(decoy_contents['psms']),
-                         len(decoy_exp_contents['psms']))
-        self.assertEqual(len(decoy_contents['peptides']),
-                         len(decoy_exp_contents['peptides']))
+        t_contents, d_contents = self.do_check('splittd_target_out.xml',
+                                               'splittd_decoy_out.xml',
+                                               target_result, decoy_result)
         for feat in ['psms', 'peptides']:
-            for el in target_contents[feat]:
+            for el in t_contents[feat]:
                 self.assertEqual(
-                    el.attrib['{%s}decoy' % target_contents['ns']], 'false')
-            for el in decoy_contents[feat]:
+                    el.attrib['{%s}decoy' % t_contents['ns']], 'false')
+            for el in d_contents[feat]:
                 self.assertEqual(
-                    el.attrib['{%s}decoy' % decoy_contents['ns']], 'true')
+                    el.attrib['{%s}decoy' % d_contents['ns']], 'true')
 
 
 class TestMerge(BaseTestPycolator):

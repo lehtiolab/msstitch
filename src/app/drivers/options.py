@@ -207,6 +207,13 @@ pycolator_options = {
                  'help': 'Extra options that may be passed to qvality. '
                  'Option form: --qoptions ***flag value ***flag ***flag value',
                  'nargs': '+', 'type': str},
+    'protheaders': {'driverattr': 'protheaders', 'clarg': '--protheaders',
+                    'nargs': '+', 'type': str,
+                    'help': 'Specify protein FASTA headers to split on. '
+                    'Multiple headers of the same split-type can be grouped '
+                    'with semicolons. E.g. --protheaders ENSP;sp '
+                    'PSEUDOGEN;ncRNA would split into ENSP/swissprot peptides '
+                    'and pseudogenes/non-coding RNA peptides.'},
     'deamidate': {'driverattr': 'deamidate', 'clarg': '--deamidate',
                   'action': 'store_const', 'default': False, 'const': True,
                   'help': 'Filter against both normal peptides and deamidated '

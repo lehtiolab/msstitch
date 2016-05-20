@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<percolator_output 
+xmlns="http://per-colator.com/percolator_out/15" 
+xmlns:p="http://per-colator.com/percolator_out/15" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://per-colator.com/percolator_out/15 https://github.com/percolator/percolator/raw/pout-1-5/src/xml/percolator_out.xsd" 
+p:majorVersion="2" p:minorVersion="07" p:percolator_version="Percolator version 2.07">
+
+  <process_info>
+    <command_line>percolator -X /mnt/galaxy/data/job_working_directory/000/49/task_0/dataset_53.dat --decoy-xml-output --verbose 0 --protein /mnt/galaxy/data/job_working_directory/000/49/task_0/dataset_52.dat</command_line>
+    <other_command_line></other_command_line>
+    <pi_0_psms>0.88042</pi_0_psms>
+    <pi_0_peptides>0.94245</pi_0_peptides>
+    <alpha>0.008</alpha>
+    <beta>0.001</beta>
+    <gamma>0.5</gamma>
+    <psms_qlevel>673</psms_qlevel>
+    <peptides_qlevel>236</peptides_qlevel>
+    <proteins_qlevel>24</proteins_qlevel>
+  </process_info>
+
+  <psms>
+    <psm p:psm_id="task_0_dataset_40_SII_5659_1_5659_3_1" p:decoy="true">
+      <svm_score>3.257</svm_score>
+      <q_value>0.000e+00</q_value>
+      <pep>2.236e-07</pep>
+      <exp_mass>0.0000</exp_mass>
+      <calc_mass>0.000</calc_mass>
+      <peptide_seq n="R" c="E" seq="[UNIMOD:730]VQDDEVGDGTTSVTVLAAELLR"/>
+      <protein_id>decoy_sequence1</protein_id>
+      <protein_id>decoy_sequence2</protein_id>
+      <p_value>1.637e-04</p_value>
+    </psm>
+    <psm p:psm_id="task_2_dataset_40_SII_4747_1_4747_3_1" p:decoy="true">
+      <svm_score>3.057</svm_score>
+      <q_value>0.000e+00</q_value>
+      <pep>5.363e-07</pep>
+      <exp_mass>0.0000</exp_mass>
+      <calc_mass>0.000</calc_mass>
+      <peptide_seq n="R" c="D" seq="[UNIMOD:730]VQDDEVGDGTTSVTVLAAELLR"/>
+      <protein_id>decoy_sequence3</protein_id>
+      <protein_id>decoy_sequence4</protein_id>
+      <p_value>1.637e-04</p_value>
+    </psm>
+    <psm p:psm_id="dataset_608_SII_4266_1_4266_2_1" p:decoy="true">
+      <svm_score>-41.070</svm_score>
+      <q_value>2.780e-01</q_value>
+      <pep>1.000e+00</pep>
+      <exp_mass>567.8200</exp_mass>
+      <calc_mass>567.320</calc_mass>
+      <peptide_seq n="K" c="A" seq="CEEKRRKK"/>
+      <protein_id>random_seq_10206</protein_id>
+      <protein_id>random_seq_10207</protein_id>
+      <protein_id>random_seq_10208</protein_id>
+      <p_value>1.000e+00</p_value>
+    </psm>
+  </psms>
+  <peptides>
+    <peptide p:peptide_id="CEEKRRKK" p:decoy="true">
+      <svm_score>-41.070</svm_score>
+      <q_value>3.917e-01</q_value>
+      <pep>1.000e+00</pep>
+      <exp_mass>567.8200</exp_mass>
+      <calc_mass>567.320</calc_mass>
+      <protein_id>random_seq_10206</protein_id>
+      <protein_id>random_seq_10207</protein_id>
+      <protein_id>random_seq_10208</protein_id>
+      <p_value>1.000e+00</p_value>
+      <psm_ids>
+        <psm_id>dataset_608_SII_4266_1_4266_2_1</psm_id>
+      </psm_ids>
+    </peptide>
+  </peptides>
+</percolator_output>

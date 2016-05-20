@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<percolator_output 
+xmlns="http://per-colator.com/percolator_out/15" 
+xmlns:p="http://per-colator.com/percolator_out/15" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://per-colator.com/percolator_out/15 https://github.com/percolator/percolator/raw/pout-1-5/src/xml/percolator_out.xsd" 
+p:majorVersion="2" p:minorVersion="07" p:percolator_version="Percolator version 2.07">
+
+  <process_info>
+    <command_line>percolator -X /mnt/galaxy/data/job_working_directory/000/49/task_0/dataset_53.dat --decoy-xml-output --verbose 0 --protein /mnt/galaxy/data/job_working_directory/000/49/task_0/dataset_52.dat</command_line>
+    <other_command_line></other_command_line>
+    <pi_0_psms>0.88042</pi_0_psms>
+    <pi_0_peptides>0.94245</pi_0_peptides>
+    <alpha>0.008</alpha>
+    <beta>0.001</beta>
+    <gamma>0.5</gamma>
+    <psms_qlevel>673</psms_qlevel>
+    <peptides_qlevel>236</peptides_qlevel>
+    <proteins_qlevel>24</proteins_qlevel>
+  </process_info>
+
+  <psms>
+    <psm p:psm_id="task_0_dataset_40_SII_4671_1_4671_3_1" p:decoy="false">
+      <svm_score>3.332594</svm_score>
+      <q_value>0.000000e+00</q_value>
+      <pep>1.604656e-07</pep>
+      <exp_mass>0.0000</exp_mass>
+      <calc_mass>0.000</calc_mass>
+      <peptide_seq n="R" c="Y" seq="[UNIMOD:730]ENPSEEAQNLVEFTDEEGYGR"/>
+      <protein_id>ENSP00000362110</protein_id>
+      <protein_id>ENSP00000392027</protein_id>
+      <p_value>1.637e-04</p_value>
+    </psm>
+    <psm p:psm_id="task_0_dataset_40_SII_3727_1_3727_3_1" p:decoy="false">
+      <svm_score>3.294</svm_score>
+      <q_value>0.000e+00</q_value>
+      <pep>1.903e-07</pep>
+      <exp_mass>0.0000</exp_mass>
+      <calc_mass>0.000</calc_mass>
+      <peptide_seq n="R" c="R" seq="[UNIMOD:730]SM[UNIMOD:35]GYDDLDYGM[UNIMOD:35]M[UNIMOD:35]SDYGTAR"/>
+      <protein_id>ENSP00000351527</protein_id>
+      <protein_id>ENSP00000353902</protein_id>
+      <protein_id>ENSP00000354785</protein_id>
+      <protein_id>ENSP00000354823</protein_id>
+      <protein_id>ENSP00000354907</protein_id>
+      <protein_id>ENSP00000381996</protein_id>
+      <protein_id>ENSP00000382004</protein_id>
+      <protein_id>ENSP00000403518</protein_id>
+      <protein_id>ENSP00000409930</protein_id>
+      <protein_id>ENSP00000413586</protein_id>
+      <protein_id>ENSP00000432041</protein_id>
+      <protein_id>ENSP00000432075</protein_id>
+      <protein_id>ENSP00000432243</protein_id>
+      <protein_id>ENSP00000433276</protein_id>
+      <protein_id>ENSP00000433334</protein_id>
+      <protein_id>ENSP00000434017</protein_id>
+      <protein_id>ENSP00000434202</protein_id>
+      <protein_id>ENSP00000434808</protein_id>
+      <protein_id>ENSP00000434949</protein_id>
+      <protein_id>ENSP00000435266</protein_id>
+      <protein_id>ENSP00000435379</protein_id>
+      <protein_id>ENSP00000435494</protein_id>
+      <protein_id>ENSP00000435789</protein_id>
+      <protein_id>ENSP00000436323</protein_id>
+      <protein_id>ENSP00000436543</protein_id>
+      <protein_id>ENSP00000436744</protein_id>
+      <protein_id>ENSP00000437156</protein_id>
+      <protein_id>ENSP00000437327</protein_id>
+      <p_value>1.637e-04</p_value>
+    </psm>
+  </psms>
+  <peptides>
+    <peptide p:peptide_id="[UNIMOD:730]ENPSEEAQNLVEFTDEEGYGR" p:decoy="false">
+      <svm_score>3.332594</svm_score>
+      <q_value>0.000000e+00</q_value>
+      <pep>1.814635e-05</pep>
+      <exp_mass>0.0000</exp_mass>
+      <calc_mass>0.000</calc_mass>
+      <protein_id>ENSP00000362110</protein_id>
+      <protein_id>ENSP00000392027</protein_id>
+      <p_value>2.229e-04</p_value>
+      <psm_ids>
+        <psm_id>task_0_dataset_40_SII_4671_1_4671_3_1</psm_id>
+        <psm_id>task_2_dataset_40_SII_4823_1_4823_3_1</psm_id>
+        <psm_id>task_0_dataset_40_SII_4666_1_4666_3_1</psm_id>
+        <psm_id>task_2_dataset_40_SII_4818_1_4818_3_1</psm_id>
+      </psm_ids>
+    </peptide>
+    <peptide p:peptide_id="[UNIMOD:730]SM[UNIMOD:35]GYDDLDYGM[UNIMOD:35]M[UNIMOD:35]SDYGTAR" p:decoy="false">
+      <svm_score>3.294</svm_score>
+      <q_value>0.000e+00</q_value>
+      <pep>2.051e-05</pep>
+      <exp_mass>0.0000</exp_mass>
+      <calc_mass>0.000</calc_mass>
+      <protein_id>ENSP00000351527</protein_id>
+      <protein_id>ENSP00000353902</protein_id>
+      <protein_id>ENSP00000354785</protein_id>
+      <protein_id>ENSP00000354823</protein_id>
+      <protein_id>ENSP00000354907</protein_id>
+      <protein_id>ENSP00000381996</protein_id>
+      <protein_id>ENSP00000382004</protein_id>
+      <protein_id>ENSP00000403518</protein_id>
+      <protein_id>ENSP00000409930</protein_id>
+      <protein_id>ENSP00000413586</protein_id>
+      <protein_id>ENSP00000432041</protein_id>
+      <protein_id>ENSP00000432075</protein_id>
+      <protein_id>ENSP00000432243</protein_id>
+      <protein_id>ENSP00000433276</protein_id>
+      <protein_id>ENSP00000433334</protein_id>
+      <protein_id>ENSP00000434017</protein_id>
+      <protein_id>ENSP00000434202</protein_id>
+      <protein_id>ENSP00000434808</protein_id>
+      <protein_id>ENSP00000434949</protein_id>
+      <protein_id>ENSP00000435266</protein_id>
+      <protein_id>ENSP00000435379</protein_id>
+      <protein_id>ENSP00000435494</protein_id>
+      <protein_id>ENSP00000435789</protein_id>
+      <protein_id>ENSP00000436323</protein_id>
+      <protein_id>ENSP00000436543</protein_id>
+      <protein_id>ENSP00000436744</protein_id>
+      <protein_id>ENSP00000437156</protein_id>
+      <protein_id>ENSP00000437327</protein_id>
+      <p_value>2.229e-04</p_value>
+      <psm_ids>
+        <psm_id>task_0_dataset_40_SII_3727_1_3727_3_1</psm_id>
+        <psm_id>task_2_dataset_40_SII_3780_1_3780_3_1</psm_id>
+        <psm_id>task_2_dataset_40_SII_3775_1_3775_3_1</psm_id>
+        <psm_id>task_0_dataset_40_SII_3722_1_3722_3_1</psm_id>
+      </psm_ids>
+    </peptide>
+    <peptide p:peptide_id="[UNIMOD:730]VQDDEVGDGTTSVTVLAAELLR" p:decoy="true">
+      <svm_score>3.257</svm_score>
+      <q_value>0.000e+00</q_value>
+      <pep>2.304e-05</pep>
+      <exp_mass>0.0000</exp_mass>
+      <calc_mass>0.000</calc_mass>
+      <protein_id>ENSP00000299300</protein_id>
+      <protein_id>ENSP00000441847</protein_id>
+      <protein_id>ENSP00000445471</protein_id>
+      <protein_id>ENSP00000450153</protein_id>
+      <p_value>2.229e-04</p_value>
+      <psm_ids>
+        <psm_id>task_0_dataset_40_SII_5659_1_5659_3_1</psm_id>
+        <psm_id>task_2_dataset_40_SII_5925_1_5925_3_1</psm_id>
+        <psm_id>task_2_dataset_40_SII_5927_1_5927_4_1</psm_id>
+        <psm_id>task_2_dataset_40_SII_5907_1_5907_3_1</psm_id>
+        <psm_id>task_2_dataset_40_SII_5920_1_5920_3_1</psm_id>
+        <psm_id>task_0_dataset_40_SII_5654_1_5654_3_1</psm_id>
+        <psm_id>task_2_dataset_40_SII_5902_1_5902_3_1</psm_id>
+        <psm_id>task_2_dataset_40_SII_5922_1_5922_4_1</psm_id>
+      </psm_ids>
+    </peptide>
+    <peptide p:peptide_id="[UNIMOD:730]VQDDEVGDGTTSVTVLAAELLR" p:decoy="true">
+      <svm_score>3.057</svm_score>
+      <q_value>0.000e+00</q_value>
+      <pep>4.324e-05</pep>
+      <exp_mass>0.0000</exp_mass>
+      <calc_mass>0.000</calc_mass>
+      <protein_id>ENSP00000404559</protein_id>
+      <protein_id>ENSP00000442816</protein_id>
+      <p_value>2.229e-04</p_value>
+      <psm_ids>
+        <psm_id>task_2_dataset_40_SII_4747_1_4747_3_1</psm_id>
+        <psm_id>task_2_dataset_40_SII_4742_1_4742_3_1</psm_id>
+      </psm_ids>
+    </peptide>
+  </peptides>
+</percolator_output>

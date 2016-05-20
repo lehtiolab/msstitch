@@ -8,6 +8,7 @@ from app.drivers import startup
 
 def main():
     drivers = [splitmerge.SplitTDDriver(),
+               splitmerge.SplitProteinDriver(),
                splitmerge.MergeDriver(),
                filters.FilterUniquePeptides(),
                filters.FilterPeptideLength(),

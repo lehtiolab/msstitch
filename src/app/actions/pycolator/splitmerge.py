@@ -1,4 +1,5 @@
 from lxml import etree
+import re
 
 from app.readers import xmlformatting as formatting
 from app.readers import pycolator as reader
@@ -51,3 +52,22 @@ def split_target_decoy(elements, ns, filter_type):
         feats_to_process[feat] = target_decoy_generator(
             elements[feat], td[filter_type], ns)
     return feats_to_process
+
+
+def protein_header_split_generator(elements, headers, ns):
+    for el in elements:
+        header_not_matching = False
+        for protein in el.findall('{%s}protein_id' % ns['xmlns']):
+            if not any([re.search(h, protein.text) for h in headers]):
+                header_not_matching = True
+                break
+        if header_not_matching:
+            formatting.clear_el(el)
+        else:
+            yield formatting.string_and_clear(el, ns)
+
+
+def split_protein_header_id_type(elements, ns, protheaders):
+    headers = protheaders.split(';')
+    return {x: protein_header_split_generator(elements[x], headers, ns)
+            for x in ['psm', 'peptide']}

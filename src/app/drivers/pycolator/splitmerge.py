@@ -5,10 +5,8 @@ from app.drivers.options import pycolator_options
 
 
 class SplitDriver(base.PycolatorDriver):
-    command = 'splittd'
-    commandhelp = ('Splits target and decoy data, producing 2 output files')
-
     def run(self):
+        self.set_filter_types()
         for filter_type, suffix in self.filter_types:
             self.prepare()
             self.set_features(filter_type)
@@ -28,13 +26,34 @@ class SplitDriver(base.PycolatorDriver):
 
 
 class SplitTDDriver(SplitDriver):
-    def __init__(self):
-        super().__init__()
-        self.targetsuffix = '_target.xml'
-        self.decoysuffix = '_decoy.xml'
+    command = 'splittd'
+    commandhelp = ('Splits target and decoy data, producing 2 output files')
+
+    def set_filter_types(self):
+        self.filter_types = [('target', '_target.xml'),
+                             ('decoy', '_decoy.xml')]
+
+    def set_features(self, filter_type):
         self.splitfunc = preparation.split_target_decoy
-        self.filter_types = [('target', self.targetsuffix),
-                             ('decoy', self.decoysuffix)]
+        super().set_features(filter_type)
+
+
+class SplitProteinDriver(SplitDriver):
+    command = 'splitprotein'
+    commandhelp = ('Splits target and decoy data, producing 2 output files')
+
+    def set_filter_types(self):
+        self.filter_types = [(headers, '_h{}.xml'.format(ix))
+                             for ix, headers in enumerate(self.protheaders)]
+
+    def set_features(self, filter_type):
+        self.splitfunc = preparation.split_protein_header_id_type
+        super().set_features(filter_type)
+
+    def set_options(self):
+        super().set_options()
+        options = self.define_options(['protheaders'], pycolator_options)
+        self.options.update(options)
 
 
 class MergeDriver(base.PycolatorDriver):
