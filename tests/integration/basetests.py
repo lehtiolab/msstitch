@@ -34,7 +34,7 @@ class BaseTest(unittest.TestCase):
         cmd = self.get_std_options()
         cmd.extend(options)
         try:
-            subprocess.check_output(cmd)
+            subprocess.check_call(cmd)
         except subprocess.CalledProcessError:
             print('Failed to run executable {}'.format(self.executable))
             raise
@@ -47,6 +47,15 @@ class BaseTest(unittest.TestCase):
             pass
         else:
             self.fail('Command {} should throw an error'.format(cmd))
+
+    def run_command_stdout(self, options=[]):
+        cmd = self.get_std_options()
+        cmd.extend(options)
+        try:
+            return subprocess.check_output(cmd)
+        except subprocess.CalledProcessError:
+            print('Failed to run executable {}'.format(self.executable))
+            raise
 
     def get_values_from_db(self, dbfile, sql):
         db = sqlite3.connect(dbfile)
