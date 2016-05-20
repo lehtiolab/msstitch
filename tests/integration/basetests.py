@@ -249,7 +249,8 @@ class PepProtableTest(BaseTest):
             acc = line.pop(accession)
             isoquant[acc] = line
         for line in self.tsv_generator(self.resultfn):
-            [self.assertEqual(isoquant[line[acc_field]][ch], line[ch])
+            [self.assertAlmostEqual(float(isoquant[line[acc_field]][ch]),
+                                    float(line[ch]))
              for ch in isoquant[line[acc_field]]]
 
     def check_build_values(self, sql, fields, accession):
