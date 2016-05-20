@@ -1,6 +1,8 @@
 import os
-from tests.integration.basetests import BaseTestPycolator
 import sqlite3
+from itertools import product
+
+from tests.integration.basetests import BaseTestPycolator
 
 
 class TestReassign(BaseTestPycolator):
@@ -189,6 +191,14 @@ class TestFilterKnown(BaseTestPycolator):
         self.dbpath = os.path.join(self.fixdir, self.reversed_dbfn)
         self.assert_seqs_correct(['--ntermwildcards'], 'ntermfalloff')
 
+    def test_deamidate(self):
+        self.dbpath = os.path.join(self.fixdir, self.dbfn)
+        self.assert_seqs_correct(['--deamidate'], 'deamidate')
+
+    def deamidate(self, sequence):
+        aa_possible = [(aa,) if aa != 'D' else ('D', 'N') for aa in sequence]
+        return list(''.join(aa) for aa in product(*aa_possible))
+
     def assert_seqs_correct(self, flags=[], seqtype=None):
         """Does the actual testing"""
         options = ['--dbfile', self.dbpath]
@@ -202,10 +212,16 @@ class TestFilterKnown(BaseTestPycolator):
             db = sqlite3.connect(self.dbpath)
             for oriseq in original_seqs:
                 seq_dbcheck = self.strip_modifications(oriseq)
-                if self.seq_in_db(db, seq_dbcheck, seqtype):
-                    self.assertNotIn(oriseq, result_seqs)
+                if seqtype == 'deamidate':
+                    testseqs = self.deamidate(seq_dbcheck)
                 else:
-                    self.assertIn(oriseq, result_seqs)
+                    testseqs = [seq_dbcheck]
+                for seq in testseqs:
+                    if self.seq_in_db(db, seq, seqtype):
+                        self.assertNotIn(oriseq, result_seqs)
+                        break
+                    else:
+                        self.assertIn(oriseq, result_seqs)
 
 
 class TestQvality(BaseTestPycolator):

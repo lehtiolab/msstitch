@@ -207,6 +207,11 @@ pycolator_options = {
                  'help': 'Extra options that may be passed to qvality. '
                  'Option form: --qoptions ***flag value ***flag ***flag value',
                  'nargs': '+', 'type': str},
+    'deamidate': {'driverattr': 'deamidate', 'clarg': '--deamidate',
+                  'action': 'store_const', 'default': False, 'const': True,
+                  'help': 'Filter against both normal peptides and deamidated '
+                  'peptides where a D->N transition has occurred.',
+                  'required': False}
 }
 
 mzidtsv_options = {

@@ -62,7 +62,8 @@ class FilterKnownPeptides(base.PycolatorDriver):
 
     def set_options(self):
         super().set_options()
-        self.options.update(self.define_options(['falloff', 'lookupfn'],
+        self.options.update(self.define_options(['falloff', 'deamidate',
+                                                 'lookupfn'],
                                                 pycolator_options))
 
     def set_features(self):
@@ -71,10 +72,12 @@ class FilterKnownPeptides(base.PycolatorDriver):
                                                             'pep',
                                                             self.lookup,
                                                             self.ns,
-                                                            self.falloff),
+                                                            self.falloff,
+                                                            self.deamidate),
             'psm': preparation.filter_known_searchspace(self.allpsms,
                                                         'psm',
                                                         self.lookup,
                                                         self.ns,
-                                                        self.falloff),
+                                                        self.falloff,
+                                                        self.deamidate),
         }
