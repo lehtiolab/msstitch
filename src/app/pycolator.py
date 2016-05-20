@@ -7,7 +7,7 @@ from app.drivers import startup
 
 
 def main():
-    drivers = [splitmerge.SplitDriver(),
+    drivers = [splitmerge.SplitTDDriver(),
                splitmerge.MergeDriver(),
                filters.FilterUniquePeptides(),
                filters.FilterPeptideLength(),

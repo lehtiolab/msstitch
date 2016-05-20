@@ -8,14 +8,8 @@ class SplitDriver(base.PycolatorDriver):
     command = 'splittd'
     commandhelp = ('Splits target and decoy data, producing 2 output files')
 
-    def __init__(self):
-        super().__init__()
-        self.targetsuffix = '_target.xml'
-        self.decoysuffix = '_decoy.xml'
-
     def run(self):
-        for filter_type, suffix in zip(['target', 'decoy'],
-                                       [self.targetsuffix, self.decoysuffix]):
+        for filter_type, suffix in self.filter_types:
             self.prepare()
             self.set_features(filter_type)
             self.outsuffix = suffix
@@ -30,8 +24,17 @@ class SplitDriver(base.PycolatorDriver):
         before having merged and remapped multifraction data anyway.
         """
         elements_to_split = {'psm': self.allpsms, 'peptide': self.allpeps}
-        self.features = preparation.split_target_decoy(elements_to_split,
-                                                       self.ns, filter_type)
+        self.features = self.splitfunc(elements_to_split, self.ns, filter_type)
+
+
+class SplitTDDriver(SplitDriver):
+    def __init__(self):
+        super().__init__()
+        self.targetsuffix = '_target.xml'
+        self.decoysuffix = '_decoy.xml'
+        self.splitfunc = preparation.split_target_decoy
+        self.filter_types = [('target', self.targetsuffix),
+                             ('decoy', self.decoysuffix)]
 
 
 class MergeDriver(base.PycolatorDriver):
