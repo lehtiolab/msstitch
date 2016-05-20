@@ -276,8 +276,10 @@ class TestIsoNormalize(basetests.MzidTSVBaseTest):
     command = 'isonormalize'
     infilename = 'mzidtsv.txt'
 
-    def get_infile_lines(self):
-        with open(self.infile[0]) as fp:
+    def get_infile_lines(self, infile=None):
+        if infile is None:
+            infile = self.infile[0]
+        with open(infile) as fp:
             header = next(fp).strip('\n').split('\t')
             for line in fp:
                 line = line.strip('\n').split('\t')
@@ -299,11 +301,11 @@ class TestIsoNormalize(basetests.MzidTSVBaseTest):
                                           '--minint', str(minint)])
         self.do_check(minint, stdout)
 
-    def do_check(self, minint, stdout):
+    def do_check(self, minint, stdout, medianpsms=None):
         channels = ['fake_ch{}'.format(x) for x in range(8)]
         denom_ch = channels[0:2]
         ch_medians = {ch: [] for ch in channels}
-        for line in self.get_infile_lines():
+        for line in self.get_infile_lines(medianpsms):
             line.update({ch: line[ch]
                          if line[ch] != 'NA' and float(line[ch]) > minint
                          else 'NA' for ch in channels})
@@ -337,3 +339,16 @@ class TestIsoNormalize(basetests.MzidTSVBaseTest):
                             if in_line[ch] != 'NA' else 'NA'
                             for ch in channels]
             self.assertEqual(resultline, exp_line)
+
+
+class TestIsoNormalizeTwofiles(TestIsoNormalize):
+    infilename = 'mzidtsv_short.txt'
+
+    def test_two_psm_files(self):
+        """Tests calculating medians on different file than the one doing the
+        median centering on"""
+        medianpsms = os.path.join(self.fixdir, 'mzidtsv.txt')
+        stdout = self.run_command_stdout(['--isobquantcolpattern', 'fake_ch',
+                                          '--denominators', '21', '22',
+                                          '--medianpsms', medianpsms])
+        self.do_check(-1, stdout, medianpsms)

@@ -13,6 +13,7 @@ class MzidTSVIsoquantNormalizeDriver(MzidTSVDriver):
     def set_options(self):
         super().set_options()
         self.options.update(self.define_options(['quantcolpattern',
+                                                 'medianpsms',
                                                  'denomcols', 'minint'],
                                                 mzidtsv_options))
 
@@ -24,4 +25,4 @@ class MzidTSVIsoquantNormalizeDriver(MzidTSVDriver):
                                                self.quantcolpattern)
         self.psms = prep.get_normalized_ratios(self.fn, self.oldheader,
                                                quantcols, denomcols,
-                                               self.minint)
+                                               self.minint, self.medianpsms)

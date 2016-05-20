@@ -220,6 +220,14 @@ mzidtsv_options = {
                  'help': 'Confidence type to define if higher or lower score '
                  'is better. One of [higher, lower]', 'type': 'pick',
                  'picks': ['higher', 'lower']},
+    'medianpsms': {'driverattr': 'medianpsms', 'clarg': '--medianpsms',
+                   'help': 'In case of using a separate PSM table with more '
+                   'data to generate more robust medians (i.e. a superset of '
+                   'input PSMs), specify that file here. The normalization '
+                   'factors will be calculated on this file, and the PSMs '
+                   'in the input will be adjusted using those factors rather '
+                   'than factors derived from solely their own quantification '
+                   'data', 'type': 'file', 'required': False},
     'mzidfn': {'driverattr': 'mzidfn', 'clarg': '--mzid', 'help': 'mzIdentML',
                'type': 'file'},
     'bioset': {'driverattr': 'bioset', 'clarg': '--bioset', 'const': True,
