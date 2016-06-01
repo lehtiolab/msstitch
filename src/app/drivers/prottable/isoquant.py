@@ -5,7 +5,7 @@ from app.drivers.options import prottable_options
 
 
 class IsobaricQuantDriver(ProttableDriver):
-    outsuffix = '_proteinquant.txt'
+    outsuffix = '_isoquant.txt'
     command = 'isoquant'
     commandhelp = ('Creates a protein quantification table from a PSM table '
                    'input with isobaric quant data.')
@@ -37,7 +37,7 @@ class IsobaricQuantDriver(ProttableDriver):
 
 
 class AddIsobaricQuantDriver(ProttableAddData):
-    outsuffix = '_isoq.txt'
+    outsuffix = '_added_isoq.txt'
     command = 'addisoquant'
     commandhelp = ('Add isobaric quantification data from another '
                    'proteintable containing this.')

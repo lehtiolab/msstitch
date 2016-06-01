@@ -127,7 +127,7 @@ class TestBuild(basetests.ProttableTest):
 
 class TestIsoquant(basetests.ProttableTest):
     command = 'isoquant'
-    suffix = '_proteinquant.txt'
+    suffix = '_isoquant.txt'
     infilename = 'mzidtsv_filtered_fr1-2_isonorm.txt'
 
     def test_isoquant(self):
@@ -140,7 +140,7 @@ class TestIsoquant(basetests.ProttableTest):
 
 class TestAddIsoquant(basetests.ProttableTest):
     command = 'addisoquant'
-    suffix = '_isoq.txt'
+    suffix = '_added_isoq.txt'
 
     def test_isoquant(self):
         isotable = os.path.join(self.fixdir, 'prottable_isoquant.txt')
