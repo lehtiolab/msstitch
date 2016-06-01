@@ -58,6 +58,10 @@ class TestReassign(BaseTestPycolator):
 
 
 class TestSplit(BaseTestPycolator):
+    def setUp(self):
+        super().setUp()
+        self.resultfn = None
+
     def do_check(self, first_exp_fn, sec_exp_fn, first_result, second_result):
         first_expected = os.path.join(self.fixdir, first_exp_fn)
         second_expected = os.path.join(self.fixdir, sec_exp_fn)

@@ -3,8 +3,11 @@ import argparse
 shared_options = {
     'fn': {'driverattr': 'fn', 'dest': 'infile', 'type': 'file', 'clarg': '-i',
            'help': 'Input file of {} format'},
+    'outfile': {'driverattr': 'outfile', 'dest': 'outfile', 'type': str,
+                'clarg': '-o', 'help': 'Output file', 'required': False},
     'outdir': {'driverattr': 'outdir', 'dest': 'outdir', 'clarg': '-d',
-               'help': 'Directory to output in', 'type': 'file'},
+               'help': 'Directory to output in', 'type': 'file',
+               'required': False},
     'multifiles': {'driverattr': 'fn', 'dest': 'infile', 'clarg': '-i',
                    'help': 'Multiple input files of {} format',
                    'type': 'file', 'nargs': '+'},

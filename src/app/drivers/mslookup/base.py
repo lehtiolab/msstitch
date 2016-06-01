@@ -19,9 +19,10 @@ class LookupDriver(BaseDriver):
         if self.lookup is None:
             # FIXME MUST be a set or mzml lookup? here is place to assert
             # correct lookuptype!
-            lookupfn = os.path.join(self.outdir,
-                                    'mslookup_db.sqlite')
-            self.lookup = lookups.create_new_lookup(lookupfn,
+            if self.outfile is None:
+                self.outfile = os.path.join(self.outdir,
+                                            'mslookup_db.sqlite')
+            self.lookup = lookups.create_new_lookup(self.outfile,
                                                     self.lookuptype)
         self.lookup.add_tables()
 

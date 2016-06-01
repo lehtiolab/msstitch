@@ -142,6 +142,7 @@ class TestSplitTSV(basetests.MzidTSVBaseTest):
 
     def setUp(self):
         super().setUp()
+        self.resultfn = None
         self.expectlines = self.get_all_lines(self.infile)
 
     def test_auto_bioset_column(self):

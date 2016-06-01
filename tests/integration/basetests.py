@@ -24,10 +24,14 @@ class BaseTest(unittest.TestCase):
         shutil.rmtree(self.workdir)
 
     def get_std_options(self):
-        cmd = [self.executable, self.command, '-d', self.workdir, '-i']
+        cmd = [self.executable, self.command, '-i']
         if type(self.infile) != list:
             self.infile = [self.infile]
         cmd.extend(self.infile)
+        if self.resultfn is not None:
+            cmd.extend(['-o', self.resultfn])
+        else:
+            cmd.extend(['-d', self.workdir])
         return cmd
 
     def run_command(self, options=[]):

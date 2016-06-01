@@ -17,7 +17,7 @@ class BaseDriver(object):
             self.lookup = None
 
     def set_options(self):
-        self.options = self.define_options(['fn', 'outdir'], {})
+        self.options = self.define_options(['fn', 'outdir', 'outfile'], {})
         self.options['-i']['help'].format(self.infiletype)
 
     def get_commandhelp(self):
@@ -61,6 +61,11 @@ class BaseDriver(object):
                                 option['clarg'], ','.join(option['picks'])))
                             sys.exit(1)
             setattr(self, opt_argkey, opt_val)
+        if self.outdir is None:
+            self.outdir = os.getcwd()
+        if self.outfile is not None:
+            if not os.path.isabs(self.outfile):
+                self.outfile = os.path.join(self.outdir, self.outfile)
 
     def start(self, **kwargs):
         self.parse_input(**kwargs)
@@ -72,9 +77,12 @@ class BaseDriver(object):
         pass
 
     def create_outfilepath(self, fn, suffix=None):
-        basefn = os.path.basename(fn)
-        outfn = basefn + suffix
-        return os.path.join(self.outdir, outfn)
+        if self.outfile is None:
+            basefn = os.path.basename(fn)
+            outfn = os.path.join(self.outdir, basefn + suffix)
+        else:
+            outfn = self.outfile
+        return outfn
 
     def number_to_headerfield(self, columnr, header):
         return header[int(columnr) - 1]
