@@ -40,7 +40,9 @@ class SplitTDDriver(SplitDriver):
 
 class SplitProteinDriver(SplitDriver):
     command = 'splitprotein'
-    commandhelp = ('Splits target and decoy data, producing 2 output files')
+    commandhelp = ('Splits input XML into multiple files depending based on '
+                   'the protein headers specified. Each header class gets '
+                   'its own output file')
 
     def set_filter_types(self):
         self.filter_types = [(headers, '_h{}.xml'.format(ix))
