@@ -254,7 +254,16 @@ mzidtsv_options = {
                  'help': 'Column number to split a PSM table on. First column '
                  'is number 1', 'required': False
                  },
-    'denomcols': {'driverattr': 'denomcols', 'clarg': '--denominators',
+    'denompatterns': {'driverattr': 'denompatterns', 'required': False,
+                      'clarg': '--denompatterns', 'type': str, 'nargs': '+',
+                      'help': 'Regex patterns to detect denominator channels '
+                      'when creating a PSM table with normalized ratios. If '
+                      'both patterns and column numbers are given then column '
+                      'numbers are used. Usage e.g. --denompattern _126 _131. '
+                      'Also possible: --denompattern _12[6-7] to detect '
+                      'multiple columns.'
+                      },
+    'denomcols': {'driverattr': 'denomcols', 'clarg': '--denomcols',
                   'type': int, 'nargs': '+', 'required': False,
                   'help': 'Column numbers of denominator channels when '
                   'creating a PSM table with normalized ratios',

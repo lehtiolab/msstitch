@@ -290,15 +290,25 @@ class TestIsoNormalize(basetests.MzidTSVBaseTest):
         return sum([float(line[ch]) for ch in denom_ch
                     if line[ch] != 'NA']) / 2
 
+    def test_denomcolpattern(self):
+        stdout = self.run_command_stdout(['--isobquantcolpattern', 'fake_ch',
+                                          '--denompatterns', '_ch0', '_ch1'])
+        self.do_check(-1, stdout)
+
+    def test_denomcolpattern_regex(self):
+        stdout = self.run_command_stdout(['--isobquantcolpattern', 'fake_ch',
+                                          '--denompatterns', '_ch[0-1]'])
+        self.do_check(-1, stdout)
+
     def test_normalize(self):
         stdout = self.run_command_stdout(['--isobquantcolpattern', 'fake_ch',
-                                          '--denominators', '21', '22'])
+                                          '--denomcols', '21', '22'])
         self.do_check(-1, stdout)
 
     def test_normalize_minint(self):
         minint = 3000
         stdout = self.run_command_stdout(['--isobquantcolpattern', 'fake_ch',
-                                          '--denominators', '21', '22',
+                                          '--denomcols', '21', '22',
                                           '--minint', str(minint)])
         self.do_check(minint, stdout)
 
@@ -350,6 +360,6 @@ class TestIsoNormalizeTwofiles(TestIsoNormalize):
         median centering on"""
         medianpsms = os.path.join(self.fixdir, 'mzidtsv.txt')
         stdout = self.run_command_stdout(['--isobquantcolpattern', 'fake_ch',
-                                          '--denominators', '21', '22',
+                                          '--denomcols', '21', '22',
                                           '--medianpsms', medianpsms])
         self.do_check(-1, stdout, medianpsms)

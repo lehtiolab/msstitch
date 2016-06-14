@@ -13,14 +13,22 @@ class MzidTSVIsoquantNormalizeDriver(MzidTSVDriver):
     def set_options(self):
         super().set_options()
         self.options.update(self.define_options(['quantcolpattern',
-                                                 'medianpsms',
+                                                 'medianpsms', 'denompatterns',
                                                  'denomcols', 'minint'],
                                                 mzidtsv_options))
 
     def get_psms(self):
         self.header = self.oldheader[:]
-        denomcols = [self.number_to_headerfield(col, self.oldheader)
-                     for col in self.denomcols]
+        if self.denomcols is not None:
+            denomcols = [self.number_to_headerfield(col, self.oldheader)
+                         for col in self.denomcols]
+        elif self.denompatterns is not None:
+            denomcolnrs = [tsv.get_columns_by_pattern(self.oldheader, pattern)
+                           for pattern in self.denompatterns]
+            denomcols = set([col for cols in denomcolnrs for col in cols])
+        else:
+            raise RuntimeError('Must define either denominator column numbers '
+                               'or regex pattterns to find them')
         quantcols = tsv.get_columns_by_pattern(self.oldheader,
                                                self.quantcolpattern)
         self.psms = prep.get_normalized_ratios(self.fn, self.oldheader,
