@@ -48,8 +48,8 @@ def parse_quant_data(qtype, pepquant):
 
 
 def get_peptide_quant(quantdata, quanttype):
-    """Parses lists of quantdata and gets the median from them. Stirps NA"""
-    parsefnx = {'precur': max} 
+    """Parses lists of quantdata and returns maxvalue from them. Strips NA"""
+    parsefnx = {'precur': max}
     quantfloats = []
     for q in quantdata:
         try:
