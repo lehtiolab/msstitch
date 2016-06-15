@@ -50,7 +50,7 @@ class FilterUniquePeptides(base.PycolatorDriver):
         self.features = {'psm': self.allpsms, 'peptide': uniquepeps}
 
 
-class FilterKnownPeptides(base.PycolatorDriver):
+class FilterPeptideSequence(base.PycolatorDriver):
     """This class processes multiple percolator runs from fractions and
     filters out first peptides that are found in a specified searchspace. Then
     it keeps the remaining best scoring unique peptides."""

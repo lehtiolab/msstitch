@@ -21,21 +21,22 @@ class SearchSpaceDB(DatabaseConnection):
     def index_peps(self):
         self.index_column('seqs_index', 'known_searchspace', 'seqs')
 
-    def check_seq_exists(self, seq, ntermwildcards=False):
+    def check_seq_exists(self, seq, amount_ntermwildcards):
         """Look up sequence in sqlite DB. Returns True or False if it
         exists (or not). When looking up a reversed DB with
         ntermwildcards: we reverse the sequence of the pep and add
         a LIKE and %-suffix to the query.
         """
-        if ntermwildcards:
-            seq = seq[::-1]
-            comparator, seqmod = ' LIKE ', '%'
-        else:
-            comparator, seqmod = '=', ''
-
-        sql = ('select exists(select seqs from known_searchspace '
-               'where seqs{0}? limit 1)'.format(comparator))
-        seq = '{0}{1}'.format(seq, seqmod)
         cursor = self.get_cursor()
-        cursor.execute(sql, (seq, ))
-        return cursor.fetchone()[0] == 1
+        if amount_ntermwildcards > 0:
+            seq = seq[::-1]
+            sqlseq = '{}{}'.format(seq, '%')
+            sql = 'select seqs from known_searchspace where seqs LIKE ?'
+            for match in cursor.execute(sql, (sqlseq, )):
+                if match[0][:-amount_ntermwildcards] in seq:
+                    return True
+            return False
+        else:
+            sql = ('select exists(select seqs from known_searchspace '
+                   'where seqs=? limit 1)')
+            return cursor.execute(sql, (seq, )).fetchone()[0] == 1

@@ -65,15 +65,18 @@ class BaseTest(unittest.TestCase):
         db = sqlite3.connect(dbfile)
         return db.execute(sql)
 
-    def seq_in_db(self, dbconn, seq, seqtype):
-        comparator = '='
-        if seqtype == 'ntermfalloff':
-            comparator = ' LIKE '
-            seq = '{0}%'.format(seq[::-1])
+    def seq_in_db(self, dbconn, seq, seqtype, max_falloff=False):
         seq = seq.replace('L', 'I')
-        sql = ('SELECT EXISTS(SELECT seqs FROM known_searchspace WHERE '
-               'seqs{0}? LIMIT 1)'.format(comparator))
-        return dbconn.execute(sql, (seq,)).fetchone()[0] == 1
+        if seqtype == 'ntermfalloff':
+            seq = '{0}%'.format(seq[::-1])
+            sql = 'SELECT seqs FROM known_searchspace WHERE seqs LIKE ?'
+            for match in dbconn.execute(sql, (seq,)):
+                if match[0][:-max_falloff] in seq:
+                    return True
+        else:
+            sql = ('SELECT EXISTS(SELECT seqs FROM known_searchspace WHERE '
+                   'seqs=? LIMIT 1)')
+            return dbconn.execute(sql, (seq,)).fetchone()[0] == 1
 
     def get_tsvheader(self, fn):
         with open(fn) as fp:

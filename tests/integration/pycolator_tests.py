@@ -214,8 +214,8 @@ class TestFilterLength(BaseTestPycolator):
 
 
 class TestFilterKnown(BaseTestPycolator):
-    command = 'filterknown'
-    suffix = '_filtknown.xml'
+    command = 'filterseq'
+    suffix = '_filtseq.xml'
     dbfn = 'known_peptide_lookup.sqlite'
     reversed_dbfn = 'rev_known_peptide_lookup.sqlite'
 
@@ -224,8 +224,10 @@ class TestFilterKnown(BaseTestPycolator):
         self.assert_seqs_correct()
 
     def test_ntermwildcards(self):
+        max_falloff = 12
         self.dbpath = os.path.join(self.fixdir, self.reversed_dbfn)
-        self.assert_seqs_correct(['--ntermwildcards'], 'ntermfalloff')
+        self.assert_seqs_correct(['--insourcefrag', str(max_falloff)],
+                                 'ntermfalloff', max_falloff)
 
     def test_deamidate(self):
         self.dbpath = os.path.join(self.fixdir, self.dbfn)
@@ -235,7 +237,7 @@ class TestFilterKnown(BaseTestPycolator):
         aa_possible = [(aa,) if aa != 'D' else ('D', 'N') for aa in sequence]
         return list(''.join(aa) for aa in product(*aa_possible))
 
-    def assert_seqs_correct(self, flags=[], seqtype=None):
+    def assert_seqs_correct(self, flags=[], seqtype=None, max_falloff=False):
         """Does the actual testing"""
         options = ['--dbfile', self.dbpath]
         options.extend(flags)
@@ -253,7 +255,7 @@ class TestFilterKnown(BaseTestPycolator):
                 else:
                     testseqs = [seq_dbcheck]
                 for seq in testseqs:
-                    if self.seq_in_db(db, seq, seqtype):
+                    if self.seq_in_db(db, seq, seqtype, max_falloff):
                         self.assertNotIn(oriseq, result_seqs)
                         break
                     else:

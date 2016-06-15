@@ -12,7 +12,7 @@ def main():
                splitmerge.MergeDriver(),
                filters.FilterUniquePeptides(),
                filters.FilterPeptideLength(),
-               filters.FilterKnownPeptides(),
+               filters.FilterPeptideSequence(),
                qvality.QvalityDriver(),
                stats.ReassignmentDriver(),
                ]

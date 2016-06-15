@@ -27,13 +27,15 @@ shared_options = {
     'decoyfn': {'driverattr': 'decoyfn', 'dest': 'decoyfn',
                 'help': 'Decoy input file (percolator out XML) for qvality',
                 'type': 'file', 'clarg': '--decoyfn'},
-    # FIXME CLARG got updated for --decoy to --decoyfn
     'falloff': {'driverattr': 'falloff', 'dest': 'falloff',
-                'clarg': '--ntermwildcards', 'action': 'store_const',
-                'const': True, 'default': False, 'help': 'Flag to '
+                'clarg': '--insourcefrag',
+                'type': int, 'default': 0, 'help': 'Apply '
                 'filter against both intact peptides and those '
                 'that match to the C-terminal part of a tryptic peptide '
-                'from the database. Database should be built with this'
+                'from the database, resulting from in-source fragmentation, '
+                'where some amino acids will be missing from the N-terminus. '
+                'Specify the max number of amino acids that may be missing. '
+                'Database should be built with this '
                 'flag in order for the lookup to work, since sequences'
                 'will be stored and looked up reversed', 'required': False
                 },
