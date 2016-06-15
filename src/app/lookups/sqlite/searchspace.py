@@ -19,7 +19,8 @@ class SearchSpaceDB(DatabaseConnection):
         self.conn.commit()
 
     def index_peps(self):
-        self.index_column('seqs_index', 'known_searchspace', 'seqs')
+        self.index_column('seqs_index', 'known_searchspace',
+                          'seqs COLLATE NOCASE')
 
     def check_seq_exists(self, seq, amount_ntermwildcards):
         """Look up sequence in sqlite DB. Returns True or False if it
