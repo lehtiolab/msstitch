@@ -53,10 +53,10 @@ class TestTrypticLookup(basetests.BaseTest):
         self.run_with_existing_db(['--cutproline'], 'proline_cuts')
 
     def test_ntermwildcards_nodb(self):
-        self.run_without_db(['--ntermwildcards'], 'ntermfalloff')
+        self.run_without_db(['--insourcefrag'], 'ntermfalloff')
 
     def test_ntermwildcards_yes_db(self):
-        self.run_with_existing_db(['--ntermwildcards'], 'ntermfalloff')
+        self.run_with_existing_db(['--insourcefrag'], 'ntermfalloff')
 
     def test_noflags_no_db(self):
         self.run_without_db()

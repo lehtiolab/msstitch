@@ -27,18 +27,6 @@ shared_options = {
     'decoyfn': {'driverattr': 'decoyfn', 'dest': 'decoyfn',
                 'help': 'Decoy input file (percolator out XML) for qvality',
                 'type': 'file', 'clarg': '--decoyfn'},
-    'falloff': {'driverattr': 'falloff', 'dest': 'falloff',
-                'clarg': '--insourcefrag',
-                'type': int, 'default': 0, 'help': 'Apply '
-                'filter against both intact peptides and those '
-                'that match to the C-terminal part of a tryptic peptide '
-                'from the database, resulting from in-source fragmentation, '
-                'where some amino acids will be missing from the N-terminus. '
-                'Specify the max number of amino acids that may be missing. '
-                'Database should be built with this '
-                'flag in order for the lookup to work, since sequences'
-                'will be stored and looked up reversed', 'required': False
-                },
     'proline': {'driverattr': 'proline', 'dest': 'proline', 'required': False,
                 'clarg': '--cutproline', 'action': 'store_const',
                 'const': True, 'default': False, 'help': 'Flag to make '
@@ -123,6 +111,18 @@ shared_options = {
 }
 
 mslookup_options = {
+    'falloff': {'driverattr': 'falloff', 'dest': 'falloff',
+                'clarg': '--insourcefrag', 'default': False,
+                'action': 'store_const', 'const': True, 'help': 'Apply '
+                'filter against both intact peptides and those '
+                'that match to the C-terminal part of a tryptic peptide '
+                'from the database, resulting from in-source fragmentation, '
+                'where some amino acids will be missing from the N-terminus. '
+                'Specify the max number of amino acids that may be missing. '
+                'Database should be built with this '
+                'flag in order for the lookup to work, since sequences '
+                'will be stored and looked up reversed', 'required': False
+                },
     'mapfn': {'driverattr': 'mapfn', 'dest': 'mapfn',
               'type': 'file', 'clarg': '--map',
               'required': False, 'help': 'File that contains '
@@ -223,7 +223,19 @@ pycolator_options = {
                   'action': 'store_const', 'default': False, 'const': True,
                   'help': 'Filter against both normal peptides and deamidated '
                   'peptides where a D->N transition has occurred.',
-                  'required': False}
+                  'required': False},
+    'falloff': {'driverattr': 'falloff', 'dest': 'falloff',
+                'clarg': '--insourcefrag',
+                'type': int, 'default': 0, 'help': 'Apply '
+                'filter against both intact peptides and those '
+                'that match to the C-terminal part of a tryptic peptide '
+                'from the database, resulting from in-source fragmentation, '
+                'where some amino acids will be missing from the N-terminus. '
+                'Specify the max number of amino acids that may be missing. '
+                'Database should be built with this '
+                'flag in order for the lookup to work, since sequences '
+                'will be stored and looked up reversed', 'required': False
+                },
 }
 
 mzidtsv_options = {
