@@ -54,9 +54,9 @@ class FilterKnownPeptides(base.PycolatorDriver):
     """This class processes multiple percolator runs from fractions and
     filters out first peptides that are found in a specified searchspace. Then
     it keeps the remaining best scoring unique peptides."""
-    outsuffix = '_filtknown.xml'
+    outsuffix = '_filtseq.xml'
     lookuptype = 'searchspace'
-    command = 'filterknown'
+    command = 'filterseq'
     commandhelp = ('Filters out peptides that are found in a certain lookup '
                    'DB')
 
