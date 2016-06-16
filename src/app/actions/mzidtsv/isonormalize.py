@@ -22,16 +22,18 @@ def calc_normalized(psm, channel, medians):
 
 
 def get_normalized_ratios(psmfn, header, channels, denom_channels,
-                          min_intensity, second_psmfn=None):
+                          min_intensity, second_psmfn, secondheader):
     """Calculates ratios for PSM tables containing isobaric channels with
     raw intensities. Normalizes the ratios by median. NA values or values
     below min_intensity are excluded from the normalization."""
     ratios = []
     if second_psmfn is not None:
         median_psmfn = second_psmfn
+        medianheader = secondheader
     else:
         median_psmfn = psmfn
-    for psm in reader.generate_tsv_psms(median_psmfn, header):
+        medianheader = header
+    for psm in reader.generate_tsv_psms(median_psmfn, medianheader):
         ratios.append(calc_psm_ratios(psm, channels, denom_channels,
                                       min_intensity))
     ch_medians = get_medians(channels, ratios)

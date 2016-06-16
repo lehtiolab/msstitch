@@ -31,6 +31,11 @@ class MzidTSVIsoquantNormalizeDriver(MzidTSVDriver):
                                'or regex pattterns to find them')
         quantcols = tsv.get_columns_by_pattern(self.oldheader,
                                                self.quantcolpattern)
+        if self.medianpsms is not None:
+            medianheader = tsv.get_tsv_header(self.medianpsms)
+        else:
+            medianheader = False
         self.psms = prep.get_normalized_ratios(self.fn, self.oldheader,
                                                quantcols, denomcols,
-                                               self.minint, self.medianpsms)
+                                               self.minint, self.medianpsms,
+                                               medianheader)
