@@ -20,7 +20,7 @@ def create_searchspace(lookup, fastafn, proline_cut=False,
             allpeps = []
     # write remaining peps to sqlite
     lookup.write_peps(allpeps, reverse_seqs)
-    lookup.index_peps()
+    lookup.index_peps(reverse_seqs)
     lookup.close_connection()
 
 

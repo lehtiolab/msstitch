@@ -18,9 +18,13 @@ class SearchSpaceDB(DatabaseConnection):
             'INSERT INTO known_searchspace(seqs) VALUES (?)', peps)
         self.conn.commit()
 
-    def index_peps(self):
-        self.index_column('seqs_index', 'known_searchspace',
-                          'seqs COLLATE NOCASE')
+    def index_peps(self, reverse_seqs):
+        if reverse_seqs:
+            self.index_column('reverse_seqs_index', 'known_searchspace',
+                              'seqs COLLATE NOCASE')
+        else:
+            self.index_column('reverse_seqs_index', 'known_searchspace',
+                              'seqs')
 
     def check_seq_exists(self, seq, amount_ntermwildcards):
         """Look up sequence in sqlite DB. Returns True or False if it
@@ -32,8 +36,12 @@ class SearchSpaceDB(DatabaseConnection):
         if amount_ntermwildcards > 0:
             seq = seq[::-1]
             sqlseq = '{}{}'.format(seq, '%')
-            sql = 'select seqs from known_searchspace where seqs LIKE ?'
-            for match in cursor.execute(sql, (sqlseq, )):
+            # FIXME non-parametrized string binding because if ? binding is
+            # used the INDEX is not used when looking up, apparently because
+            # the query cant be optimized when using LIKE and binding.
+            sql = ('select seqs from known_searchspace where seqs LIKE '
+                   '"{}"'.format(sqlseq))
+            for match in cursor.execute(sql):
                 if match[0][:-amount_ntermwildcards] in seq:
                     return True
             return False
