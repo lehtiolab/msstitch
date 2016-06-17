@@ -270,9 +270,5 @@ class TestQvality(BaseTestPycolator):
         self.infilename = 'splittd_target_out.xml'
         self.decoyfn = 'splittd_decoy_out.xml'
         self.decoy = os.path.join(self.fixdir, self.decoyfn)
-
-        options = ['--decoyfn', self.decoy, '--feattype', 'blaja', ]#'--qoptions']
-        #self.run_command(options)
+        #options = ['--decoyfn', self.decoy, '--feattype', 'blaja', ]
         self.fail('pycolator qvality integration testing not implemented yet')
-
-

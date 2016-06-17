@@ -102,10 +102,10 @@ class TestPercoTSV(basetests.MzidTSVBaseTest):
         for ac, specidres in etree.iterparse(
                 msgffile, tag='{%s}'
                 'SpectrumIdentificationResult' % ns['xmlns']):
-            sid = specidres.attrib['spectrumID']
             for result in specidres.findall(
                     '{%s}SpectrumIdentificationItem' % ns['xmlns']):
-                perco = [x for x in result.findall('{%s}userParam' % ns['xmlns'])
+                perco = [x for x in
+                         result.findall('{%s}userParam' % ns['xmlns'])
                          if x.attrib['name'].split(':')[0] == 'percolator']
                 perco = {x.attrib['name'].replace('percolator:', ''):
                          x.attrib['value'] for x in perco}
