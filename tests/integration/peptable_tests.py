@@ -113,10 +113,12 @@ class TestBuild(basetests.PeptableTest):
         cmd = [self.executable, self.command, '-d', self.workdir]
         return cmd
 
-    def check(self, genecentric=False):
+    def check(self, genecentric=False, noncentric=False):
         self.check_values()
         if genecentric:
             self.check_genes()
+        elif noncentric:
+            pass
         else:
             self.check_proteingroups()
         self.check_isobaric()
@@ -217,3 +219,9 @@ class TestBuild(basetests.PeptableTest):
                    '--dbfile', self.dbfile, '--genecentric']
         self.run_command(options)
         self.check(genecentric=True)
+
+    def test_noncentric(self):
+        options = ['--fdr', '--pep', '--isobaric', '--precursor',
+                   '--dbfile', self.dbfile, '--noncentric']
+        self.run_command(options)
+        self.check(noncentric=True)

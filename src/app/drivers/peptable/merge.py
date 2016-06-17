@@ -22,11 +22,14 @@ class BuildPeptideTableDriver(PeptableMergeDriver):
         self.fn = os.path.join(os.getcwd(), 'built_peptide_table.txt')
         if self.genecentric:
             self.lookuptype = 'peptidegenecentrictable'
+        elif self.noncentric:
+            self.genecentric = 'plain'
+            self.lookuptype = 'peptidetableplain'
 
     def set_options(self):
         super().set_options()
-        options = self.define_options(['lookupfn', 'genecentric', 'isobaric',
-                                       'precursor', 'fdr', 'pep',
+        options = self.define_options(['lookupfn', 'genecentric', 'noncentric',
+                                       'isobaric', 'precursor', 'fdr', 'pep',
                                        'mock_infn'], peptable_options)
         self.options.update(options)
 

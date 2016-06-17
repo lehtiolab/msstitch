@@ -1,7 +1,7 @@
 from app.lookups.sqlite.protpeptable import ProtPepTable
 
 
-class PepTableDB(ProtPepTable):
+class PepTableProteinCentricDB(ProtPepTable):
     datatype = 'peptide'
     colmap = {'peptide_sequences': ['pep_id', 'sequence'],
               'peptide_precur_quanted': ['pep_id', 'peptable_id', 'quant'],
@@ -10,7 +10,8 @@ class PepTableDB(ProtPepTable):
               'pepquant_channels': ['channel_id', 'peptable_id',
                                     'channel_name', 'amount_psms_name'],
               'peptide_iso_quanted': ['peptidequant_id', 'pep_id',
-                                      'channel_id', 'quantvalue', 'amount_psms'],
+                                      'channel_id', 'quantvalue',
+                                      'amount_psms'],
               }
 
     def add_tables(self):
@@ -26,7 +27,7 @@ class PepTableDB(ProtPepTable):
         return (x[0] for x in cursor)
 
 
-class PepTableGeneCentricDB(PepTableDB):
+class PepTableGeneCentricDB(PepTableProteinCentricDB):
     datatype = 'peptide'
 
     def get_proteins_psms_for_map(self):
@@ -42,5 +43,15 @@ class PepTableGeneCentricDB(PepTableDB):
                       'USING(protein_acc)'
                       )
         genetable = 'genes'
-        return self.get_unique_gene_psms(genetable, fields, firstjoin, extrajoins)
+        return self.get_unique_gene_psms(genetable, fields, firstjoin,
+                                         extrajoins)
 
+
+class PepTablePlainDB(PepTableProteinCentricDB):
+    datatype = 'peptide'
+
+    def get_proteins_psms_for_map(self):
+        fields = ['p.protein_acc', 'sets.set_name', 'pep.sequence',
+                  'psm.psm_id']
+        firstjoin = ('protein_psm', 'pp', 'protein_acc')
+        return self.get_proteins_psms('proteins', fields, firstjoin)

@@ -141,7 +141,9 @@ def count_psms(pdata):
 def add_record_to_peptidedata(peptidedata, p_acc, pool, psmdata, genecentric,
                               pgcontentmap=None):
     seq, psm_id = psmdata[2], psmdata[3]
-    if genecentric:
+    if genecentric == 'plain':
+        gene, desc, assoc_id, cov, pgcontent = None, None, None, None, None
+    elif genecentric:
         gene = p_acc
         desc, assoc_id = psmdata[4], psmdata[5]
         cov, pgcontent = None, None
@@ -160,6 +162,8 @@ def add_record_to_peptidedata(peptidedata, p_acc, pool, psmdata, genecentric,
         peptidedata[seq]['psms'][pool].add(psm_id)
     if not genecentric:
         protein = (p_acc, cov, desc, gene, assoc_id, len(pgcontent))
+    elif genecentric == 'plain':
+        protein = (p_acc, cov, desc, gene, assoc_id)
     else:
         protein = (None, cov, desc, gene, assoc_id)
     peptidedata[seq]['proteins'].add(protein)

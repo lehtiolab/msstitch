@@ -363,6 +363,11 @@ peptable_options.update({
                    'containing PSM table spectrafiles (e.g. mzML) '
                    'if you want to track PSMs when creating peptide '
                    'tables', 'required': False},
+    'noncentric': {'driverattr': 'noncentric', 'dest': 'noncentric',
+                   'clarg': '--noncentric', 'action': 'store_const',
+                   'const': True, 'default': False, 'required': False,
+                   'help': 'Do not include protein group '
+                   'or gene data in output, just use accessions. '},
     'genecentric': {'driverattr': 'genecentric', 'dest': 'genecentric',
                     'clarg': '--genecentric', 'action': 'store_const',
                     'const': True, 'default': False, 'required': False,
