@@ -43,7 +43,6 @@ shared_options = {
                     'help': 'Feature type to use for qvality. Can either be '
                     'psm or peptide.', 'clarg': '--feattype',
                     'type': 'pick', 'picks': ['psm', 'peptide']},
-    # FIXME CLARG changes -f to --feattype
     'unroll': {'driverattr': 'unroll', 'clarg': '--unroll', 'const': True,
                'action': 'store_const', 'default': False, 'help': 'PSM table '
                'from Mzid2TSV contains either one PSM per line with all '
@@ -336,7 +335,7 @@ prottable_options.update({
                     'be converted to -log10 values.'},
     'featuretype': {'driverattr': 'featuretype', 'dest': 'featuretype',
                     'help': 'Feature type to use for qvality. Can be one of '
-                    '[qvalue, probability].', 'clarg': '--feattype',
+                    '[qvalue, probability, svm].', 'clarg': '--feattype',
                     'type': 'pick', 'picks': ['qvalue', 'probability', 'svm']},
     't_fasta': {'driverattr': 't_fasta', 'clarg': '--targetfasta',
                 'type': 'file', 'help': 'FASTA file with target proteins '
