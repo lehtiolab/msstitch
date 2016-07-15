@@ -18,7 +18,8 @@ class BaseDriver(object):
 
     def set_options(self):
         self.options = self.define_options(['fn', 'outdir', 'outfile'], {})
-        self.options['-i']['help'].format(self.infiletype)
+        self.options['-i']['help'] = self.options['-i']['help'].format(
+            self.infiletype)
 
     def get_commandhelp(self):
         return self.commandhelp
