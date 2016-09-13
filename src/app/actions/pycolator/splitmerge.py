@@ -68,6 +68,6 @@ def protein_header_split_generator(elements, headers, ns):
 
 
 def split_protein_header_id_type(elements, ns, protheaders):
-    headers = protheaders.split(';')
+    headers = protheaders.strip(';').split(';')
     return {x: protein_header_split_generator(elements[x], headers, ns)
             for x in ['psm', 'peptide']}
