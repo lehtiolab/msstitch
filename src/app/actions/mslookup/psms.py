@@ -43,8 +43,8 @@ def get_protein_gene_map(mapfn, proteins, decoy):
     gpmap = {}
     for protein, gene, symbol, desc in fastareader.get_proteins_genes(mapfn):
         if protein in proteins:
+            protein = proteins[protein]
             if decoy:
-                protein = proteins[protein]
                 symbol = '{}{}'.format(mzidtsvdata.DECOY_PREFIX, symbol)
                 gene = '{}{}'.format(mzidtsvdata.DECOY_PREFIX, gene)
                 desc = None
@@ -76,11 +76,13 @@ def store_proteins_descriptions(pgdb, fastafn, tsvfn, mapfn, header, decoy,
             pgdb.store_descriptions(descriptions)
             pgdb.store_genes(genes)
     if mapfn:
+        proteins_with_versions = {}
+        for protein in proteins:
+            proteins_with_versions[protein[0].split('.')[0]] = protein
         if decoy:
             mod = fastareader.get_decoy_mod_string(proteins[0][0])
-            proteins = {x[0].replace(mod, ''): x[0] for x in proteins}
-        else:
-            proteins = {x[0]: 1 for x in proteins}
+            proteins_with_versions = {k.replace(mod, ''): v for k, v
+                                      in proteins_with_versions.items()}
         gpmap = get_protein_gene_map(mapfn, proteins, decoy)
         pgdb.store_gene_and_associated_id(gpmap)
 

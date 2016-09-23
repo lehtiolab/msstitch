@@ -187,10 +187,8 @@ class TestPSMLookup(basetests.MSLookupTest):
         return psms
 
 
-class TestPSMLookupEnsembl(TestPSMLookup):
-    infilename = 'mzidtsv_filtered_fr1-2.txt'
-
-    def check_db_map(self, fasta, martmap):
+class TestPSMLookupEnsemblBase(TestPSMLookup):
+    def check_db_map(self, fasta, martmap, versioned=False):
         exp_proteins = {rec.id: {'seq': rec.seq}
                         for rec in SeqIO.parse(fasta, 'fasta')}
         header = self.get_tsvheader(martmap)
@@ -200,10 +198,14 @@ class TestPSMLookupEnsembl(TestPSMLookup):
         dix = header.index('Description')
         for line in self.get_all_lines(martmap):
             line = line.strip('\n').split('\t')
-            exp_proteins[line[pix]].update({'gene': line[gix],
-                                            'symb': line[six],
-                                            'desc': line[dix],
-                                            })
+            if versioned:
+                pacc = '{}.2'.format(line[pix])
+            else:
+                pacc = line[pix]
+            exp_proteins[pacc].update({'gene': line[gix],
+                                       'symb': line[six],
+                                       'desc': line[dix],
+                                       })
         self.check_db_fasta(fasta, exp_proteins)
         sql = ('SELECT g.protein_acc, g.gene_acc, aid.assoc_id, pd.description'
                ' FROM genes AS g JOIN associated_ids AS aid USING(protein_acc)'
@@ -238,6 +240,10 @@ class TestPSMLookupEnsembl(TestPSMLookup):
             self.assertEqual(gene, exp_proteins[prot]['gene'])
             self.assertEqual(aid, exp_proteins[prot]['symb'])
 
+
+class TestPSMLookupEnsembl(TestPSMLookupEnsemblBase):
+    infilename = 'mzidtsv_filtered_fr1-2.txt'
+
     def test_no_fasta(self):
         options = ['--spectracol', '2']
         self.run_command(options)
@@ -265,6 +271,17 @@ class TestPSMLookupEnsembl(TestPSMLookup):
                    '--map', mapfn, '--decoy']
         self.run_command(options)
         self.check_db_decoy(fastafn, mapfn)
+
+
+class TestPSMLookupEnsemblVersioned(TestPSMLookupEnsemblBase):
+    infilename = 'mzidtsv_filtered_fr1-2_versioned_ensembl.txt'
+
+    def test_fasta_map_versions(self):
+        fastafn = os.path.join(self.fixdir, 'ensembl_versioned.fasta')
+        mapfn = os.path.join(self.fixdir, 'biomart.map')
+        options = ['--spectracol', '2', '--fasta', fastafn, '--map', mapfn]
+        self.run_command(options)
+        self.check_db_map(fastafn, mapfn, versioned=True)
 
 
 class TestPSMLookupDelimitedFasta(TestPSMLookup):
