@@ -355,7 +355,7 @@ prottable_options.update({
                     'type': float, 'default': False, 'help': 'FDR cutoff when '
                     'building merged protein table, to use when a cutoff has '
                     'been used before storing the table to lookup. FDR values '
-                    'need to be stored in the lookup'},
+                    'need to be stored in the lookup', 'required': False},
 })
 
 

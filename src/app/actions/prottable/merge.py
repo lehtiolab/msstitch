@@ -37,7 +37,7 @@ def build_proteintable(pqdb, headerfields, mergecutoff, isobaric=False,
                       pdata_fun, protein, sqlfieldmap, headerfields,
                       pdmap)
     for protein in proteins:
-        if not protein_pool_fdr_cutoff(protein, sqlfieldmap, mergecutoff):
+        if mergecutoff and not protein_pool_fdr_cutoff(protein, sqlfieldmap, mergecutoff):
             continue
         p_acc = protein[sqlfieldmap['p_acc']]
         if p_acc != outprotein[prottabledata.HEADER_PROTEIN]:
