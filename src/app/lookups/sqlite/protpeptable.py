@@ -183,6 +183,24 @@ class ProtPepTable(ResultLookupInterface):
 
     def prepare_mergetable_sql(self, precursor=False, isobaric=False,
                                probability=False, fdr=False, pep=False):
+        """Dynamically build SQL query to generate entries for the multi-set
+        merged protein and peptide tables. E.g.
+
+        SELECT g.gene_acc, pc.channel_name, pc.amount_psms_name,
+               giq.quantvalue giq.amount_psms gfdr.fdr
+        FROM genes AS g
+        JOIN biosets AS bs
+        JOIN gene_tables AS gt ON gt.set_id=bs.set_id
+        JOIN genequant_channels AS pc ON pc.gene_table_id=gt.genetable_id
+        JOIN gene_iso_quanted AS giq ON giq.gene_id=g.gene_id
+             AND giq.channel_id=pc.channel_id
+        JOIN gene_fdr AS gfdr ON gfdr.gene_id=g.gene_id
+             AND gfdr.genetable_id=gt.genetable_id
+        ORDER BY g.gene
+
+        This is multi-set output because we join on biosets. The output is
+        then parsed to its respective set by the action code.
+        """
         featcol = self.colmap[self.table_map[self.datatype]['feattable']][1]
         selectmap, count = self.update_selects({}, ['p_acc', 'set_name'], 0)
         joins = []
