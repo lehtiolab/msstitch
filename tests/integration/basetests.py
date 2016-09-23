@@ -269,7 +269,7 @@ class PepProtableTest(BaseTest):
                                     float(line[ch]))
              for ch in isoquant[line[acc_field]]]
 
-    def check_build_values(self, sql, fields, accession):
+    def check_build_values(self, sql, fields, accession, cutoff=False):
         expected = {}
         for rec in self.get_values_from_db(self.dbfile, sql):
             # skip multiple entries of e.g protein group per peptide
@@ -286,8 +286,16 @@ class PepProtableTest(BaseTest):
                 for val, field in zip(pepvals, fields):
                     self.assertEqual(str(val),
                                      line['{}_{}'.format(setname, field)])
+            expected.pop(acc)
+        self.check_exp_empty(expected, cutoff)
 
-    def check_built_isobaric(self, sql, accession):
+    def check_exp_empty(self, expected, cutoff):
+        if cutoff:
+            self.assertFalse(expected == {})
+        else:
+            self.assertTrue(expected == {})
+
+    def check_built_isobaric(self, sql, accession, cutoff=False):
         expected = {}
         for rec in self.get_values_from_db(self.dbfile, sql):
             try:
@@ -310,6 +318,8 @@ class PepProtableTest(BaseTest):
                     # FIXME currently no # PSMs in peptide table isoquant!
                 else:
                     self.assertEqual(nr_psms, str(exp_val[1]))
+            expected.pop(line[accession])
+        self.check_exp_empty(expected, cutoff)
 
 
 class PeptableTest(PepProtableTest):

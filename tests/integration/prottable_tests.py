@@ -46,10 +46,12 @@ class TestBuild(basetests.ProttableTest):
         cmd = [self.executable, self.command, '-d', self.workdir]
         return cmd
 
-    def test_proteincentric(self):
+    def test_proteincentric(self, cutoff=False):
         self.dbfile = os.path.join(self.fixdir, 'prottable_db.sqlite')
         options = ['--fdr', '--precursor', '--isobaric', '--probability',
                    '--pep', '--dbfile', self.dbfile]
+        if cutoff:
+            options.extend(['--mergecutoff', str(cutoff)])
         self.run_command(options)
         sql = ('SELECT p.protein_acc, bs.set_name, pf.fdr, pep.pep, pp.quant, '
                'ppr.probability FROM proteins AS p '
@@ -62,15 +64,18 @@ class TestBuild(basetests.ProttableTest):
 
         self.check_build_values(sql, ['q-value', 'PEP', 'MS1 precursor area',
                                       'Protein error probability'],
-                                'Protein accession')
+                                'Protein accession', cutoff)
         sql = ('SELECT p.protein_acc, bs.set_name, pc.channel_name, '
                'pi.quantvalue, pi.amount_psms FROM proteins AS p '
                'JOIN biosets AS bs '
                'JOIN protein_iso_quanted AS pi USING(pacc_id) '
                'JOIN protquant_channels AS pc USING(channel_id) '
                )
-        self.check_built_isobaric(sql, 'Protein accession')
+        self.check_built_isobaric(sql, 'Protein accession', cutoff)
         self.check_protein_data('proteincentric')
+
+    def test_mergecutoff(self):
+        self.test_proteincentric(0.0001)
 
     def test_genecentric(self):
         self.dbfile = os.path.join(self.fixdir, 'prottable_gene_db.sqlite')
