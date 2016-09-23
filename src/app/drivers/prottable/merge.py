@@ -19,7 +19,7 @@ class BuildProteinTableDriver(ProttableMergeDriver):
         self.options.update(self.define_options(['lookupfn', 'genecentric',
                                                  'isobaric', 'precursor',
                                                  'probability', 'fdr', 'pep',
-                                                 'mock_infn'],
+                                                 'mock_infn', 'mergecutoff'],
                                                 prottable_options))
 
     def parse_input(self, **kwargs):
@@ -36,6 +36,7 @@ class BuildProteinTableDriver(ProttableMergeDriver):
         """Generates proteins with quant from the lookup table"""
         self.features = preparation.build_proteintable(self.lookup,
                                                        self.headerfields,
+                                                       self.mergecutoff,
                                                        self.isobaric,
                                                        self.precursor,
                                                        self.probability,

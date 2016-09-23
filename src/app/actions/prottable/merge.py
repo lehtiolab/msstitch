@@ -5,7 +5,7 @@ from app.actions.mergetable import simple_val_fetch, fill_mergefeature
 from app.actions.proteindata import create_featuredata_map
 
 
-def build_proteintable(pqdb, headerfields, isobaric=False,
+def build_proteintable(pqdb, headerfields, mergecutoff, isobaric=False,
                        precursor=False, probability=False, fdr=False,
                        pep=False, genecentric=False):
     """Fetches proteins and quants from joined lookup table, loops through
@@ -37,9 +37,12 @@ def build_proteintable(pqdb, headerfields, isobaric=False,
                       pdata_fun, protein, sqlfieldmap, headerfields,
                       pdmap)
     for protein in proteins:
+        if not protein_pool_fdr_cutoff(protein, sqlfieldmap, mergecutoff):
+            continue
         p_acc = protein[sqlfieldmap['p_acc']]
         if p_acc != outprotein[prottabledata.HEADER_PROTEIN]:
             if outprotein != check_prot:
+                # Is this here to avoid outputting empty proteins?
                 yield outprotein
             outprotein = {prottabledata.HEADER_PROTEIN: p_acc}
             check_prot = {k: v for k, v in outprotein.items()}
@@ -47,6 +50,17 @@ def build_proteintable(pqdb, headerfields, isobaric=False,
                           pep_fun, pdata_fun, protein, sqlfieldmap,
                           headerfields, pdmap)
     yield outprotein
+
+
+def protein_pool_fdr_cutoff(sql_entry, sqlmap, fdrcutoff):
+    fdr = sql_entry[sqlmap['fdr_val']]
+    if fdr is None:
+        print('WARNING, filtering merge table on FDR but protein {} in '
+              'set {} has no FDR value in '
+              'lookup.'.format(sql_entry[sqlmap['p_acc']], 
+                               sql_entry[sqlmap['set_name']]))
+        return False
+    return fdr < fdrcutoff
 
 
 def get_protein_data_genecentric(outprotein, proteindata_map, headerfields):
@@ -57,8 +71,7 @@ def get_protein_data_genecentric(outprotein, proteindata_map, headerfields):
 
 def get_protein_data(outprotein, proteindata_map, headerfields):
     p_acc = outprotein[prottabledata.HEADER_PROTEIN]
-    return pinfo.get_protein_data_pgrouped(proteindata_map, p_acc,
-                                           headerfields)
+    return pinfo.get_protein_data_pgrouped(proteindata_map, p_acc, headerfields)
 
 
 def get_isobaric_quant(protein, sqlmap, headerfields):

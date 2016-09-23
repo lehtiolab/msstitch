@@ -351,6 +351,11 @@ prottable_options.update({
                  'type': 'pick', 'picks': ['fasta', 'result'],
                  'help': 'Feature type to use for qvality. Can be one of '
                  '[fasta, result].'},
+    'mergecutoff': {'driverattr': 'mergecutoff', 'clarg': '--mergecutoff',
+                    'type': float, 'default': False, 'help': 'FDR cutoff when '
+                    'building merged protein table, to use when a cutoff has '
+                    'been used before storing the table to lookup. FDR values '
+                    'need to be stored in the lookup'},
 })
 
 
