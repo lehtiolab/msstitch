@@ -280,8 +280,6 @@ class PepProtableTest(BaseTest):
                 expected[rec[0]] = {rec[1]: rec[2:]}
         for line in self.tsv_generator(self.resultfn):
             acc = line[accession]
-            if acc not in expected:
-                continue
             for setname, pepvals in expected[acc].items():
                 for val, field in zip(pepvals, fields):
                     self.assertEqual(str(val),
