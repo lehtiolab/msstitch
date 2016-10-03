@@ -210,11 +210,14 @@ class TestPSMLookupEnsemblBase(TestPSMLookup):
         sql = ('SELECT g.protein_acc, g.gene_acc, aid.assoc_id, pd.description'
                ' FROM genes AS g JOIN associated_ids AS aid USING(protein_acc)'
                ' JOIN prot_desc AS pd USING(protein_acc)')
+        count = 0
         for prot, gene, aid, desc in self.get_values_from_db(self.resultfn,
                                                              sql):
+            count += 1
             self.assertEqual(gene, exp_proteins[prot]['gene'])
             self.assertEqual(aid, exp_proteins[prot]['symb'])
             self.assertEqual(desc, exp_proteins[prot]['desc'])
+        self.assertNotEqual(count, 0)
 
     def check_db_decoy(self, fasta, martmap):
         def decoymod(accession):
