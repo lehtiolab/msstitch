@@ -56,7 +56,7 @@ class AddIsobaricQuantDriver(ProttableAddData):
                                                    quantheader)
         self.quantacc = reader.get_cols_in_file(self.quantacccolpattern,
                                                 quantheader, single_col=True)
-        self.quantproteins = reader.generate_tsv_proteins(self.quantfile,
+        self.quantfeatures = reader.generate_tsv_proteins(self.quantfile,
                                                           quantheader)
 
     def create_header(self):
@@ -64,6 +64,6 @@ class AddIsobaricQuantDriver(ProttableAddData):
 
     def set_feature_generator(self):
         self.features = preparation.add_isoquant_data(self.in_proteins,
-                                                      self.quantproteins,
+                                                      self.quantfeatures,
                                                       self.quantacc,
                                                       self.quantfields)

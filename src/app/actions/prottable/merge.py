@@ -57,7 +57,7 @@ def protein_pool_fdr_cutoff(sql_entry, sqlmap, fdrcutoff):
     if fdr is None:
         print('WARNING, filtering merge table on FDR but protein {} in '
               'set {} has no FDR value in '
-              'lookup.'.format(sql_entry[sqlmap['p_acc']], 
+              'lookup.'.format(sql_entry[sqlmap['p_acc']],
                                sql_entry[sqlmap['set_name']]))
         return False
     return fdr < fdrcutoff

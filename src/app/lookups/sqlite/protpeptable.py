@@ -258,7 +258,7 @@ class ProtPepTable(ResultLookupInterface):
         return sql, selectmap
 
     def get_sql_joins_mergetable(self, sql, joins, pep_or_prot):
-        protein_j_cols = {'g': 'pacc_id', 'gt': 'prottable_id', 
+        protein_j_cols = {'g': 'pacc_id', 'gt': 'prottable_id',
                           'pgm': 'protein_acc'}
         peptide_j_cols = {'g': 'pep_id', 'gt': 'peptable_id'}
         gene_j_cols = {'g': 'gene_id', 'gt': 'genetable_id'}
