@@ -276,6 +276,41 @@ class TestPSMLookupEnsembl(TestPSMLookupEnsemblBase):
         self.check_db_decoy(fastafn, mapfn)
 
 
+class TestPSMLookupEnsemblExtraPeptides(TestPSMLookupEnsemblBase):
+    """For when a DB has been used to which a user has added e.g. novel
+    peptides, which are not annotated to a protein"""
+
+    infilename = 'mzidtsv_filtered_fr1-2_extrapep.txt'
+
+    def test_no_fasta(self):
+        options = ['--spectracol', '2']
+        self.run_command(options)
+        self.check_db_base()
+
+    def test_with_fasta(self):
+        fastafn = os.path.join(self.fixdir, 'ensembl_extrapep.fasta')
+        options = ['--spectracol', '2', '--fasta', fastafn]
+        self.run_command(options)
+        self.check_db_fasta(fastafn)
+
+    def test_fasta_map(self):
+        fastafn = os.path.join(self.fixdir, 'ensembl_extrapep.fasta')
+        mapfn = os.path.join(self.fixdir, 'biomart.map')
+        options = ['--spectracol', '2', '--fasta', fastafn, '--map', mapfn]
+        self.run_command(options)
+        self.check_db_map(fastafn, mapfn)
+
+    def test_fasta_map_decoy(self):
+        self.infile = os.path.join(self.fixdir,
+                                   'mzidtsv_filtered_fr1-2_extrapep_decoy.txt')
+        fastafn = os.path.join(self.fixdir, 'decoy_ensembl_extrapep.fasta')
+        mapfn = os.path.join(self.fixdir, 'biomart.map')
+        options = ['--spectracol', '2', '--fasta', fastafn,
+                   '--map', mapfn, '--decoy']
+        self.run_command(options)
+        self.check_db_decoy(fastafn, mapfn)
+
+
 class TestPSMLookupEnsemblVersioned(TestPSMLookupEnsemblBase):
     infilename = 'mzidtsv_filtered_fr1-2_versioned_ensembl.txt'
 

@@ -11,8 +11,8 @@ def create_psm_lookup(fn, fastafn, mapfn, header, pgdb, unroll=False,
                       fastadelim=None, genefield=None):
     """Reads PSMs from file, stores them to a database backend in chunked PSMs.
     """
-    store_proteins_descriptions(pgdb, fastafn, fn, mapfn, header, decoy,
-                                fastadelim, genefield)
+    proteins = store_proteins_descriptions(pgdb, fastafn, fn, mapfn, header,
+                                           decoy, fastadelim, genefield)
     mzmlmap = pgdb.get_mzmlfile_map()
     sequences = {}
     for psm in tsvreader.generate_tsv_psms(fn, header):
@@ -36,7 +36,7 @@ def create_psm_lookup(fn, fastafn, mapfn, header, pgdb, unroll=False,
                      })
     pgdb.store_psms(psms)
     pgdb.index_psms()
-    store_psm_protein_relations(fn, header, pgdb)
+    store_psm_protein_relations(fn, header, pgdb, proteins)
 
 
 def get_protein_gene_map(mapfn, proteins, decoy):
@@ -85,9 +85,10 @@ def store_proteins_descriptions(pgdb, fastafn, tsvfn, mapfn, header, decoy,
                                       in proteins_with_versions.items()}
         gpmap = get_protein_gene_map(mapfn, proteins_with_versions, decoy)
         pgdb.store_gene_and_associated_id(gpmap)
+    return [x[0] for x in proteins]
 
 
-def store_psm_protein_relations(fn, header, pgdb):
+def store_psm_protein_relations(fn, header, pgdb, proteins):
     """Reads PSMs from file, extracts their proteins and peptides and passes
     them to a database backend in chunks.
     """
@@ -98,7 +99,9 @@ def store_psm_protein_relations(fn, header, pgdb):
     store_soon = False
     for psm in tsvreader.generate_tsv_psms(fn, header):
         psm_id, prots = tsvreader.get_pepproteins(psm)
+        prots = [x for x in prots if x in proteins]
         try:
+            # is there ever a psm with same id as earlier?? why like this?
             allpsms[psm_id].extend(prots)
         except KeyError:
             allpsms[psm_id] = prots
