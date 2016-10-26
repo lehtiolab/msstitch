@@ -37,7 +37,7 @@ def filter_whole_proteins(elements, protein_fasta, seqtype, ns, deamidation):
     for element in elements:
         seq_matches_protein = False
         for seq in get_seqs_from_element(element, seqtype, ns, deamidation):
-            if any([seq in protein for protein in whole_proteins]):
+            if any((seq in protein for protein in whole_proteins)):
                 seq_matches_protein = True
                 break
         if seq_matches_protein:

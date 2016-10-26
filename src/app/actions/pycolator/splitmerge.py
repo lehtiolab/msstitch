@@ -58,7 +58,7 @@ def protein_header_split_generator(elements, headers, ns):
     for el in elements:
         header_not_matching = False
         for protein in el.findall('{%s}protein_id' % ns['xmlns']):
-            if not any([re.search(h, protein.text) for h in headers]):
+            if not any((re.search(h, protein.text) for h in headers)):
                 header_not_matching = True
                 break
         if header_not_matching:
