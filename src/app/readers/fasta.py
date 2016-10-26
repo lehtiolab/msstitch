@@ -25,6 +25,11 @@ def get_proteins_descriptions(fastafn):
         yield (record.id, record.description)
 
 
+def get_proteins_sequence(fastafn):
+    for record in parse_fasta(fastafn):
+        yield record.seq
+
+
 def get_proteins_genes(fastafn, fastadelim=None, genefield=None):
     """This returns a tuple of (protein, gene, HGNC symbol, description) from
     a passed file. If the file is FASTA from ENSEMBL or UniProt, only genes and

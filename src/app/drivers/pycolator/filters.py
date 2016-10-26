@@ -50,6 +50,34 @@ class FilterUniquePeptides(base.PycolatorDriver):
         self.features = {'psm': self.allpsms, 'peptide': uniquepeps}
 
 
+class FilterWholeProteinSequence(base.PycolatorDriver):
+    """This class processes multiple percolator runs from fractions and
+    filters out first peptides that are found in a specified searchspace. Then
+    it keeps the remaining best scoring unique peptides."""
+    outsuffix = '_filtprot.xml'
+    command = 'filterprot'
+    commandhelp = ('Filters out peptides that match to a protein in a FASTA '
+                   'file. Slow, so only use on few peptides.')
+
+    def set_options(self):
+        super().set_options()
+        self.options.update(self.define_options(['deamidate', 'fasta'],
+                                                pycolator_options))
+
+    def set_features(self):
+        self.features = {
+            'peptide': preparation.filter_whole_proteins(self.allpeps,
+                                                         self.fasta,
+                                                         'pep',
+                                                         self.ns,
+                                                         self.deamidate),
+            'psm': preparation.filter_whole_proteins(self.allpsms,
+                                                     self.fasta,
+                                                     'psm',
+                                                     self.ns,
+                                                     self.deamidate),
+        }
+
 class FilterPeptideSequence(base.PycolatorDriver):
     """This class processes multiple percolator runs from fractions and
     filters out first peptides that are found in a specified searchspace. Then

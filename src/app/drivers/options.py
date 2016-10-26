@@ -33,6 +33,9 @@ shared_options = {
                 'trypsin before a proline residue. Then filtering will be '
                 'done against both cut and non-cut peptides.',
                 },
+    'fasta': {'driverattr': 'fasta', 'dest': 'fasta',
+              'type': 'file', 'help': 'FASTA sequence database',
+              'required': False, 'default': False, 'clarg': '--fasta'},
     'trypsinize': {'driverattr': 'trypsinize', 'dest': 'trypsinize',
                    'clarg': '--notrypsin', 'required': False,
                    'action': 'store_const', 'const': False, 'default': True,
@@ -134,11 +137,6 @@ mslookup_options = {
               'for decoy PSMs, use with --map in case there '
               'are no decoy symbols in the FASTA used to '
               'search.', 'required': False},
-    'fasta': {'driverattr': 'fasta', 'dest': 'fasta',
-              'type': 'file', 'help': 'FASTA sequence database'
-              ' to use when extracting gene names to the PSM '
-              'table from proteins', 'required': False,
-              'default': False, 'clarg': '--fasta'},
     'spectrafns': {'driverattr': 'spectrafns', 'dest': 'spectra',
                    'type': str, 'help': 'Spectra files in mzML '
                    'format. Multiple files can be specified, if '
@@ -192,6 +190,10 @@ mslookup_options['proteincol'] = {k: v for k, v
 mslookup_options['proteincol'].update(
     {'default': 1, 'help':
      mslookup_options['proteincol']['help'].format('first')})
+mslookup_options['fasta'] = {k: v for k, v in shared_options['fasta'].items()}
+mslookup_options['fasta']['help'] = ('FASTA sequence database to use when '
+                                     'extracting gene names to the PSM '
+                                     'table from proteins')
 
 pycolator_options = {
     'maxlength': {'driverattr': 'maxlength', 'dest': 'maxlength',

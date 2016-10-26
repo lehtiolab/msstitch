@@ -1,8 +1,8 @@
 import re
 from itertools import product
 
-from app.lookups.sqlite import searchspace as sqlite
 from app.readers import pycolator as reader
+from app.readers import fasta
 from app.readers import xmlformatting as formatting
 
 
@@ -32,12 +32,38 @@ def strip_modifications(seq):
     return re.sub('\[UNIMOD:\d*\]', '', seq)
 
 
+def filter_whole_proteins(elements, protein_fasta, seqtype, ns, deamidation):
+    whole_proteins = [x for x in fasta.get_proteins_sequence(protein_fasta)]
+    for element in elements:
+        seq_matches_protein = False
+        for seq in get_seqs_from_element(element, seqtype, ns, deamidation):
+            if any([seq in protein for protein in whole_proteins]):
+                seq_matches_protein = True
+                break
+        if seq_matches_protein:
+            formatting.clear_el(element)
+        else:
+            yield formatting.string_and_clear(element, ns)
+
+
 def filter_known_searchspace(elements, seqtype, lookup, ns, ntermwildcards,
                              deamidation):
     """Yields peptides from generator as long as their sequence is not found in
     known search space dict. Useful for excluding peptides that are found in
     e.g. ENSEMBL or similar"""
     for element in elements:
+        seq_is_known = False
+        for seq in get_seqs_from_element(element, seqtype, ns, deamidation):
+            if lookup.check_seq_exists(seq, ntermwildcards):
+                seq_is_known = True
+                break
+        if seq_is_known:
+            formatting.clear_el(element)
+        else:
+            yield formatting.string_and_clear(element, ns)
+
+
+def get_seqs_from_element(element, seqtype, ns, deamidation):
         seq = get_either_seq(seqtype, element, ns)
         seq = strip_modifications(seq)
         # Exchange leucines for isoleucines since MS can't differ and we
@@ -45,18 +71,9 @@ def filter_known_searchspace(elements, seqtype, lookup, ns, ntermwildcards,
         # in this amino acid
         seq = seq.replace('L', 'I')
         if deamidation:
-            seqs = combination_replace(seq, 'D', 'N')
+            return combination_replace(seq, 'D', 'N')
         else:
-            seqs = [seq]
-        seq_is_known = False
-        for testseq in seqs:
-            if lookup.check_seq_exists(testseq, ntermwildcards):
-                seq_is_known = True
-                break
-        if seq_is_known:
-            formatting.clear_el(element)
-        else:
-            yield formatting.string_and_clear(element, ns)
+            return [seq]
 
 
 def combination_replace(seq, from_aa, to_aa):
