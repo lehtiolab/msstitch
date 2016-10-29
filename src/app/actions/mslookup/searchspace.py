@@ -1,4 +1,22 @@
 from Bio import SeqIO
+PROTEIN_STORE_CHUNK_SIZE = 100000
+
+
+def create_searchspace_wholeproteins(lookup, fastafn, minpeplen):
+    fasta = SeqIO.parse(fastafn, 'fasta')
+    prots = {prot.id: prot.seq for prot in fasta}
+    storeseqs = []
+    peptotal = 0
+    for prot_id, protseq in prots.items():
+        for pos in range(0, len(protseq) - minpeplen + 1):
+            possible_pep = str(protseq)[pos:pos + minpeplen]
+            peptotal += 1
+            storeseqs.append((possible_pep, prot_id, pos))
+        if len(storeseqs) > PROTEIN_STORE_CHUNK_SIZE:
+            lookup.store_pep_proteins(storeseqs)
+            storeseqs = []
+    lookup.store_pep_proteins(storeseqs)
+    print('Stored {} peptides from {} proteins'.format(peptotal, len(prots)))
 
 
 def create_searchspace(lookup, fastafn, proline_cut=False,

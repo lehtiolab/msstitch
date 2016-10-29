@@ -348,6 +348,8 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                  'FOREIGN KEY(protein_acc) '
                                  'REFERENCES proteins(protein_acc)'],
                    'known_searchspace': ['seqs TEXT'],
+                   'protein_peptides': ['seq TEXT', 'protid TEXT',
+                                        'pos INTEGER'],
                    }
 
 

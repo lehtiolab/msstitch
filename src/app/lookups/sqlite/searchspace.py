@@ -4,7 +4,7 @@ from app.lookups.sqlite.base import DatabaseConnection
 class SearchSpaceDB(DatabaseConnection):
     def add_tables(self):
         """Creates a searchspace lookup sqlite."""
-        self.create_tables(['known_searchspace'])
+        self.create_tables(['known_searchspace', 'protein_peptides'])
 
     def write_peps(self, peps, reverse_seqs):
         """Writes peps to db. We can reverse to be able to look up
@@ -25,6 +25,18 @@ class SearchSpaceDB(DatabaseConnection):
         else:
             self.index_column('reverse_seqs_index', 'known_searchspace',
                               'seqs')
+
+    def store_pep_proteins(self, pepproteins):
+        cursor = self.get_cursor()
+        cursor.executemany('INSERT INTO protein_peptides(seq, protid, pos) '
+                           'VALUES(?, ?, ?)', pepproteins)
+        self.conn.commit()
+
+    def index_proteins(self):
+        cursor = self.get_cursor()
+        cursor.execute('CREATE INDEX pepix ON protein_peptides(seq)')
+        self.index_column('pepix', 'protein_peptides', 'seq')
+        self.conn.commit()
 
     def check_seq_exists(self, seq, amount_ntermwildcards):
         """Look up sequence in sqlite DB. Returns True or False if it

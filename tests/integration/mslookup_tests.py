@@ -7,11 +7,14 @@ from Bio import SeqIO
 from lxml import etree
 
 
-class TestTrypticLookup(basetests.BaseTest):
-    command = 'seqspace'
+class SearchspaceLookup(basetests.BaseTest):
     suffix = ''
-    executable = 'msslookup'
     infilename = 'proteins.fasta'
+    executable = 'msslookup'
+
+
+class TestTrypticLookup(SearchspaceLookup):
+    command = 'seqspace'
 
     def all_seqs_in_db(self, dbfn, sequences, seqtype):
         db = sqlite3.connect(dbfn)
@@ -63,6 +66,39 @@ class TestTrypticLookup(basetests.BaseTest):
 
     def test_noflags_yes_db(self):
         self.run_with_existing_db()
+
+
+class TestWholeProteinSeqLookup(SearchspaceLookup):
+    command = 'protspace'
+
+    def all_seqs_in_db(self, dbfn, sequences, seqtype):
+        db = sqlite3.connect(dbfn)
+        seqs_in_db = set()
+        sql = ('SELECT EXISTS(SELECT seq FROM protein_peptides WHERE '
+               'seq=? LIMIT 1)')
+        for seq in sequences:
+            seqs_in_db.add(db.execute(sql, (seq,)).fetchone()[0] == 1)
+        db.close()
+        return seqs_in_db == set([True])
+
+    def query_db_assert(self, options):
+        with open(os.path.join(self.fixdir, 'allpeptides_proteins.yml')) as fp:
+            sequences = yaml.load(fp)
+        options.extend(['--minlen', '6'])
+        self.run_command(options)
+        self.assertTrue(self.all_seqs_in_db(self.resultfn, sequences,
+                                            seqtype=False))
+
+    def test_without_db(self, seqtype=None):
+        self.resultfn = os.path.join(self.workdir,
+                                     'mslookup_db.sqlite')
+        self.query_db_assert([])
+
+    def test_with_existing_db(self, seqtype=None):
+        self.resultfn = os.path.join(self.workdir, 'seqspace.db')
+        options = ['--dbfile', self.resultfn]
+        self.copy_db_to_workdir('mzidtsv_db.sqlite')
+        self.query_db_assert(options)
 
 
 class TestSpectraLookup(basetests.MSLookupTest):

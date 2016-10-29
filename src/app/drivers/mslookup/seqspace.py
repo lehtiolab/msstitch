@@ -30,3 +30,25 @@ class SeqspaceLookupDriver(base.LookupDriver):
     def create_lookup(self):
         preparation.create_searchspace(self.lookup, self.fn, self.proline,
                                        self.falloff, self.trypsinize)
+
+
+class WholeProteinSeqspaceLookupDriver(base.LookupDriver):
+    lookuptype = 'searchspace'
+    command = 'protspace'
+    commandhelp = """Create a full-length protein lookup DB from a FASTA file.
+    Protein sequences are stored as short peptides starting from every one of
+    the proteins' amino acids."""
+
+    def __init__(self):
+        super().__init__()
+        self.infiletype = 'FASTA'
+
+    def set_options(self):
+        super().set_options()
+        self.options['--dbfile'].update({'required': False, 'default': None})
+        self.options.update(self.define_options(['minlength'],
+                                                mslookup_options))
+
+    def create_lookup(self):
+        preparation.create_searchspace_wholeproteins(self.lookup, self.fn,
+                                                     self.minlength)

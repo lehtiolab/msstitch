@@ -110,6 +110,9 @@ shared_options = {
                   'dest': 'genefield', 'required': False, 'type': int,
                   'help': 'Field nr (first=1) in FASTA that contains gene '
                   'name when using --fastadelim to parse the gene names'},
+    'minlength': {'driverattr': 'minlength', 'dest': 'minlength', 'default': 0,
+                  'help': 'Minimum length of peptide to be included',
+                  'type': int, 'clarg': '--minlen', 'required': False},
 }
 
 mslookup_options = {
@@ -200,10 +203,6 @@ pycolator_options = {
                   'default': None, 'required': False,
                   'help': 'Maximum length of peptide to be included in '
                   'filtered data.', 'type': int, 'clarg': '--maxlen'},
-    'minlength': {'driverattr': 'minlength', 'dest': 'minlength', 'default': 0,
-                  'help': 'Minimum length of peptide to be included in '
-                  'filtered data.', 'type': int, 'clarg': '--minlen',
-                  'required': False},
     'score': {'driverattr': 'score', 'dest': 'score', 'default': 'svm',
               'help': 'Score to filter unique peptides on, e.g. svm',
               'type': 'pick', 'picks': ['svm', 'q', 'pep', 'p'],
