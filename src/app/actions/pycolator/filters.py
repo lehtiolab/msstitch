@@ -32,12 +32,17 @@ def strip_modifications(seq):
     return re.sub('\[UNIMOD:\d*\]', '', seq)
 
 
-def filter_whole_proteins(elements, protein_fasta, seqtype, ns, deamidation):
-    whole_proteins = [x for x in fasta.get_proteins_sequence(protein_fasta)]
+def filter_whole_proteins(elements, protein_fasta, lookup, seqtype, ns,
+                          deamidation, minpeplen):
+    whole_proteins = {prot.id: prot.seq for prot in
+                      fasta.get_proteins_sequence(protein_fasta)}
     for element in elements:
         seq_matches_protein = False
-        for seq in get_seqs_from_element(element, seqtype, ns, deamidation):
-            if any((seq in protein for protein in whole_proteins)):
+        element_seqs = get_seqs_from_element(element, seqtype, ns, deamidation)
+        element_prots = {protid[0]: seq for seq in element_seqs for protid in
+                         lookup.get_protein_from_pep(seq[:minpeplen])}
+        for prot_id, pepseq in element_prots.items():
+            if pepseq in whole_proteins[prot_id]:
                 seq_matches_protein = True
                 break
         if seq_matches_protein:

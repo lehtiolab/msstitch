@@ -56,27 +56,34 @@ class FilterWholeProteinSequence(base.PycolatorDriver):
     it keeps the remaining best scoring unique peptides."""
     outsuffix = '_filtprot.xml'
     command = 'filterprot'
+    lookuptype = 'searchspace'
     commandhelp = ('Filters out peptides that match to a protein in a FASTA '
-                   'file. Slow, so only use on few peptides.')
+                   'file. Needs a lookup to match peptides to quickly.')
 
     def set_options(self):
         super().set_options()
-        self.options.update(self.define_options(['deamidate', 'fasta'],
+        self.options.update(self.define_options(['deamidate', 'fasta',
+                                                 'minlength', 'lookupfn'],
                                                 pycolator_options))
 
     def set_features(self):
         self.features = {
             'peptide': preparation.filter_whole_proteins(self.allpeps,
                                                          self.fasta,
+                                                         self.lookup,
                                                          'pep',
                                                          self.ns,
-                                                         self.deamidate),
+                                                         self.deamidate,
+                                                         self.minlength),
             'psm': preparation.filter_whole_proteins(self.allpsms,
                                                      self.fasta,
+                                                     self.lookup,
                                                      'psm',
                                                      self.ns,
-                                                     self.deamidate),
+                                                     self.deamidate,
+                                                     self.minlength),
         }
+
 
 class FilterPeptideSequence(base.PycolatorDriver):
     """This class processes multiple percolator runs from fractions and
