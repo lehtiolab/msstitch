@@ -61,3 +61,9 @@ class SearchSpaceDB(DatabaseConnection):
             sql = ('select exists(select seqs from known_searchspace '
                    'where seqs=? limit 1)')
             return cursor.execute(sql, (seq, )).fetchone()[0] == 1
+
+    def get_protein_from_pep(self, peptide):
+        cursor = self.get_cursor()
+        cursor.execute('SELECT protid FROM peptides WHERE seq='
+                       '"{}"'.format(peptide))
+        return cursor
