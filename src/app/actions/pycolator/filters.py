@@ -39,10 +39,12 @@ def filter_whole_proteins(elements, protein_fasta, lookup, seqtype, ns,
     for element in elements:
         seq_matches_protein = False
         element_seqs = get_seqs_from_element(element, seqtype, ns, deamidation)
-        element_prots = {protid[0]: seq for seq in element_seqs for protid in
+        element_prots = {protid: (seq, pos) for seq in element_seqs
+                         for protid, pos in
                          lookup.get_protein_from_pep(seq[:minpeplen])}
-        for prot_id, pepseq in element_prots.items():
-            if pepseq in whole_proteins[prot_id]:
+        for prot_id, (pepseq, pos) in element_prots.items():
+            protseq = whole_proteins[prot_id]
+            if pepseq in protseq and protseq[pos - 1] in ['K', 'R']:
                 seq_matches_protein = True
                 break
         if seq_matches_protein:
