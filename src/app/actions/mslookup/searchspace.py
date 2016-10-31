@@ -4,10 +4,10 @@ PROTEIN_STORE_CHUNK_SIZE = 100000
 
 def create_searchspace_wholeproteins(lookup, fastafn, minpeplen):
     fasta = SeqIO.parse(fastafn, 'fasta')
-    prots = {prot.id: prot.seq for prot in fasta}
+    prots = {prot.seq: prot.id for prot in fasta}
     storeseqs = []
     peptotal = 0
-    for prot_id, protseq in prots.items():
+    for protseq, prot_id in prots.items():
         for pos in range(0, len(protseq) - minpeplen + 1):
             possible_pep = str(protseq)[pos:pos + minpeplen]
             peptotal += 1
