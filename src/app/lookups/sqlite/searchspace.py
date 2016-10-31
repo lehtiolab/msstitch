@@ -64,6 +64,6 @@ class SearchSpaceDB(DatabaseConnection):
 
     def get_protein_from_pep(self, peptide):
         cursor = self.get_cursor()
-        cursor.execute('SELECT protid FROM peptides WHERE seq='
+        cursor.execute('SELECT protid FROM protein_peptides WHERE seq='
                        '"{}"'.format(peptide))
         return cursor

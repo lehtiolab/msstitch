@@ -35,7 +35,7 @@ def strip_modifications(seq):
 def filter_whole_proteins(elements, protein_fasta, lookup, seqtype, ns,
                           deamidation, minpeplen):
     whole_proteins = {prot.id: prot.seq for prot in
-                      fasta.get_proteins_sequence(protein_fasta)}
+                      fasta.parse_fasta(protein_fasta)}
     for element in elements:
         seq_matches_protein = False
         element_seqs = get_seqs_from_element(element, seqtype, ns, deamidation)
