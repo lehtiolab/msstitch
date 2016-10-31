@@ -16,7 +16,9 @@ def create_searchspace_wholeproteins(lookup, fastafn, minpeplen):
             lookup.store_pep_proteins(storeseqs)
             storeseqs = []
     lookup.store_pep_proteins(storeseqs)
-    print('Stored {} peptides from {} proteins'.format(peptotal, len(prots)))
+    lookup.index_proteins()
+    print('Stored {} peptides from {} proteins (reduced FASTA to remove '
+          'duplicate sequences)'.format(peptotal, len(prots)))
 
 
 def create_searchspace(lookup, fastafn, proline_cut=False,

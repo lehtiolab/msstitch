@@ -33,8 +33,6 @@ class SearchSpaceDB(DatabaseConnection):
         self.conn.commit()
 
     def index_proteins(self):
-        cursor = self.get_cursor()
-        cursor.execute('CREATE INDEX pepix ON protein_peptides(seq)')
         self.index_column('pepix', 'protein_peptides', 'seq')
         self.conn.commit()
 
