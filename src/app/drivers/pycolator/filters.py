@@ -63,7 +63,8 @@ class FilterWholeProteinSequence(base.PycolatorDriver):
     def set_options(self):
         super().set_options()
         self.options.update(self.define_options(['deamidate', 'fasta',
-                                                 'minlength', 'lookupfn'],
+                                                 'minlength', 'lookupfn',
+                                                 'forcetryp'],
                                                 pycolator_options))
 
     def set_features(self):
@@ -74,14 +75,16 @@ class FilterWholeProteinSequence(base.PycolatorDriver):
                                                          'pep',
                                                          self.ns,
                                                          self.deamidate,
-                                                         self.minlength),
+                                                         self.minlength,
+                                                         self.forcetryp),
             'psm': preparation.filter_whole_proteins(self.allpsms,
                                                      self.fasta,
                                                      self.lookup,
                                                      'psm',
                                                      self.ns,
                                                      self.deamidate,
-                                                     self.minlength),
+                                                     self.minlength,
+                                                     self.forcetryp)
         }
 
 

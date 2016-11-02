@@ -33,7 +33,7 @@ def strip_modifications(seq):
 
 
 def filter_whole_proteins(elements, protein_fasta, lookup, seqtype, ns,
-                          deamidation, minpeplen):
+                          deamidation, minpeplen, enforce_tryp):
     whole_proteins = {str(prot.seq).replace('L', 'I'): prot.id for prot in
                       fasta.parse_fasta(protein_fasta)}
     whole_proteins = {v: k for k, v in whole_proteins.items()}
@@ -45,9 +45,17 @@ def filter_whole_proteins(elements, protein_fasta, lookup, seqtype, ns,
                          lookup.get_protein_from_pep(seq[:minpeplen])}
         for prot_id, (pepseq, pos) in element_prots.items():
             protseq = whole_proteins[prot_id]
-            if pepseq in protseq and protseq[pos - 1] in ['K', 'R']:
-                seq_matches_protein = True
-                break
+            if pepseq in protseq:
+                if enforce_tryp and (pos == 0 or not set([
+                                     pepseq[-1], 
+                                     protseq[pos - 1]]).difference(['K', 'R'])):
+                    # pepseq is tryptic on both ends (or is an N-term peptide), 
+                    # matches to protein seq so remove
+                    seq_matches_protein = True
+                    break
+                elif not enforce_tryp:
+                    seq_matches_protein = True
+                    break
         if seq_matches_protein:
             formatting.clear_el(element)
         else:

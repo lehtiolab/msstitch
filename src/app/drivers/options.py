@@ -224,6 +224,14 @@ pycolator_options = {
                   'help': 'Filter against both normal peptides and deamidated '
                   'peptides where a D->N transition has occurred.',
                   'required': False},
+    'forcetryp': {'driverattr': 'forcetryp', 'clarg': '--enforce-tryptic',
+                  'action': 'store_const', 'default': False, 'const': True,
+                  'help': 'When filtering peptides against whole proteins, '
+                  'filter out peptides that match a whole protein but only '
+                  'if they are fully tryptic, i.e. the protein needs K,R 1 '
+                  'position upstream of the peptide, and the peptide '
+                  'C-terminal should also be K,R. Useful when discerning '
+                  'from pseudogenes'},
     'falloff': {'driverattr': 'falloff', 'dest': 'falloff',
                 'clarg': '--insourcefrag',
                 'type': int, 'default': 0, 'help': 'Apply '
