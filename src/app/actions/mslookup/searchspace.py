@@ -26,12 +26,11 @@ def create_searchspace(lookup, fastafn, proline_cut=False,
     """Given a FASTA database, proteins are trypsinized and resulting peptides
     stored in a database or dict for lookups"""
     allpeps = []
-    protindex = SeqIO.index(fastafn, 'fasta')
-    for acc in protindex:
+    for record in SeqIO.parse(fastafn, 'fasta'):
         if do_trypsinize:
-            pepseqs = trypsinize(protindex[acc].seq, proline_cut)
+            pepseqs = trypsinize(record.seq, proline_cut)
         else:
-            pepseqs = [protindex[acc].seq]
+            pepseqs = [record.seq]
         # Exchange all leucines to isoleucines because MS can't differ
         pepseqs = [(str(pep).replace('L', 'I'),) for pep in pepseqs]
         allpeps.extend(pepseqs)
