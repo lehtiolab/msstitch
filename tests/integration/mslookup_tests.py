@@ -83,7 +83,7 @@ class TestWholeProteinSeqLookup(SearchspaceLookup):
 
     def query_db_assert(self, options):
         with open(os.path.join(self.fixdir, 'allpeptides_proteins.yml')) as fp:
-            sequences = yaml.load(fp)
+            sequences = [x.replace('L', 'I') for x in yaml.load(fp)]
         options.extend(['--minlen', '6'])
         self.run_command(options)
         self.assertTrue(self.all_seqs_in_db(self.resultfn, sequences,
