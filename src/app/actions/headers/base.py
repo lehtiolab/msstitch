@@ -10,6 +10,7 @@ def generate_general_header(headerfields, fieldtypes, firstfield,
     else:
         header = oldheader[:]
     poolfields = OrderedDict()
+    poolfields[None] = []  # Have non-pool/set columns come before pool-columns
     for fieldtype in fieldtypes:
         try:
             fields = headerfields[fieldtype]
