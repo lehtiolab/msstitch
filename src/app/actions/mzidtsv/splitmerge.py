@@ -16,7 +16,7 @@ def get_splitcolnr(header, bioset, splitcol):
     given via bioset and splitcol"""
     if bioset:
         return header.index(mzidtsvdata.HEADER_SETNAME)
-    elif splitcol:
+    elif splitcol is not None:
         return splitcol - 1
     else:
         raise RuntimeError('Must specify either --bioset or --splitcol')
