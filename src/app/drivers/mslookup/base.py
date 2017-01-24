@@ -6,12 +6,16 @@ from app.drivers.options import mslookup_options
 
 
 class LookupDriver(BaseDriver):
+    outfile, outdir = None, None
+
     def __init__(self):
         super().__init__()
         self.parser_options = mslookup_options
 
     def set_options(self):
         super().set_options()
+        del(self.options['-o'])
+        del(self.options['-d'])
         self.options.update(self.define_options(['lookupfn'],
                                                 mslookup_options))
 

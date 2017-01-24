@@ -29,9 +29,9 @@ class BaseTest(unittest.TestCase):
         if type(self.infile) != list:
             self.infile = [self.infile]
         cmd.extend(self.infile)
-        if self.resultfn is not None:
+        if self.resultfn is not None and self.executable != 'msslookup':
             cmd.extend(['-o', self.resultfn])
-        else:
+        elif self.resultfn is None:
             cmd.extend(['-d', self.workdir])
         return cmd
 
