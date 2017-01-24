@@ -10,13 +10,14 @@ from tempfile import mkdtemp
 
 class BaseTest(unittest.TestCase):
     testdir = 'tests'
-    fixdir = os.path.join(testdir, 'fixtures')
-    outdir = os.path.join(testdir, 'test_output')
+    fixdir = os.path.join(os.getcwd(), testdir, 'fixtures')
+    outdir = os.path.join(os.getcwd(), testdir, 'test_output')
 
     def setUp(self):
         self.infile = os.path.join(self.fixdir, self.infilename)
         os.makedirs(self.outdir, exist_ok=True)
         self.workdir = mkdtemp(dir=self.outdir)
+        os.chdir(self.workdir)
         self.resultfn = os.path.join(self.workdir,
                                      self.infilename + self.suffix)
 
