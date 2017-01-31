@@ -110,7 +110,8 @@ class TestSplitTD(TestSplit):
     suffix = ''
 
     def test_splittd(self):
-        """Tests that splitted files contain equal amount of PSMS
+        """TestSplitTD:: test_splittd
+        Tests that splitted files contain equal amount of PSMS
         when compared with expected output, and checks that each psm/peptide
         has correct 'decoy' attribute."""
         target_result = os.path.join(self.workdir,

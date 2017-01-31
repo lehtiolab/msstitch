@@ -5,6 +5,8 @@ from app.drivers.options import pycolator_options
 
 
 class SplitDriver(base.PycolatorDriver):
+    outfile = None
+
     def run(self):
         self.set_filter_types()
         for filter_type, suffix in self.filter_types:
@@ -13,6 +15,12 @@ class SplitDriver(base.PycolatorDriver):
             self.outsuffix = suffix
             self.write()
         self.finish()
+
+    def set_options(self):
+        """Since splitdriver splits into multiple files we cannot set an
+        output file"""
+        super().set_options()
+        del(self.options['-o'])
 
     def set_features(self, filter_type):
         """Calls splitter to split percolator output into target/decoy
