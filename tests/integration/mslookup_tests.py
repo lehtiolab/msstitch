@@ -228,8 +228,14 @@ class TestPSMLookupEnsemblBase(TestPSMLookup):
         exp_proteins = {rec.id: {'seq': rec.seq}
                         for rec in SeqIO.parse(fasta, 'fasta')}
         header = self.get_tsvheader(martmap)
-        pix = header.index('Ensembl Protein ID')
-        gix = header.index('Ensembl Gene ID')
+        try:
+            pix = header.index('Ensembl Protein ID')
+        except ValueError:
+            # new biomart version (2017 jan) has no "Ensembl" in header fields
+            pix = header.index('Protein ID')
+            gix = header.index('Gene ID')
+        else:
+            gix = header.index('Ensembl Gene ID')
         six = header.index('HGNC symbol')
         dix = header.index('Description')
         for line in self.get_all_lines(martmap):
@@ -297,6 +303,13 @@ class TestPSMLookupEnsembl(TestPSMLookupEnsemblBase):
     def test_fasta_map(self):
         fastafn = os.path.join(self.fixdir, 'ensembl.fasta')
         mapfn = os.path.join(self.fixdir, 'biomart.map')
+        options = ['--spectracol', '2', '--fasta', fastafn, '--map', mapfn]
+        self.run_command(options)
+        self.check_db_map(fastafn, mapfn)
+
+    def test_newversion_fasta_map(self):
+        fastafn = os.path.join(self.fixdir, 'ensembl.fasta')
+        mapfn = os.path.join(self.fixdir, 'new_biomart.map')
         options = ['--spectracol', '2', '--fasta', fastafn, '--map', mapfn]
         self.run_command(options)
         self.check_db_map(fastafn, mapfn)
