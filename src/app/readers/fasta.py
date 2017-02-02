@@ -30,6 +30,24 @@ def get_proteins_sequence(fastafn):
         yield record.seq
 
 
+def parse_biomart_fn(martfn, ensg_id, ensp_id, desc_id, symb_id, alt_symb_id):
+    with open(martfn) as fp:
+        header = next(fp).strip().split('\t')
+        ensg = header.index(ensg_id)
+        ensp = header.index(ensp_id)
+        desc = header.index(desc_id)
+        try:
+            symb = header.index(symb_id)
+        except ValueError:
+            symb = header.index(alt_symb_id)
+        for line in fp:
+            line = line.strip('\n').split('\t')
+            protein = line[ensp]
+            if not protein:
+                continue
+            yield (protein, line[ensg], line[symb], line[desc])
+
+
 def get_proteins_genes(fastafn, fastadelim=None, genefield=None):
     """This returns a tuple of (protein, gene, HGNC symbol, description) from
     a passed file. If the file is FASTA from ENSEMBL or UniProt, only genes and
@@ -44,21 +62,15 @@ def get_proteins_genes(fastafn, fastadelim=None, genefield=None):
                                        fastadelim, genefield),
                    None, record.description)
     elif 'Ensembl Gene ID' in firstline.split('\t'):
-        with open(fastafn) as fp:
-            header = next(fp).strip().split('\t')
-            ensg = header.index('Ensembl Gene ID')
-            ensp = header.index('Ensembl Protein ID')
-            desc = header.index('Description')
-            try:
-                symb = header.index('HGNC symbol')
-            except ValueError:
-                symb = header.index('Associated Gene Name')
-            for line in fp:
-                line = line.strip('\n').split('\t')
-                protein = line[ensp]
-                if not protein:
-                    continue
-                yield (protein, line[ensg], line[symb], line[desc])
+        for line in parse_biomart_fn(fastafn, 'Ensembl Gene ID',
+                                     'Ensembl Protein ID', 'Description',
+                                     'HGNC symbol', 'Associated Gene Name'):
+            yield line
+    elif 'Gene ID' in firstline.split('\t'):
+        for line in parse_biomart_fn(fastafn, 'Gene ID', 'Protein ID',
+                                     'Description', 'HGNC symbol',
+                                     'Associated Gene Name'):
+            yield line
 
 
 def parse_protein_identifier(record):
