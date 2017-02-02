@@ -53,8 +53,10 @@ class SplitProteinDriver(SplitDriver):
                    'its own output file')
 
     def set_filter_types(self):
-        self.filter_types = [(headers, '_h{}.xml'.format(ix))
-                             for ix, headers in enumerate(self.protheaders)]
+        maxdigits = len(str(len(self.protheaders)))
+        self.filter_types = [(headers, '_h{i:0{pad}d}.xml'.format(
+            i=ix, dig=maxdigits))
+            for ix, headers in enumerate(self.protheaders)]
 
     def set_features(self, filter_type):
         self.splitfunc = preparation.split_protein_header_id_type
