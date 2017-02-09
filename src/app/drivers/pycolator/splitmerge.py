@@ -54,7 +54,7 @@ class SplitProteinDriver(SplitDriver):
 
     def set_filter_types(self):
         maxdigits = len(str(len(self.protheaders)))
-        self.filter_types = [(headers, '_h{i:0{pad}d}.xml'.format(
+        self.filter_types = [(headers, '_h{i:0{dig}d}.xml'.format(
             i=ix, dig=maxdigits))
             for ix, headers in enumerate(self.protheaders)]
 
