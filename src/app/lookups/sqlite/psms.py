@@ -82,8 +82,7 @@ class PSMDB(ResultLookupInterface):
         cursor.executemany(
             'INSERT INTO psms(psm_id, pep_id, score, spectra_id) '
             'VALUES(?, ?, ?, ?)', ((psm['psm_id'], psm['seq'], psm['score'],
-                                    self.get_spectra_id(psm['specfn'],
-                                                        scan_nr=psm['scannr']))
+                                    psm['spec_id'])
                                    for psm in psms))
         cursor.executemany(
             'INSERT INTO psmrows(psm_id, rownr) VALUES(?, ?)',

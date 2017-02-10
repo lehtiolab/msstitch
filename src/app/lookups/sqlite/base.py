@@ -9,7 +9,7 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                  'FOREIGN KEY(set_id)'
                                  'REFERENCES biosets'
                                  ],
-                   'mzml': ['spectra_id INTEGER PRIMARY KEY',
+                   'mzml': ['spectra_id TEXT PRIMARY KEY',
                             'mzmlfile_id INTEGER',
                             'scan_nr TEXT',
                             'charge INTEGER',

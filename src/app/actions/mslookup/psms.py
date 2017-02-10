@@ -33,6 +33,7 @@ def create_psm_lookup(fn, fastafn, mapfn, header, pgdb, unroll=False,
                      'score': score,
                      'specfn': mzmlmap[specfn],
                      'scannr': scan,
+                     'spec_id': '{}_{}'.format(mzmlmap[specfn], scan),
                      })
     pgdb.store_psms(psms)
     pgdb.index_psms()
@@ -101,7 +102,7 @@ def store_psm_protein_relations(fn, header, pgdb, proteins):
         psm_id, prots = tsvreader.get_pepproteins(psm)
         prots = [x for x in prots if x in proteins]
         try:
-            # is there ever a psm with same id as earlier?? why like this?
+            # In case the PSMs are presented unrolled
             allpsms[psm_id].extend(prots)
         except KeyError:
             allpsms[psm_id] = prots
