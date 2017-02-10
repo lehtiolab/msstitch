@@ -85,7 +85,7 @@ def store_proteins_descriptions(pgdb, fastafn, tsvfn, mapfn, header, decoy,
                                       in proteins_with_versions.items()}
         gpmap = get_protein_gene_map(mapfn, proteins_with_versions, decoy)
         pgdb.store_gene_and_associated_id(gpmap)
-    return [x[0] for x in proteins]
+    return set([x[0] for x in proteins])
 
 
 def store_psm_protein_relations(fn, header, pgdb, proteins):
