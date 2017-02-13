@@ -2,7 +2,8 @@ from collections import OrderedDict
 
 from app.readers import tsv
 from app.actions.headers.base import (generate_general_header,
-                                      generate_headerfields)
+                                      generate_headerfields,
+                                      get_isoquant_fields)
 from app.dataformats import peptable as peptabledata
 from app.dataformats import mzidtsv as mzidtsvdata
 
@@ -96,12 +97,3 @@ def get_nopsms_fields(poolnames=False):
     for field in poolfields:
         allfields[field] = poolnames
     return allfields
-
-
-def get_isoquant_fields(pqdb=False, poolnames=False):
-    """Returns a headerfield dict for isobaric quant channels. Channels are
-    taken from DB and there isn't a pool-independent version of this yet"""
-    quantheader = OrderedDict()
-    for chan_name in pqdb.get_isoquant_channels():
-        quantheader[chan_name] = poolnames
-    return quantheader

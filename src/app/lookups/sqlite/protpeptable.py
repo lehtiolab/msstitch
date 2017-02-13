@@ -181,6 +181,13 @@ class ProtPepTable(ResultLookupInterface):
         cursor = self.get_cursor()
         return cursor.execute(sql)
 
+    def get_isoquant_amountpsms_channels(self):
+        cursor = self.get_cursor()
+        cursor.execute(
+            'SELECT DISTINCT channel_name, amount_psms_name '
+            'FROM {}'.format(self.table_map[self.datatype]['isochtable']))
+        return cursor
+
     def prepare_mergetable_sql(self, precursor=False, isobaric=False,
                                probability=False, fdr=False, pep=False):
         """Dynamically build SQL query to generate entries for the multi-set

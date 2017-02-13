@@ -16,3 +16,15 @@ def fill_mergefeature(outfeature, iso_fun, ms1_fun, prob_fun, fdr_fun, pep_fun,
     if outfeature == check_feat:
         return
     outfeature.update(pdata_fun(outfeature, featuredata_map, headerfields))
+
+
+def get_isobaric_quant(feature, sqlmap, headerfields):
+    chan = feature[sqlmap['channel']]
+    pool = feature[sqlmap['set_name']]
+    psmfield = feature[sqlmap['isoq_psmsfield']]
+    quant = feature[sqlmap['isoq_val']]
+    nopsms = feature[sqlmap['isoq_psms']]
+    if quant is None:
+        return {}
+    return {headerfields['isoquant'][chan][pool]: quant,
+            headerfields['isoquant'][psmfield][pool]: nopsms}

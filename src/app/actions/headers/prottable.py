@@ -1,9 +1,9 @@
 from collections import OrderedDict
 
 from app.actions.headers.base import (generate_general_header,
-                                      generate_headerfields)
+                                      generate_headerfields,
+                                      get_isoquant_fields)
 from app.dataformats import prottable as prottabledata
-from sqlite3 import OperationalError
 
 
 def generate_header(headerfields, oldheader=False):
@@ -64,23 +64,6 @@ def get_proteininfo_fields(poolnames=False):
     for field in poolfields:
         allfields[field] = poolnames
     return allfields
-
-
-def get_isoquant_fields(pqdb=False, poolnames=False):
-    """Returns a headerfield dict for isobaric quant channels. Channels are
-    taken from DB and there isn't a pool-independent version of this yet"""
-    if pqdb is None:
-        return {}
-    quantheader = OrderedDict()
-    try:
-        channels_psms = pqdb.get_isoquant_amountpsms_channels()
-    except OperationalError:
-        return {}
-    for chan_name, amnt_psms_name in channels_psms:
-        quantheader[chan_name] = poolnames
-        if amnt_psms_name:
-            quantheader[amnt_psms_name] = poolnames
-    return quantheader
 
 
 def get_bestpeptide_fields(poolnames=False):

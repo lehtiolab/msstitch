@@ -1,5 +1,6 @@
 from app.dataformats import peptable as peptabledata
-from app.actions.mergetable import simple_val_fetch, fill_mergefeature
+from app.actions.mergetable import (simple_val_fetch, fill_mergefeature,
+                                    get_isobaric_quant)
 
 from app.actions.proteindata import create_featuredata_map
 
@@ -42,15 +43,6 @@ def build_peptidetable(pqdb, headerfields, isobaric=False,
                           pep_fun, pdata_fun, peptide, sqlfieldmap,
                           headerfields, peptidedatamap)
     yield outpeptide
-
-
-def get_isobaric_quant(peptide, sqlmap, headerfields):
-    chan = peptide[sqlmap['channel']]
-    pool = peptide[sqlmap['set_name']]
-    quant = peptide[sqlmap['isoq_val']]
-    if quant is None:
-        return {}
-    return {headerfields['isoquant'][chan][pool]: quant}
 
 
 def get_precursor_quant(peptide, sqlmap, headerfields):

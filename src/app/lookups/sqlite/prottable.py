@@ -30,13 +30,6 @@ class ProtTableDB(ProtPepTable):
         firsttable = 'protein_group_master'
         return self.get_proteins_psms(firsttable, fields, firstjoin)
 
-    def get_isoquant_amountpsms_channels(self):
-        cursor = self.get_cursor()
-        cursor.execute(
-            'SELECT DISTINCT channel_name, amount_psms_name '
-            'FROM protquant_channels')
-        return cursor
-
     def get_precursorquant_headerfields(self):
         cursor = self.get_cursor()
         cursor.execute(
@@ -84,13 +77,6 @@ class GeneTableDB(ProtPepTable):
         genetable = self.table_map[self.datatype]['feattable']
         return self.get_unique_gene_psms(genetable, fields, firstjoin,
                                          extrajoins)
-
-    def get_isoquant_amountpsms_channels(self):
-        cursor = self.get_cursor()
-        cursor.execute(
-            'SELECT DISTINCT channel_name, amount_psms_name '
-            'FROM genequant_channels')
-        return cursor
 
     def get_precursorquant_headerfields(self):
         cursor = self.get_cursor()

@@ -1,6 +1,7 @@
 from app.dataformats import prottable as prottabledata
 from app.actions.prottable import info as pinfo
-from app.actions.mergetable import simple_val_fetch, fill_mergefeature
+from app.actions.mergetable import (simple_val_fetch, fill_mergefeature,
+                                    get_isobaric_quant)
 
 from app.actions.proteindata import create_featuredata_map
 
@@ -71,19 +72,8 @@ def get_protein_data_genecentric(outprotein, proteindata_map, headerfields):
 
 def get_protein_data(outprotein, proteindata_map, headerfields):
     p_acc = outprotein[prottabledata.HEADER_PROTEIN]
-    return pinfo.get_protein_data_pgrouped(proteindata_map, p_acc, headerfields)
-
-
-def get_isobaric_quant(protein, sqlmap, headerfields):
-    chan = protein[sqlmap['channel']]
-    pool = protein[sqlmap['set_name']]
-    psmfield = protein[sqlmap['isoq_psmsfield']]
-    quant = protein[sqlmap['isoq_val']]
-    nopsms = protein[sqlmap['isoq_psms']]
-    if quant is None:
-        return {}
-    return {headerfields['isoquant'][chan][pool]: quant,
-            headerfields['isoquant'][psmfield][pool]: nopsms}
+    return pinfo.get_protein_data_pgrouped(proteindata_map, p_acc,
+                                           headerfields)
 
 
 def get_precursor_quant(protein, sqlmap, headerfields):

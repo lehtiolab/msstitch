@@ -19,13 +19,6 @@ class PepTableProteinCentricDB(ProtPepTable):
                             'peptide_iso_quanted', 'peptide_precur_quanted',
                             'peptide_fdr', 'peptide_pep'])
 
-    def get_isoquant_channels(self):
-        cursor = self.get_cursor()
-        cursor.execute(
-            'SELECT DISTINCT channel_name '
-            'FROM pepquant_channels')
-        return (x[0] for x in cursor)
-
 
 class PepTableGeneCentricDB(PepTableProteinCentricDB):
     datatype = 'peptide'

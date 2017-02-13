@@ -310,13 +310,8 @@ class PepProtableTest(BaseTest):
                     setfield = '{}_{}'.format(setname, field)
                     exp_val = fields[field]
                 self.assertEqual(line[setfield], str(exp_val[0]))
-                try:
-                    nr_psms = line['{} - # quanted PSMs'.format(setfield)]
-                except KeyError:
-                    pass
-                    # FIXME currently no # PSMs in peptide table isoquant!
-                else:
-                    self.assertEqual(nr_psms, str(exp_val[1]))
+                nr_psms = line['{} - # quanted PSMs'.format(setfield)]
+                self.assertEqual(nr_psms, str(exp_val[1]))
             expected.pop(line[accession])
         self.check_exp_empty(expected, cutoff)
 
