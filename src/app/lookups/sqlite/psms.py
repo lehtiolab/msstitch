@@ -25,6 +25,7 @@ class PSMDB(ResultLookupInterface):
                 'VALUES(?, ?)', sequences)
         self.conn.commit()
         self.index_column('proteins_index', 'proteins', 'protein_acc')
+        self.index_column('evidence_index', 'protein_evidence', 'protein_acc')
 
     def store_descriptions(self, descriptions):
         cursor = self.get_cursor()
@@ -111,6 +112,8 @@ class PSMDB(ResultLookupInterface):
         self.index_column('psmrowid_index', 'psmrows', 'psm_id')
         self.index_column('psmrow_index', 'psmrows', 'rownr')
         self.index_column('pepseq_index', 'peptide_sequences', 'sequence')
+        self.index_column('pepid_index', 'peptide_sequences', 'pep_id')
+        self.index_column('psmspepid_index', 'psms', 'pep_id')
 
     def index_protein_peptides(self):
         self.index_column('protein_index', 'protein_psm', 'protein_acc')
