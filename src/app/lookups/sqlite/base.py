@@ -19,7 +19,7 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                             'REFERENCES mzmlfiles'],
                    'isobaric_channels': ['channel_id INTEGER PRIMARY KEY',
                                          'channel_name TEXT'],
-                   'isobaric_quant': ['spectra_id INTEGER',
+                   'isobaric_quant': ['spectra_id TEXT',
                                       'channel_id INTEGER',
                                       'intensity REAL',
                                       'FOREIGN KEY(spectra_id)'
@@ -36,7 +36,7 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                  'charge INTEGER', 'intensity REAL',
                                  'FOREIGN KEY(mzmlfile_id)'
                                  'REFERENCES mzmlfiles'],
-                   'ms1_align': ['spectra_id INTEGER',
+                   'ms1_align': ['spectra_id TEXT',
                                  'feature_id INTEGER',
                                  'FOREIGN KEY(spectra_id) '
                                  'REFERENCES mzml '
@@ -49,7 +49,7 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                    'psms': ['psm_id TEXT PRIMARY KEY NOT NULL',
                             'pep_id INTEGER',
                             'score TEXT',
-                            'spectra_id INTEGER',
+                            'spectra_id TEXT',
                             'FOREIGN KEY(pep_id)'
                             'REFERENCES peptide_sequences '
                             'FOREIGN KEY(spectra_id)'
