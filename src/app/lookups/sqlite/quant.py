@@ -20,9 +20,10 @@ class QuantDB(ResultLookupInterface):
                           'LEFT OUTER JOIN ms1_quant AS pq USING(feature_id)'])
             sqlfields['precursor'] = fieldcount
         if not precursor and not isobaric:
-            raise RuntimeError('Cannot add quantification data, neither isobaric, '
-                               'nor precursor have been specified.')
-        sql = 'SELECT {} FROM psmrows as pr {}'.format(', '.join(selects), ' '.join(joins))
+            raise RuntimeError('Cannot add quantification data, neither '
+                               'isobaric, nor precursor have been specified.')
+        sql = ('SELECT {} FROM psmrows as pr {} '
+               'ORDER BY pr.rownr'.format(', '.join(selects), ' '.join(joins)))
         cursor = self.get_cursor()
         return cursor.execute(sql), sqlfields
 
