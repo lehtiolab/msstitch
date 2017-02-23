@@ -1,4 +1,4 @@
-from decimal import Decimal, getcontext
+from decimal import Decimal
 
 from app.readers import openms as openmsreader
 DB_STORE_CHUNK = 500000
@@ -20,7 +20,7 @@ def create_isobaric_quant_lookup(quantdb, specfn_consensus_els, channelmap):
     mzmlmap = quantdb.get_mzmlfile_map()
     for specfn, consensus_el in specfn_consensus_els:
         rt = openmsreader.get_consxml_rt(consensus_el)
-        rt = float(Decimal(rt) / 60)
+        rt = round(float(Decimal(rt) / 60), 12)
         qdata = get_quant_data(consensus_el)
         spectra_id = quantdb.get_spectra_id(mzmlmap[specfn],
                                             retention_time=rt)
@@ -42,7 +42,6 @@ def create_precursor_quant_lookup(quantdb, mzmlfn_feats, quanttype,
                      'openms': openms_featparser,
                      }
     features = []
-    getcontext().prec = 14  # sets decimal point precision
     mzmlmap = quantdb.get_mzmlfile_map()
     for specfn, feat_element in mzmlfn_feats:
         feat = featparsermap[quanttype](feat_element)
@@ -123,7 +122,7 @@ def get_precursors_from_window(quantdb, minmz):
 def kronik_featparser(feature):
     charge = int(feature['Charge'])
     mz = (float(feature['Monoisotopic Mass']) + charge * PROTON_MASS) / charge
-    return {'rt': float(Decimal(feature['Best RTime'])),
+    return {'rt': round(float(feature['Best RTime']), 12),
             'mz': mz,
             'charge': charge,
             'intensity': float(feature['Best Intensity']),
@@ -132,7 +131,7 @@ def kronik_featparser(feature):
 
 def openms_featparser(feature):
     feat = openmsreader.get_feature_info(feature)
-    feat['rt'] = float(Decimal(feat['rt']) / 60)
+    feat['rt'] = round(float(Decimal(feat['rt']) / 60), 12)
     return feat
 
 
