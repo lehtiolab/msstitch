@@ -16,8 +16,8 @@ def main():
                probability.AddProteinProbability(),
                create_empty.CreateEmptyDriver(),
                bestpeptide.BestPeptidePerProtein(),
-               qvality.ProttableQvalityDriver(),
-               qvality.PickedQvalityDriver(),
+               qvality.ProttableFDRDriver(),
+               qvality.PickedFDRDriver(),
                fdr.ProttableFDRDriver(),
                ]
     startup.start_msstitch(drivers, sys.argv)

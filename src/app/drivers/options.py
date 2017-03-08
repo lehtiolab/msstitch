@@ -342,10 +342,6 @@ prottable_options.update({
                     'action': 'store_const', 'default': False, 'const': True,
                     'required': False, 'help': 'Score, e.g. q-values will '
                     'be converted to -log10 values.'},
-    'featuretype': {'driverattr': 'featuretype', 'dest': 'featuretype',
-                    'help': 'Feature type to use for qvality. Can be one of '
-                    '[qvalue, probability, svm].', 'clarg': '--feattype',
-                    'type': 'pick', 'picks': ['qvalue', 'probability', 'svm']},
     't_fasta': {'driverattr': 't_fasta', 'clarg': '--targetfasta',
                 'type': 'file', 'help': 'FASTA file with target proteins '
                 'to determine best scoring proteins of target/decoy pairs '

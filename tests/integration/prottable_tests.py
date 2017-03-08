@@ -276,9 +276,9 @@ class TestBestpeptide(basetests.ProttableTest):
         self.check()
 
 
-class TestQvality(basetests.ProttableTest):
-    command = 'qvality'
-    suffix = '_protqvality.txt'
+class TestProtFDR(basetests.ProttableTest):
+    command = 'protfdr'
+    suffix = '_protfdr.txt'
     infilename = 'prottable_target.txt'
 
     def setUp(self):
@@ -286,44 +286,43 @@ class TestQvality(basetests.ProttableTest):
         self.decoyfn = os.path.join(self.fixdir, 'prottable_decoy.txt')
 
     def test_qval(self):
-        options = ['--feattype', 'qvalue', '--decoyfn', self.decoyfn]
-        self.fail('Not yet implemented qvality tests')
+        options = ['--decoyfn', self.decoyfn]
         self.run_command(options)
-        self.assertEqual(1, 2)
-
-    def test_probability(self):
-        options = ['--feattype', 'probability', '--decoyfn', self.decoyfn]
-        self.fail('Not yet implemented qvality tests')
-        self.run_command(options)
-        self.assertEqual(1, 2)
+        expectedfn = os.path.join(self.fixdir, 'protfdr.txt')
+        self.check_lines(expectedfn, self.resultfn)
 
 
-class TestPickqvality(basetests.ProttableTest):
-    command = 'pickqvality'
-    suffix = '_pickedqvality.txt'
-    infilename = 'prottable_target.txt'
-
-    def setUp(self):
-        super().setUp()
-        self.decoyfn = os.path.join(self.fixdir, 'prottable_decoy.txt')
+class TestAssocPickFDR(basetests.ProttableTest):
+    command = 'pickedfdr'
+    suffix = '_pickedfdr.txt'
+    infilename = 'prottable_assoc_target.txt'
 
     def test_result(self):
-        self.fail('Not yet implemented qvality tests')
+        self.infilename = 'prottable_assoc_target.txt'
+        self.decoyfn = os.path.join(self.fixdir, 'prottable_assoc_decoy.txt')
         options = ['--decoyfn', self.decoyfn, '--picktype', 'result']
         self.run_command(options)
-        self.assertEqual(1, 2)
+        expectedfn = os.path.join(self.fixdir, 'pickfdr_assoc.txt')
+        self.check_lines(expectedfn, self.resultfn)
+
+
+class TestFastaPickFDR(basetests.ProttableTest):
+    command = 'pickedfdr'
+    suffix = '_pickedfdr.txt'
+    infilename = 'prottable_ensg_target.txt'
 
     def test_fasta(self):
-        self.fail('Not yet implemented qvality tests')
+        self.decoyfn = os.path.join(self.fixdir, 'prottable_ensg_decoy.txt')
         tfasta = os.path.join(self.fixdir, 'ensembl.fasta')
         dfasta = os.path.join(self.fixdir, 'decoy_ensembl.fasta')
         options = ['--decoyfn', self.decoyfn, '--targetfasta', tfasta,
                    '--decoyfasta', dfasta, '--picktype', 'fasta']
         self.run_command(options)
-        self.assertEqual(1, 2)
+        expectedfn = os.path.join(self.fixdir, 'pickfdr_ensg.txt')
+        self.check_lines(expectedfn, self.resultfn)
 
 
-class TestFDR(basetests.ProttableTest):
+class TestAddFDR(basetests.ProttableTest):
     command = 'fdr'
     suffix = '_protfdr.txt'
     infilename = 'prottable_target.txt'

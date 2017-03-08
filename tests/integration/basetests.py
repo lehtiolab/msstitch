@@ -124,6 +124,11 @@ class BaseTest(unittest.TestCase):
         except ValueError:
             return value
 
+    def check_lines(self, expected, result):
+        with open(expected) as fp, open(result) as resultfp:
+            for expline, resline in zip(fp, resultfp):
+                self.assertEqual(expline, resline)
+
 
 class BaseTestPycolator(BaseTest):
     executable = 'msspercolator'
