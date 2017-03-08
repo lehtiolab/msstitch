@@ -2,9 +2,8 @@
 
 import sys
 from app.drivers import startup
-from app.drivers.prottable import (probability, info, merge, isoquant,
-                                   precursorarea, create_empty, bestpeptide,
-                                   qvality, fdr)
+from app.drivers.prottable import (probability, info, merge, isoquant, fdr,
+                                   precursorarea, create_empty, bestpeptide)
 
 
 def main():
@@ -16,8 +15,8 @@ def main():
                probability.AddProteinProbability(),
                create_empty.CreateEmptyDriver(),
                bestpeptide.BestPeptidePerProtein(),
-               qvality.ProttableFDRDriver(),
-               qvality.PickedFDRDriver(),
                fdr.ProttableFDRDriver(),
+               fdr.PickedFDRDriver(),
+               fdr.ProttableAddFDRDriver(),
                ]
     startup.start_msstitch(drivers, sys.argv)
