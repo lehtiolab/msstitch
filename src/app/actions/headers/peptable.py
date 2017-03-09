@@ -88,12 +88,3 @@ def get_proteininfo_fields(poolnames=False):
         allfields[field] = False
     allfields[peptabledata.HEADER_NO_PSM] = poolnames
     return allfields
-
-
-def get_nopsms_fields(poolnames=False):
-    allfields = OrderedDict()
-    poolfields = [peptabledata.HEADER_NO_PSM,
-                  ]
-    for field in poolfields:
-        allfields[field] = poolnames
-    return allfields

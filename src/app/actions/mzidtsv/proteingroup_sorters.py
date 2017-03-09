@@ -81,9 +81,5 @@ def sort_evidence_score(proteins):
     return sort_amounts(proteins, lookups.EVIDENCE_LVL_INDEX)
 
 
-def sort_coin_toss(proteins):
-    return [proteins]
-
-
 def sort_alphabet(proteins):
     return [sorted(proteins, key=lambda x: x[2])]

@@ -15,21 +15,6 @@ def get_proteins_for_db(fastafn):
              for acc, record in objects.items()))
 
 
-def generate_proteins_id(fastafn):
-    for record in parse_fasta(fastafn):
-        yield record.id
-
-
-def get_proteins_descriptions(fastafn):
-    for record in parse_fasta(fastafn):
-        yield (record.id, record.description)
-
-
-def get_proteins_sequence(fastafn):
-    for record in parse_fasta(fastafn):
-        yield record.seq
-
-
 def parse_biomart_fn(martfn, ensg_id, ensp_id, desc_id, symb_id, alt_symb_id):
     with open(martfn) as fp:
         header = next(fp).strip().split('\t')
@@ -127,14 +112,6 @@ def get_gene(description, rectype, fastadelim, genefield):
         return gn_list[0]
     except IndexError:
         return 'NA'
-
-
-def has_evidence_levels(fastafn):
-    fasta = parse_fasta(fastafn)
-    record = next(fasta)
-    if get_uniprot_evidence_level(record.description):
-        return True
-    return False
 
 
 def get_uniprot_evidence_level(header):

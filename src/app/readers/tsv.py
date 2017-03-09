@@ -71,10 +71,6 @@ def get_psm_id(line):
                                 line[mzidtsvdata.HEADER_PEPTIDE])
 
 
-def get_content_proteins_from_master(line):
-    return line[prottabledata.HEADER_CONTENT_PROTEINS].split(';')
-
-
 def get_proteins_from_psm(line):
     """From a line, return list of proteins reported by Mzid2TSV. When unrolled
     lines are given, this returns the single protein from the line."""

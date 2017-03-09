@@ -18,7 +18,7 @@ def generate_psms_quanted(quantdb, tsvfn, isob_header, oldheader,
         if isobaric:
             isoquants = {}
             while quant[0] == rownr:
-                isoquants.update({quant[sqlfields['isochan']]: 
+                isoquants.update({quant[sqlfields['isochan']]:
                                   str(quant[sqlfields['isoquant']])})
                 quant = next(allquants)
             outpsm.update(get_quant_NAs(isoquants, isob_header))
@@ -49,11 +49,6 @@ def get_full_and_isobaric_headers(oldheader, quantdb, isobaric=False,
     else:
         isob_header = None
     return fullheader, isob_header
-
-
-def create_tsv_header_quant(tsvfn, quantheader):
-    """Returns tsvheader split list with quant header appended"""
-    return readers.get_tsv_header(tsvfn) + [str(x[0]) for x in quantheader]
 
 
 def get_quant_NAs(quantdata, quantheader):
