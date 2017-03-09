@@ -1,7 +1,7 @@
 import sys
-from statistics import median, StatisticsError
 
 from app.readers import tsv as reader
+from app.actions import isonormalizing
 
 
 def calc_psm_ratios(psm, channels, denom_channels, min_intensity):
@@ -18,8 +18,13 @@ def calc_psm_ratios(psm, channels, denom_channels, min_intensity):
             if psm_intensity[ch] != 'NA' else 'NA' for ch in channels]
 
 
-def calc_normalized(psm, channel, medians):
-    return psm[channel] / medians[channel]
+def get_isobaric_ratios(psmfn, header, channels, denom_channels, min_int):
+    for psm in reader.generate_tsv_psms(psmfn, header):
+        psmratios = calc_psm_ratios(psm, channels, denom_channels,
+                                    min_int)
+        psm.update({ch: str(psmratios[ix]) if psmratios[ix] != 'NA' else 'NA'
+                    for ix, ch in enumerate(channels)})
+        yield psm
 
 
 def get_normalized_ratios(psmfn, header, channels, denom_channels,
@@ -37,7 +42,7 @@ def get_normalized_ratios(psmfn, header, channels, denom_channels,
     for psm in reader.generate_tsv_psms(median_psmfn, medianheader):
         ratios.append(calc_psm_ratios(psm, channels, denom_channels,
                                       min_intensity))
-    ch_medians = get_medians(channels, ratios)
+    ch_medians = isonormalizing.get_medians(channels, ratios)
     report = ('Channel intensity medians used for normalization:\n'
               '{}'.format('\n'.join(['{} - {}'.format(ch, ch_medians[ch])
                                      for ch in channels])))
@@ -49,15 +54,3 @@ def get_normalized_ratios(psmfn, header, channels, denom_channels,
                     if psmratios[ix] != 'NA' else 'NA'
                     for ix, ch in enumerate(channels)})
         yield psm
-
-
-def get_medians(channels, ratios):
-    ch_medians = {}
-    for ix, channel in enumerate(channels):
-        try:
-            ch_medians[channel] = median([x[ix] for x in ratios
-                                          if x[ix] != 'NA'])
-        except StatisticsError:
-            # channel is empty, common in protein quant but not in normalizing
-            ch_medians[channel] = 'NA'
-    return ch_medians

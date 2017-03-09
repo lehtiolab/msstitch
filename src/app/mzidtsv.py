@@ -17,6 +17,7 @@ def main():
                quant.TSVQuantDriver(),
                proteingrouping.ProteinGroupDriver(),
                prot2gene.TSVGeneFromProteinDriver(),
-               isonormalize.MzidTSVIsoquantNormalizeDriver(),
+               isonormalize.PSMIsoquantRatioDriver(),
+               isonormalize.PSMIsoquantNormalizeDriver(),
                ]
     startup.start_msstitch(drivers, sys.argv)
