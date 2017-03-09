@@ -287,8 +287,8 @@ class TestIsoNormalize(basetests.MzidTSVBaseTest):
                 yield {field: val for field, val in zip(header, line)}
 
     def get_denominator(self, line, denom_ch):
-        return sum([float(line[ch]) for ch in denom_ch
-                    if line[ch] != 'NA']) / 2
+        denomvals = [float(line[ch]) for ch in denom_ch if line[ch] != 'NA']
+        return sum(denomvals) / len(denomvals)
 
     def test_denomcolpattern(self):
         stdout = self.run_command_stdout(['--isobquantcolpattern', 'fake_ch',
