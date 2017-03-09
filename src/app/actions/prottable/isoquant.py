@@ -1,4 +1,4 @@
-from app.actions.mzidtsv.isonormalize import get_medians
+from app.actions.isonormalizing import get_medians
 from app.dataformats import prottable as prottabledata
 from app.actions.shared.pepprot_isoquant import base_add_isoquant_data
 
@@ -22,11 +22,30 @@ def add_isoquant_data(proteins, quantproteins, quantacc, quantfields):
         yield protein
 
 
-def isobaric_quant_psms(psms, protcol, quantcols):
-    """Runs through PSM table and uses medians of isobaric quant values of the
-    PSMs per protein to create protein quantification output. Combine with
-    median normalization for more accurate results"""
-    protpsmquant = {}
+def isobaric_quant_psms(psms, protcol, quantcols, normalize, normalize_table):
+    """Runs through PSM table and uses medians of isobaric quant ratios of the
+    PSMs per protein/peptide to create protein quantification output.
+    Normalization can be applied either using the resulting ratios of the
+    protein/peptide/genes or using a second list of features, passed as
+    an iterable from the tsv reader.
+    """
+    features = get_isobaric_median_features(psms, protcol, quantcols)
+    if normalize == 'median':
+        if normalize_table:
+            featratios = [[convert_to_float_or_na(f[x]) for x in quantcols]
+                          for f in normalize_table]
+        else:
+            featratios = [[f[x] for x in quantcols] for f in features]
+        ch_medians = get_medians(quantcols, featratios)
+        for feat in features:
+            feat.update({ch: str(feat[ch] / ch_medians[ch])
+                         if feat[ch] != 'NA' else 'NA' for ch in quantcols})
+    for feat in features:
+        yield feat
+
+
+def get_isobaric_median_features(psms, protcol, quantcols):
+    protpsmquant, proteins = {}, []
     for psm in psms:
         if psm[protcol] == '' or ';' in psm[protcol]:
             continue
@@ -39,11 +58,15 @@ def isobaric_quant_psms(psms, protcol, quantcols):
         except KeyError:
             protpsmquant[psm[protcol]] = [[convert_to_float_or_na(psm[q])
                                            for q in quantcols]]
-    for protein, quants in protpsmquant.items():
-        outprotein = {prottabledata.HEADER_PROTEIN: protein}
-        outprotein.update(get_medians(quantcols, quants))
-        outprotein.update(get_no_psms(quantcols, quants))
-        yield outprotein
+        proteins.append(psm[protcol])
+    features = []
+    for protein in proteins:
+        quants = protpsmquant[protein]
+        feature = {prottabledata.HEADER_PROTEIN: protein}
+        feature.update(get_medians(quantcols, quants))
+        feature.update(get_no_psms(quantcols, quants))
+        features.append(feature)
+    return features
 
 
 def get_no_psms(channels, ratios):

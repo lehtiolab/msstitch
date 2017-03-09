@@ -135,12 +135,29 @@ class TestIsoquant(basetests.ProttableTest):
     suffix = '_isoquant.txt'
     infilename = 'mzidtsv_filtered_fr1-2_isonorm.txt'
 
+    def test_normalized_isoquant(self):
+        options = ['--protcol', '14', '--isobquantcolpattern', 'tmt10plex',
+                   '--normalize', 'median']
+        self.run_command(options)
+        self.isoquant_check(
+            os.path.join(self.fixdir, 'prottable_normalized_isoquant.txt'),
+            'Protein accession')
+
+    def test_normalize_isoquant_using_other_ratiofn(self):
+        normratiofn = os.path.join(self.fixdir, 'prottable_ratio_isoquant.txt')
+        options = ['--protcol', '14', '--isobquantcolpattern', 'tmt10plex',
+                   '--normalize', 'median', '--norm-ratios', normratiofn]
+        self.run_command(options)
+        self.isoquant_check(
+            os.path.join(self.fixdir, 'prottable_normalized_isoquant.txt'),
+            'Protein accession')
+
     def test_isoquant(self):
         options = ['--protcol', '14', '--isobquantcolpattern', 'tmt10plex']
         self.run_command(options)
-        self.isoquant_check(os.path.join(self.fixdir,
-                                         'prottable_isoquant.txt'),
-                            'Protein accession')
+        self.isoquant_check(
+            os.path.join(self.fixdir, 'prottable_ratio_isoquant.txt'),
+            'Protein accession')
 
 
 class TestAddIsoquant(basetests.ProttableTest):

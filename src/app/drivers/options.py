@@ -311,6 +311,20 @@ pepprottable_options = {
     'quantfile': {'driverattr': 'quantfile', 'clarg': '--quantfile',
                   'type': 'file', 'help': 'File containing isobaric quant '
                   'data to add to table.'},
+    'normalize': {'driverattr': 'normalize', 'clarg': '--normalize',
+                  'type': str, 'default': False, 'required': False,
+                  'help': 'Normalization method for isobaric '
+                  'quant data on protein or peptide level. Currently only '
+                  'median centering is used. Use "--normalize median"'},
+    'normalizeratios': {'driverattr': 'normalizeratios', 'type': 'file',
+                        'clarg': '--norm-ratios', 'required': False,
+                        'default': False, 'help': 'In case of using a '
+                        'separate table to generate channel medians for '
+                        'normalizing, specify that file here. The '
+                        'normalization factors will be calculated from this '
+                        'file, and the features in the input will be adjusted '
+                        'using those factors rather than factors derived from '
+                        'their own quantification data'},
     'scorecolpattern': {'driverattr': 'scorecolpattern', 'type': str,
                         'clarg': '--scorecolpattern', 'help': 'Regular '
                         'expression pattern to find column where score '

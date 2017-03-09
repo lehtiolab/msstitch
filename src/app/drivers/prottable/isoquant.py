@@ -16,8 +16,10 @@ class IsobaricQuantDriver(ProttableDriver):
 
     def set_options(self):
         super().set_options()
-        self.options.update(self.define_options(['proteincol',
-                                                 'quantcolpattern']))
+        self.options.update(self.define_options(['proteincol', 'normalize',
+                                                 'normalizeratios',
+                                                 'quantcolpattern'],
+                                                prottable_options))
 
     def create_header(self):
         self.header = preparation.get_isoquant_header(self.quantfields)
@@ -31,9 +33,16 @@ class IsobaricQuantDriver(ProttableDriver):
                                                     psmheader)
 
     def set_feature_generator(self):
+        normalizefeats = False
+        if self.normalizeratios:
+            normalizeheader = reader.get_tsv_header(self.normalizeratios)
+            normalizefeats = reader.generate_tsv_proteins(self.normalizeratios,
+                                                          normalizeheader)
         self.features = preparation.isobaric_quant_psms(self.in_psms,
                                                         self.proteincol,
-                                                        self.quantfields)
+                                                        self.quantfields,
+                                                        self.normalize,
+                                                        normalizefeats)
 
 
 class AddIsobaricQuantDriver(ProttableAddData):
