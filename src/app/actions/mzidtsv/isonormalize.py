@@ -9,8 +9,9 @@ def calc_psm_ratios(psm, channels, denom_channels, min_intensity):
     psm_intensity = {ch: float(psm[ch])
                      if psm[ch] != 'NA' and float(psm[ch]) > min_intensity
                      else 'NA' for ch in channels}
-    denom = sum([psm_intensity[ch] for ch in denom_channels
-                 if psm_intensity[ch] != 'NA']) / len(denom_channels)
+    denomvalues = [psm_intensity[ch] for ch in denom_channels
+                   if psm_intensity[ch] != 'NA']
+    denom = sum(denomvalues) / len(denomvalues)
     if denom == 0:
         return ['NA'] * len(channels)
     return [psm_intensity[ch] / denom
