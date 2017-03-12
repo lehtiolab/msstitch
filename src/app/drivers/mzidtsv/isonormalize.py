@@ -32,7 +32,8 @@ class PSMIsoquantRatioDriver(MzidTSVDriver):
         quantcols = tsv.get_columns_by_pattern(self.oldheader,
                                                self.quantcolpattern)
         self.psms = prep.get_isobaric_ratios(self.fn, self.oldheader,
-                                             quantcols, denomcols, self.minint)
+                                             quantcols, denomcols, self.minint,
+                                             self.fn, False, False, False)
 
 
 class PSMIsoquantNormalizeDriver(MzidTSVDriver):
