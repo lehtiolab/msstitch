@@ -5,6 +5,8 @@ from app.dataformats import prottable as prottabledata
 from app.readers import tsv as reader
 from app.actions import isonormalizing
 
+ISOQUANTRATIO_FEAT_ACC = 'isoquant_target_acc'
+
 
 def get_isobaric_ratios(psmfn, psmheader, channels, denom_channels, min_int,
                         targetfn, accessioncol, normalize, normratiofn):
@@ -18,39 +20,54 @@ def get_isobaric_ratios(psmfn, psmheader, channels, denom_channels, min_int,
     psm_or_feat_ratios = get_psmratios(psmfn, psmheader, channels,
                                        denom_channels, min_int, accessioncol)
     if normalize and normratiofn:
-        ch_medians = get_ch_medians(get_psmratios(normratiofn))
+        ch_medians = get_medians(get_psmratios(normratiofn))
         outratios = generate_normalized_ratios(psm_or_feat_ratios, ch_medians)
     elif normalize:
         psm_or_feat_ratios = [x for x in psm_or_feat_ratios]
-        ch_medians = get_ch_medians(channels, psmratios)
+        ch_medians = get_medians(channels, psm_or_feat_ratios)
         outratios = generate_normalized_ratios(psm_or_feat_ratios, ch_medians)
     else:
-        outratios = [x for x in psm_or_feat_ratios]
+        outratios = [x for x in psm_or_feat_ratios]  # FIXME isgenerator input?
+    # outratios = [{ch1: 123, ch2: 456, ISOQUANTRATIO_FEAT_ACC: ENSG1244}]
     if accessioncol and targetfn:
-        output_to_target_accession_table(outratios, targetfn)
+        outratios = {x[ISOQUANTRATIO_FEAT_ACC]: x for x in outratios}
+        output_to_target_accession_table(targetfn, outratios)
     elif targetfn == psmfn:
         return paste_to_psmtable(psmfn, psmheader, outratios)
     else:
+        # possibly unnecessary codepath here
         return outratios
 
 
 def get_psmratios(psmfn, header, channels, denom_channels, min_int, acc_col):
     for psm in reader.generate_tsv_psms(psmfn, header):
         ratios = calc_psm_ratios(psm, channels, denom_channels, min_int)
-        yield {ch: str(ratios[ix]) if ratios[ix] != 'NA' else 'NA'
-               for ix, ch in enumerate(channels)}
+        psmquant = {ch: str(ratios[ix]) if ratios[ix] != 'NA' else 'NA'
+                    for ix, ch in enumerate(channels)}
+        if acc_col:
+            psmquant[ISOQUANTRATIO_FEAT_ACC] = psm[acc_col]
+        else:
+            psmquant[ISOQUANTRATIO_FEAT_ACC] = False
+        yield psmquant
 
 
 def paste_to_psmtable(psmfn, header, ratios):
     # loop psms in psmtable, paste the outratios in memory
     for psm, ratio in zip(reader.generate_tsv_psms(psmfn, header), ratios):
+        ratio.pop(ISOQUANTRATIO_FEAT_ACC)
         psm.update(ratio)
         yield psm
 
 
-def output_to_target_accession_table():
+def output_to_target_accession_table(targetfn, featratios):
     #loop prottable, add ratios from dict, acc = key
-    pass
+    theader = reader.get_tsv_header(targetfn)
+    acc_field = theader[0]
+    for feat in reader.generate_tsv_proteins(targetfn, theader):
+        quants = featratios[acc_field]
+        quants.pop(ISOQUANTRATIO_FEAT_ACC)
+        feat.update(quants)
+        yield feat
 
 
 def calc_psm_ratios(psm, channels, denom_channels, min_intensity):
