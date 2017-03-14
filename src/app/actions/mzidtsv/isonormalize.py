@@ -83,7 +83,8 @@ def get_psmratios(psmfn, header, channels, denom_channels, min_int, acc_col):
 def get_ratios_from_fn(fn, header, channels):
     ratios = []
     for feat in reader.generate_tsv_psms(fn, header):
-        ratios.append([float(feat[ch]) for ch in channels])
+        ratios.append([float(feat[ch]) if feat[ch] != 'NA' else 'NA'
+                       for ch in channels])
     return ratios
 
 
@@ -114,9 +115,9 @@ def calc_psm_ratios(psm, channels, denom_channels, min_intensity):
                      else 'NA' for ch in channels}
     denomvalues = [psm_intensity[ch] for ch in denom_channels
                    if psm_intensity[ch] != 'NA']
-    denom = sum(denomvalues) / len(denomvalues)
-    if denom == 0:
+    if sum(denomvalues) == 0 or len(denomvalues) == 0:
         return ['NA'] * len(channels)
+    denom = sum(denomvalues) / len(denomvalues)
     return [psm_intensity[ch] / denom
             if psm_intensity[ch] != 'NA' else 'NA' for ch in channels]
 
