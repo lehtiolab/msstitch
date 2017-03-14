@@ -1,3 +1,4 @@
+HEADER_ACCESSION = 'Accession'
 HEADER_PROTEIN = 'Protein accession'
 HEADER_GENE = 'Gene'
 HEADER_ASSOCIATED = 'Associated gene ID'

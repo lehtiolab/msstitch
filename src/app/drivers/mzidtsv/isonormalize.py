@@ -1,6 +1,7 @@
 from app.drivers.mzidtsv import MzidTSVDriver
 from app.drivers.options import mzidtsv_options
 from app.actions.mzidtsv import isonormalize as prep
+from app.dataformats import prottable as prottabledata
 from app.readers import tsv
 
 
@@ -33,14 +34,15 @@ class PSMIsoquantRatioDriver(MzidTSVDriver):
         quantcols = tsv.get_columns_by_pattern(self.oldheader,
                                                self.quantcolpattern)
         self.get_column_header_for_number(['proteincol'], self.oldheader)
+        nopsms = [prep.get_no_psms_field(qf) for qf in quantcols]
         if self.proteincol and self.targettable:
             targetheader = tsv.get_tsv_header(self.targettable)
-            self.header = targetheader + quantcols
+            self.header = targetheader + quantcols + nopsms
         elif not self.proteincol and not self.targettable:
-            self.header = (['ratio_{}'.format(x) for x in quantcols] +
-                           self.oldheader)
+            self.header = (self.oldheader +
+                           ['ratio_{}'.format(x) for x in quantcols])
         elif self.proteincol and not self.targettable:
-            self.header = [self.proteincol] + quantcols
+            self.header = [prottabledata.HEADER_ACCESSION] + quantcols + nopsms
         self.psms = prep.get_isobaric_ratios(self.fn, self.oldheader,
                                              quantcols, denomcols, self.minint,
                                              self.targettable, self.proteincol,
