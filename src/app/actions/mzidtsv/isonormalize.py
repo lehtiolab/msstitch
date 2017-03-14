@@ -24,23 +24,27 @@ def get_isobaric_ratios(psmfn, psmheader, channels, denom_channels, min_int,
         normheader = reader.get_tsv_header(normratiofn)
         normratios = get_ratios_from_fn(normratiofn, normheader, channels)
         ch_medians = get_medians(channels, normratios, report=True)
-        outratios = calculate_normalized_ratios(psm_or_feat_ratios, ch_medians)
+        outratios = calculate_normalized_ratios(psm_or_feat_ratios, ch_medians,
+                                                channels)
     elif normalize:
         flatratios = [[feat[ch] for ch in channels]
                       for feat in psm_or_feat_ratios]
         ch_medians = get_medians(channels, flatratios, report=True)
-        outratios = calculate_normalized_ratios(psm_or_feat_ratios, ch_medians)
+        outratios = calculate_normalized_ratios(psm_or_feat_ratios, ch_medians,
+                                                channels)
     else:
         outratios = psm_or_feat_ratios
-    # here: outratios [{ch1: 123, ch2: 456, ISOQUANTRATIO_FEAT_ACC: ENSG1244}]
+    # at this point, outratios look like:
+    # [{ch1: 123, ch2: 456, ISOQUANTRATIO_FEAT_ACC: ENSG1244}, ]
     if accessioncol and targetfn:
         outratios = {x[ISOQUANTRATIO_FEAT_ACC]: x for x in outratios}
-        output_to_target_accession_table(targetfn, outratios)
-    elif targetfn == psmfn:
+        return output_to_target_accession_table(targetfn, outratios)
+    elif not accessioncol and not targetfn:
         return paste_to_psmtable(psmfn, psmheader, outratios)
-    else:
-        # possibly unnecessary codepath here
-        return outratios
+    elif accessioncol and not targetfn:
+        # generate new table with accessions
+        return ({(k if not k == ISOQUANTRATIO_FEAT_ACC else accessioncol): v
+                 for k, v in ratio.items()} for ratio in outratios)
 
 
 def get_psmratios(psmfn, header, channels, denom_channels, min_int, acc_col):
@@ -79,7 +83,7 @@ def get_psmratios(psmfn, header, channels, denom_channels, min_int, acc_col):
 def get_ratios_from_fn(fn, header, channels):
     ratios = []
     for feat in reader.generate_tsv_psms(fn, header):
-        ratios.append([feat[ch] for ch in channels])
+        ratios.append([float(feat[ch]) for ch in channels])
     return ratios
 
 
@@ -87,6 +91,7 @@ def paste_to_psmtable(psmfn, header, ratios):
     # loop psms in psmtable, paste the outratios in memory
     for psm, ratio in zip(reader.generate_tsv_psms(psmfn, header), ratios):
         ratio.pop(ISOQUANTRATIO_FEAT_ACC)
+        ratio = {'ratio_{}'.format(ch): val for ch, val in ratio.items()}
         psm.update(ratio)
         yield psm
 
@@ -96,7 +101,7 @@ def output_to_target_accession_table(targetfn, featratios):
     theader = reader.get_tsv_header(targetfn)
     acc_field = theader[0]
     for feat in reader.generate_tsv_proteins(targetfn, theader):
-        quants = featratios[acc_field]
+        quants = featratios[feat[acc_field]]
         quants.pop(ISOQUANTRATIO_FEAT_ACC)
         feat.update(quants)
         yield feat
@@ -145,13 +150,12 @@ def get_no_psms(channels, ratios):
     return ch_nopsms
 
 
-def calculate_normalized_ratios(ratios, ch_medians):
+def calculate_normalized_ratios(ratios, ch_medians, channels):
     """Calculates ratios for PSM tables containing isobaric channels with
     raw intensities. Normalizes the ratios by median. NA values or values
     below min_intensity are excluded from the normalization."""
     outratios = []
     for quant in ratios:
-        channels = [x for x in quant.values() if x != ISOQUANTRATIO_FEAT_ACC]
         quant.update({ch: str(quant[ch] / ch_medians[ch])
                       if quant[ch] != 'NA' else 'NA' for ch in channels})
         outratios.append(quant)

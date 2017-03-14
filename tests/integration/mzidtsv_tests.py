@@ -313,13 +313,14 @@ class TestIso(basetests.MzidTSVBaseTest):
 
     def do_check(self, minint, stdout, normalize=False, medianpsms=None):
         channels = ['fake_ch{}'.format(x) for x in range(8)]
+        resultch = ['ratio_{}'.format(x) for x in channels]
         denom_ch = channels[0:2]
         if normalize:
             ch_medians = self.check_normalize_medians(channels, denom_ch,
                                                       minint, stdout,
                                                       medianpsms)
         for in_line, resultline in zip(self.get_infile_lines(),
-                                       self.get_values(channels)):
+                                       self.get_values(resultch)):
             in_line.update({ch: in_line[ch]
                             if in_line[ch] != 'NA' and
                             float(in_line[ch]) > minint else 'NA'

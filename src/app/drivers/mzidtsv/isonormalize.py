@@ -13,12 +13,13 @@ class PSMIsoquantRatioDriver(MzidTSVDriver):
     def set_options(self):
         super().set_options()
         self.options.update(self.define_options(['quantcolpattern',
-                                                 'denompatterns',
-                                                 'denomcols', 'minint'],
+                                                 'denompatterns', 'denomcols',
+                                                 'minint', 'targettable',
+                                                 'proteincol', 'normalize',
+                                                 'normalizeratios'],
                                                 mzidtsv_options))
 
     def get_psms(self):
-        self.header = self.oldheader[:]
         if self.denomcols is not None:
             denomcols = [self.number_to_headerfield(col, self.oldheader)
                          for col in self.denomcols]
@@ -31,9 +32,20 @@ class PSMIsoquantRatioDriver(MzidTSVDriver):
                                'or regex pattterns to find them')
         quantcols = tsv.get_columns_by_pattern(self.oldheader,
                                                self.quantcolpattern)
+        self.get_column_header_for_number(['proteincol'], self.oldheader)
+        if self.proteincol and self.targettable:
+            targetheader = tsv.get_tsv_header(self.targettable)
+            self.header = targetheader + quantcols
+        elif not self.proteincol and not self.targettable:
+            self.header = (['ratio_{}'.format(x) for x in quantcols] +
+                           self.oldheader)
+        elif self.proteincol and not self.targettable:
+            self.header = [self.proteincol] + quantcols
         self.psms = prep.get_isobaric_ratios(self.fn, self.oldheader,
                                              quantcols, denomcols, self.minint,
-                                             self.fn, False, False, False)
+                                             self.targettable, self.proteincol,
+                                             self.normalize,
+                                             self.normalizeratios)
 
 
 class PSMIsoquantNormalizeDriver(MzidTSVDriver):
