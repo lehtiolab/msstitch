@@ -311,9 +311,13 @@ class TestIso(basetests.MzidTSVBaseTest):
             self.assertEqual(float(stdout_channels[ch]), ch_medians[ch])
         return ch_medians
 
-    def do_check(self, minint, stdout, normalize=False, medianpsms=None):
+    def do_check(self, minint, stdout, normalize=False, medianpsms=None,
+                 resultch=False):
         channels = ['fake_ch{}'.format(x) for x in range(8)]
-        resultch = ['ratio_{}'.format(x) for x in channels]
+        # TODO only for backwards compatibilty, remove if statement around
+        # assignment when msspsmtable isonormalize is removed
+        if not resultch:
+            resultch = ['ratio_{}'.format(x) for x in channels]
         denom_ch = channels[0:2]
         if normalize:
             ch_medians = self.check_normalize_medians(channels, denom_ch,
@@ -356,67 +360,71 @@ class TestIsoRatio(TestIso):
         self.do_check(0, stdout)
 
 
+class TestIsoFeatRatio(TestIso):
+    suffix = '_ratio_isobaric.txt'
+    command = 'isoratio'
+    infilename = 'mzidtsv_intensities.txt'
+    channels = ['tmt10plex_{}'.format(x) for x in ['126', '127N', '127C',
+                                                   '128N', '128C', '129N',
+                                                   '129C', '130N', '130C',
+                                                   '131']]
+    nopsms = ['{} - # quanted PSMs'.format(ch) for ch in channels]
+
+    def test_normalized_isoquant(self):
+        options = ['--protcol', '14', '--isobquantcolpattern', 'tmt10plex',
+                   '--denompatterns', '_126', '--normalize', 'median']
+        self.run_command(options)
+        self.isoquant_check(
+            os.path.join(self.fixdir, 'prottable_normalized_isoquant.txt'),
+            'Accession', self.channels, self.nopsms)
+
+    def test_normalized_othertable_isoquant(self):
+        prottable_ratiofn = os.path.join(self.fixdir,
+                                         'mzidtsv_ratios.txt')
+        options = ['--protcol', '14', '--isobquantcolpattern', 'tmt10plex',
+                   '--denompatterns', '_126', '--normalize', 'median',
+                   '--norm-ratios', prottable_ratiofn]
+        self.run_command(options)
+        self.isoquant_check(
+            os.path.join(self.fixdir, 'prottable_normalized_isoquant.txt'),
+            'Accession', self.channels, self.nopsms)
+
+    def test_normalized_targettable_isoquant(self):
+        prottable_targettable = os.path.join(self.fixdir,
+                                             'prottable_only_acc.txt')
+        options = ['--protcol', '14', '--isobquantcolpattern', 'tmt10plex',
+                   '--denompatterns', '_126', '--normalize', 'median',
+                   '--targettable', prottable_targettable]
+        self.run_command(options)
+        self.isoquant_check(
+            os.path.join(self.fixdir, 'prottable_normalized_isoquant.txt'),
+            'Protein accession', self.channels, self.nopsms)
+
+
 class TestIsoNormalize(TestIso):
     suffix = '_normalized_isobaric.txt'
     command = 'isonormalize'
     infilename = 'mzidtsv.txt'
+    channels = ['fake_ch{}'.format(x) for x in range(8)]
 
     def test_normalize(self):
         stdout = self.run_command_stdout(['--isobquantcolpattern', 'fake_ch',
                                           '--denomcols', '21', '22'])
-        self.do_check(0, stdout, normalize=True)
+        self.do_check(0, stdout, normalize=True, resultch=self.channels)
 
     def test_normalize_minint(self):
         minint = 3000
         stdout = self.run_command_stdout(['--isobquantcolpattern', 'fake_ch',
                                           '--denomcols', '21', '22',
                                           '--minint', str(minint)])
-        self.do_check(minint, stdout, normalize=True)
+        self.do_check(minint, stdout, normalize=True, resultch=self.channels)
 
-#    def do_check(self, minint, stdout, medianpsms=None):
-#        channels = ['fake_ch{}'.format(x) for x in range(8)]
-#        denom_ch = channels[0:2]
-#        ch_medians = {ch: [] for ch in channels}
-#        for line in self.get_infile_lines(medianpsms):
-#            line.update({ch: line[ch]
-#                         if line[ch] != 'NA' and float(line[ch]) > minint
-#                         else 'NA' for ch in channels})
-#            denom = self.get_denominator(line, denom_ch)
-#            if denom == 0:
-#                continue
-#            for ch in channels:
-#                if line[ch] == 'NA':
-#                    continue
-#                ch_medians[ch].append(float(line[ch]) / denom)
-#        ch_medians = {ch: median(vals) for ch, vals in ch_medians.items()}
-#        stdout = stdout.decode().split('\n')
-#        self.assertEqual(stdout[0],
-#                         'Channel intensity medians used for normalization:')
-#        stdout_channels = {x.split(' - ')[0]: x.split(' - ')[1]
-#                           for x in stdout[1:]}
-#        for ch in channels:
-#            self.assertEqual(float(stdout_channels[ch]), ch_medians[ch])
-#        for in_line, resultline in zip(self.get_infile_lines(),
-#                                       self.get_values(channels)):
-#            in_line.update({ch: in_line[ch]
-#                            if in_line[ch] != 'NA' and
-#                            float(in_line[ch]) > minint else 'NA'
-#                            for ch in channels})
-#            resultline = [x[2] for x in resultline]
-#            denom = self.get_denominator(in_line, denom_ch)
-#            if denom == 0:
-#                exp_line = ['NA'] * len(channels)
-#            else:
-#                exp_line = [str((float(in_line[ch]) / denom) / ch_medians[ch])
-#                            if in_line[ch] != 'NA' else 'NA'
-#                            for ch in channels]
-#            self.assertEqual(resultline, exp_line)
-#
 
 class TestIsoNormalizeTwofiles(TestIso):
     infilename = 'mzidtsv_short.txt'
     suffix = '_normalized_isobaric.txt'
     command = 'isonormalize'
+    channels = ['fake_ch{}'.format(x) for x in range(8)]
 
     def test_two_psm_files(self):
         """Tests calculating medians on different file than the one doing the
@@ -425,4 +433,5 @@ class TestIsoNormalizeTwofiles(TestIso):
         stdout = self.run_command_stdout(['--isobquantcolpattern', 'fake_ch',
                                           '--denomcols', '21', '22',
                                           '--medianpsms', medianpsms])
-        self.do_check(0, stdout, normalize=True, medianpsms=medianpsms)
+        self.do_check(0, stdout, normalize=True, medianpsms=medianpsms,
+                      resultch=self.channels)

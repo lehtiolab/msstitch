@@ -3,7 +3,7 @@ from app.readers import tsv as reader
 
 def base_add_isoquant_data(features, quantfeatures, acc_col, quantacc_col,
                            quantfields):
-    """Generic function that takes a peptide or protein table and adds 
+    """Generic function that takes a peptide or protein table and adds
     quant data from ANOTHER such table."""
     quant_map = get_quantmap(quantfeatures, quantacc_col, quantfields)
     for feature in features:
@@ -13,7 +13,7 @@ def base_add_isoquant_data(features, quantfeatures, acc_col, quantacc_col,
             outfeat.update(quant_map[feat_acc])
         except KeyError:
             outfeat.update({field: 'NA' for field in quantfields})
-        yield outfeat 
+        yield outfeat
 
 
 def get_quantmap(features, acc_col, quantfields):

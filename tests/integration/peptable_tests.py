@@ -70,13 +70,16 @@ class TestIsoquant(basetests.PeptableTest):
     infilename = 'peptable_small.txt'
     command = 'isoquant'
     suffix = '_isoq.txt'
+    channels = ['fake_ch{}'.format(x) for x in range(0, 8)]
+    nopsms = ['{} - # quanted PSMs'.format(ch) for ch in channels]
 
     def test_isoquant(self):
         isotable = os.path.join(self.fixdir, 'peptable_isoquant.txt')
         options = ['--quantfile', isotable, '--isobquantcolpattern', 'fake_ch',
                    '--qaccpattern', 'accession']
         self.run_command(options)
-        self.isoquant_check(isotable, 'Peptide sequence')
+        self.isoquant_check(isotable, 'Peptide sequence', self.channels,
+                            self.nopsms)
 
 
 class TestModelQvals(basetests.PeptableTest):

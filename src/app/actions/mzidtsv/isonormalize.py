@@ -11,13 +11,9 @@ ISOQUANTRATIO_FEAT_ACC = '##isoquant_target_acc##'
 
 def get_isobaric_ratios(psmfn, psmheader, channels, denom_channels, min_int,
                         targetfn, accessioncol, normalize, normratiofn):
-    # outputs:
-    # PSM ratios
-    # PSM ratios but normalized
-    # protein median ratios
-    # protein median normalized on itself
-    # protein median normalized on another
-    #
+    """Main function to calculate ratios for PSMs, peptides, proteins, genes.
+    Can do simple ratios, median-of-ratios and median-centering
+    normalization."""
     psm_or_feat_ratios = get_psmratios(psmfn, psmheader, channels,
                                        denom_channels, min_int, accessioncol)
     if normalize and normratiofn:

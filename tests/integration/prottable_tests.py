@@ -130,46 +130,22 @@ class TestBuild(basetests.ProttableTest):
         self.check_protein_data('assoccentric')
 
 
-class TestIsoquant(basetests.ProttableTest):
-    command = 'isoquant'
-    suffix = '_isoquant.txt'
-    infilename = 'mzidtsv_filtered_fr1-2_isonorm.txt'
-
-    def test_normalized_isoquant(self):
-        options = ['--protcol', '14', '--isobquantcolpattern', 'tmt10plex',
-                   '--normalize', 'median']
-        self.run_command(options)
-        self.isoquant_check(
-            os.path.join(self.fixdir, 'prottable_normalized_isoquant.txt'),
-            'Protein accession')
-
-    def test_normalize_isoquant_using_other_ratiofn(self):
-        normratiofn = os.path.join(self.fixdir, 'prottable_ratio_isoquant.txt')
-        options = ['--protcol', '14', '--isobquantcolpattern', 'tmt10plex',
-                   '--normalize', 'median', '--norm-ratios', normratiofn]
-        self.run_command(options)
-        self.isoquant_check(
-            os.path.join(self.fixdir, 'prottable_normalized_isoquant.txt'),
-            'Protein accession')
-
-    def test_isoquant(self):
-        options = ['--protcol', '14', '--isobquantcolpattern', 'tmt10plex']
-        self.run_command(options)
-        self.isoquant_check(
-            os.path.join(self.fixdir, 'prottable_ratio_isoquant.txt'),
-            'Protein accession')
-
-
 class TestAddIsoquant(basetests.ProttableTest):
     command = 'addisoquant'
     suffix = '_added_isoq.txt'
+    channels = ['tmt10plex_{}'.format(x) for x in ['126', '127N', '127C',
+                                                   '128N', '128C', '129N',
+                                                   '129C', '130N', '130C',
+                                                   '131']]
+    nopsms = ['{} - # quanted PSMs'.format(ch) for ch in channels]
 
     def test_isoquant(self):
         isotable = os.path.join(self.fixdir, 'prottable_isoquant.txt')
         options = ['--quantfile', isotable, '--isobquantcolpattern',
                    'tmt10plex', '--qaccpattern', 'accession']
         self.run_command(options)
-        self.isoquant_check(isotable, 'Protein accession')
+        self.isoquant_check(isotable, 'Protein accession', self.channels,
+                            self.nopsms)
 
 
 class TestMS1Quant(basetests.ProttableTest):

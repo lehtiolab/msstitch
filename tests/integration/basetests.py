@@ -129,6 +129,23 @@ class BaseTest(unittest.TestCase):
             for expline, resline in zip(fp, resultfp):
                 self.assertEqual(expline, resline)
 
+    def isoquant_check(self, expected_isotable, acc_field, channels, nopsms):
+        isoquant = {}
+        accession = self.get_tsvheader(expected_isotable)[0]
+        for line in self.tsv_generator(expected_isotable):
+            acc = line.pop(accession)
+            isoquant[acc] = line
+        for result in self.tsv_generator(self.resultfn):
+            for ch in channels + nopsms:
+                try:
+                    resval = float(result[ch])
+                    expval = float(isoquant[result[acc_field]][ch])
+                except ValueError:
+                    # NA found
+                    self.assertEqual(resval, expval)
+                else:
+                    self.assertAlmostEqual(resval, expval)
+
 
 class BaseTestPycolator(BaseTest):
     executable = 'msspercolator'
@@ -264,17 +281,6 @@ class MSLookupTest(BaseTest):
 
 
 class PepProtableTest(BaseTest):
-    def isoquant_check(self, isotable, acc_field):
-        isoquant = {}
-        accession = self.get_tsvheader(isotable)[0]
-        for line in self.tsv_generator(isotable):
-            acc = line.pop(accession)
-            isoquant[acc] = line
-        for line in self.tsv_generator(self.resultfn):
-            [self.assertAlmostEqual(float(isoquant[line[acc_field]][ch]),
-                                    float(line[ch]))
-             for ch in isoquant[line[acc_field]]]
-
     def check_build_values(self, sql, fields, accession, cutoff=False):
         expected = {}
         for rec in self.get_values_from_db(self.dbfile, sql):

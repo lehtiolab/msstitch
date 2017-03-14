@@ -10,7 +10,6 @@ def main():
     drivers = [info.AddProteinInfoDriver(),
                merge.BuildProteinTableDriver(),
                isoquant.AddIsobaricQuantDriver(),
-               isoquant.IsobaricQuantDriver(),
                precursorarea.AddPrecursorAreaDriver(),
                probability.AddProteinProbability(),
                create_empty.CreateEmptyDriver(),
