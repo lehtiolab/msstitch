@@ -22,7 +22,7 @@ def filter_peptide_length(features, elementtype, ns, minlen=0, maxlen=None):
     for feat in features:
         seq = get_either_seq(elementtype, feat, ns)
         seq = strip_modifications(seq)
-        if len(seq) > minlen and len(seq) < maxlen:
+        if len(seq) >= minlen and len(seq) <= maxlen:
             yield formatting.string_and_clear(feat, ns)
         else:
             formatting.clear_el(feat)
@@ -47,9 +47,9 @@ def filter_whole_proteins(elements, protein_fasta, lookup, seqtype, ns,
             protseq = whole_proteins[prot_id]
             if pepseq in protseq:
                 if enforce_tryp and (pos == 0 or not set([
-                                     pepseq[-1], 
+                                     pepseq[-1],
                                      protseq[pos - 1]]).difference(['K', 'R'])):
-                    # pepseq is tryptic on both ends (or is an N-term peptide), 
+                    # pepseq is tryptic on both ends (or is an N-term peptide),
                     # matches to protein seq so remove
                     seq_matches_protein = True
                     break

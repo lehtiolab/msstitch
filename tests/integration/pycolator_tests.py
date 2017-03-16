@@ -195,7 +195,7 @@ class TestFilterLength(BaseTestPycolator):
     def all_peps_in_output(self, original_seqs, minlen, maxlen, testresult):
         for feat in original_seqs:
             seq = self.strip_modifications(feat)
-            if len(seq) < minlen or len(seq) > maxlen:
+            if len(seq) <= minlen or len(seq) >= maxlen:
                 continue
             self.assertIn(feat, testresult)
 
