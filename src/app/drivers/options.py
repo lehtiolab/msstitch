@@ -231,7 +231,7 @@ pycolator_options = {
                   'if they are fully tryptic, i.e. the protein needs K,R 1 '
                   'position upstream of the peptide, and the peptide '
                   'C-terminal should also be K,R. Useful when discerning '
-                  'from pseudogenes'},
+                  'from pseudogenes', 'required': False},
     'falloff': {'driverattr': 'falloff', 'dest': 'falloff',
                 'clarg': '--insourcefrag',
                 'type': int, 'default': 0, 'help': 'Apply '
