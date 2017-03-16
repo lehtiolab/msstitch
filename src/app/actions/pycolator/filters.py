@@ -40,22 +40,24 @@ def filter_whole_proteins(elements, protein_fasta, lookup, seqtype, ns,
     for element in elements:
         seq_matches_protein = False
         element_seqs = get_seqs_from_element(element, seqtype, ns, deamidation)
-        element_prots = {protid: (seq, pos) for seq in element_seqs
-                         for protid, pos in
-                         lookup.get_protein_from_pep(seq[:minpeplen])}
-        for prot_id, (pepseq, pos) in element_prots.items():
-            protseq = whole_proteins[prot_id]
-            if pepseq in protseq:
-                if enforce_tryp and (pos == 0 or not set([
-                                     pepseq[-1],
-                                     protseq[pos - 1]]).difference(['K', 'R'])):
-                    # pepseq is tryptic on both ends (or is an N-term peptide),
-                    # matches to protein seq so remove
-                    seq_matches_protein = True
-                    break
-                elif not enforce_tryp:
-                    seq_matches_protein = True
-                    break
+        element_prots = {seq: [(protid, pos) for protid, pos in
+                               lookup.get_protein_from_pep(seq[:minpeplen])]
+                         for seq in element_seqs}
+        for pepseq, proteins in element_prots.items():
+            for prot_id, pos in proteins:
+                protseq = whole_proteins[prot_id]
+                if pepseq in protseq:
+                    if enforce_tryp and (pos == 0 or not set(
+                            [pepseq[-1],
+                             protseq[pos - 1]]).difference(['K', 'R'])):
+                        # pepseq is tryptic on both ends, or
+                        # pepseq is an N-term peptide),
+                        # matches to protein seq so remove
+                        seq_matches_protein = True
+                        break
+                    elif not enforce_tryp:
+                        seq_matches_protein = True
+                        break
         if seq_matches_protein:
             formatting.clear_el(element)
         else:
