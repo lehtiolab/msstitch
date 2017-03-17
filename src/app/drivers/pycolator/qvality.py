@@ -46,8 +46,7 @@ class QvalityDriver(base.PycolatorDriver):
             self.scores[t_or_d] = {}
             self.scores[t_or_d]['scores'] = self.score_get_fun(
                 feats, self.featuretype, self.prepare_percolator_output)
-            self.scores[t_or_d]['fn'] = self.create_outfilepath(
-                t_or_d, self.outsuffix)
+            self.scores[t_or_d]['fn'] = '{}_qvality_input.txt'.format(t_or_d)
             writers.write_qvality_input(self.scores[t_or_d]['scores'],
                                         self.scores[t_or_d]['fn'])
 
@@ -56,7 +55,6 @@ class QvalityDriver(base.PycolatorDriver):
         outfn = self.create_outfilepath(self.fn, self.outsuffix)
         command = ['qvality']
         command.extend(self.qvalityoptions)
-        command.extend([self.scores['target']['fn'],
-                        self.scores['decoy']['fn']])
-        command.extend(['-o', outfn])
+        command.extend([self.scores['target']['fn'], self.scores['decoy']['fn'],
+                        '-o', outfn])
         subprocess.call(command)
