@@ -27,6 +27,8 @@ def parse_biomart_fn(martfn, ensg_id, ensp_id, desc_id, symb_id, alt_symb_id):
             symb = header.index(alt_symb_id)
         for line in fp:
             line = line.strip('\n').split('\t')
+            if line == ['']:
+                continue
             protein = line[ensp]
             if not protein:
                 continue
