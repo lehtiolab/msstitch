@@ -317,6 +317,9 @@ mzidtsv_options = {
                'required': False, 'default': -1,
                },
 }
+mzidtsv_options['quantcolpattern'] = {
+    k: v for k, v in shared_options['quantcolpattern'].items()}
+mzidtsv_options['quantcolpattern']['required'] = True
 
 pepprottable_options = {
     # a mock infile to make sure we don't show or need an infile, e.g. in
