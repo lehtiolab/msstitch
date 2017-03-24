@@ -56,11 +56,11 @@ def build_proteintable(pqdb, headerfields, mergecutoff, isobaric=False,
 
 def protein_pool_fdr_cutoff(sql_entry, sqlmap, fdrcutoff):
     fdr = sql_entry[sqlmap['fdr_val']]
-    if fdr is None:
+    if fdr in [False, 'NA', 'na', 'false', None]:
         print('WARNING, filtering merge table on FDR but protein {} in '
-              'set {} has no FDR value in '
+              'set {} has FDR value "{}" in '
               'lookup.'.format(sql_entry[sqlmap['p_acc']],
-                               sql_entry[sqlmap['set_name']]))
+                               sql_entry[sqlmap['set_name']], fdr))
         return False
     return fdr < fdrcutoff
 
