@@ -6,8 +6,10 @@ from app.readers import fasta
 
 
 def generate_protein_fdr(target, decoy, theader, dheader, headerfields):
-    tproteins = [x for x in reader.generate_tsv_proteins(target, theader)]
-    dproteins = [x for x in reader.generate_tsv_proteins(decoy, dheader)]
+    tproteins = [x for x in reader.generate_tsv_proteins(target, theader)
+                 if get_score(x)]
+    dproteins = [x for x in reader.generate_tsv_proteins(decoy, dheader)
+                 if get_score(x)]
     [x.update({'target_decoy': 'target'}) for x in tproteins]
     [x.update({'target_decoy': 'decoy'}) for x in dproteins]
     proteins = sorted(tproteins + dproteins, key=lambda x: get_score(x),
