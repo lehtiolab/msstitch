@@ -39,7 +39,10 @@ def get_psm2pep_header(oldheader, isobq_pattern=False, precurqfield=False):
 
 def get_linear_model_header(oldheader):
     header = oldheader[:]
-    ix = header.index(peptabledata.HEADER_PEP) + 1
+    try:
+        ix = header.index(peptabledata.HEADER_PEP) + 1
+    except ValueError:
+        ix = header.index(peptabledata.HEADER_QVAL) + 1
     return header[:ix] + [peptabledata.HEADER_QVAL_MODELED] + header[ix:]
 
 
