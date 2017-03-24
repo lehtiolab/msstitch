@@ -96,6 +96,11 @@ shared_options = {
                    'table in which protein or gene accessions are. '
                    'stored. First column number is 1. Use in case of not '
                    'using standard {} column'},
+    'pcolpattern': {'driverattr': 'pcolpattern', 'clarg': '--protcolpattern',
+                    'type': int, 'required': False, 'help': 'Text pattern to '
+                    'identify column in table in which protein or gene '
+                    'accessions are. Use in case of not using standard '
+                    '{} column'},
     'fdrcolpattern': {'driverattr': 'fdrcolpattern', 'dest': 'fdrcolpattern',
                       'clarg': '--fdrcolpattern', 'type': str,
                       'required': False, 'default': None,

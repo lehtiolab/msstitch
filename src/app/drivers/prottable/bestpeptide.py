@@ -18,7 +18,7 @@ class BestPeptidePerProtein(ProttableAddData):
         super().set_options()
         self.options.update(self.define_options(['pepfile', 'proteincol',
                                                  'scorecolpattern',
-                                                 'minlogscore'],
+                                                 'pcolpattern', 'minlogscore'],
                                                 prottable_options))
 
     def parse_input(self, **kwargs):
@@ -29,6 +29,8 @@ class BestPeptidePerProtein(ProttableAddData):
         super().initialize_input()
         self.pepheader = tsvreader.get_tsv_header(self.pepfile)
         self.get_column_header_for_number(['proteincol'], self.pepheader)
+        self.proteincol = tsvreader.get_cols_in_file(self.pcolpattern,
+                                                     self.pepheader, True)
         self.scorecol = tsvreader.get_cols_in_file(self.scorecolpattern,
                                                    self.pepheader, True)
 
