@@ -51,7 +51,8 @@ def qvalue_generator(fdrheader, sorted_features):
         tdcounter[outfeat['target_decoy']] += 1
         if outfeat['target_decoy'] == 'target':
             outfeats.append(outfeat)
-    fdr = tdcounter['decoy'] / float(tdcounter['decoy'] + tdcounter['target'])
+    # Only report target hits so FDR=D/T
+    fdr = tdcounter['decoy'] / float(tdcounter['target'])
     for feat in sorted(outfeats,
                        key=lambda x: x[prottabledata.HEADER_PROTEIN]):
         feat[fdrheader] = fdr
