@@ -66,10 +66,12 @@ class TestBuild(basetests.ProttableTest):
                                       'Protein error probability'],
                                 'Protein accession', cutoff)
         sql = ('SELECT p.protein_acc, bs.set_name, pc.channel_name, '
-               'pi.quantvalue, pi.amount_psms FROM proteins AS p '
+               'pi.quantvalue, pi.amount_psms, pf.fdr FROM proteins AS p '
                'JOIN biosets AS bs '
                'JOIN protein_iso_quanted AS pi USING(pacc_id) '
                'JOIN protquant_channels AS pc USING(channel_id) '
+               'JOIN protein_fdr AS pf WHERE pf.prottable_id=pc.prottable_id '
+               'AND pf.pacc_id=p.pacc_id'
                )
         self.check_built_isobaric(sql, 'Protein accession', cutoff)
         self.check_protein_data('proteincentric')
@@ -121,7 +123,8 @@ class TestBuild(basetests.ProttableTest):
                                       'Protein error probability'],
                                 'Protein accession')
         sql = ('SELECT ai.assoc_id, bs.set_name, pc.channel_name, '
-               'pi.quantvalue, pi.amount_psms FROM associated_ids AS ai '
+               'pi.quantvalue, pi.amount_psms '
+               'FROM associated_ids AS ai '
                'JOIN biosets AS bs '
                'JOIN assoc_iso_quanted AS pi USING(gene_id) '
                'JOIN genequant_channels AS pc USING(channel_id) '
@@ -337,7 +340,6 @@ class TestAddFDR(basetests.ProttableTest):
                 lowerscore = str(qv_score)
             elif score < qv_score:
                 return get_average(fdrmap, lowerscore, qv_score)
-        print(qv_score, max(fdrmap), 'wtf')
 
     def test(self):
         qvfn = os.path.join(self.fixdir, 'prottable_qvality.txt')

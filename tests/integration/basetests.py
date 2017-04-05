@@ -309,20 +309,23 @@ class PepProtableTest(BaseTest):
         expected = {}
         for rec in self.get_values_from_db(self.dbfile, sql):
             try:
-                expected[rec[0]][rec[1]][rec[2]] = rec[3:]
+                expected[rec[0]][rec[1]][rec[2]] = [rec[3], rec[4]]
             except KeyError:
                 try:
-                    expected[rec[0]][rec[1]] = {rec[2]: rec[3:]}
+                    expected[rec[0]][rec[1]] = {rec[2]: [rec[3], rec[4]]}
                 except KeyError:
-                    expected[rec[0]] = {rec[1]: {rec[2]: rec[3:]}}
+                    expected[rec[0]] = {rec[1]: {rec[2]: [rec[3], rec[4]]}}
+            if cutoff:
+                expected[rec[0]][rec[1]][rec[2]] = [rec[3], rec[4], rec[5]]
         for line in self.tsv_generator(self.resultfn):
             for setname, fields in expected[line[accession]].items():
-                for field in fields:
+                for field, exp_val in fields.items():
                     setfield = '{}_{}'.format(setname, field)
-                    exp_val = fields[field]
-                self.assertEqual(line[setfield], str(exp_val[0]))
-                nr_psms = line['{} - # quanted PSMs'.format(setfield)]
-                self.assertEqual(nr_psms, str(exp_val[1]))
+                    if cutoff and exp_val[2] > cutoff:
+                        exp_val = ['NA', 'NA']
+                    self.assertEqual(line[setfield], str(exp_val[0]))
+                    nr_psms = line['{} - # quanted PSMs'.format(setfield)]
+                    self.assertEqual(nr_psms, str(exp_val[1]))
             expected.pop(line[accession])
         self.check_exp_empty(expected, cutoff)
 
