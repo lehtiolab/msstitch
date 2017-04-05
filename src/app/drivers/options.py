@@ -97,10 +97,10 @@ shared_options = {
                    'stored. First column number is 1. Use in case of not '
                    'using standard {} column'},
     'pcolpattern': {'driverattr': 'pcolpattern', 'clarg': '--protcolpattern',
-                    'type': int, 'required': False, 'help': 'Text pattern to '
+                    'type': str, 'required': False, 'help': 'Text pattern to '
                     'identify column in table in which protein or gene '
                     'accessions are. Use in case of not using standard '
-                    '{} column'},
+                    '{} column', 'default': False},
     'fdrcolpattern': {'driverattr': 'fdrcolpattern', 'dest': 'fdrcolpattern',
                       'clarg': '--fdrcolpattern', 'type': str,
                       'required': False, 'default': None,
@@ -254,7 +254,12 @@ pycolator_options = {
 mzidtsv_options = {
     'confcol': {'driverattr': 'confcol', 'clarg': '--confidence-col',
                 'help': 'Confidence column number or name in the tsv file. '
-                'First column has number 1.', 'type': int},
+                'First column has number 1.', 'type': int, 'required': False},
+    'confpattern': {'driverattr': 'confpattern', 'clarg': '--confcolpattern',
+                    'type': str, 'required': False, 'help': 'Text pattern to '
+                    'identify column in table on which confidence filtering '
+                    'should be done. Use in case of not using standard '
+                    '{} column', 'default': False},
     'conflvl': {'driverattr': 'conflvl', 'clarg': '--confidence-lvl',
                 'help': 'Confidence cutoff level as a floating point number',
                 'type': float},

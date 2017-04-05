@@ -169,19 +169,28 @@ class TestConffiltTSV(basetests.MzidTSVBaseTest):
     suffix = '_filtconf.txt'
 
     def test_confidence_filter_lower(self):
-        conflvl, confcol = 0, 14  # EValue
-        self.run_conffilt(confcol, conflvl, True)
+        conflvl = 0
+        self.run_conffilt(conflvl, 'lower', confcol=14)
+
+    def test_confidence_filter_lower_confpattern(self):
+        conflvl = 0
+        self.run_conffilt(conflvl, 'lower', confpat='EValue')
 
     def test_confidence_filter_higher(self):
-        conflvl, confcol = 0, 14  # EValue
-        self.run_conffilt(confcol, conflvl, False)
+        conflvl = 0
+        self.run_conffilt(conflvl, 'higher', confcol=14)
 
-    def run_conffilt(self, confcol, conflvl, lowerbetter):
-        options = ['--confidence-col', str(confcol), '--confidence-better',
-                   'lower', '--confidence-lvl', str(conflvl)]
+    def run_conffilt(self, conflvl, better, confcol=False, confpat=False):
+        options = ['--confidence-better', better,
+                   '--confidence-lvl', str(conflvl)]
+        if confcol is not False:
+            options.extend(['--confidence-col', str(confcol)])
+        elif confpat:
+            options.extend(['--confcolpattern', confpat])
+        print(options)
         self.run_command(options)
-        asserter = {True: self.assertLess,
-                    False: self.assertGreater}[lowerbetter]
+        asserter = {'lower': self.assertLess,
+                    'higher': self.assertGreater}[better]
         for line in self.get_all_lines(self.resultfn):
             asserter(float(line.strip('\n').split('\t')[confcol - 1]), conflvl)
 

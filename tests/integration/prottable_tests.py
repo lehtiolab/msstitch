@@ -262,9 +262,15 @@ class TestBestpeptide(basetests.ProttableTest):
         self.run_command(options)
         self.check()
 
-    def test_genecentric(self):
+    def test_protcol(self):
         options = ['--logscore', '--scorecolpattern', '^PEP',
                    '--peptable', self.pepfile, '--protcol', '15']
+        self.run_command(options)
+        self.check()
+
+    def test_protcol_pattern(self):
+        options = ['--logscore', '--scorecolpattern', '^PEP',
+                   '--peptable', self.pepfile, '--protcolpattern', 'Master']
         self.run_command(options)
         self.check()
 
