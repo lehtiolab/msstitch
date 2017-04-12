@@ -1,7 +1,9 @@
+from collections import OrderedDict
+
+
 from app.dataformats import peptable as peptabledata
 from app.actions.mergetable import (simple_val_fetch, fill_mergefeature,
                                     get_isobaric_quant)
-
 from app.actions.proteindata import create_featuredata_map
 
 
@@ -114,13 +116,19 @@ def get_cov_descriptions(peptide, pdata, report):
                                   peptabledata.HEADER_ASSOCIATED,
                                   peptabledata.HEADER_NO_CONTENTPROTEINS],
                                  [float, str, str, str, int]):
-
         try:
-            report[key] = ';'.join([format_val(x[idx], keytype)
-                                    for x in pdata[seq]['proteins']])
+            replist = [format_val(x[idx], keytype)
+                       for x in pdata[seq]['proteins']]
         except (TypeError, IndexError):
-            # if None in the  list or index too high, skip, NA will be output
-            pass
+            # index too high, or None skip, item will be NA'ed downstream
+            continue
+        if key in [peptabledata.HEADER_GENES, peptabledata.HEADER_ASSOCIATED]:
+            replist = OrderedDict([(x, 1) for x in replist]).keys()
+        try:
+            report[key] = ';'.join(replist)
+        except TypeError:
+            # None in list, skip, NA will be output
+            continue
     return report
 
 
