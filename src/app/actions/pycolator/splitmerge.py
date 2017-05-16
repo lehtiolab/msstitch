@@ -55,6 +55,8 @@ def split_target_decoy(elements, ns, filter_type):
 
 
 def protein_header_split_generator(elements, headers, ns):
+    """Loop through proteins of each PSM/peptide. If a protein does not
+    match any of headers, discard PSM/peptide immediately"""
     for el in elements:
         header_not_matching = False
         for protein in el.findall('{%s}protein_id' % ns['xmlns']):
