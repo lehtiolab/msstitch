@@ -381,10 +381,13 @@ class DatabaseConnection(object):
                 self.conn.commit()
 
     def connect(self, fn):
-        """SQLite connect method and enabling foreign keys"""
+        """SQLite connect method initialize db"""
         self.conn = sqlite3.connect(fn)
         cur = self.get_cursor()
+        cur.execute('PRAGMA page_size=4096')
         cur.execute('PRAGMA FOREIGN_KEYS=ON')
+        cur.execute('PRAGMA cache_size=10000')
+        cur.execute('PRAGMA journal_mode=MEMORY')
 
     def get_cursor(self):
         """Quickly get cursor, abstracting connection"""
