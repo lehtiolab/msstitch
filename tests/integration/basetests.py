@@ -142,9 +142,9 @@ class BaseTest(unittest.TestCase):
                     expval = float(isoquant[result[acc_field]][ch])
                 except ValueError:
                     # NA found
-                    self.assertEqual(resval, expval)
+                    self.assertEqual(result[ch], isoquant[result[acc_field]][ch])
                 else:
-                    self.assertAlmostEqual(resval, expval)
+                    self.assertEqual(resval, expval)
 
 
 class BaseTestPycolator(BaseTest):
