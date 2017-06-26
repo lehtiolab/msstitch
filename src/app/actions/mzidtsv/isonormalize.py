@@ -1,5 +1,6 @@
 import sys
 from statistics import median, StatisticsError
+from collections import OrderedDict
 
 from app.dataformats import prottable as prottabledata
 from app.readers import tsv as reader
@@ -45,7 +46,7 @@ def get_isobaric_ratios(psmfn, psmheader, channels, denom_channels, min_int,
 
 
 def get_psmratios(psmfn, header, channels, denom_channels, min_int, acc_col):
-    allfeats, feat_order, psmratios = {}, [], []
+    allfeats, feat_order, psmratios = {}, OrderedDict(), []
     for psm in reader.generate_tsv_psms(psmfn, header):
         ratios = calc_psm_ratios(psm, channels, denom_channels, min_int)
         # remove uninformative psms when adding to features
@@ -58,7 +59,7 @@ def get_psmratios(psmfn, header, channels, denom_channels, min_int, acc_col):
                 allfeats[psm[acc_col]].append(ratios)
             except KeyError:
                 allfeats[psm[acc_col]] = [ratios]
-            feat_order.append(psm[acc_col])
+            feat_order[psm[acc_col]] = 1
         else:
             psmquant = {ch: str(ratios[ix]) if ratios[ix] != 'NA' else 'NA'
                         for ix, ch in enumerate(channels)}
@@ -68,7 +69,7 @@ def get_psmratios(psmfn, header, channels, denom_channels, min_int, acc_col):
         return psmratios
     else:
         outfeatures = []
-        for feat in feat_order:
+        for feat in feat_order.keys():
             quants = allfeats[feat]
             outfeature = {ISOQUANTRATIO_FEAT_ACC: feat}
             outfeature.update(get_medians(channels, quants))
