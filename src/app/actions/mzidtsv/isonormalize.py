@@ -35,7 +35,7 @@ def get_isobaric_ratios(psmfn, psmheader, channels, denom_channels, min_int,
     # [{ch1: 123, ch2: 456, ISOQUANTRATIO_FEAT_ACC: ENSG1244}, ]
     if accessioncol and targetfn:
         outratios = {x[ISOQUANTRATIO_FEAT_ACC]: x for x in outratios}
-        return output_to_target_accession_table(targetfn, outratios)
+        return output_to_target_accession_table(targetfn, outratios, channels)
     elif not accessioncol and not targetfn:
         return paste_to_psmtable(psmfn, psmheader, outratios)
     elif accessioncol and not targetfn:
@@ -95,12 +95,15 @@ def paste_to_psmtable(psmfn, header, ratios):
         yield psm
 
 
-def output_to_target_accession_table(targetfn, featratios):
+def output_to_target_accession_table(targetfn, featratios, channels):
     #loop prottable, add ratios from dict, acc = key
     theader = reader.get_tsv_header(targetfn)
     acc_field = theader[0]
     for feat in reader.generate_tsv_proteins(targetfn, theader):
-        quants = featratios[feat[acc_field]]
+        try:
+            quants = featratios[feat[acc_field]]
+        except KeyError:
+            quants = ['NA'] * len(channels)
         quants.pop(ISOQUANTRATIO_FEAT_ACC)
         feat.update(quants)
         yield feat
