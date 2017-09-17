@@ -89,7 +89,6 @@ def mzid_specdata_generator(mzidfile, namespace):
          'SequenceCollection',
          'AnalysisProtocolCollection',
          'AnalysisCollection',
-         'AnalysisData',
          ],
         namespace)
 
