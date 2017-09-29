@@ -1,4 +1,3 @@
-from app.actions.isonormalizing import get_medians
 from app.dataformats import prottable as prottabledata
 from app.actions.shared.pepprot_isoquant import base_add_isoquant_data
 

@@ -8,7 +8,7 @@ class ProttableFDRDriver(ProttableAddData):
     """Runs qvality on two TSV tables"""
     outsuffix = '_protfdr.txt'
     command = 'protfdr'
-    commandhelp = ('Run qvality on protein (or tsv) tables '
+    commandhelp = ('Calculate FDR of protein (or tsv) tables '
                    'containing target (-i) proteins and decoy (--decoy) '
                    'proteins. Uses Q-score from Savitski 2014 MCP as a '
                    'ranking mechanism, q-values are #D/(#D+#T) without '
