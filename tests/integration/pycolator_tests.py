@@ -136,6 +136,22 @@ class TestMerge(BaseTestPycolator):
     infilename = 'splittd_target_out.xml'
     suffix = '_merged.xml'
 
+    def test_merge_onefile(self):
+        self.infile = [self.infile]
+        self.run_command()
+        expected = self.read_percolator_out(self.infile[0])
+        result = self.read_percolator_out(self.resultfn)
+        self.assertEqual(len(result['psms']), len(result['peptides']))
+        self.assertCountEqual(self.get_element_ids(expected['psms'], 'psm_id',
+                                                   expected['ns']),
+                              self.get_element_ids(result['psms'], 'psm_id',
+                                                   result['ns']))
+        self.assertCountEqual(self.get_element_ids(expected['peptides'],
+                                                   'peptide_id',
+                                                   expected['ns']),
+                              self.get_element_ids(result['peptides'],
+                                                   'peptide_id', result['ns']))
+
     def test_merge(self):
         #self.multifiles = [os.path.join(self.fixdir, 'splittd_decoy_out.xml')]
         #self.multifiles =
