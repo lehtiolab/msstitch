@@ -77,7 +77,7 @@ def get_proteins_from_psm(line):
     proteins = line[mzidtsvdata.HEADER_PROTEIN].split(';')
     outproteins = []
     for protein in proteins:
-        prepost_protein = re.sub('\(pre=.[\.\,]post=.\)','', protein).strip()
+        prepost_protein = re.sub('\(pre=[A-Z\,]*post=.*\)', '', protein).strip()
         outproteins.append(prepost_protein)
     return outproteins
 
