@@ -122,9 +122,7 @@ def get_pepproteins(line):
 
 
 def strip_modifications(seq):
-    nomodseq = re.sub('\d+', '', seq)
-    nomodseq = re.sub('\+\.', '', nomodseq)
-    return nomodseq
+    return re.sub('[-+.\d]', '', seq)
 
 
 def get_cols_in_file(pattern, header, single_col=False):
