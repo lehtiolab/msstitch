@@ -107,13 +107,15 @@ class TestSpectraLookup(basetests.MSLookupTest):
 
     def check_spectra(self, bsets):
         sql = ('SELECT mf.mzmlfilename, bs.set_name, s.scan_nr, s.charge, '
-               's.mz, s.retention_time, s.spectra_id FROM mzml AS s '
+               's.mz, s.retention_time, s.ion_injection_time, s.spectra_id '
+               'FROM mzml AS s '
                'JOIN mzmlfiles AS mf USING(mzmlfile_id) '
                'JOIN biosets AS bs USING(set_id)')
         specrecs = {}
         for rec in self.get_values_from_db(self.resultfn, sql):
             specrecs[rec[2]] = {'fn': rec[0], 'bs': rec[1], 'charge': rec[3],
-                                'mz': rec[4], 'rt': rec[5], 'sid': rec[6]}
+                                'mz': rec[4], 'rt': rec[5], 'iit': rec[6],
+                                'sid': rec[7]}
         for scannr, spec in self.get_spectra_mzml(self.infile, bsets):
             self.assertEqual(spec, specrecs[scannr])
 
@@ -141,12 +143,13 @@ class TestSpectraLookup(basetests.MSLookupTest):
                                        'selectedIonList', 'selectedIon'],
                                       spectrum, ns)
                 rt = get_cvparam_value(scan, 'scan start time', ns)[0]
+                iit = get_cvparam_value(scan, 'ion injection time', ns)[0]
                 charge = get_cvparam_value(precursor, 'charge state', ns)[0]
                 mz = get_cvparam_value(precursor, 'selected ion m/z', ns)[0]
                 exp_data = {'fn': os.path.basename(infile), 'bs': bset,
                             'charge': int(charge),
                             'sid': '{}_{}'.format(mzfnid + 1, scannr),
-                            'mz': float(mz), 'rt': float(rt)}
+                            'mz': float(mz), 'rt': float(rt), 'iit': float(iit)}
                 yield scannr, exp_data
 
     def test_spectra_newdb(self):

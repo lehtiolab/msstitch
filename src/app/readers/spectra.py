@@ -13,10 +13,13 @@ def mzmlfn_ms2_spectra_generator(mzmlfiles):
         scannr = get_spec_scan_nr(spec)
         rt = fetch_cvparams_values_from_subel(spec, 'scan',
                                               ['scan start time'], ns)
+        iit = fetch_cvparams_values_from_subel(spec, 'scan',
+                                               ['ion injection time'], ns)
         mz, charge = fetch_cvparams_values_from_subel(spec, 'selectedIon',
                                                       ['selected ion m/z',
                                                        'charge state'], ns)
-        yield fn, {'scan': scannr, 'rt': rt[0], 'mz': mz, 'charge': charge}
+        yield fn, {'scan': scannr, 'rt': rt[0], 'iit': iit[0], 'mz': mz,
+                   'charge': charge}
         formatting.clear_el(spec)
 
 

@@ -9,8 +9,8 @@ class SpectraDB(BioSetDB):
     def store_mzmls(self, spectra):
         self.store_many(
             'INSERT INTO mzml(spectra_id, mzmlfile_id, scan_nr, charge, mz, '
-            'retention_time) '
-            'VALUES (?, ?, ?, ?, ?, ?)', spectra)
+            'retention_time, ion_injection_time) '
+            'VALUES (?, ?, ?, ?, ?, ?, ?)', spectra)
 
     def index_mzml(self):
         self.index_column('spectra_id_index', 'mzml', 'spectra_id')
