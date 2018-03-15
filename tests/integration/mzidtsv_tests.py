@@ -14,15 +14,17 @@ class TestAddSpecData(basetests.MzidTSVBaseTest):
     def test_addspecdata(self):
         options = ['--dbfile', self.dbfile, '--spectracol', '2']
         self.run_command(options)
-        sql = ('SELECT pr.rownr, bs.set_name, sp.retention_time '
+        sql = ('SELECT pr.rownr, bs.set_name, sp.retention_time, '
+               'sp.ion_injection_time '
                'FROM psmrows AS pr JOIN psms USING(psm_id) '
                'JOIN mzml AS sp USING(spectra_id) '
                'JOIN mzmlfiles USING(mzmlfile_id) '
                'JOIN biosets AS bs USING(set_id) '
                'ORDER BY pr.rownr')
-        fields = ['Biological set', 'Retention time(min)']
+        fields = ['Biological set', 'Retention time(min)',
+                  'Ion injection time(ms)']
         expected_values = self.process_dbvalues_both(self.dbfile, sql, [],
-                                                     [1, 2], fields)
+                                                     [1, 2, 3], fields)
         self.check_results(fields, self.rowify(expected_values))
 
 

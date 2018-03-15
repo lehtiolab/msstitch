@@ -16,6 +16,7 @@ def generate_psms_spectradata(lookup, tsvfn, oldheader):
         if row == int(specdata[0]):
             outpsm.update({mzidtsvdata.HEADER_SETNAME: specdata[1],
                            mzidtsvdata.HEADER_RETENTION_TIME: str(specdata[2]),
+                           mzidtsvdata.HEADER_INJECTION_TIME: str(specdata[3]),
                            })
         else:
             raise RuntimeError('PSM with row nr {} has no rownr in DB. '

@@ -21,8 +21,9 @@ class SpectraDB(BioSetDB):
 
     def get_exp_spectra_data_rows(self):
         cursor = self.get_cursor()
-        return cursor.execute('SELECT pr.rownr, bs.set_name, sp.retention_time'
-                              ' FROM psmrows AS pr '
+        return cursor.execute('SELECT pr.rownr, bs.set_name, sp.retention_time, '
+                              'sp.ion_injection_time '
+                              'FROM psmrows AS pr '
                               'JOIN psms AS p USING(psm_id) '
                               'JOIN mzml AS sp USING(spectra_id) '
                               'JOIN mzmlfiles as mf USING(mzmlfile_id) '
