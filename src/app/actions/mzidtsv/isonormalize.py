@@ -104,7 +104,8 @@ def output_to_target_accession_table(targetfn, featratios, channels):
             quants = featratios[feat[acc_field]]
         except KeyError:
             quants = ['NA'] * len(channels)
-        quants.pop(ISOQUANTRATIO_FEAT_ACC)
+        else:
+            quants.pop(ISOQUANTRATIO_FEAT_ACC)
         feat.update(quants)
         yield feat
 
