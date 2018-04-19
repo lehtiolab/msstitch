@@ -1,7 +1,7 @@
 import os
 from argparse import ArgumentParser, RawTextHelpFormatter
 
-VERSION_NUMBER = '2.6'
+VERSION_NUMBER = '2.7'
 
 
 def parser_file_exists(currentparser, fn):
