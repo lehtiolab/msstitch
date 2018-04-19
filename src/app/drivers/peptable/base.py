@@ -13,8 +13,8 @@ class PeptableDriver(PepProttableDriver):
         self.headerfields = head.get_peptable_headerfields(self.headertypes,
                                                            self.lookup,
                                                            self.poolnames)
-        self.header = head.generate_header(self.headerfields,
-                                           self.oldheader)
+        self.header = head.generate_header(self.headerfields, self.oldheader,
+                                           self.group_by_field)
 
 
 class PeptableAddData(PeptableDriver):
@@ -25,6 +25,10 @@ class PeptableAddData(PeptableDriver):
 
 
 class PeptableMergeDriver(PeptableDriver):
+    def __init__(self):
+        super().__init__()
+        self.group_by_field = True
+
     def initialize_input(self):
         self.headertypes = ['proteindata']
         for inflag, htype in zip([self.fdr, self.pep, self.precursor,

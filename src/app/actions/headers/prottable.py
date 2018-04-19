@@ -6,12 +6,13 @@ from app.actions.headers.base import (generate_general_header,
 from app.dataformats import prottable as prottabledata
 
 
-def generate_header(headerfields, oldheader=False):
+def generate_header(headerfields, oldheader, group_by_field):
     """Returns a header as a list, ready to write to TSV file"""
     fieldtypes = ['proteindata', 'probability', 'proteinfdr', 'proteinpep',
                   'precursorquant', 'isoquant', 'bestpepscore']
     return generate_general_header(headerfields, fieldtypes,
-                                   prottabledata.HEADER_PROTEIN, oldheader)
+                                   prottabledata.HEADER_PROTEIN, oldheader,
+                                   group_by_field)
 
 
 def get_prottable_headerfields(headertypes, lookup=False, poolnames=False):

@@ -9,6 +9,7 @@ class PepProttableDriver(BaseDriver):
         self.oldheader = False
         self.probability = False
         self.poolnames = False
+        self.group_by_field = False
 
     def run(self):
         self.initialize_input()

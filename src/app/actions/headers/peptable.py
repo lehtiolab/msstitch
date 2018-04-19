@@ -46,12 +46,13 @@ def get_linear_model_header(oldheader):
     return header[:ix] + [peptabledata.HEADER_QVAL_MODELED] + header[ix:]
 
 
-def generate_header(headerfields, oldheader=False):
+def generate_header(headerfields, oldheader, group_by_field):
     """Returns a header as a list, ready to write to TSV file"""
     fieldtypes = ['peptidefdr', 'peptidepep', 'nopsms', 'proteindata',
                   'precursorquant', 'isoquant']
     return generate_general_header(headerfields, fieldtypes,
-                                   peptabledata.HEADER_PEPTIDE, oldheader)
+                                   peptabledata.HEADER_PEPTIDE, oldheader,
+                                   group_by_field)
 
 
 def get_peptable_headerfields(headertypes, lookup=False, poolnames=False):
