@@ -103,7 +103,8 @@ def output_to_target_accession_table(targetfn, featratios, channels):
         try:
             quants = featratios[feat[acc_field]]
         except KeyError:
-            quants = ['NA'] * len(channels)
+            quants = {ch: 'NA' for ch in channels}
+            quants.update({get_no_psms_field(ch): 'NA' for ch in channels})
         else:
             quants.pop(ISOQUANTRATIO_FEAT_ACC)
         feat.update(quants)
