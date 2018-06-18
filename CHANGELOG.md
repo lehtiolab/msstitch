@@ -1,5 +1,9 @@
 # Changelog
 
+## [2.8] - 2018-04-19
+### Fixed
+- Bug which was not completely fixed in 2.7, now add NA correctly to all fields
+
 ## [2.7] - 2018-04-19
 ### Change
 - Field outputs for peptable and prottable merge - used to keep set-fields together and interleave isobaric channels with their nr of psms.
