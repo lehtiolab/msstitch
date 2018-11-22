@@ -1,5 +1,9 @@
 # Changelog
 
+## [2.9] - 2018-04-19
+### Fixed
+- Bug fixed where precursor-quant-only databases would result in skipping the last line of the PSM table when running `msspsmtable quant`
+
 ## [2.8] - 2018-04-19
 ### Fixed
 - Bug which was not completely fixed in 2.7, now add NA correctly to all fields
