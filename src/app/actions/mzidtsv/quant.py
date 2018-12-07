@@ -23,15 +23,14 @@ def generate_psms_quanted(quantdb, tsvfn, isob_header, oldheader,
                 try:
                     quant = next(allquants)
                 except StopIteration:
-                    # last PSM
-                    yield outpsm
+                    # last PSM, break from while loop or it is not yielded at all
                     break
             outpsm.update(get_quant_NAs(isoquants, isob_header))
         else:
             try:
                 quant = next(allquants)
             except StopIteration:
-                # last PSM
+                # last PSM, needs explicit yield/break or it will not be yielded
                 yield outpsm
                 break
         yield outpsm
