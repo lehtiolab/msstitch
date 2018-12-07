@@ -1,6 +1,10 @@
 # Changelog
 
-## [2.9] - 2018-04-19
+## [2.10] - 2018-12-07
+### Fixed
+- Bug fixed where isobaric databases would also result in skipping the last line of the PSM table when running `msspsmtable quant`
+
+## [2.9] - 2018-11-22
 ### Fixed
 - Bug fixed where precursor-quant-only databases would result in skipping the last line of the PSM table when running `msspsmtable quant`
 
