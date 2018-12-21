@@ -1,5 +1,9 @@
 # Changelog
 
+## [2.11] - 2018-12-07
+### Fixed
+- Bug fixed, now possible to load protein/gene/peptide tables in sqlite without storing "number of quanted PSMs"
+
 ## [2.10] - 2018-12-07
 ### Fixed
 - Bug fixed where isobaric databases would also result in skipping the last line of the PSM table when running `msspsmtable quant`
