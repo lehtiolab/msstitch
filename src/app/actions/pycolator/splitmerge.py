@@ -54,15 +54,20 @@ def split_target_decoy(elements, ns, filter_type):
     return feats_to_process
 
 
-def protein_header_split_generator(elements, headers, ns):
+def protein_header_split_generator(elements, headers, ns, prot_type):
     """Loop through proteins of each PSM/peptide. If a protein does not
     match any of headers, discard PSM/peptide immediately"""
     for el in elements:
         header_not_matching = False
         for protein in el.findall('{%s}protein_id' % ns['xmlns']):
-            if not any((re.search(h, protein.text) for h in headers)):
-                header_not_matching = True
-                break
+            if prot_type == 'known':
+                if any((re.search(h, protein.text) for h in headers)):
+                    header_not_matching = False
+                    break
+            else:
+                if not any((re.search(h, protein.text) for h in headers)):
+                    header_not_matching = True
+                    break
         if header_not_matching:
             formatting.clear_el(el)
         else:
@@ -70,6 +75,11 @@ def protein_header_split_generator(elements, headers, ns):
 
 
 def split_protein_header_id_type(elements, ns, protheaders):
+    prot_type = "other"
     headers = protheaders.strip(';').split(';')
-    return {x: protein_header_split_generator(elements[x], headers, ns)
+    if ":" in protheaders:
+        prot_type = protheaders.strip(';').split(':')[0]
+        headers = ':'.join(protheaders.split(":")[1::]).strip(';').split(';')
+    
+    return {x: protein_header_split_generator(elements[x], headers, ns, prot_type)
             for x in ['psm', 'peptide']}
