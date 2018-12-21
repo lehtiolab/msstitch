@@ -621,11 +621,11 @@ class TestProteintableLookup(TestProtPepTableLookup):
                    'JOIN protquant_channels AS pc USING(channel_id)')
         self.check_isobaric(iso_sql)
 
-    def test_genecentric(self):
+    def test_genecentric_no_psmnrs(self):
         options = ['--setnames', 'S1', '--genecentric', 'genes',
                    '--isobquantcolpattern', 'itraq4plex', '--fdrcolpattern',
-                   'q-value', '--pepcolpattern', 'PEP', '--psmnrcolpattern',
-                   'quanted', '--ms1quantcolpattern', 'area', '--protcol', '2',
+                   'q-value', '--pepcolpattern', 'PEP', 
+                   '--ms1quantcolpattern', 'area', '--protcol', '2',
                    '--probcolpattern', 'probability']
         sql = ('SELECT p.gene_acc, ppq.quant, pf.fdr, pp.pep, '
                'ppr.probability '

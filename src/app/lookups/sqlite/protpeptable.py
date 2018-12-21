@@ -51,11 +51,15 @@ class ProtPepTable(ResultLookupInterface):
                 self.table_map[self.datatype]['fntable']),
             tables)
 
-    def store_quant_channels(self, quantchannels):
+    def store_quant_channels(self, quantchannels, psmnrcols):
         table = self.table_map[self.datatype]['isochtable']
-        self.store_many(
-            'INSERT INTO {}({}, channel_name, amount_psms_name) VALUES'
-            '(?, ?, ?)'.format(table, self.colmap[table][1]), quantchannels)
+        if psmnrcols:
+            sql = ('INSERT INTO {}({}, channel_name, amount_psms_name) VALUES'
+                   '(?, ?, ?)'.format(table, self.colmap[table][1]))
+        else:
+            sql = ('INSERT INTO {}({}, channel_name) VALUES'
+                   '(?, ?)'.format(table, self.colmap[table][1]))
+        self.store_many(sql, quantchannels)
 
     def get_quantchannel_map(self):
         outdict = {}
@@ -71,12 +75,15 @@ class ProtPepTable(ResultLookupInterface):
                 outdict[fnid] = {channel_name: (channel_id, amount_psms_name)}
         return outdict
 
-    def store_isobaric_quants(self, quants):
+    def store_isobaric_quants(self, quants, psmnrcols):
         table = self.table_map[self.datatype]['isoqtable']
-        self.store_many(
-            'INSERT INTO {}({}, channel_id, quantvalue, amount_psms) '
-            'VALUES '
-            '(?, ?, ?, ?)'.format(table, self.colmap[table][1]), quants)
+        if psmnrcols:
+            sql = ('INSERT INTO {}({}, channel_id, quantvalue, amount_psms) ' 
+                   'VALUES ' '(?, ?, ?, ?)'.format(table, self.colmap[table][1]))
+        else:
+            sql = ('INSERT INTO {}({}, channel_id, quantvalue) ' 
+                   'VALUES ' '(?, ?, ?)'.format(table, self.colmap[table][1]))
+        self.store_many(sql, quants)
 
     def get_tablefn_map(self):
         table = self.table_map[self.datatype]['fntable']
