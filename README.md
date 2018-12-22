@@ -1,23 +1,13 @@
 # msstitch -- MS proteomics post-processing utilities
 
 Shotgun proteomics has a number of bioinformatic tools available for identification 
-and quantification of peptides, and the subsequent protein inference. A problem which
-remains is that to generate a full end-user compatible output table one often has to
-resort to a full suite of tools. Suites can be very well made, reliable and accepted
-by the field, but they are "large" monoliths.
+and quantification of peptides, and the subsequent protein inference.
 
 These scripts are written to scratch an itch felt some years ago when combining 
 existing tools, and act as small command-line runnable programs that do small
 things such as adding values to a PSM table, manipulating percolator results or grouping
 proteins. They are capable of combining multiple different output formats into
 complete output.
-
-Small things take short time to update, are easy to parallelize, and tools that 
-generate input data for these scripts can usually be upgraded without having to 
-wait for a full tool suite update (unless large output format changes apply).
-While the tools are not per definition user-friendly in that there is no GUI or
-chaining/integration, they are easy to implement in frameworks such as Galaxy
-or Taverna.
 
 We currently support the tools we run ourselves, but these could easily be extended
 to include more tool output formats.
