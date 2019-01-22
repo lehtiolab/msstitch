@@ -26,5 +26,7 @@ def get_isobaric_quant(feature, sqlmap, headerfields):
     nopsms = feature[sqlmap['isoq_psms']]
     if quant is None:
         return {}
-    return {headerfields['isoquant'][chan][pool]: quant,
-            headerfields['isoquant'][psmfield][pool]: nopsms}
+    qfeat = {headerfields['isoquant'][chan][pool]: quant}
+    if psmfield is not None:
+        qfeat[headerfields['isoquant'][psmfield][pool]] = nopsms
+    return qfeat

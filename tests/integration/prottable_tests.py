@@ -73,7 +73,7 @@ class TestBuild(basetests.ProttableTest):
                'JOIN protein_fdr AS pf WHERE pf.prottable_id=pc.prottable_id '
                'AND pf.pacc_id=p.pacc_id'
                )
-        self.check_built_isobaric(sql, 'Protein accession', cutoff)
+        self.check_built_isobaric(sql, 'Protein accession', cutoff=cutoff)
         self.check_protein_data('proteincentric')
 
     def test_mergecutoff(self):
@@ -104,6 +104,36 @@ class TestBuild(basetests.ProttableTest):
                )
         self.check_built_isobaric(sql, 'Protein accession')
         self.check_protein_data('genecentric')
+
+    def test_nopsmnrs(self):
+        """Given a lookup with NO amount psm information, output a nice gene
+        table without those columns"""
+        self.dbfile = os.path.join(self.fixdir, 'prottable_nopsm_db.sqlite')
+        options = ['--fdr', '--precursor', '--isobaric', '--probability',
+                   '--pep', '--dbfile', self.dbfile, '--genecentric', 'genes']
+        self.run_command(options)
+        sql = ('SELECT g.gene_acc, bs.set_name, gf.fdr, pep.pep , gp.quant, '
+               'gpr.probability '
+               'FROM genes AS g '
+               'JOIN biosets AS bs '
+               'JOIN gene_fdr AS gf USING(gene_id) '
+               'JOIN gene_pep AS pep USING(gene_id) '
+               'JOIN gene_precur_quanted AS gp USING(gene_id) '
+               'JOIN gene_probability AS gpr USING(gene_id) '
+               )
+        print(self.dbfile)
+        self.check_build_values(sql, ['q-value', 'PEP', 'MS1 precursor area',
+                                      'Protein error probability'],
+                                'Protein accession')
+        sql = ('SELECT g.gene_acc, bs.set_name, pc.channel_name, '
+               'pi.quantvalue, pi.amount_psms FROM genes AS g '
+               'JOIN biosets AS bs '
+               'JOIN gene_iso_quanted AS pi USING(gene_id) '
+               'JOIN genequant_channels AS pc USING(channel_id) '
+               )
+        self.check_built_isobaric(sql, 'Protein accession', check_nr_psms=False)
+        self.check_protein_data('genecentric')
+
 
     def test_assoccentric(self):
         self.dbfile = os.path.join(self.fixdir, 'prottable_assoc_db.sqlite')
