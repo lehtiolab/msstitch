@@ -45,15 +45,17 @@ def build_proteintable(pqdb, headerfields, mergecutoff, isobaric=False,
             continue
         p_acc = protein[sqlfieldmap['p_acc']]
         if p_acc != outprotein[prottabledata.HEADER_PROTEIN]:
+            # check if protein has been filled, otherwise do not output
+            # sometimes proteins have NA in all fields
             if outprotein != check_prot:
-                # Is this here to avoid outputting empty proteins?
                 yield outprotein
             outprotein = {prottabledata.HEADER_PROTEIN: p_acc}
             check_prot = {k: v for k, v in outprotein.items()}
         fill_mergefeature(outprotein, iso_fun, ms1_fun, prob_fun, fdr_fun,
                           pep_fun, pdata_fun, protein, sqlfieldmap,
                           headerfields, pdmap)
-    yield outprotein
+    if outprotein != check_prot:
+        yield outprotein
 
 
 def protein_pool_fdr_cutoff(sql_entry, sqlmap, fdrcutoff):
