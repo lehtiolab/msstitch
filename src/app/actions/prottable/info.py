@@ -23,8 +23,14 @@ def add_protein_data(proteins, pgdb, headerfields, genecentric=False,
                                          get_uniques=True)
     dataget_fun = {True: get_protein_data_genecentric,
                    False: get_protein_data_pgrouped}[genecentric is not False]
+    firstfield = {
+            False: prottabledata.HEADER_PROTEIN, 
+            'genes': prottabledata.HEADER_GENEID,
+            'assoc': prottabledata.HEADER_GENENAME,
+            }[genecentric]
     for protein in proteins:
         outprotein = {k: v for k, v in protein.items()}
+        outprotein[firstfield] = outprotein.pop(prottabledata.HEADER_PROTEIN)
         protein_acc = protein[prottabledata.HEADER_PROTEIN]
         outprotein.update(dataget_fun(proteindata, protein_acc, headerfields))
         outprotein = {k: str(v) for k, v in outprotein.items()}
@@ -64,8 +70,8 @@ def get_protein_data_base(proteindata, p_acc, headerfields):
     outdict.update({prottabledata.HEADER_NO_PROTEIN: proteincount,
                     prottabledata.HEADER_DESCRIPTION:
                     proteindata[p_acc]['desc']})
-    for field, pdfield in zip([prottabledata.HEADER_GENE,
-                               prottabledata.HEADER_ASSOCIATED],
+    for field, pdfield in zip([prottabledata.HEADER_GENEID,
+                               prottabledata.HEADER_GENENAME],
                               ['gene', 'aid']):
         try:
             outdict[field] = ';'.join(proteindata[p_acc][pdfield])

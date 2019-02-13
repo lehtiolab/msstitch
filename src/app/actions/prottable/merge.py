@@ -30,30 +30,35 @@ def build_proteintable(pqdb, headerfields, mergecutoff, isobaric=False,
     protein_sql, sqlfieldmap = pqdb.prepare_mergetable_sql(precursor, isobaric,
                                                            probability, fdr,
                                                            pep)
+    accession_field = {
+            False: prottabledata.HEADER_PROTEIN,
+            'genes': prottabledata.HEADER_GENEID,
+            'assoc': prottabledata.HEADER_GENENAME,
+            }[genecentric]
     proteins = pqdb.get_merged_features(protein_sql)
     protein = next(proteins)
-    outprotein = {prottabledata.HEADER_PROTEIN: protein[sqlfieldmap['p_acc']]}
+    outprotein = {accession_field: protein[sqlfieldmap['p_acc']]}
     check_prot = {k: v for k, v in outprotein.items()}
     if not mergecutoff or protein_pool_fdr_cutoff(protein, sqlfieldmap,
                                                   mergecutoff):
         fill_mergefeature(outprotein, iso_fun, ms1_fun, prob_fun, fdr_fun,
                           pep_fun, pdata_fun, protein, sqlfieldmap,
-                          headerfields, pdmap)
+                          headerfields, pdmap, accession_field)
     for protein in proteins:
         if mergecutoff and not protein_pool_fdr_cutoff(protein, sqlfieldmap,
                                                        mergecutoff):
             continue
         p_acc = protein[sqlfieldmap['p_acc']]
-        if p_acc != outprotein[prottabledata.HEADER_PROTEIN]:
+        if p_acc != outprotein[accession_field]:
             # check if protein has been filled, otherwise do not output
             # sometimes proteins have NA in all fields
             if outprotein != check_prot:
                 yield outprotein
-            outprotein = {prottabledata.HEADER_PROTEIN: p_acc}
+            outprotein = {accession_field: p_acc}
             check_prot = {k: v for k, v in outprotein.items()}
         fill_mergefeature(outprotein, iso_fun, ms1_fun, prob_fun, fdr_fun,
                           pep_fun, pdata_fun, protein, sqlfieldmap,
-                          headerfields, pdmap)
+                          headerfields, pdmap, accession_field)
     if outprotein != check_prot:
         yield outprotein
 
@@ -76,14 +81,14 @@ def protein_pool_fdr_cutoff(sql_entry, sqlmap, fdrcutoff):
     return fdr < fdrcutoff
 
 
-def get_protein_data_genecentric(outprotein, proteindata_map, headerfields):
-    p_acc = outprotein[prottabledata.HEADER_PROTEIN]
+def get_protein_data_genecentric(outprotein, proteindata_map, headerfields, accfield):
+    p_acc = outprotein[accfield]
     return pinfo.get_protein_data_genecentric(proteindata_map, p_acc,
                                               headerfields)
 
 
-def get_protein_data(outprotein, proteindata_map, headerfields):
-    p_acc = outprotein[prottabledata.HEADER_PROTEIN]
+def get_protein_data(outprotein, proteindata_map, headerfields, accfield):
+    p_acc = outprotein[accfield]
     return pinfo.get_protein_data_pgrouped(proteindata_map, p_acc,
                                            headerfields)
 

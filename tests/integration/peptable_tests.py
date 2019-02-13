@@ -76,7 +76,7 @@ class TestIsoquant(basetests.PeptableTest):
     def test_isoquant(self):
         isotable = os.path.join(self.fixdir, 'peptable_isoquant.txt')
         options = ['--quantfile', isotable, '--isobquantcolpattern', 'fake_ch',
-                   '--qaccpattern', 'accession']
+                   '--qaccpattern', 'Protein ID']
         self.run_command(options)
         self.isoquant_check(isotable, 'Peptide sequence', self.channels,
                             self.nopsms)

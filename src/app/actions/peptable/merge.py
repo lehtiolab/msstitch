@@ -77,7 +77,7 @@ def get_no_psms(peptide, pdata, headerfields):
     return outdict
 
 
-def get_protein_data(peptide, pdata, headerfields):
+def get_protein_data(peptide, pdata, headerfields, accfield):
     """These fields are currently not pool dependent so headerfields
     is ignored"""
     report = get_proteins(peptide, pdata, headerfields)

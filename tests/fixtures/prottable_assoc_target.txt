@@ -1,4 +1,4 @@
-Protein accession	Q-score best peptide
+Protein ID	Q-score best peptide
 SHMT2	1.8065970969375824
 ALDOA	2.4252744164059266
 CASP7	2.074997492319022

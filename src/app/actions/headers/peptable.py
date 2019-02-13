@@ -78,7 +78,7 @@ def get_peptidepep_fields(poolnames=False):
     return {peptabledata.HEADER_PEP: poolnames}
 
 
-def get_proteininfo_fields(poolnames=False):
+def get_proteininfo_fields(poolnames=False, genecentric=False):
     """Returns header fields for protein (group) information."""
     allfields = OrderedDict()
     basefields = [peptabledata.HEADER_PROTEINS,

@@ -391,25 +391,29 @@ class ProttableTest(PepProtableTest):
         sql_adds = sql_map['primary'] + sql_map['fields']
         sql_adds.append(' '.join(sql_map['joins']))
         sql = sql.format(*sql_adds)
-        psm_sql_map = {'pc': ('pgm', 'protein_acc', 'protein_group_master'),
-                       'gc': ('g', 'gene_acc', 'genes'),
-                       'ac': ('aid', 'assoc_id', 'associated_ids')}[centric]
+        expected = {rec[0]: rec[1:] for rec in
+                    self.get_values_from_db(self.dbfile, sql)}
+        pdatalup = {
+                'pc': {'acc': 'Protein ID', 'fields': [('Gene ID', 0), ('Gene Name', 1), 
+                    ('Description', 2), ('Coverage', 3)]},
+                'gc': {'acc': 'Gene ID', 'fields': [('Gene Name', 0), ('Description', 2)]},
+                'ac': {'acc': 'Gene Name', 'fields': [('Gene ID', 0), ('Description', 2)]},
+                }
+        for protein in self.tsv_generator(self.resultfn):
+            pacc = protein[pdatalup[centric]['acc']]
+            for (field, ix) in pdatalup[centric]['fields']:
+                self.assertEqual(protein[field], str(expected[pacc][ix]))
+
         psm_sql = ('SELECT {0}.{1}, pp.psm_id, ps.sequence '
                    'FROM {2} AS {0} '
                    'JOIN protein_psm AS pp USING(protein_acc) '
                    'JOIN psms USING(psm_id) '
                    'JOIN peptide_sequences AS ps USING(pep_id) '
                    )
+        psm_sql_map = {'pc': ('pgm', 'protein_acc', 'protein_group_master'),
+                       'gc': ('g', 'gene_acc', 'genes'),
+                       'ac': ('aid', 'assoc_id', 'associated_ids')}[centric]
         psm_sql = psm_sql.format(*psm_sql_map)
-        expected = {rec[0]: rec[1:] for rec in
-                    self.get_values_from_db(self.dbfile, sql)}
-        for protein in self.tsv_generator(self.resultfn):
-            pacc = protein['Protein accession']
-            self.assertEqual(protein['Gene'], expected[pacc][0])
-            self.assertEqual(protein['Associated gene ID'], expected[pacc][1])
-            self.assertEqual(protein['Description'], expected[pacc][2])
-            self.assertEqual(protein['Coverage'], str(expected[pacc][3]))
-
         expected, unipeps = {}, {}
         for rec in self.get_values_from_db(self.dbfile, psm_sql):
             pacc = rec[0]
@@ -428,7 +432,7 @@ class ProttableTest(PepProtableTest):
             if len(prot) == 1:
                 expected[prot.pop()]['unipep'] += 1
         for protein in self.tsv_generator(self.resultfn):
-            pacc = protein['Protein accession']
+            pacc = protein[pdatalup[centric]['acc']]
             poolname = 'S1'
             self.assertEqual(protein['{}_# Unique peptides'.format(poolname)],
                              str(expected[pacc]['unipep']))

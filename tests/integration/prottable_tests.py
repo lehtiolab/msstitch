@@ -64,7 +64,7 @@ class TestBuild(basetests.ProttableTest):
 
         self.check_build_values(sql, ['q-value', 'PEP', 'MS1 precursor area',
                                       'Protein error probability'],
-                                'Protein accession', cutoff)
+                                'Protein ID', cutoff)
         sql = ('SELECT p.protein_acc, bs.set_name, pc.channel_name, '
                'pi.quantvalue, pi.amount_psms, pf.fdr FROM proteins AS p '
                'JOIN biosets AS bs '
@@ -73,7 +73,7 @@ class TestBuild(basetests.ProttableTest):
                'JOIN protein_fdr AS pf WHERE pf.prottable_id=pc.prottable_id '
                'AND pf.pacc_id=p.pacc_id'
                )
-        self.check_built_isobaric(sql, 'Protein accession', cutoff=cutoff)
+        self.check_built_isobaric(sql, 'Protein ID', cutoff=cutoff)
         self.check_protein_data('proteincentric')
 
     def test_mergecutoff(self):
@@ -95,14 +95,14 @@ class TestBuild(basetests.ProttableTest):
                )
         self.check_build_values(sql, ['q-value', 'PEP', 'MS1 precursor area',
                                       'Protein error probability'],
-                                'Protein accession')
+                                'Gene ID')
         sql = ('SELECT g.gene_acc, bs.set_name, pc.channel_name, '
                'pi.quantvalue, pi.amount_psms FROM genes AS g '
                'JOIN biosets AS bs '
                'JOIN gene_iso_quanted AS pi USING(gene_id) '
                'JOIN genequant_channels AS pc USING(channel_id) '
                )
-        self.check_built_isobaric(sql, 'Protein accession')
+        self.check_built_isobaric(sql, 'Gene ID')
         self.check_protein_data('genecentric')
 
     def test_nopsmnrs(self):
@@ -124,14 +124,14 @@ class TestBuild(basetests.ProttableTest):
         print(self.dbfile)
         self.check_build_values(sql, ['q-value', 'PEP', 'MS1 precursor area',
                                       'Protein error probability'],
-                                'Protein accession')
+                                'Gene ID')
         sql = ('SELECT g.gene_acc, bs.set_name, pc.channel_name, '
                'pi.quantvalue, pi.amount_psms FROM genes AS g '
                'JOIN biosets AS bs '
                'JOIN gene_iso_quanted AS pi USING(gene_id) '
                'JOIN genequant_channels AS pc USING(channel_id) '
                )
-        self.check_built_isobaric(sql, 'Protein accession', check_nr_psms=False)
+        self.check_built_isobaric(sql, 'Gene ID', check_nr_psms=False)
         self.check_protein_data('genecentric')
 
 
@@ -151,7 +151,7 @@ class TestBuild(basetests.ProttableTest):
                )
         self.check_build_values(sql, ['q-value', 'PEP', 'MS1 precursor area',
                                       'Protein error probability'],
-                                'Protein accession')
+                                'Gene Name')
         sql = ('SELECT ai.assoc_id, bs.set_name, pc.channel_name, '
                'pi.quantvalue, pi.amount_psms '
                'FROM associated_ids AS ai '
@@ -159,7 +159,7 @@ class TestBuild(basetests.ProttableTest):
                'JOIN assoc_iso_quanted AS pi USING(gene_id) '
                'JOIN genequant_channels AS pc USING(channel_id) '
                )
-        self.check_built_isobaric(sql, 'Protein accession')
+        self.check_built_isobaric(sql, 'Gene Name')
         self.check_protein_data('assoccentric')
 
 
@@ -175,9 +175,9 @@ class TestAddIsoquant(basetests.ProttableTest):
     def test_isoquant(self):
         isotable = os.path.join(self.fixdir, 'prottable_isoquant.txt')
         options = ['--quantfile', isotable, '--isobquantcolpattern',
-                   'tmt10plex', '--qaccpattern', 'accession']
+                   'tmt10plex', '--qaccpattern', 'Protein ID']
         self.run_command(options)
-        self.isoquant_check(isotable, 'Protein accession', self.channels,
+        self.isoquant_check(isotable, 'Protein ID', self.channels,
                             self.nopsms)
 
 
@@ -198,9 +198,9 @@ class TestMS1Quant(basetests.ProttableTest):
         for protein in self.tsv_generator(self.resultfn):
             try:
                 self.assertEqual(float(protein['MS1 precursor area']),
-                                 top_ms1[protein['Protein accession']])
+                                 top_ms1[protein['Protein ID']])
             except ValueError:
-                self.assertNotIn(protein['Protein accession'], top_ms1)
+                self.assertNotIn(protein['Protein ID'], top_ms1)
 
     def test_ms1(self):
         options = ['--psmtable', self.psmfile]
@@ -221,7 +221,7 @@ class TestProbability(basetests.ProttableTest):
         top_psms = self.get_top_psms(self.pepfile, 'Peptide sequence', 'PEP',
                                      lowerbetter=True)
         for protein in self.tsv_generator(self.resultfn):
-            protacc = protein['Protein accession']
+            protacc = protein['Protein ID']
             expected_prob = 1
             for prob in top_psms[protacc].values():
                 expected_prob *= prob
@@ -255,7 +255,7 @@ class TestEmpty(basetests.ProttableTest):
             if ';' in prot:
                 continue
             expected_proteins.add(prot)
-        res = [x['Protein accession'] for x in
+        res = [x['Protein ID'] for x in
                self.tsv_generator(self.resultfn)]
         self.assertFalse(expected_proteins.symmetric_difference(res))
 
@@ -283,7 +283,7 @@ class TestBestpeptide(basetests.ProttableTest):
                    for prot, psms in top_psms.items()}
         for protein in self.tsv_generator(self.resultfn):
             res = float(protein['Q-score best peptide'])
-            self.assertEqual(qscores[protein['Protein accession']], res)
+            self.assertEqual(qscores[protein['Protein ID']], res)
 
     def setUp(self):
         super().setUp()

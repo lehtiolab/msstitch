@@ -1,4 +1,4 @@
-Protein accession	Q-score best peptide	q-value
+Protein ID	Q-score best peptide	q-value
 PAK1IP1	7.495453159608811	0.0
 SCAMP3	5.176134690675489	0.0
 GPR180	5.1576404266693245	0.0

@@ -1,4 +1,4 @@
-Protein accession	Q-score best peptide	q-value
+Protein ID	Q-score best peptide	q-value
 ENSP00000434509	7.495453159608811	0.0
 ENSP00000434805	5.176134690675489	0.0
 ENSP00000243286	5.1576404266693245	0.0

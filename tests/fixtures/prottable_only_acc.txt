@@ -1,4 +1,4 @@
-Protein accession
+Protein accession 
 ENSP00000238256
 ENSP00000243286
 ENSP00000246024
