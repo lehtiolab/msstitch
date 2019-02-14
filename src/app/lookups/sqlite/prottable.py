@@ -23,12 +23,8 @@ class ProtTableDB(ProtPepTable):
                             'protein_probability', 'protein_fdr',
                             'protein_pep'])
 
-    def get_all_proteins_psms_for_unipeps(self):
-        fields = ['p.protein_acc', 'sets.set_name',
-                  'pep.sequence']
-        firstjoin = ('psm_protein_groups', 'ppg', 'master_id')
-        firsttable = 'protein_group_master'
-        return self.get_proteins_psms(firsttable, fields, firstjoin)
+    def get_unique_peptide_nrs(self):
+        return self.get_unique_peptide_nrs_base('protein_acc', 'JOIN protein_group_content USING(protein_acc) JOIN protein_group_master AS acctable USING(master_id)')
 
     def get_precursorquant_headerfields(self):
         cursor = self.get_cursor()
@@ -58,13 +54,6 @@ class GeneTableDB(ProtPepTable):
                             'gene_probability', 'gene_fdr',
                             'gene_pep'])
 
-    def get_all_proteins_psms_for_unipeps(self):
-        fields = ['p.gene_acc', 'sets.set_name',
-                  'pep.sequence']
-        firstjoin = ('protein_psm', 'pp', 'protein_acc')
-        firsttable = 'genes'
-        return self.get_proteins_psms(firsttable, fields, firstjoin)
-
     def get_protein_gene_symbol_for_map(self):
         fields = ['p.gene_acc', 'pd.description',
                   'aid.assoc_id', 'prot.protein_acc']
@@ -87,6 +76,9 @@ class GeneTableDB(ProtPepTable):
         firstjoin = ('protein_psm', 'pp', 'protein_acc')
         genetable = self.table_map[self.datatype]['feattable']
         return self.get_unique_gene_psms(genetable, fields, firstjoin)
+             
+    def get_unique_peptide_nrs(self):
+        return self.get_unique_peptide_nrs_base('gene_acc', 'JOIN genes AS acctable USING(protein_acc)')
 
     def get_precursorquant_headerfields(self):
         cursor = self.get_cursor()
@@ -114,12 +106,8 @@ class GeneTableAssocIDsDB(GeneTableDB):
                             'assoc_probability', 'assoc_fdr',
                             'assoc_pep'])
 
-    def get_all_proteins_psms_for_unipeps(self):
-        fields = ['p.assoc_id', 'sets.set_name',
-                  'pep.sequence']
-        firstjoin = ('protein_psm', 'pp', 'protein_acc')
-        firsttable = 'associated_ids'
-        return self.get_proteins_psms(firsttable, fields, firstjoin)
+    def get_unique_peptide_nrs(self):
+        return self.get_unique_peptide_nrs_base('assoc_id', 'JOIN associated_ids AS acctable USING(protein_acc)')
 
     def get_protein_gene_symbol_for_map(self):
         fields = ['p.assoc_id', 'pd.description',

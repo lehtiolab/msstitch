@@ -151,6 +151,26 @@ class ProtPepTable(ResultLookupInterface):
         sql = sql.format(','.join(fields), 'protein_group_master')
         cursor = self.get_cursor()
         return cursor.execute(sql)
+
+    def get_unique_peptide_nrs_base(self, acc, joins):
+        sql = (
+                'SELECT COUNT(sequence), set_name, {0} FROM ( '
+
+                'SELECT sequence, set_name, {0} FROM ( '
+
+                'SELECT DISTINCT pep.sequence, bs.set_name, acctable.{0} FROM '
+                'peptide_sequences AS pep JOIN psms USING(pep_id) '
+                'JOIN mzml USING(spectra_id) JOIN mzmlfiles USING(mzmlfile_id) '
+                'JOIN biosets AS bs USING(set_id) '
+                'JOIN protein_psm AS pp USING(psm_id) '
+                '{1})'
+
+                'GROUP BY sequence,set_name HAVING COUNT(sequence)=1) '
+
+                'GROUP BY {0}, set_name')
+        cursor = self.get_cursor()
+        sql = sql.format(acc, joins)
+        return cursor.execute(sql)
         
     def get_proteins_psms_for_map(self):
         """Gets protein-PSM combinations and other info for creating a map
