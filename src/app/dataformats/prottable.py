@@ -22,3 +22,8 @@ HEADER_PEP = 'PEP'
 HEADER_QVAL_MODELED = 'q-value (linear model)'
 HEADER_QSCORE = 'Q-score best peptide'
 PICKED_HEADER = [HEADER_PROTEIN, HEADER_QSCORE]
+ACCESSIONS = {
+        False: HEADER_PROTEIN, 
+        'genes': HEADER_GENEID,
+        'assoc': HEADER_GENENAME,
+        }

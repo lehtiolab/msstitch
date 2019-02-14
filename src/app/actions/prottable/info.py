@@ -23,11 +23,7 @@ def add_protein_data(proteins, pgdb, headerfields, genecentric=False,
                                          get_uniques=True)
     dataget_fun = {True: get_protein_data_genecentric,
                    False: get_protein_data_pgrouped}[genecentric is not False]
-    firstfield = {
-            False: prottabledata.HEADER_PROTEIN, 
-            'genes': prottabledata.HEADER_GENEID,
-            'assoc': prottabledata.HEADER_GENENAME,
-            }[genecentric]
+    firstfield = prottabledata.ACCESSIONS[genecentric]
     for protein in proteins:
         outprotein = {k: v for k, v in protein.items()}
         outprotein[firstfield] = outprotein.pop(prottabledata.HEADER_PROTEIN)

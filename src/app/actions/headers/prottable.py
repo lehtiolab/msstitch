@@ -10,11 +10,7 @@ def generate_protein_header(headerfields, oldheader, group_by_field, genecentric
     """Returns a header as a list, ready to write to TSV file"""
     fieldtypes = ['proteindata', 'probability', 'proteinfdr', 'proteinpep',
                   'precursorquant', 'isoquant', 'bestpepscore']
-    firstfield = {
-            False: prottabledata.HEADER_PROTEIN, 
-            'genes': prottabledata.HEADER_GENEID,
-            'assoc': prottabledata.HEADER_GENENAME,
-            }[genecentric]
+    firstfield = prottabledata.ACCESSIONS[genecentric]
     return generate_general_header(headerfields, fieldtypes, firstfield, oldheader,
                                    group_by_field)
 

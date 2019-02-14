@@ -30,11 +30,7 @@ def build_proteintable(pqdb, headerfields, mergecutoff, isobaric=False,
     protein_sql, sqlfieldmap = pqdb.prepare_mergetable_sql(precursor, isobaric,
                                                            probability, fdr,
                                                            pep)
-    accession_field = {
-            False: prottabledata.HEADER_PROTEIN,
-            'genes': prottabledata.HEADER_GENEID,
-            'assoc': prottabledata.HEADER_GENENAME,
-            }[genecentric]
+    accession_field = prottabledata.ACCESSIONS[genecentric]
     proteins = pqdb.get_merged_features(protein_sql)
     protein = next(proteins)
     outprotein = {accession_field: protein[sqlfieldmap['p_acc']]}
