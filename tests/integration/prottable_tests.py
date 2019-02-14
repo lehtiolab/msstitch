@@ -121,7 +121,6 @@ class TestBuild(basetests.ProttableTest):
                'JOIN gene_precur_quanted AS gp USING(gene_id) '
                'JOIN gene_probability AS gpr USING(gene_id) '
                )
-        print(self.dbfile)
         self.check_build_values(sql, ['q-value', 'PEP', 'MS1 precursor area',
                                       'Protein error probability'],
                                 'Gene ID')

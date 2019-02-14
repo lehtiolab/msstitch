@@ -13,7 +13,8 @@ def build_proteintable(pqdb, headerfields, mergecutoff, isobaric=False,
     them and when all of a protein's quants have been collected, yields the
     protein quant information."""
     pdmap = create_featuredata_map(pqdb, genecentric=genecentric,
-                                   fill_fun=pinfo.add_record_to_proteindata,
+                                   psm_fill_fun=pinfo.add_psms_to_proteindata,
+                                   pgene_fill_fun=pinfo.add_protgene_to_protdata,
                                    count_fun=pinfo.count_peps_psms,
                                    get_uniques=True)
     empty_return = lambda x, y, z: {}

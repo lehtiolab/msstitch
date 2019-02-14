@@ -1,12 +1,12 @@
 from app.dataformats import prottable as prottabledata
-from app.actions.proteindata import (add_record_to_proteindata,
+from app.actions.proteindata import (add_psms_to_proteindata,
+                                     add_protgene_to_protdata,
                                      create_featuredata_map)
 
 
 def count_peps_psms(proteindata, p_acc, pool):
     data = proteindata[p_acc]['pools'][pool]
     proteindata[p_acc]['pools'][pool]['psms'] = len(data['psms'])
-    #proteindata[prot][pool]['proteins'] = len(data['proteins'])
     proteindata[p_acc]['pools'][pool]['peptides'] = len(data['peptides'])
 
 
@@ -53,22 +53,19 @@ def get_headerfieldtext(headerfields, hfieldtype, pool):
 
 
 def get_protein_data_base(proteindata, p_acc, headerfields):
-    proteincount = 'na'
-    outdict = {}
     hfields = [prottabledata.HEADER_NO_UNIPEP,
                prottabledata.HEADER_NO_PEPTIDE,
                prottabledata.HEADER_NO_PSM,
                ]
+    outdict = {prottabledata.HEADER_DESCRIPTION: proteindata[p_acc]['desc']}
     for pool, pdata in proteindata[p_acc]['pools'].items():
         pool_values = [pdata['unipeps'], pdata['peptides'], pdata['psms']]
         outdict.update({get_headerfieldtext(headerfields, hfield, pool): val
                         for (hfield, val) in zip(hfields, pool_values)})
-    outdict.update({prottabledata.HEADER_NO_PROTEIN: proteincount,
-                    prottabledata.HEADER_DESCRIPTION:
-                    proteindata[p_acc]['desc']})
     for field, pdfield in zip([prottabledata.HEADER_GENEID,
-                               prottabledata.HEADER_GENENAME],
-                              ['gene', 'aid']):
+                               prottabledata.HEADER_GENENAME,
+                               prottabledata.HEADER_PROTEINS],
+                              ['gene', 'aid', 'protein_ids']):
         try:
             outdict[field] = ';'.join(proteindata[p_acc][pdfield])
         except TypeError:
@@ -81,9 +78,9 @@ def get_cov_protnumbers(proteindata, p_acc, report):
         report[prottabledata.HEADER_COVERAGE] = proteindata[p_acc]['cov']
     except KeyError:
         pass
-    if 'proteins' in proteindata[p_acc]:
+    if 'pgcontent' in proteindata[p_acc]:
         report.update({prottabledata.HEADER_CONTENTPROT:
-                       ','.join(proteindata[p_acc]['proteins']),
+                       ','.join(proteindata[p_acc]['pgcontent']),
                        prottabledata.HEADER_NO_PROTEIN:
-                       len(proteindata[p_acc]['proteins'])})
+                       len(proteindata[p_acc]['pgcontent'])})
     return report

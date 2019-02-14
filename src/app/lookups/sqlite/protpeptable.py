@@ -133,29 +133,38 @@ class ProtPepTable(ResultLookupInterface):
                'protein_group_master AS pgm '
                'JOIN protein_group_content AS pgc USING(master_id)')
         return cursor.execute(sql)
-
+    
+    def get_protein_gene_symbol_for_map(self):
+        fields = ['p.protein_acc', 'pep.sequence', 'pd.description',
+                  'pcov.coverage', 'g.gene_acc', 'aid.assoc_id']
+        sql = (
+                'SELECT {} FROM {} AS p '
+                'JOIN protein_psm USING(protein_acc) '
+                'JOIN psms USING(psm_id) '
+                'JOIN peptide_sequences AS pep USING(pep_id) '
+                'LEFT OUTER JOIN prot_desc AS pd USING(protein_acc) '
+                'LEFT OUTER JOIN protein_coverage '
+                'AS pcov USING(protein_acc) '
+                'LEFT OUTER JOIN genes AS g USING(protein_acc) '
+                'LEFT OUTER JOIN associated_ids AS aid USING(protein_acc)'
+                )
+        sql = sql.format(','.join(fields), 'protein_group_master')
+        cursor = self.get_cursor()
+        return cursor.execute(sql)
+        
     def get_proteins_psms_for_map(self):
         """Gets protein-PSM combinations and other info for creating a map
         of protein data. This particular version is protein-group centric"""
-        fields = ['p.protein_acc', 'sets.set_name',
-                  'pep.sequence', 'psm.psm_id', 'pd.description',
-                  'pcov.coverage', 'g.gene_acc', 'aid.assoc_id']
-        extrajoins = ('LEFT OUTER JOIN prot_desc AS pd USING(protein_acc) '
-                      'LEFT OUTER JOIN protein_coverage '
-                      'AS pcov USING(protein_acc) '
-                      'LEFT OUTER JOIN genes AS g USING(protein_acc) '
-                      'LEFT OUTER JOIN associated_ids AS aid '
-                      'USING(protein_acc)'
-                      )
+        fields = ['p.protein_acc', 'sets.set_name', 'pep.sequence', 'psm.psm_id']
         firstjoin = ('psm_protein_groups', 'ppg', 'master_id')
-        return self.get_proteins_psms('protein_group_master', fields,
-                                      firstjoin, extrajoins)
+        return self.get_proteins_psms('protein_group_master', fields, firstjoin)
 
-    def get_unique_gene_psms(self, genetable, fields, firstjoin, extrajoins):
+    def get_unique_gene_psms(self, genetable, fields, firstjoin):
+        """Uniques the results from get_proteins_psms so each PSM as defined
+        by gene ID / setname / psm_id will only occur once"""
         lastgene = None
         gpsms_out, gp_ids = [], []
-        for gpsm in self.get_proteins_psms(genetable, fields, firstjoin,
-                                           extrajoins):
+        for gpsm in self.get_proteins_psms(genetable, fields, firstjoin):
             if gpsm[0] != lastgene:
                 for outpsm in gpsms_out:
                     yield outpsm
@@ -168,8 +177,7 @@ class ProtPepTable(ResultLookupInterface):
         for outpsm in gpsms_out:
             yield outpsm
 
-    def get_proteins_psms(self, firsttable, fields, firstjoin,
-                          extrajoins=False):
+    def get_proteins_psms(self, firsttable, fields, firstjoin):
         joins = [firstjoin]
         joins.extend([('psms', 'psm', 'psm_id'),
                       ('peptide_sequences', 'pep', 'pep_id'),
@@ -179,8 +187,6 @@ class ProtPepTable(ResultLookupInterface):
                       ])
         join_sql = ' '.join(['JOIN {} AS {} USING({})'.format(
             j[0], j[1], j[2]) for j in joins])
-        if extrajoins:
-            join_sql = '{} {}'.format(join_sql, extrajoins)
         sql = ('SELECT {} FROM {} '
                'AS p'.format(', '.join(fields), firsttable))
         sql = '{} {} ORDER BY {}, sets.set_name'.format(sql, join_sql,

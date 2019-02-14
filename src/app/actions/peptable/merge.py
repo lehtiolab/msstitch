@@ -13,8 +13,9 @@ def build_peptidetable(pqdb, headerfields, isobaric=False,
     """Fetches peptides and quants from joined lookup table, loops through
     them and when all of a peptides quants/data have been collected, yields
     peptide quant information."""
-    peptidedatamap = create_featuredata_map(pqdb, genecentric=genecentric,
-                                            fill_fun=add_record_to_peptidedata)
+    peptidedatamap = create_featuredata_map(pqdb, genecentric=genecentric, 
+            psm_fill_fun=add_psm_to_peptidedata, pgene_fill_fun=add_protgene_to_pepdata,
+            is_peptides=True)
     count_psms(peptidedatamap)
     empty_return = lambda x, y, z: {}
     iso_fun = {True: get_isobaric_quant, False: empty_return}[isobaric]
@@ -138,19 +139,25 @@ def count_psms(pdata):
             pdata[seq]['psms'][pool] = len(pdata[seq]['psms'][pool])
 
 
-def add_record_to_peptidedata(peptidedata, p_acc, pool, psmdata, genecentric,
-                              pgcontentmap=None):
-    seq, psm_id = psmdata[2], psmdata[3]
+def add_protgene_to_pepdata(peptidedata, seq, p_acc, dbrec, genecentric, pgcontentmap=None):
     if genecentric == 'plain':
         gene, desc, assoc_id, cov, pgcontent = None, None, None, None, None
+        protein = (p_acc, cov, desc, gene, assoc_id)
     elif genecentric:
         gene = p_acc
-        desc, assoc_id = psmdata[4], psmdata[5]
+        desc, assoc_id = dbrec[2], dbrec[3]
         cov, pgcontent = None, None
+        protein = (None, cov, desc, gene, assoc_id)
     else:
-        desc, cov = psmdata[4], psmdata[5]
-        gene, assoc_id = psmdata[6], psmdata[7]
+        desc, cov = dbrec[2], dbrec[3]
+        gene, assoc_id = dbrec[4], dbrec[5]
         pgcontent = pgcontentmap[p_acc]
+        protein = (p_acc, cov, desc, gene, assoc_id, len(pgcontent))
+    peptidedata[seq]['proteins'].add(protein)
+
+
+def add_psm_to_peptidedata(peptidedata, p_acc, pool, psmdata):
+    seq, psm_id = psmdata[2], psmdata[3]
     try:
         peptidedata[seq]['psms'][pool].add(psm_id)
     except KeyError:
@@ -160,10 +167,3 @@ def add_record_to_peptidedata(peptidedata, p_acc, pool, psmdata, genecentric,
             peptidedata[seq] = {'psms': {pool: set()},
                                 'proteins': set()}
         peptidedata[seq]['psms'][pool].add(psm_id)
-    if not genecentric:
-        protein = (p_acc, cov, desc, gene, assoc_id, len(pgcontent))
-    elif genecentric == 'plain':
-        protein = (p_acc, cov, desc, gene, assoc_id)
-    else:
-        protein = (None, cov, desc, gene, assoc_id)
-    peptidedata[seq]['proteins'].add(protein)

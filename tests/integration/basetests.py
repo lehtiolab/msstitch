@@ -363,46 +363,46 @@ class ProttableTest(PepProtableTest):
     def check_protein_data(self, centrictype):
         centric = {'proteincentric': 'pc', 'genecentric': 'gc',
                    'assoccentric': 'ac'}[centrictype]
-        sql_map = {'pc': {'primary':
-                          ['pgm', 'protein_acc', 'protein_group_master'],
-                          'fields': ['g.gene_acc', 'aid.assoc_id',
-                                     'pc.coverage'],
-                          'joins':
-                          ['JOIN genes AS g USING(protein_acc) ',
-                           'JOIN associated_ids AS aid USING(protein_acc) ',
-                           'JOIN protein_coverage AS pc USING(protein_acc)',
-                           ]},
-                   'gc': {'primary': ['g', 'gene_acc', 'genes'],
-                          'fields': ['"NA"'] * 3,
-                          'joins':
-                          ['JOIN associated_ids USING(protein_acc) ',
-                           ]},
-                   'ac': {'primary': ['aid', 'assoc_id', 'associated_ids'],
-                          'fields': ['"NA"'] * 3,
-                          'joins':
-                          ['JOIN genes USING(protein_acc) ',
-                           ]},
-                   }[centric]
-
-        sql = ('SELECT {0}.{1}, {3}, {4}, pd.description, {5} '
-               'FROM {2} AS {0} '
-               '{6} '
-               'JOIN prot_desc AS pd USING(protein_acc)')
-        sql_adds = sql_map['primary'] + sql_map['fields']
-        sql_adds.append(' '.join(sql_map['joins']))
-        sql = sql.format(*sql_adds)
+        if centric == 'pc':
+            sql = (
+            'SELECT p.protein_acc,GROUP_CONCAT(g.gene_acc),GROUP_CONCAT(aid.assoc_id),pd.description,pcov.coverage '
+            'FROM protein_group_master AS p '
+            'JOIN associated_ids AS aid USING(protein_acc) '
+            'JOIN genes AS g USING(protein_acc) '
+            'JOIN prot_desc AS pd USING(protein_acc) '
+            'JOIN protein_coverage AS pcov USING(protein_acc) '
+            'GROUP BY g.gene_acc'
+            )
+        elif centric == 'gc':
+            sql = (
+            'SELECT g.gene_acc, GROUP_CONCAT(aid.assoc_id),GROUP_CONCAT(p.protein_acc),pd.description '
+            'FROM genes AS g '
+            'JOIN associated_ids AS aid USING(protein_acc) '
+            'JOIN proteins AS p USING(protein_acc) '
+            'JOIN prot_desc AS pd USING(protein_acc) '
+            'GROUP BY g.gene_acc'
+            )
+        elif centric == 'ac':
+            sql = (
+            'SELECT aid.assoc_id, GROUP_CONCAT(g.gene_acc),GROUP_CONCAT(p.protein_acc),pd.description '
+            'FROM associated_ids AS aid '
+            'JOIN genes AS g USING(protein_acc) '
+            'JOIN proteins AS p USING(protein_acc) '
+            'JOIN prot_desc AS pd USING(protein_acc) '
+            'GROUP BY aid.assoc_id'
+            )
         expected = {rec[0]: rec[1:] for rec in
                     self.get_values_from_db(self.dbfile, sql)}
         pdatalup = {
-                'pc': {'acc': 'Protein ID', 'fields': [('Gene ID', 0), ('Gene Name', 1), 
-                    ('Description', 2), ('Coverage', 3)]},
-                'gc': {'acc': 'Gene ID', 'fields': [('Gene Name', 0), ('Description', 2)]},
-                'ac': {'acc': 'Gene Name', 'fields': [('Gene ID', 0), ('Description', 2)]},
+                'pc': {'acc': 'Protein ID', 'fields': [('Gene ID', 0), ('Gene Name', 1), ('Coverage', 3)]},
+                'gc': {'acc': 'Gene ID', 'fields': [('Gene Name', 0), ('Protein ID(s)', 1)]},
+                'ac': {'acc': 'Gene Name', 'fields': [('Gene ID', 0), ('Protein ID(s)', 1)]},
                 }
-        for protein in self.tsv_generator(self.resultfn):
-            pacc = protein[pdatalup[centric]['acc']]
+        for row in self.tsv_generator(self.resultfn):
+            acc = row[pdatalup[centric]['acc']]
             for (field, ix) in pdatalup[centric]['fields']:
-                self.assertEqual(protein[field], str(expected[pacc][ix]))
+                self.assertEqual(set(str(row[field]).split(';')), set(str(expected[acc][ix]).split(',')))
+            self.assertEqual(row['Description'], expected[acc][2])
 
         psm_sql = ('SELECT {0}.{1}, pp.psm_id, ps.sequence '
                    'FROM {2} AS {0} '
