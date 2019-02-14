@@ -17,7 +17,8 @@ def add_protein_data(proteins, pgdb, headerfields, genecentric=False,
     is given then only output for that pool will be shown in the
     protein table."""
     proteindata = create_featuredata_map(pgdb, genecentric=genecentric,
-                                         fill_fun=add_record_to_proteindata,
+                                         psm_fill_fun=add_psms_to_proteindata,
+                                         pgene_fill_fun=add_protgene_to_protdata,
                                          count_fun=count_peps_psms,
                                          pool_to_output=pool_to_output,
                                          get_uniques=True)
