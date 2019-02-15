@@ -13,9 +13,12 @@ def add_protgene_to_protdata(proteindata, p_acc, pgenedata, genecentric, pgconte
         gene, assoc_id = pgenedata[4], pgenedata[5]
         pgcontent = pgcontentmap[p_acc]
         protid = None
-    proteindata[p_acc]['desc'] = desc
-    proteindata[p_acc]['pgcontent'] = pgcontent
-    proteindata[p_acc]['cov'] = cov
+    pdata = {'desc': desc, 'pgcontent': pgcontent, 'cov': cov}
+    try:
+        proteindata[p_acc].update(pdata)
+    except KeyError:
+        proteindata[p_acc] = pdata
+        proteindata[p_acc].update({'gene': set(), 'aid': set(), 'protein_ids': set()})
     proteindata[p_acc]['gene'].add(gene)
     proteindata[p_acc]['aid'].add(assoc_id)
     proteindata[p_acc]['protein_ids'].add(protid)
@@ -31,8 +34,7 @@ def add_psms_to_proteindata(proteindata, p_acc, pool, psmdata):
         try:
             proteindata[p_acc]['pools'][pool] = emptyinfo
         except KeyError:
-            proteindata[p_acc] = {'pools': {pool: emptyinfo},
-                                  'gene': set(), 'aid': set(), 'protein_ids': set()}
+            proteindata[p_acc].update({'pools': {pool: emptyinfo}})
         proteindata[p_acc]['pools'][pool]['psms'].add(psm_id)
     proteindata[p_acc]['pools'][pool]['peptides'].add(seq)
 
@@ -48,8 +50,16 @@ def create_featuredata_map(pgdb, psm_fill_fun, pgene_fill_fun, genecentric=False
         pgcontentmap = None
     else:
         pgcontentmap = get_proteingroup_content(pgdb)
-    protein_psms_data = pgdb.get_proteins_psms_for_map()
     proteindata = {}
+    for pgenedata in pgdb.get_protein_gene_symbol_for_map():
+        if is_peptides:
+            # include sequence (index 1 of record) to fill func
+            pgene_fill_fun(proteindata, pgenedata[1], pgenedata[0], 
+                    pgenedata, genecentric, pgcontentmap)
+        else:
+            pgene_fill_fun(proteindata, pgenedata[0], 
+                    pgenedata, genecentric, pgcontentmap)
+    protein_psms_data = pgdb.get_proteins_psms_for_map()
     psmdata = next(protein_psms_data)
     last_prot, last_pool = psmdata[0], psmdata[1]
     psm_fill_fun(proteindata, last_prot, last_pool, psmdata)
@@ -65,14 +75,6 @@ def create_featuredata_map(pgdb, psm_fill_fun, pgene_fill_fun, genecentric=False
     if count_fun is not None:
         count_fun(proteindata, last_prot, last_pool)
     
-    for pgenedata in pgdb.get_protein_gene_symbol_for_map():
-        if is_peptides:
-            # include sequence (index 1 of record) to fill func
-            pgene_fill_fun(proteindata, pgenedata[1], pgenedata[0], 
-                    pgenedata, genecentric, pgcontentmap)
-        else:
-            pgene_fill_fun(proteindata, pgenedata[0], 
-                    pgenedata, genecentric, pgcontentmap)
     if get_uniques:
         for no_uni, pool, pacc in pgdb.get_unique_peptide_nrs():
             proteindata[pacc]['pools'][pool]['unipeps'] = no_uni

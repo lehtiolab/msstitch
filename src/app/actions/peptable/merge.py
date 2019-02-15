@@ -153,7 +153,11 @@ def add_protgene_to_pepdata(peptidedata, seq, p_acc, dbrec, genecentric, pgconte
         gene, assoc_id = dbrec[4], dbrec[5]
         pgcontent = pgcontentmap[p_acc]
         protein = (p_acc, cov, desc, gene, assoc_id, len(pgcontent))
-    peptidedata[seq]['proteins'].add(protein)
+    try:
+        peptidedata[seq]['proteins'].add(protein)
+    except KeyError:
+        peptidedata[seq] = {'proteins': set()}
+        peptidedata[seq]['proteins'].add(protein)
 
 
 def add_psm_to_peptidedata(peptidedata, p_acc, pool, psmdata):
@@ -164,6 +168,5 @@ def add_psm_to_peptidedata(peptidedata, p_acc, pool, psmdata):
         try:
             peptidedata[seq]['psms'][pool] = set()
         except KeyError:
-            peptidedata[seq] = {'psms': {pool: set()},
-                                'proteins': set()}
+            peptidedata[seq].update({'psms': {pool: set()}})
         peptidedata[seq]['psms'][pool].add(psm_id)
