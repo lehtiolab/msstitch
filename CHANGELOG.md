@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.12] - 2018-12-07
+### Changed
+- Can now build lookups of multiple protein/gene/peptide tables without the nr-of-psms used for isobaric quant, to allow for other quant methods
+- Output merged protein/gene tables with all mappings. Whereas protein tables earlier also got gene IDs and gene names, the reverse now is also true
+### Fixed
+- Header names in merged tables are now not only "Protein accession" anymore, but in case of e.g. ENSEMBL gene IDs the table is called gene ID
+- Bug fixed, in merged tables we could get eg last line containing a protein with only NAs because it was not checked if the last merged feature was "empty" 
+
 ## [2.11] - 2018-12-07
 ### Fixed
 - Bug fixed, now possible to load protein/gene/peptide tables in sqlite without storing "number of quanted PSMs"
