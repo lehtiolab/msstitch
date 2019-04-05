@@ -56,3 +56,19 @@ class PepTablePlainDB(PepTableProteinCentricDB):
                   'psm.psm_id']
         firstjoin = ('protein_psm', 'pp', 'protein_acc')
         return self.get_proteins_psms('proteins', fields, firstjoin)
+
+    def get_protein_gene_symbol_for_map(self):
+        fields = ['p.protein_acc', 'pep.sequence', 'pd.description',
+                  'pcov.coverage']
+        sql = (
+                'SELECT {} FROM proteins AS p '
+                'JOIN protein_psm USING(protein_acc) '
+                'JOIN psms USING(psm_id) '
+                'JOIN peptide_sequences AS pep USING(pep_id) '
+                'LEFT OUTER JOIN prot_desc AS pd USING(protein_acc) '
+                'LEFT OUTER JOIN protein_coverage '
+                'AS pcov USING(protein_acc) '
+                )
+        sql = sql.format(','.join(fields))
+        cursor = self.get_cursor()
+        return cursor.execute(sql)

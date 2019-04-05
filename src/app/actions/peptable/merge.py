@@ -141,7 +141,7 @@ def count_psms(pdata):
 
 def add_protgene_to_pepdata(peptidedata, seq, p_acc, dbrec, genecentric, pgcontentmap=None):
     if genecentric == 'plain':
-        gene, desc, assoc_id, cov, pgcontent = None, None, None, None, None
+        gene, desc, assoc_id, cov, pgcontent = None, dbrec[2], None, dbrec[3], None
         protein = (p_acc, cov, desc, gene, assoc_id)
     elif genecentric:
         gene = p_acc

@@ -224,6 +224,7 @@ class TestBuild(basetests.PeptableTest):
         self.check(genecentric=True)
 
     def test_noncentric(self):
+        self.dbfile = os.path.join(self.fixdir, 'peptable_db_noncentric.sqlite')
         options = ['--fdr', '--pep', '--isobaric', '--precursor',
                    '--dbfile', self.dbfile, '--noncentric']
         self.run_command(options)
