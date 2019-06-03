@@ -19,12 +19,15 @@ def create_isobaric_quant_lookup(quantdb, specfn_consensus_els, channelmap):
                        quantdb.get_channelmap()}
     quants = []
     mzmlmap = quantdb.get_mzmlfile_map()
+    active_fn = None
     for specfn, consensus_el in specfn_consensus_els:
+        if specfn != active_fn:
+            active_fn = specfn
+            specmap = quantdb.get_specmap(mzmlmap[specfn], retention_time=True)
         rt = openmsreader.get_consxml_rt(consensus_el)
         rt = round(float(Decimal(rt) / 60), 12)
         qdata = get_quant_data(consensus_el)
-        spectra_id = quantdb.get_spectra_id(mzmlmap[specfn],
-                                            retention_time=rt)
+        spectra_id = specmap[rt]
         for channel_no in sorted(qdata.keys()):
             quants.append((spectra_id, channelmap_dbid[channel_no],
                            qdata[channel_no]))
