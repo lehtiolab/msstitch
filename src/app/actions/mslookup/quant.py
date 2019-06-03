@@ -73,12 +73,16 @@ def align_quants_psms(quantdb, rt_tolerance, mz_tolerance, mz_toltype):
     allspectra = quantdb.get_spectra_mz_sorted()
     featwindow_max_mz = -1
     spec_feat_store = []
+    active_fn = None
     for spec_id, fn_id, charge, mz, rt in allspectra:
+        if fn_id != active_fn:
+            active_fn = fn_id
+            fnfeats = quantdb.get_fnfeats(fn_id)
         minmz, maxmz = get_minmax(mz, mz_tolerance, mz_toltype)
         if maxmz > featwindow_max_mz:
-            feat_map, featwindow_max_mz = get_precursors_from_window(quantdb,
+            feat_map, featwindow_max_mz = get_precursors_from_window(fnfeats,
                                                                      minmz)
-        best_feat_id = align_psm(mz, rt, fn_id, charge, feat_map, rt_tolerance)
+        best_feat_id = align_psm(mz, rt, charge, feat_map, rt_tolerance)
         if not best_feat_id:
             continue
         spec_feat_store.append((spec_id, best_feat_id))
@@ -88,11 +92,11 @@ def align_quants_psms(quantdb, rt_tolerance, mz_tolerance, mz_toltype):
     quantdb.store_ms1_alignments(spec_feat_store)
 
 
-def align_psm(psm_mz, psm_rt, fn_id, charge, featmap, rttol):
+def align_psm(psm_mz, psm_rt, charge, featmap, rttol):
     minrt, maxrt = get_minmax(psm_rt, rttol / 60)
     alignments = {}
     try:
-        featlist = featmap[fn_id][charge]
+        featlist = featmap[charge]
     except KeyError:
         return False
     for feat_mz, feat_rt, feat_id in featlist:
@@ -105,22 +109,23 @@ def align_psm(psm_mz, psm_rt, fn_id, charge, featmap, rttol):
         return False
 
 
-def get_precursors_from_window(quantdb, minmz):
+def get_precursors_from_window(mzfeatmap, minmz):
     """Returns a dict of a specified amount of features from the
     ms1 quant database, and the highest mz of those features"""
-    featmap = {}
-    mz = False
-    features = quantdb.get_precursor_quant_window(FEATURE_ALIGN_WINDOW_AMOUNT,
-                                                  minmz)
-    for feat_id, fn_id, charge, mz, rt in features:
+    chargemap = {}
+    mz, amount_feats = False, 0
+    features = []
+    for mz, feat_id, charge, rt in mzfeatmap:
+        if mz < minmz:
+            continue
+        elif amount_feats > FEATURE_ALIGN_WINDOW_AMOUNT:
+            break
+        amount_feats += 1
         try:
-            featmap[fn_id][charge].append((mz, rt, feat_id))
+            chargemap[charge].append((mz, rt, feat_id))
         except KeyError:
-            try:
-                featmap[fn_id][charge] = [(mz, rt, feat_id)]
-            except KeyError:
-                featmap[fn_id] = {charge: [(mz, rt, feat_id)]}
-    return featmap, mz
+            chargemap[charge] = [(mz, rt, feat_id)]
+    return chargemap, mz
 
 
 def kronik_featparser(feature):

@@ -27,13 +27,13 @@ class QuantDB(ResultLookupInterface):
         cursor = self.get_cursor()
         return cursor.execute(sql), sqlfields
 
-    def get_precursor_quant_window(self, windowsize, minmz):
+
+    def get_fnfeats(self, fn_id):
         cursor = self.get_cursor()
         return cursor.execute(
-            'SELECT feature_id, mzmlfile_id, charge, mz, retention_time '
+            'SELECT mz, feature_id, charge, retention_time '
             'FROM ms1_quant '
-            'WHERE mz > ? ORDER BY mz '
-            'LIMIT ?', (minmz, windowsize))
+            'WHERE mzmlfile_id=?', (fn_id,))
 
     def get_all_quantmaps(self):
         """Returns all unique quant channels from lookup as list"""
@@ -99,4 +99,4 @@ class PrecursorQuantDB(QuantDB):
     def get_spectra_mz_sorted(self):
         return self.get_cursor().execute(
             'SELECT spectra_id, mzmlfile_id, charge, mz, retention_time '
-            'FROM mzml ORDER BY mz')
+            'FROM mzml ORDER BY mzmlfile_id,mz')
