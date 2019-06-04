@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.13] - 2019-06-04
+### Changed
+- Not querying SQLite for each feature/MS2 quant in msslookup quant, instead keep all data for given spectra file in memory, hopefully this speeds things up
+### Fixed
+- --noncentric flag for building combined output tables did not work if there was not a protein table in the lookup file. Now possible.
+
 ## [2.12] - 2018-12-07
 ### Changed
 - Can now build lookups of multiple protein/gene/peptide tables without the nr-of-psms used for isobaric quant, to allow for other quant methods
