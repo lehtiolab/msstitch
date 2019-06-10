@@ -60,6 +60,7 @@ def generate_xmltags(fn, returntag, ignore_tags, ns=None):
     for ac, el in etree.iterparse(fn):
         if el.tag == '{0}{1}'.format(xmlns, returntag):
             yield el
+            formatting.clear_el(el)
         elif el.tag in ns_ignore:
             formatting.clear_el(el)
 

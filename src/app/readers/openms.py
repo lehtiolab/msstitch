@@ -13,7 +13,7 @@ def mzmlfn_cons_el_generator(specfiles, consfiles):
     """Returns generation of tuples of spectra file and
     consensusXML quant elements"""
     return specfn_quant_generator(specfiles, consfiles, 'consensusElement',
-                                  ['consensusElementList'])
+                                  [])
 
 
 def mzmlfn_feature_generator(specfiles, featfiles):
