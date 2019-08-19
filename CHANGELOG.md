@@ -1,5 +1,9 @@
 # Changelog
 
+## [2.14] - 2019-08-19
+### Changed
+- Quicker XML parsing with big documents since there was non-cleared elements earlier
+
 ## [2.13] - 2019-06-04
 ### Changed
 - Not querying SQLite for each feature/MS2 quant in msslookup quant, instead keep all data for given spectra file in memory, hopefully this speeds things up
