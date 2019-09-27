@@ -13,6 +13,59 @@ class SearchspaceLookup(basetests.BaseTest):
     executable = 'msslookup'
 
 
+class TestDecoyFa(SearchspaceLookup):
+    command = 'makedecoy'
+    infilename = 'twoproteins.fasta'
+
+    def all_seqs_in_db(self, dbfn, sequences, seqtype):
+        db = sqlite3.connect(dbfn)
+        seqs_in_db = set()
+        for seq in sequences:
+            seqs_in_db.add(self.seq_in_db(db, seq, seqtype))
+        db.close()
+        return seqs_in_db == set([True])
+
+    def run_check(self, options):
+        options.extend(['-o', self.resultfn])
+        self.run_command(options)
+
+    def run_without_db(self, options):
+        self.resultfn = os.path.join(self.workdir, 'decoy.fa')
+        self.run_check(options)
+
+    def run_with_existing_db(self, options):
+        print(self.workdir)
+        self.resultfn = os.path.join(self.workdir, 'decoy.fa')
+        self.copy_db_to_workdir('decoycheck.sqlite', 'decoycheck.sqlite')
+        options.extend(['--dbfile', 'decoycheck.sqlite'])
+        self.run_check(options)
+
+    def check_seqs(self, checkfile):
+        checkfa = SeqIO.index(os.path.join(self.fixdir, checkfile), 'fasta')
+        resfa = SeqIO.index(self.resultfn, 'fasta')
+        for seqid, seq in resfa.items():
+            self.assertEqual(seq.seq, checkfa[seqid].seq)
+
+    def test_tryprev_predb(self):
+        self.run_with_existing_db(['--scramble', 'tryp_rev'])
+        self.check_seqs('decoy_tryprev_checked.fasta')
+
+    def test_tryprev_yesdb(self):
+        self.run_without_db(['--scramble', 'tryp_rev'])
+        self.check_seqs('decoy_tryprev_checked.fasta')
+
+    def test_tryprev_ignore_db(self):
+        self.run_without_db(['--scramble', 'tryp_rev', '--ignore-target-hits'])
+        self.check_seqs('decoy_tryprev.fasta')
+
+    def test_protrev_yesdb(self):
+        self.fail()
+
+    def test_protrev_nodb(self):
+        self.run_without_db(['--scramble', 'prot_rev'])
+        self.check_seqs('decoy_twoproteins.fasta')
+
+
 class TestTrypticLookup(SearchspaceLookup):
     command = 'seqspace'
 

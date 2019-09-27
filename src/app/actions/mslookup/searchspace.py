@@ -1,4 +1,5 @@
 from Bio import SeqIO
+from Bio.Seq import Seq
 PROTEIN_STORE_CHUNK_SIZE = 100000
 
 
@@ -21,14 +22,14 @@ def create_searchspace_wholeproteins(lookup, fastafn, minpeplen):
           'duplicate sequences)'.format(peptotal, len(prots)))
 
 
-def create_searchspace(lookup, fastafn, proline_cut=False,
-                       reverse_seqs=True, do_trypsinize=True):
+def create_searchspace(lookup, fastafn, proline_cut=False, reverse_seqs=True,
+        do_trypsinize=True, fully_tryptic=False):
     """Given a FASTA database, proteins are trypsinized and resulting peptides
     stored in a database or dict for lookups"""
     allpeps = []
     for record in SeqIO.parse(fastafn, 'fasta'):
         if do_trypsinize:
-            pepseqs = trypsinize(record.seq, proline_cut)
+            pepseqs = trypsinize(record.seq, proline_cut, fully_tryptic=fully_tryptic)
         else:
             pepseqs = [record.seq]
         # Exchange all leucines to isoleucines because MS can't differ
@@ -40,15 +41,16 @@ def create_searchspace(lookup, fastafn, proline_cut=False,
     # write remaining peps to sqlite
     lookup.write_peps(allpeps, reverse_seqs)
     lookup.index_peps(reverse_seqs)
-    lookup.close_connection()
+    #lookup.close_connection()
 
 
-def trypsinize(proseq, proline_cut=False):
-    # TODO add cysteine to non cut options, use enums
+def trypsinize(proseq, proline_cut=False, fully_tryptic=False):
+    # TODO add cysteine to non cut options
     """Trypsinize a protein sequence. Returns a list of peptides.
     Peptides include both cut and non-cut when P is behind a tryptic
     residue. Multiple consequent tryptic residues are treated as follows:
     PEPKKKTIDE - [PEPK, PEPKK, PEPKKK, KKTIDE, KTIDE, TIDE, K, K, KK ]
+    When fully_tryptic = True, the peptide would yield: [PEPK, K, K, TIDE]
     """
     outpeps = []
     currentpeps = ['']
@@ -62,7 +64,9 @@ def trypsinize(proseq, proline_cut=False):
             continue
         if aa in trypres and proseq[i + 1] not in noncutters:
             outpeps.extend(currentpeps)  # do actual cut by storing peptides
-            if proseq[i + 1] in trypres.union('P'):
+            if fully_tryptic:
+                currentpeps = ['']
+            elif proseq[i + 1] in trypres.union('P'):
                 # add new peptide to list if we are also to run on
                 currentpeps.append('')
             elif trypres.issuperset(currentpeps[-1]):
@@ -74,3 +78,40 @@ def trypsinize(proseq, proline_cut=False):
     if currentpeps != ['']:
         outpeps.extend(currentpeps)
     return outpeps
+
+
+def tryp_rev(seq, lookup):
+    segments = trypsinize(seq, fully_tryptic=True)
+    final_seq = []
+    for s in segments :
+        if len(s) > 1 :
+            if s[-1] in ['R', 'K']:
+                new_s = '{}{}'.format(s[:-1][::-1], s[-1])
+            else:
+                new_s = s[::-1]
+        else :
+            new_s = s
+        if lookup and lookup.check_seq_exists(new_s.replace('L', 'I'), amount_ntermwildcards=0):
+            continue
+        final_seq.append(new_s)
+    if final_seq:
+        seq.seq = Seq(''.join(final_seq))
+        seq.id = 'decoy_{}'.format(seq.name)
+    else:
+        seq = False
+    return seq
+
+
+def prot_rev(seq, lookup):
+    seq.id = 'decoy_{}'.format(seq.name)
+    seq = seq[::-1]
+    return seq
+
+
+def create_decoy_fa(fastafn, method, lookup):
+    outfasta = SeqIO.parse(fastafn, 'fasta')
+    if method == 'prot_rev':
+        outfasta = (prot_rev(x, lookup) for x in outfasta)
+    if method == 'tryp_rev':
+        outfasta = (tryp_rev(x, lookup) for x in outfasta)
+    return (x for x in outfasta if x) # do not yield empty records

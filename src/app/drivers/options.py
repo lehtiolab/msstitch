@@ -120,6 +120,20 @@ shared_options = {
                   'type': int, 'clarg': '--minlen', 'required': False},
 }
 
+sequence_options = {
+        'scramble': {
+            'driverattr': 'scramble', 'dest': 'scramble', 'clarg': '--scramble',
+            'help': 'Decoy scrambling method, use: "reverse": reverse peptides fully, '
+            '"tryp_rev": tryptic reverse, or "prot_rev": protein reverse.',
+            'required': False, 'default': 'tryp_rev'},
+        'ignoretarget': {
+            'driverattr': 'ignoretarget', 'dest': 'ignoretarget', 'clarg': '--ignore-target-hits',
+            'help': 'Do not remove tryptic peptides from sequence where they match target DB',
+            'required': False, 'action': 'store_const', 'const': True, 'default': False},
+
+        }
+
+
 mslookup_options = {
     'falloff': {'driverattr': 'falloff', 'dest': 'falloff',
                 'clarg': '--insourcefrag', 'default': False,

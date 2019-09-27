@@ -17,5 +17,6 @@ def main():
                proteinquant.ProteinQuantLookupDriver(),
                seqspace.SeqspaceLookupDriver(),
                seqspace.WholeProteinSeqspaceLookupDriver(),
+               seqspace.DecoySeqDriver(),
                ]
     startup.start_msstitch(drivers, sys.argv)

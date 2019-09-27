@@ -115,8 +115,11 @@ class BaseTest(unittest.TestCase):
             root.remove(child)
         return root
 
-    def copy_db_to_workdir(self, dbfn):
-        shutil.copy(os.path.join(self.fixdir, dbfn), self.resultfn)
+    def copy_db_to_workdir(self, dbfn, dst=False):
+        if not dst: 
+            shutil.copy(os.path.join(self.fixdir, dbfn), self.resultfn)
+        else:
+            shutil.copy(os.path.join(self.fixdir, dbfn), dst)
 
     def get_float_or_na(self, value):
         try:
