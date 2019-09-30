@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.15] - 2019-09-30
+### Added
+- Decoy creation tool to do protein-reverse and tryptic peptide reverse while shuffling decoy peptides that are identical to target peptides
+
+### Fixed
+- For some reason had missed that --noncentric also does not like having a coverage table (dependent on proteins, so irrelevant).
+
 ## [2.14] - 2019-08-19
 ### Changed
 - Quicker XML parsing with big documents since there was non-cleared elements earlier
