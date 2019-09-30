@@ -40,30 +40,37 @@ class TestDecoyFa(SearchspaceLookup):
         options.extend(['--dbfile', 'decoycheck.sqlite'])
         self.run_check(options)
 
-    def check_seqs(self, checkfile):
+    def check_seqs(self, checkfile, targetscrambling):
         checkfa = SeqIO.index(os.path.join(self.fixdir, checkfile), 'fasta')
         resfa = SeqIO.index(self.resultfn, 'fasta')
         for seqid, seq in resfa.items():
-            self.assertEqual(seq.seq, checkfa[seqid].seq)
+            try:
+                self.assertEqual(seq.seq, checkfa[seqid].seq)
+            except AssertionError:
+                if targetscrambling:
+                    self.assertEqual(seq.seq[-1], checkfa[seqid].seq[-1])
+                    self.assertEqual(set(seq.seq), set(checkfa[seqid].seq))
+                else:
+                    raise
 
     def test_tryprev_predb(self):
         self.run_with_existing_db(['--scramble', 'tryp_rev'])
-        self.check_seqs('decoy_tryprev_checked.fasta')
+        self.check_seqs('decoy_tryprev.fasta', targetscrambling=True)
 
     def test_tryprev_yesdb(self):
         self.run_without_db(['--scramble', 'tryp_rev'])
-        self.check_seqs('decoy_tryprev_checked.fasta')
+        self.check_seqs('decoy_tryprev.fasta', targetscrambling=True)
 
     def test_tryprev_ignore_db(self):
         self.run_without_db(['--scramble', 'tryp_rev', '--ignore-target-hits'])
-        self.check_seqs('decoy_tryprev.fasta')
+        self.check_seqs('decoy_tryprev.fasta', targetscrambling=True)
 
     def test_protrev_yesdb(self):
         self.fail()
 
     def test_protrev_nodb(self):
         self.run_without_db(['--scramble', 'prot_rev'])
-        self.check_seqs('decoy_twoproteins.fasta')
+        self.check_seqs('decoy_twoproteins.fasta', targetscrambling=True)
 
 
 class TestTrypticLookup(SearchspaceLookup):

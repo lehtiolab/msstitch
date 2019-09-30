@@ -1,5 +1,6 @@
 from Bio import SeqIO
 from Bio.Seq import Seq
+from random import shuffle
 PROTEIN_STORE_CHUNK_SIZE = 100000
 
 
@@ -89,11 +90,17 @@ def tryp_rev(seq, lookup):
                 new_s = '{}{}'.format(s[:-1][::-1], s[-1])
             else:
                 new_s = s[::-1]
+            shufflecount = 0
+            while lookup and lookup.check_seq_exists(new_s.replace('L', 'I'), amount_ntermwildcards=0) and shufflecount < 100:
+                nterm = list(new_s[:-1])
+                shuffle(nterm)
+                new_s = '{}{}'.format(''.join(nterm), new_s[-1])
+                shufflecount += 1
+            if shufflecount < 10: # max 10 shuffles, else discard decoy
+                final_seq.append(new_s)
         else :
             new_s = s
-        if lookup and lookup.check_seq_exists(new_s.replace('L', 'I'), amount_ntermwildcards=0):
-            continue
-        final_seq.append(new_s)
+            final_seq.append(s)
     if final_seq:
         seq.seq = Seq(''.join(final_seq))
         seq.id = 'decoy_{}'.format(seq.name)
