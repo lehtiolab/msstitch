@@ -34,7 +34,6 @@ class TestDecoyFa(SearchspaceLookup):
         self.run_check(options)
 
     def run_with_existing_db(self, options):
-        print(self.workdir)
         self.resultfn = os.path.join(self.workdir, 'decoy.fa')
         self.copy_db_to_workdir('decoycheck.sqlite', 'decoycheck.sqlite')
         options.extend(['--dbfile', 'decoycheck.sqlite'])
@@ -56,6 +55,10 @@ class TestDecoyFa(SearchspaceLookup):
     def test_tryprev_predb(self):
         self.run_with_existing_db(['--scramble', 'tryp_rev'])
         self.check_seqs('decoy_tryprev.fasta', targetscrambling=True)
+
+    def test_tryprev_predb_trypsinized(self):
+        self.run_with_existing_db(['--scramble', 'tryp_rev', '--notrypsin'])
+        self.check_seqs('decoy_pretryp.fasta', targetscrambling=True)
 
     def test_tryprev_yesdb(self):
         self.run_without_db(['--scramble', 'tryp_rev'])

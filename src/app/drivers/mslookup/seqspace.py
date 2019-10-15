@@ -24,9 +24,8 @@ class SeqspaceLookupDriver(base.LookupDriver):
     def set_options(self):
         super().set_options()
         self.options['--dbfile'].update({'required': False, 'default': None})
-        self.options.update(self.define_options(['falloff', 'proline',
-                                                 'trypsinize'],
-                                                mslookup_options))
+        self.options.update(self.define_options(['falloff', 'proline'], mslookup_options))
+        self.options.update(self.define_options(['trypsinize'], sequence_options))
 
     def create_lookup(self):
         preparation.create_searchspace(self.lookup, self.fn, self.proline,
@@ -76,13 +75,13 @@ class DecoySeqDriver(base.LookupDriver):
         super().set_options()
         self.options['--dbfile'].update({'required': False, 'default': None})
         self.options.update(self.define_options(
-            ['fn', 'outfile', 'scramble', 'ignoretarget'], sequence_options))
+            ['fn', 'outfile', 'scramble', 'ignoretarget', 'trypsinize'], sequence_options))
 
     def run(self):
         outfn = self.create_outfilepath(self.fn, self.outsuffix)
         if self.lookup is None and not self.ignoretarget:
             self.initialize_lookup('decoychecker.sqlite')
             preparation.create_searchspace(self.lookup, self.fn, reverse_seqs=False, fully_tryptic=True)
-        decoyfa = preparation.create_decoy_fa(self.fn, self.scramble, self.lookup)
+        decoyfa = preparation.create_decoy_fa(self.fn, self.scramble, self.lookup, self.trypsinize)
         with open(outfn, 'w') as fp:
             SeqIO.write(decoyfa, fp, 'fasta')

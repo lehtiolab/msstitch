@@ -36,12 +36,6 @@ shared_options = {
     'fasta': {'driverattr': 'fasta', 'dest': 'fasta',
               'type': 'file', 'help': 'FASTA sequence database',
               'required': False, 'default': False, 'clarg': '--fasta'},
-    'trypsinize': {'driverattr': 'trypsinize', 'dest': 'trypsinize',
-                   'clarg': '--notrypsin', 'required': False,
-                   'action': 'store_const', 'const': False, 'default': True,
-                   'help': 'Do not trypsinize. User is expected to deliver a'
-                   'pretrypsinized FASTA file'
-                   },
     'featuretype': {'driverattr': 'featuretype', 'dest': 'featuretype',
                     'help': 'Feature type to use for qvality. Can either be '
                     'psm or peptide.', 'clarg': '--feattype',
@@ -130,7 +124,12 @@ sequence_options = {
             'driverattr': 'ignoretarget', 'dest': 'ignoretarget', 'clarg': '--ignore-target-hits',
             'help': 'Do not remove tryptic peptides from sequence where they match target DB',
             'required': False, 'action': 'store_const', 'const': True, 'default': False},
-
+        'trypsinize': {'driverattr': 'trypsinize', 'dest': 'trypsinize',
+                   'clarg': '--notrypsin', 'required': False,
+                   'action': 'store_const', 'const': False, 'default': True,
+                   'help': 'Do not trypsinize. User is expected to deliver a'
+                   'pretrypsinized FASTA file'
+                   },
         }
 
 

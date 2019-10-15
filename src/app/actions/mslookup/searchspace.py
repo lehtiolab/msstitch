@@ -81,8 +81,11 @@ def trypsinize(proseq, proline_cut=False, fully_tryptic=False):
     return outpeps
 
 
-def tryp_rev(seq, lookup):
-    segments = trypsinize(seq, fully_tryptic=True)
+def tryp_rev(seq, lookup, do_trypsinize):
+    if do_trypsinize:
+        segments = trypsinize(seq, fully_tryptic=True)
+    else:
+        segments = [str(seq.seq)]
     final_seq = []
     for s in segments :
         if len(s) > 1 :
@@ -115,10 +118,10 @@ def prot_rev(seq, lookup):
     return seq
 
 
-def create_decoy_fa(fastafn, method, lookup):
+def create_decoy_fa(fastafn, method, lookup, is_trypsinized):
     outfasta = SeqIO.parse(fastafn, 'fasta')
     if method == 'prot_rev':
         outfasta = (prot_rev(x, lookup) for x in outfasta)
     if method == 'tryp_rev':
-        outfasta = (tryp_rev(x, lookup) for x in outfasta)
+        outfasta = (tryp_rev(x, lookup, is_trypsinized) for x in outfasta)
     return (x for x in outfasta if x) # do not yield empty records
