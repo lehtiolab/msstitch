@@ -36,6 +36,12 @@ class SearchSpaceDB(DatabaseConnection):
         self.index_column('pepix', 'protein_peptides', 'seq')
         self.conn.commit()
 
+    def get_multi_seq(self, seqs):
+        sql = 'SELECT seqs FROM known_searchspace WHERE seqs IN ({})'.format(
+                ', '.join('?' for _ in seqs))
+        cursor = self.get_cursor()
+        return set([x[0] for x in cursor.execute(sql, seqs)])
+
     def check_seq_exists(self, seq, amount_ntermwildcards):
         """Look up sequence in sqlite DB. Returns True or False if it
         exists (or not). When looking up a reversed DB with

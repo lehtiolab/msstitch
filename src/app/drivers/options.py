@@ -130,6 +130,10 @@ sequence_options = {
                    'help': 'Do not trypsinize. User is expected to deliver a'
                    'pretrypsinized FASTA file'
                    },
+        'miss_cleavage': {'driverattr': 'miss_cleavage', 'dest': 'miss_cleavage',
+                   'clarg': '--miscleav', 'required': False, 'type': int, 'default': 0,
+                   'help': 'Amount of missed cleavages to allow when trypsinizing',
+                   },
         }
 
 

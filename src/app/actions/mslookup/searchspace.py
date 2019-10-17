@@ -23,18 +23,20 @@ def create_searchspace_wholeproteins(lookup, fastafn, minpeplen):
           'duplicate sequences)'.format(peptotal, len(prots)))
 
 
-def create_searchspace(lookup, fastafn, proline_cut=False, reverse_seqs=True,
-        do_trypsinize=True, fully_tryptic=False):
+def create_searchspace(lookup, fastafn, minlen, proline_cut=False, reverse_seqs=True,
+        do_trypsinize=True, miss_cleavage=False):
     """Given a FASTA database, proteins are trypsinized and resulting peptides
     stored in a database or dict for lookups"""
     allpeps = []
     for record in SeqIO.parse(fastafn, 'fasta'):
         if do_trypsinize:
-            pepseqs = trypsinize(record.seq, proline_cut, fully_tryptic=fully_tryptic)
+            pepseqs = trypsinize(record.seq, proline_cut, miss_cleavage=miss_cleavage)
         else:
             pepseqs = [record.seq]
         # Exchange all leucines to isoleucines because MS can't differ
         pepseqs = [(str(pep).replace('L', 'I'),) for pep in pepseqs]
+        if minlen:
+            pepseqs = [pep for pep in pepseqs if len(pep[0]) >= minlen]
         allpeps.extend(pepseqs)
         if len(allpeps) > 1000000:  # more than x peps, write to SQLite
             lookup.write_peps(allpeps, reverse_seqs)
@@ -45,67 +47,73 @@ def create_searchspace(lookup, fastafn, proline_cut=False, reverse_seqs=True,
     #lookup.close_connection()
 
 
-def trypsinize(proseq, proline_cut=False, fully_tryptic=False):
+def trypsinize(proseq, proline_cut=False, miss_cleavage=0):
     # TODO add cysteine to non cut options
     """Trypsinize a protein sequence. Returns a list of peptides.
     Peptides include both cut and non-cut when P is behind a tryptic
-    residue. Multiple consequent tryptic residues are treated as follows:
-    PEPKKKTIDE - [PEPK, PEPKK, PEPKKK, KKTIDE, KTIDE, TIDE, K, K, KK ]
-    When fully_tryptic = True, the peptide would yield: [PEPK, K, K, TIDE]
+    residue. Number of missed cleavages can be specified.
     """
+    #if not set(str(proseq.seq[1:-1])).intersection('RK'):
+    #    return [str(proseq.seq)]
     outpeps = []
-    currentpeps = ['']
     trypres = set(['K', 'R'])
     noncutters = set()
     if not proline_cut:
         noncutters.add('P')
+    peptide = ''
     for i, aa in enumerate(proseq):
-        currentpeps = ['{0}{1}'.format(x, aa) for x in currentpeps]
+        peptide += aa
         if i == len(proseq) - 1:
-            continue
-        if aa in trypres and proseq[i + 1] not in noncutters:
-            outpeps.extend(currentpeps)  # do actual cut by storing peptides
-            if fully_tryptic:
-                currentpeps = ['']
-            elif proseq[i + 1] in trypres.union('P'):
-                # add new peptide to list if we are also to run on
-                currentpeps.append('')
-            elif trypres.issuperset(currentpeps[-1]):
-                currentpeps = [x for x in currentpeps if trypres.issuperset(x)]
-                currentpeps.append('')
-            else:
-                currentpeps = ['']
-
-    if currentpeps != ['']:
-        outpeps.extend(currentpeps)
+            outpeps.append(peptide)
+        elif aa in trypres and proseq[i + 1] not in noncutters:
+            outpeps.append(peptide)  # do actual cut by storing peptides
+            peptide = ''
+        
+    ft_pep_amount = len(outpeps)
+    for i in range(1, miss_cleavage + 1):
+        for j, pep in enumerate([x for x in outpeps]):
+            if j + i < ft_pep_amount:
+                outpeps.append(''.join([x for x in (outpeps[j:j + i + 1])]))
     return outpeps
 
 
-def tryp_rev(seq, lookup, do_trypsinize):
+def tryp_rev(seq, lookup, do_trypsinize, miss_cleavage, minlen):
     if do_trypsinize:
-        segments = trypsinize(seq, fully_tryptic=True)
+        segments = trypsinize(seq, miss_cleavage=miss_cleavage)
     else:
         segments = [str(seq.seq)]
-    final_seq = []
-    for s in segments :
+    final_seq = {}
+    decoy_segs = {}
+    for i, s in enumerate(segments):
         if len(s) > 1 :
             if s[-1] in ['R', 'K']:
-                new_s = '{}{}'.format(s[:-1][::-1], s[-1])
+                decoy_segs[i] = '{}{}'.format(s[:-1][::-1], s[-1])
             else:
-                new_s = s[::-1]
-            shufflecount = 0
-            while lookup and lookup.check_seq_exists(new_s.replace('L', 'I'), amount_ntermwildcards=0) and shufflecount < 100:
-                nterm = list(new_s[:-1])
-                shuffle(nterm)
-                new_s = '{}{}'.format(''.join(nterm), new_s[-1])
-                shufflecount += 1
-            if shufflecount < 10: # max 10 shuffles, else discard decoy
-                final_seq.append(new_s)
-        else :
-            new_s = s
-            final_seq.append(s)
-    if final_seq:
-        seq.seq = Seq(''.join(final_seq))
+                decoy_segs[i] = s[::-1]
+        else:
+            decoy_segs[i] = s
+    if lookup is not None:
+        shufflecount = 0
+        targets, tests = True, {k:v for k,v in decoy_segs.items()}
+        if minlen:
+            tests = {k:v for k,v in tests.items() if len(v) >= minlen}
+        while targets and shufflecount < 10:
+            targets = lookup.get_multi_seq(list(tests.values()))
+            shuffled = 0
+            for i,s in [(k,v) for k,v in tests.items()]:
+                if s not in targets:
+                    decoy_segs[i] = tests.pop(i)
+                else:
+                    nterm = list(s[:-1])
+                    shuffle(nterm)
+                    tests[i] = '{}{}'.format(''.join(nterm), s[-1])
+                    shuffled = 1
+            shufflecount += shuffled
+        # discard max shuffled peptides
+        if shufflecount >= 10:
+            decoy_segs.update({i: '' for i in tests.keys()})
+    if decoy_segs:
+        seq.seq = Seq(''.join([decoy_segs[i] for i in range(0, len(decoy_segs))]))
         seq.id = 'decoy_{}'.format(seq.name)
     else:
         seq = False
@@ -118,10 +126,10 @@ def prot_rev(seq, lookup):
     return seq
 
 
-def create_decoy_fa(fastafn, method, lookup, is_trypsinized):
+def create_decoy_fa(fastafn, method, lookup, is_trypsinized, miss_cleavage, minlen):
     outfasta = SeqIO.parse(fastafn, 'fasta')
     if method == 'prot_rev':
         outfasta = (prot_rev(x, lookup) for x in outfasta)
     if method == 'tryp_rev':
-        outfasta = (tryp_rev(x, lookup, is_trypsinized) for x in outfasta)
+        outfasta = (tryp_rev(x, lookup, is_trypsinized, miss_cleavage, minlen) for x in outfasta)
     return (x for x in outfasta if x) # do not yield empty records
