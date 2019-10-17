@@ -68,9 +68,6 @@ class TestDecoyFa(SearchspaceLookup):
         self.run_without_db(['--scramble', 'tryp_rev', '--ignore-target-hits'])
         self.check_seqs('decoy_tryprev.fasta', targetscrambling=True)
 
-    def test_protrev_yesdb(self):
-        self.fail()
-
     def test_protrev_nodb(self):
         self.run_without_db(['--scramble', 'prot_rev'])
         self.check_seqs('decoy_twoproteins.fasta', targetscrambling=True)
