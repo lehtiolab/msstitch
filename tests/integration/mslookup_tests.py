@@ -53,7 +53,7 @@ class TestDecoyFa(SearchspaceLookup):
                     raise
 
     def test_tryprev_predb(self):
-        self.run_with_existing_db(['--scramble', 'tryp_rev'])
+        self.run_with_existing_db(['--scramble', 'tryp_rev', '--maxshuffle', '10'])
         self.check_seqs('decoy_tryprev.fasta', targetscrambling=True)
 
     def test_tryprev_predb_trypsinized(self):
@@ -92,9 +92,10 @@ class TestTrypticLookup(SearchspaceLookup):
             options = []
         with open(os.path.join(self.fixdir, 'peptides_trypsinized.yml')) as fp:
             tryp_sequences = yaml.load(fp)
-        sequences = tryp_sequences['fully_tryptic']
         if seqtype is not None:
-            sequences.extend(tryp_sequences[seqtype])
+            sequences = tryp_sequences[seqtype]
+        else:
+            sequences = tryp_sequences['fully_tryptic']
         self.run_command(options)
         self.assertTrue(self.all_seqs_in_db(self.resultfn,
                                             sequences, seqtype))
