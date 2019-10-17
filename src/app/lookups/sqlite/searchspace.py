@@ -15,7 +15,7 @@ class SearchSpaceDB(DatabaseConnection):
             peps = [(x[0][::-1],) for x in peps]
         cursor = self.get_cursor()
         cursor.executemany(
-            'INSERT INTO known_searchspace(seqs) VALUES (?)', peps)
+            'INSERT OR IGNORE INTO known_searchspace(seqs) VALUES (?)', peps)
         self.conn.commit()
 
     def index_peps(self, reverse_seqs):
@@ -23,7 +23,7 @@ class SearchSpaceDB(DatabaseConnection):
             self.index_column('reverse_seqs_index', 'known_searchspace',
                               'seqs COLLATE NOCASE')
         else:
-            self.index_column('reverse_seqs_index', 'known_searchspace',
+            self.index_column('sequence_index', 'known_searchspace',
                               'seqs')
 
     def store_pep_proteins(self, pepproteins):
