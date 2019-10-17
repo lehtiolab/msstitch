@@ -130,6 +130,11 @@ sequence_options = {
                    'help': 'Do not trypsinize. User is expected to deliver a'
                    'pretrypsinized FASTA file'
                    },
+        'max_shuffle': {'driverattr': 'max_shuffle', 'dest': 'max_shuffle',
+                   'clarg': '--maxshuffle', 'required': False, 'type': int, 'default': 10,
+                   'help': 'Amount of times to attempt to shuffle a decoy reversed peptide '
+                   'to make it not match target peptides, before discarding it.'
+                   ' Used when using tryptic peptide reversal (not protein reversal)'},
         'miss_cleavage': {'driverattr': 'miss_cleavage', 'dest': 'miss_cleavage',
                    'clarg': '--miscleav', 'required': False, 'type': int, 'default': 0,
                    'help': 'Amount of missed cleavages to allow when trypsinizing',

@@ -77,7 +77,7 @@ def trypsinize(proseq, proline_cut=False, miss_cleavage=0):
     return outpeps
 
 
-def tryp_rev(seq, lookup, do_trypsinize, miss_cleavage, minlen):
+def tryp_rev(seq, lookup, do_trypsinize, miss_cleavage, minlen, max_shuffle):
     if do_trypsinize:
         segments = trypsinize(seq, miss_cleavage=miss_cleavage)
     else:
@@ -92,12 +92,13 @@ def tryp_rev(seq, lookup, do_trypsinize, miss_cleavage, minlen):
                 decoy_segs[i] = s[::-1]
         else:
             decoy_segs[i] = s
+    nr_discarded = 0
     if lookup is not None:
         shufflecount = 0
         targets, tests = True, {k:v for k,v in decoy_segs.items()}
         if minlen:
             tests = {k:v for k,v in tests.items() if len(v) >= minlen}
-        while targets and shufflecount < 10:
+        while targets and shufflecount < max_shuffle:
             targets = lookup.get_multi_seq(list(tests.values()))
             shuffled = 0
             for i,s in [(k,v) for k,v in tests.items()]:
@@ -110,14 +111,15 @@ def tryp_rev(seq, lookup, do_trypsinize, miss_cleavage, minlen):
                     shuffled = 1
             shufflecount += shuffled
         # discard max shuffled peptides
-        if shufflecount >= 10:
+        if shufflecount >= max_shuffle:
             decoy_segs.update({i: '' for i in tests.keys()})
+            nr_discarded += len(tests.keys())
     if decoy_segs:
         seq.seq = Seq(''.join([decoy_segs[i] for i in range(0, len(decoy_segs))]))
         seq.id = 'decoy_{}'.format(seq.name)
     else:
         seq = False
-    return seq
+    return seq, nr_discarded
 
 
 def prot_rev(seq, lookup):
@@ -126,10 +128,15 @@ def prot_rev(seq, lookup):
     return seq
 
 
-def create_decoy_fa(fastafn, method, lookup, is_trypsinized, miss_cleavage, minlen):
+def create_decoy_fa(fastafn, method, lookup, is_trypsinized, miss_cleavage, minlen, max_shuffle):
     outfasta = SeqIO.parse(fastafn, 'fasta')
     if method == 'prot_rev':
-        outfasta = (prot_rev(x, lookup) for x in outfasta)
+        return (prot_rev(x, lookup) for x in outfasta)
     if method == 'tryp_rev':
-        outfasta = (tryp_rev(x, lookup, is_trypsinized, miss_cleavage, minlen) for x in outfasta)
-    return (x for x in outfasta if x) # do not yield empty records
+        discarded = 0
+        outtryp = (tryp_rev(x, lookup, is_trypsinized, miss_cleavage, minlen, 
+            max_shuffle) for x in outfasta)
+        for seq, nr_discarded in outtryp:
+            discarded += nr_discarded
+            yield seq
+        print('Discarded {} peptides that matched target DB and could not be shuffled'.format(nr_discarded))

@@ -74,14 +74,15 @@ class DecoySeqDriver(base.LookupDriver):
     def set_options(self):
         super().set_options()
         self.options['--dbfile'].update({'required': False, 'default': None})
-        self.options.update(self.define_options(
-            ['fn', 'outfile', 'scramble', 'ignoretarget', 'trypsinize', 'miss_cleavage', 'minlength'], sequence_options))
+        self.options.update(self.define_options([
+            'fn', 'outfile', 'scramble', 'ignoretarget', 'trypsinize', 
+            'miss_cleavage', 'minlength', 'max_shuffle'], sequence_options))
 
     def run(self):
         outfn = self.create_outfilepath(self.fn, self.outsuffix)
         if self.lookup is None and not self.ignoretarget:
             self.initialize_lookup('decoychecker.sqlite')
             preparation.create_searchspace(self.lookup, self.fn, self.minlength, reverse_seqs=False, miss_cleavage=self.miss_cleavage)
-        decoyfa = preparation.create_decoy_fa(self.fn, self.scramble, self.lookup, self.trypsinize, self.miss_cleavage, self.minlength)
+        decoyfa = preparation.create_decoy_fa(self.fn, self.scramble, self.lookup, self.trypsinize, self.miss_cleavage, self.minlength, self.max_shuffle)
         with open(outfn, 'w') as fp:
             SeqIO.write(decoyfa, fp, 'fasta')
