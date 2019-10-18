@@ -12,7 +12,7 @@ class SearchSpaceDB(DatabaseConnection):
         This way we can still use the index.
         """
         if reverse_seqs:
-            peps = [(x[0][::-1],) for x in peps]
+            peps = ((x[0][::-1],) for x in peps)
         cursor = self.get_cursor()
         cursor.executemany(
             'INSERT OR IGNORE INTO known_searchspace(seqs) VALUES (?)', peps)
