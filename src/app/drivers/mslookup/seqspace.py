@@ -86,3 +86,28 @@ class DecoySeqDriver(base.LookupDriver):
         decoyfa = preparation.create_decoy_fa(self.fn, self.scramble, self.lookup, self.trypsinize, self.miss_cleavage, self.minlength, self.max_shuffle)
         with open(outfn, 'w') as fp:
             SeqIO.write(decoyfa, fp, 'fasta')
+
+
+class TrypsinizeDriver(base.LookupDriver):
+    outsuffix = '_tryp.fa'
+    command = 'trypsinize'
+    commandhelp = """Trypsinize a FASTA file"""
+
+    def __init__(self):
+        super().__init__()
+        self.infiletype = 'FASTA'
+
+    def set_options(self):
+        super().set_options()
+        self.options['--dbfile'].update({'required': False, 'default': None})
+        self.options.update(self.define_options([
+            'fn', 'outfile', 'miss_cleavage', 'minlength', 'proline'], sequence_options))
+
+    def run(self):
+        outfn = self.create_outfilepath(self.fn, self.outsuffix)
+        with open(self.fn) as fp, open(outfn, 'w') as wfp:
+            seqs = SeqIO.parse(fp, 'fasta')
+            decoyfa = preparation.create_trypsinized(seqs, self.proline, self.miss_cleavage, self.minlength)
+            SeqIO.write(decoyfa, wfp, 'fasta')
+
+

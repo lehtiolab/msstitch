@@ -18,5 +18,6 @@ def main():
                seqspace.SeqspaceLookupDriver(),
                seqspace.WholeProteinSeqspaceLookupDriver(),
                seqspace.DecoySeqDriver(),
+               seqspace.TrypsinizeDriver(),
                ]
     startup.start_msstitch(drivers, sys.argv)

@@ -50,6 +50,16 @@ def create_searchspace(lookup, infile, minlen, proline_cut=False, reverse_seqs=T
     #lookup.close_connection()
 
 
+def create_trypsinized(proteins, proline_cut=False, miss_cleavage=0, minlen=0):
+    for proseq in proteins:
+        outpeps = trypsinize(str(proseq.seq), proline_cut, miss_cleavage)
+        if minlen:
+            outpeps = [pep for pep in outpeps if len(pep) >= minlen]
+        for pep in outpeps:
+            trypseq = SeqIO.SeqRecord(Seq(pep), id=proseq.id, name=proseq.name, description='')
+            yield trypseq
+
+
 def trypsinize(proseq, proline_cut=False, miss_cleavage=0):
     # TODO add cysteine to non cut options
     """Trypsinize a protein sequence. Returns a list of peptides.
