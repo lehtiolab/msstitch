@@ -389,6 +389,7 @@ class DatabaseConnection(object):
         cur.execute('PRAGMA FOREIGN_KEYS=ON')
         cur.execute('PRAGMA cache_size=10000')
         cur.execute('PRAGMA journal_mode=MEMORY')
+        cur.execute('PRAGMA synchronous=OFF')
 
     def get_cursor(self):
         """Quickly get cursor, abstracting connection"""
