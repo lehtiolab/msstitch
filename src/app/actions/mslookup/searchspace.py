@@ -135,7 +135,7 @@ def tryp_rev(seq, lookup, do_trypsinize, miss_cleavage, minlen, max_shuffle):
     return seq, nr_discarded
 
 
-def prot_rev(seq, lookup):
+def prot_rev(seq):
     seq.id = 'decoy_{}'.format(seq.name)
     seq = seq[::-1]
     return seq
@@ -144,7 +144,7 @@ def prot_rev(seq, lookup):
 def create_decoy_fa(fastafn, method, lookup, is_trypsinized, miss_cleavage, minlen, max_shuffle):
     outfasta = SeqIO.parse(fastafn, 'fasta')
     if method == 'prot_rev':
-        return (prot_rev(x, lookup) for x in outfasta)
+        return (prot_rev(x) for x in outfasta)
     if method == 'tryp_rev':
         discarded = 0
         outtryp = (tryp_rev(x, lookup, is_trypsinized, miss_cleavage, minlen, 
