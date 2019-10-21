@@ -13,6 +13,41 @@ class SearchspaceLookup(basetests.BaseTest):
     executable = 'msslookup'
 
 
+class TestTrypsinize(SearchspaceLookup):
+    suffix = '_tryp.fa'
+    command = 'trypsinize'
+    infilename = 'proteins.fasta'
+
+    def run_case(self, minlen, cutproline, miscleav):
+        options = ['-o', self.resultfn]
+        seqtype = 'fully_tryptic'
+        if minlen:
+            options.extend(['--minlen', str(minlen)])
+        if cutproline:
+            options.extend(['--cutproline'])
+            seqtype = 'proline_cuts'
+        if miscleav:
+            options.extend(['--miscleav', str(miscleav)])
+            seqtype = 'miscleav'
+        cmd = self.run_command(options)
+        with open(os.path.join(self.fixdir, 'peptides_trypsinized.yml')) as fp:
+            tryp_sequences = yaml.load(fp)
+        for rec in SeqIO.parse(self.resultfn, 'fasta'):
+            self.assertEqual(tryp_sequences[seqtype][str(rec.seq)], rec.id)
+            if minlen:
+                self.assertGreaterEqual(len(str(rec.seq)), minlen)
+
+
+    def test_fullytryptic(self):
+        self.run_case(8, False, False)
+
+    def test_prolinecut(self):
+        self.run_case(False, True, False)
+
+    def test_miss_cleavage(self):
+        self.run_case(False, False, 1)
+
+
 class TestDecoyFa(SearchspaceLookup):
     command = 'makedecoy'
     infilename = 'twoproteins.fasta'
