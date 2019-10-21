@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.16] - 2019-10-21
+### Added
+- Trypsinization tool `msslookup trypsinize` to create trypsinized FASTA from proteins
+- Biomart table header addition of "Gene stable ID" to comply with latest
+- Params `--maxshuffle`, `--minlen`, and `--notrypsin` added to `msslookup seqspace` for more flexible/quicker operation if needed
+
+### Changed
+- Faster SQL for known_searchspace by UNIQUE constraint, accept text files also instead of .fa, 
+
 ## [2.15] - 2019-09-30
 ### Added
 - Decoy creation tool to do protein-reverse and tryptic peptide reverse while shuffling decoy peptides that are identical to target peptides
