@@ -399,12 +399,13 @@ class DatabaseConnection(object):
         """Close connection to db, abstracts connection object"""
         self.conn.close()
 
-    def index_column(self, index_name, table, column):
+    def index_column(self, index_name, table, column, unique=False):
         """Called by interfaces to index specific column in table"""
         cursor = self.get_cursor()
+        unique = 'unique' if unique else ''
         try:
             cursor.execute(
-                'CREATE INDEX {0} on {1}({2})'.format(index_name, table, column))
+                'CREATE {3} INDEX {0} on {1}({2})'.format(index_name, table, column, unique))
         except sqlite3.OperationalError as error:
             print(error)
             print('Skipping index creation and assuming it exists already')

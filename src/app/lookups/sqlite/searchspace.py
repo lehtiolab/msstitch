@@ -21,10 +21,10 @@ class SearchSpaceDB(DatabaseConnection):
     def index_peps(self, reverse_seqs):
         if reverse_seqs:
             self.index_column('reverse_seqs_index', 'known_searchspace',
-                              'seqs COLLATE NOCASE')
+                              'seqs COLLATE NOCASE', unique=True)
         else:
             self.index_column('sequence_index', 'known_searchspace',
-                              'seqs')
+                              'seqs', unique=True)
 
     def store_pep_proteins(self, pepproteins):
         cursor = self.get_cursor()
