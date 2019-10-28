@@ -74,7 +74,7 @@ class TestDecoyFa(SearchspaceLookup):
         options.extend(['--dbfile', 'decoycheck.sqlite'])
         self.run_check(options)
 
-    def check_seqs(self, checkfile, targetscrambling):
+    def check_seqs(self, checkfile, targetscrambling=False):
         checkfa = SeqIO.index(os.path.join(self.fixdir, checkfile), 'fasta')
         resfa = SeqIO.index(self.resultfn, 'fasta')
         for seqid, seq in resfa.items():
@@ -103,9 +103,9 @@ class TestDecoyFa(SearchspaceLookup):
         self.run_without_db(['--scramble', 'tryp_rev', '--ignore-target-hits'])
         self.check_seqs('decoy_tryprev.fasta', targetscrambling=True)
 
-    def test_protrev_nodb(self):
+    def test_protrev(self):
         self.run_without_db(['--scramble', 'prot_rev'])
-        self.check_seqs('decoy_twoproteins.fasta', targetscrambling=True)
+        self.check_seqs('decoy_twoproteins.fasta')
 
 
 class TestTrypticLookup(SearchspaceLookup):
