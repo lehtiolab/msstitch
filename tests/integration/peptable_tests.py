@@ -102,6 +102,14 @@ class TestModelQvals(basetests.PeptableTest):
                                    10 ** (float(line[score]) *
                                           slope + intercept))
 
+    def test_modelqvals_none_included(self):
+        score, fdr = 'percolator svm-score', '^q-value'
+        options = ['--scorecolpattern', score, '--fdrcolpattern', fdr, '--qvalthreshold', '1']
+        self.run_command(options)
+        for line in self.tsv_generator(self.resultfn):
+            self.assertEqual(line[fdr[1:] + ' (linear modeled)'], 'NA')
+
+
 
 class TestBuild(basetests.PeptableTest):
     command = 'build'

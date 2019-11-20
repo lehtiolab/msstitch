@@ -440,4 +440,9 @@ peptable_options.update({
                     'data in output, but use gene names instead. '
                     'These need to have been stored when '
                     'creating a PSM lookup.'},
+    'qvalthreshold': {'driverattr': 'qvalthreshold', 'dest': 'qvalthreshold',
+        'type': float, 'clarg': '--qvalthreshold', 'help': 'Specifies the '
+        'inclusion threshold for q-values to fit a linear model to. Any scores/'
+        'q-values below this threshold will not be used.', 'default': 10e-4,
+        'required': False},
 })
