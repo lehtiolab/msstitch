@@ -1,8 +1,9 @@
+from math import log
+
 from app.dataformats import peptable as peptabledata
 from app.dataformats import prottable as prottabledata
 from app.readers import tsv as reader
 from app.actions.peptable.base import evaluate_peptide
-from math import log
 
 
 def generate_proteins(pepfn, proteins, pepheader, scorecol, minlog,
@@ -26,12 +27,11 @@ def generate_proteins(pepfn, proteins, pepheader, scorecol, minlog,
                                  protein_peptides.values()
                                  if pep['score'] > 0])
         except ValueError:
-            import sys
-            sys.stderr.write('Cannot find score of type {} which is above 0. '
-                             'Only scores above zero can have a -log value. '
-                             'Exiting.'.format(scorecol))
-            sys.exit(1)
-        nextbestscore = -log(nextbestscore, 10)
+            print('WARNING: Cannot find score of type {} which is above 0. '
+                    'Only scores above zero can have a -log value.'.format(scorecol))
+            nextbestscore = -log(1e-06, 10) # 1 decoy in a million, fake value
+        else:
+            nextbestscore = -log(nextbestscore, 10)
     for protein in proteins:
         try:
             peptide = protein_peptides[protein[prottabledata.HEADER_PROTEIN]]

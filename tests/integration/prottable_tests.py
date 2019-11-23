@@ -272,17 +272,19 @@ class TestBestpeptide(basetests.ProttableTest):
     command = 'bestpeptide'
     suffix = '_bestpep.tsv'
 
-    def check(self):
+    def check(self, top_psms):
         # FIXME what to do if a qvalue is at exactly 0? no log possible.
         # uglyfix here is to use PEP to avoid that scenario but the real
         # code has a nextbest qvalue for that.
-        top_psms = self.get_top_psms(self.pepfile, 'Peptide sequence',
-                                     'PEP', lowerbetter=True)
         qscores = {prot: -log(min([x for x in psms.values()]), 10)
                    for prot, psms in top_psms.items()}
         for protein in self.tsv_generator(self.resultfn):
-            res = float(protein['Q-score best peptide'])
-            self.assertEqual(qscores[protein['Protein ID']], res)
+            try:
+                res = float(protein['Q-score best peptide'])
+            except ValueError:
+                self.assertEqual(protein['Q-score best peptide'], 'NA')
+            else:
+                self.assertEqual(qscores[protein['Protein ID']], res)
 
     def setUp(self):
         super().setUp()
@@ -292,19 +294,33 @@ class TestBestpeptide(basetests.ProttableTest):
         options = ['--logscore', '--scorecolpattern', '^PEP',
                    '--peptable', self.pepfile]
         self.run_command(options)
-        self.check()
+        top_psms = self.get_top_psms(self.pepfile, 'Peptide sequence',
+                                     'PEP', lowerbetter=True)
+        self.check(top_psms)
+
+    def test_only_NA(self):
+        options = ['--logscore', '--scorecolpattern', '^FragMeth',
+                   '--peptable', self.pepfile]
+        self.run_command(options)
+        top_psms = self.get_top_psms(self.pepfile, 'Peptide sequence',
+                                     'FragMethod', lowerbetter=True)
+        self.check(top_psms)
 
     def test_protcol(self):
         options = ['--logscore', '--scorecolpattern', '^PEP',
                    '--peptable', self.pepfile, '--protcol', '15']
         self.run_command(options)
-        self.check()
+        top_psms = self.get_top_psms(self.pepfile, 'Peptide sequence',
+                                     'PEP', lowerbetter=True)
+        self.check(top_psms)
 
     def test_protcol_pattern(self):
         options = ['--logscore', '--scorecolpattern', '^PEP',
                    '--peptable', self.pepfile, '--protcolpattern', 'Master']
         self.run_command(options)
-        self.check()
+        top_psms = self.get_top_psms(self.pepfile, 'Peptide sequence',
+                                     'PEP', lowerbetter=True)
+        self.check(top_psms)
 
 
 class TestProtFDR(basetests.ProttableTest):
