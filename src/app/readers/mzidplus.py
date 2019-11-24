@@ -3,16 +3,6 @@
 from app.readers import xml as basereader
 from app.readers import ml
 
-P_SVM = ('percolator:score', 'percolator svm-score')
-P_PSMP = ('percolator:psm_p_value', 'PSM p-value')
-P_PSMQ = ('percolator:psm_q_value', 'PSM q-value')
-P_PSMPEP = ('percolator:psm_pep', 'PSM-PEP')
-P_PEPTIDEQ = ('percolator:peptide_q_value', 'peptide q-value')
-P_PEPTIDEPEP = ('percolator:peptide_pep', 'peptide PEP')
-
-PERCO_ORDER = [P_SVM, P_PSMP, P_PSMQ, P_PSMPEP, P_PEPTIDEQ, P_PEPTIDEPEP]
-PERCO_HEADERMAP = {x[0]: x[1] for x in PERCO_ORDER}
-
 
 def get_mzid_namespace(mzidfile):
     return basereader.get_namespace_from_top(mzidfile, None)
@@ -110,25 +100,3 @@ def get_specresult_scan_nr(result):
 
 def get_specresult_mzml_id(specresult):
     return specresult.attrib['spectraData_ref']
-
-
-def get_specidentitem_percolator_data(item, xmlns):
-    """Loop through SpecIdentificationItem children. Find
-    percolator data by matching to a dict lookup. Return a
-    dict containing percolator data"""
-    percomap = {'{0}userParam'.format(xmlns): PERCO_HEADERMAP, }
-    percodata = {}
-    for child in item:
-        try:
-            percoscore = percomap[child.tag][child.attrib['name']]
-        except KeyError:
-            continue
-        else:
-            percodata[percoscore] = child.attrib['value']
-    outkeys = [y for x in list(percomap.values()) for y in list(x.values())]
-    for key in outkeys:
-        try:
-            percodata[key]
-        except KeyError:
-            percodata[key] = 'NA'
-    return percodata

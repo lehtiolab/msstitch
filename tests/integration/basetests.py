@@ -220,7 +220,7 @@ class MzidTSVBaseTest(BaseTest):
                 row = [record]
                 rownr += 1
 
-    def check_results(self, checkfields, expected_values):
+    def check_results_sql(self, checkfields, expected_values):
         for resultvals, exp_vals in zip(self.get_values(checkfields),
                                         expected_values):
             for resultval, expectval in zip(resultvals, exp_vals):

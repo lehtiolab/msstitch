@@ -22,10 +22,8 @@ class TestPSM2Peptable(basetests.PeptableTest):
         striplist.extend(['Files/scans for peptide', 'MS1 area',
                           'MS1 area (highest of all PSMs)'])
         for peptide in self.tsv_generator(self.resultfn):
-            for newkey, oldkey in zip(['Peptide', 'peptide PEP',
-                                       'peptide q-value', 'Protein'],
-                                      ['Peptide sequence', 'PEP', 'q-value',
-                                       'Protein(s)']):
+            for newkey, oldkey in zip(['Peptide', 'peptide q-value', 'Protein'],
+                                      ['Peptide sequence', 'q-value', 'Protein(s)']):
                 peptide[newkey] = peptide.pop(oldkey)
             mapping_psms = psms[peptide['Peptide']]
             toppsm = mapping_psms[str(max([float(score) for score
@@ -143,8 +141,8 @@ class TestBuild(basetests.PeptableTest):
                'JOIN peptide_fdr AS pf USING(pep_id) '
                'JOIN peptide_pep AS pp USING(pep_id) '
                )
-        self.check_build_values(sql, ['MS1 area (highest of all PSMs)',
-                                      'q-value', 'PEP'], 'Peptide sequence')
+        self.check_build_values(sql, ['MS1 area (highest of all PSMs)', 'q-value', ],
+                'Peptide sequence')
 
     def check_genes(self):
         # FIXME get a db WITHOUT protein groups for genecentric peptides

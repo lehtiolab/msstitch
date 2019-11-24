@@ -318,8 +318,11 @@ mzidtsv_options = {
                     'to a new table, or when no --protcol is specified, '
                     'pastes ratios to the PSM table they are fetched from.',
                     'type': 'file', 'required': False},
-    'mzidfn': {'driverattr': 'mzidfn', 'clarg': '--mzid', 'help': 'mzIdentML',
-               'type': 'file'},
+    'percofn': {'driverattr': 'percofn', 'clarg': '--perco', 'help': 'Percolator '
+        'XML output file', 'type': 'file'},
+    'mzidfns': {'driverattr': 'mzidfns', 'clarg': '--mzids', 'help': 'MzIdentML '
+        ' output files belonging to PSM table TSV files, use same order as for TSVs', 
+        'type': 'file', 'nargs': '+'},
     'bioset': {'driverattr': 'bioset', 'clarg': '--bioset', 'const': True,
                'action': 'store_const', 'default': False,
                'help': 'this enables automatic splitting on '

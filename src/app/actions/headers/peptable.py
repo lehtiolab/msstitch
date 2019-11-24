@@ -12,12 +12,10 @@ def switch_psm_to_peptable_fields(oldheader):
     """Returns a dict map with old to new header fields"""
     return {old: new for old, new in zip([mzidtsvdata.HEADER_PEPTIDE,
                                           mzidtsvdata.HEADER_PROTEIN,
-                                          mzidtsvdata.HEADER_PEPTIDE_Q,
-                                          mzidtsvdata.HEADER_PEPTIDE_PEP],
+                                          mzidtsvdata.HEADER_PEPTIDE_Q],
                                          [peptabledata.HEADER_PEPTIDE,
                                           peptabledata.HEADER_PROTEINS,
-                                          peptabledata.HEADER_QVAL,
-                                          peptabledata.HEADER_PEP])}
+                                          peptabledata.HEADER_QVAL])}
 
 
 def get_psm2pep_header(oldheader, isobq_pattern=False, precurqfield=False):
