@@ -127,9 +127,10 @@ def tryp_rev(seq, lookup, do_trypsinize, miss_cleavage, minlen, max_shuffle):
         if shufflecount >= max_shuffle:
             decoy_segs.update({i: '' for i in tests.keys()})
             nr_discarded += len(tests.keys())
-    if decoy_segs:
+    if set(decoy_segs.values()) != {''}:
         seq.seq = Seq(''.join([decoy_segs[i] for i in range(0, len(decoy_segs))]))
         seq.id = 'decoy_{}'.format(seq.name)
+        seq.description = 'decoy_{}'.format(seq.description)
     else:
         seq = False
     return seq, nr_discarded
@@ -151,5 +152,6 @@ def create_decoy_fa(fastafn, method, lookup, is_trypsinized, miss_cleavage, minl
             max_shuffle) for x in outfasta)
         for seq, nr_discarded in outtryp:
             discarded += nr_discarded
-            yield seq
-        print('Discarded {} peptides that matched target DB and could not be shuffled'.format(nr_discarded))
+            if seq:
+                yield seq
+        print('Discarded {} peptides that matched target DB and could not be shuffled'.format(discarded))

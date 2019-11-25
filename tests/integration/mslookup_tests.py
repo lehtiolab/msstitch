@@ -91,10 +91,6 @@ class TestDecoyFa(SearchspaceLookup):
         self.run_with_existing_db(['--scramble', 'tryp_rev', '--maxshuffle', '10'])
         self.check_seqs('decoy_tryprev.fasta', targetscrambling=True)
 
-    def test_tryprev_predb_trypsinized(self):
-        self.run_with_existing_db(['--scramble', 'tryp_rev', '--notrypsin'])
-        self.check_seqs('decoy_pretryp.fasta', targetscrambling=True)
-
     def test_tryprev_yesdb(self):
         self.run_without_db(['--scramble', 'tryp_rev'])
         self.check_seqs('decoy_tryprev.fasta', targetscrambling=True)
@@ -106,6 +102,32 @@ class TestDecoyFa(SearchspaceLookup):
     def test_protrev(self):
         self.run_without_db(['--scramble', 'prot_rev'])
         self.check_seqs('decoy_twoproteins.fasta')
+
+
+class TestDecoyFaPretryp(SearchspaceLookup):
+    command = 'makedecoy'
+    infilename = 'twoproteins_tryp.fa'
+
+    def test_tryprev_predb_trypsinized(self):
+        self.infilename = 'twoproteins_tryp.fa'
+        self.resultfn = os.path.join(self.workdir, 'decoy.fa')
+        options = ['--scramble', 'tryp_rev', '--notrypsin', '-o', self.resultfn]
+        self.run_command(options)
+        self.check_seqs('decoy_twoproteins_tryp.fa', True)
+
+    def check_seqs(self, checkfile, targetscrambling=False):
+        checkfa = SeqIO.index(os.path.join(self.fixdir, checkfile), 'fasta')
+        resfa = SeqIO.index(self.resultfn, 'fasta')
+        for seqid, seq in resfa.items():
+            try:
+                self.assertEqual(seq.seq, checkfa[seqid].seq)
+            except AssertionError:
+                # peptide may have been shuffled when in db
+                if targetscrambling:
+                    self.assertEqual(seq.seq[-1], checkfa[seqid].seq[-1])
+                    self.assertEqual(set(seq.seq), set(checkfa[seqid].seq))
+                else:
+                    raise
 
 
 class TestTrypticLookup(SearchspaceLookup):
