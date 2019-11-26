@@ -70,10 +70,15 @@ def add_fdr_to_mzidtsv(psms, mzid_specidr, mzns, percodata):
                 psmheaders.HEADER_PSMQ: percopsm['qval'], 
                 psmheaders.HEADER_PEPTIDE_Q: percopsm['pepqval'], 
                 psmheaders.HEADER_TARGETDECOY: 'decoy' if percopsm['decoy'] else 'target', 
-               # 'Strip': plates[fnix], 
-               # 'Fraction': fractions[fnix], 
-               # 'missed_cleavage': count_missed_cleavage(outpsm['Peptide'])
                 })
+            # Remove all decoy protein matches from target proteins, to ensure downstream
+            # processing does not trip up on them, e.g. having a decoy master protein.
+            if not percopsm['decoy']:
+                outprots = []
+                for prot in outpsm[psmheaders.HEADER_PROTEIN].split(';'):
+                    if not prot.startswith(psmheaders.DECOY_PREFIX):
+                        outprots.append(prot)
+                outpsm[psmheaders.HEADER_PROTEIN] = ';'.join(outprots)
             yield outpsm
 
 
