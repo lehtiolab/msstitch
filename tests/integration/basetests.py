@@ -249,8 +249,10 @@ class MzidTSVBaseTest(BaseTest):
                     result = [record[0]] + [record[x] for x in channel_fields]
                     outresults.append(tuple(result))
 
-    def get_values(self, checkfields):
-        with open(self.resultfn) as fp:
+    def get_values(self, checkfields, outfile=False):
+        if not outfile:
+            outfile = self.resultfn
+        with open(outfile) as fp:
             header = next(fp).strip('\n').split('\t')
             fieldindices = [header.index(field) for field in checkfields]
             row = 0

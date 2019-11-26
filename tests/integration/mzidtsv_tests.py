@@ -1,4 +1,5 @@
 import os
+import re
 from lxml import etree
 from statistics import median
 
@@ -6,13 +7,27 @@ from app.dataformats import mzidtsv as constants
 from tests.integration import basetests
 
 
-class TestAddSpecData(basetests.MzidTSVBaseTest):
+class TestAddPSMData(basetests.MzidTSVBaseTest):
     command = 'specdata'
     suffix = '_spectradata.tsv'
     infilename = 'mzidtsv_filtered_fr1-2_nospecdata.txt'
 
-    def test_addspecdata(self):
+    # TODO duplicated code, decide when we know what is to be in this (add data) module
+    def test_addspecdata_basic(self):
         options = ['--dbfile', self.dbfile, '--spectracol', '2']
+        self.run_command(options)
+        sql = ('SELECT pr.rownr, sp.retention_time, '
+               'sp.ion_injection_time '
+               'FROM psmrows AS pr JOIN psms USING(psm_id) '
+               'JOIN mzml AS sp USING(spectra_id) '
+               'JOIN mzmlfiles USING(mzmlfile_id) '
+               'ORDER BY pr.rownr')
+        fields = ['Retention time(min)', 'Ion injection time(ms)']
+        expected_values = self.process_dbvalues_both(self.dbfile, sql, [], [1, 2], fields)
+        self.check_results_sql(fields, self.rowify(expected_values))
+
+    def test_addspec_miscleav_bioset(self):
+        options = ['--dbfile', self.dbfile, '--spectracol', '2', '--addmiscleav', '--addbioset']
         self.run_command(options)
         sql = ('SELECT pr.rownr, bs.set_name, sp.retention_time, '
                'sp.ion_injection_time '
@@ -26,6 +41,11 @@ class TestAddSpecData(basetests.MzidTSVBaseTest):
         expected_values = self.process_dbvalues_both(self.dbfile, sql, [],
                                                      [1, 2, 3], fields)
         self.check_results_sql(fields, self.rowify(expected_values))
+
+        for val, exp in zip(self.get_values(['missed_cleavage']), self.get_values(['Peptide'], self.infile[0])):
+            exp = re.sub('[0-9\+\.]', '', exp[0][1])[:-1]
+            self.assertEqual(int(val[0][1]), exp.count('K') + exp.count('R') - exp.count('KP') - exp.count('RP'))
+
 
 
 class TestQuantTSV(basetests.MzidTSVBaseTest):
@@ -166,7 +186,6 @@ class TestConffiltTSV(basetests.MzidTSVBaseTest):
             options.extend(['--confidence-col', str(confcol)])
         elif confpat:
             options.extend(['--confcolpattern', confpat])
-        print(options)
         self.run_command(options)
         asserter = {'lower': self.assertLess,
                     'higher': self.assertGreater}[better]

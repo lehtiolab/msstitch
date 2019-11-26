@@ -112,33 +112,42 @@ shared_options = {
     'minlength': {'driverattr': 'minlength', 'dest': 'minlength', 'default': 0,
                   'help': 'Minimum length of peptide to be included',
                   'type': int, 'clarg': '--minlen', 'required': False},
+    'addbioset': {'driverattr': 'addbioset', 'dest': 'addbioset',
+            'clarg': '--addbioset', 'required': False, 'action': 'store_const',
+            'default': False, 'const': True,
+            'help': 'Add biological setname from DB lookup to PSM table',
+               },
+    'addmiscleav': {'driverattr': 'addmiscleav', 'dest': 'addmiscleav',
+            'clarg': '--addmiscleav', 'required': False, 'action': 'store_const',
+            'default': False, 'const': True, 'help': 'Add missed cleavages to PSM table',
+               },
 }
 
 sequence_options = {
-        'scramble': {
-            'driverattr': 'scramble', 'dest': 'scramble', 'clarg': '--scramble',
-            'help': 'Decoy scrambling method, use: "reverse": reverse peptides fully, '
-            '"tryp_rev": tryptic reverse, or "prot_rev": protein reverse.',
-            'required': False, 'default': 'tryp_rev'},
-        'ignoretarget': {
-            'driverattr': 'ignoretarget', 'dest': 'ignoretarget', 'clarg': '--ignore-target-hits',
-            'help': 'Do not remove tryptic peptides from sequence where they match target DB',
-            'required': False, 'action': 'store_const', 'const': True, 'default': False},
-        'trypsinize': {'driverattr': 'trypsinize', 'dest': 'trypsinize',
-                   'clarg': '--notrypsin', 'required': False,
-                   'action': 'store_const', 'const': False, 'default': True,
-                   'help': 'Do not trypsinize. User is expected to deliver a'
-                   'pretrypsinized FASTA file'
-                   },
-        'max_shuffle': {'driverattr': 'max_shuffle', 'dest': 'max_shuffle',
-                   'clarg': '--maxshuffle', 'required': False, 'type': int, 'default': 10,
-                   'help': 'Amount of times to attempt to shuffle a decoy reversed peptide '
-                   'to make it not match target peptides, before discarding it.'
-                   ' Used when using tryptic peptide reversal (not protein reversal)'},
-        'miss_cleavage': {'driverattr': 'miss_cleavage', 'dest': 'miss_cleavage',
-                   'clarg': '--miscleav', 'required': False, 'type': int, 'default': 0,
-                   'help': 'Amount of missed cleavages to allow when trypsinizing',
-                   },
+    'scramble': {
+        'driverattr': 'scramble', 'dest': 'scramble', 'clarg': '--scramble',
+        'help': 'Decoy scrambling method, use: "reverse": reverse peptides fully, '
+        '"tryp_rev": tryptic reverse, or "prot_rev": protein reverse.',
+        'required': False, 'default': 'tryp_rev'},
+    'ignoretarget': {
+        'driverattr': 'ignoretarget', 'dest': 'ignoretarget', 'clarg': '--ignore-target-hits',
+        'help': 'Do not remove tryptic peptides from sequence where they match target DB',
+        'required': False, 'action': 'store_const', 'const': True, 'default': False},
+    'trypsinize': {'driverattr': 'trypsinize', 'dest': 'trypsinize',
+               'clarg': '--notrypsin', 'required': False,
+               'action': 'store_const', 'const': False, 'default': True,
+               'help': 'Do not trypsinize. User is expected to deliver a'
+               'pretrypsinized FASTA file'
+               },
+    'max_shuffle': {'driverattr': 'max_shuffle', 'dest': 'max_shuffle',
+               'clarg': '--maxshuffle', 'required': False, 'type': int, 'default': 10,
+               'help': 'Amount of times to attempt to shuffle a decoy reversed peptide '
+               'to make it not match target peptides, before discarding it.'
+               ' Used when using tryptic peptide reversal (not protein reversal)'},
+    'miss_cleavage': {'driverattr': 'miss_cleavage', 'dest': 'miss_cleavage',
+               'clarg': '--miscleav', 'required': False, 'type': int, 'default': 0,
+               'help': 'Amount of missed cleavages to allow when trypsinizing',
+               },
         }
 
 
