@@ -93,7 +93,11 @@ class TestDecoyFa(SearchspaceLookup):
 
     def test_tryprev_yesdb(self):
         self.run_without_db(['--scramble', 'tryp_rev'])
-        self.check_seqs('decoy_tryprev.fasta', targetscrambling=True)
+        self.check_seqs('decoy_tryprev_targetcheck.fasta', targetscrambling=True)
+
+    def test_tryprev_yesdb_minlen(self):
+        self.run_without_db(['--scramble', 'tryp_rev', '--minlen', '4'])
+        self.check_seqs('decoy_tryprev_check_minlen.fasta', targetscrambling=True)
 
     def test_tryprev_ignore_db(self):
         self.run_without_db(['--scramble', 'tryp_rev', '--ignore-target-hits'])
