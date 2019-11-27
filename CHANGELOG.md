@@ -1,5 +1,20 @@
 # Changelog
 
+## [2.17] - 2019-11-
+### Added
+- FDR calculator from percolator output for PSM tables from MSGF, `msspsmtable percolator`
+- Missed cleavage count column in PSM table as an option to `msspsmtable specdata --miscleav`
+
+### Changed
+- Linear modeled q-values from scores and bestpeptides for a feature are NA if there are fewer than 1 q-values above the threshold.
+- Add biological set to PSM table is now optional with `msspsmtable specdata --addbioset` flag.
+- Protein FDR calculation does not crash on ZeroDivisionError when T=0: D/T is then set to 1. 
+
+### Fixed
+- Bugs in `msslookup makedecoy` fixed, actually filter out all non-matching peptides and too short peptides
+- Protein FDR calculation was for some proteins calculated as D/T+D where that should be D/T
+
+
 ## [2.16] - 2019-10-21
 ### Added
 - Trypsinization tool `msslookup trypsinize` to create trypsinized FASTA from proteins

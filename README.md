@@ -68,7 +68,7 @@ Example: Create column in peptide table with linear modeled q-values
 ### mssprottable
 Creates and modifies protein tables, also runs qvality on these for FDR calculation
 
-Example: Add best-scoring peptide to protein table (Q-score by Savitsky et al 2014)
+Example: Add best-scoring peptide to protein table (Q-score by Savitski et al 2014)
 
 `mssprottable bestpeptide -i proteins.txt --peptable peptides.txt --scorecolpattern svm --logscore -o proteins_bestpep.txt`
 
