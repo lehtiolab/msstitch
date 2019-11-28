@@ -25,7 +25,7 @@ def calculate_target_decoy_competition(percofn):
     for psm in sorted([(pid, score, decoy) for pid, (score, decoy) in psms.items()], reverse=True, key=lambda x:x[1]):
         decoys[psm[2]] += 1
         try:
-            psms[psm[0]] = {'decoy': psm[2], 'svm': psm[1], 'qval': decoys[True]/decoys[False]}  # T-TDC
+            psms[psm[0]] = {'decoy': psm[2], 'svm': psm[1], 'qval': min(decoys[True]/decoys[False], 1)}  # T-TDC
         except ZeroDivisionError:
             psms[psm[0]] = {'decoy': psm[2], 'svm': psm[1], 'qval': 1}  # T-TDC
     # Then calculate peptide FDRs
@@ -34,7 +34,7 @@ def calculate_target_decoy_competition(percofn):
         decoys[decoy] += 1
         for pid in psm_ids:
             try:
-                psms[pid.text]['pepqval'] = decoys['true']/decoys['false']
+                psms[pid.text]['pepqval'] = min(decoys['true']/decoys['false'], 1)
             except ZeroDivisionError:
                 psms[pid.text]['pepqval'] = 1
             except KeyError:
