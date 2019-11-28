@@ -26,7 +26,7 @@ def fit_linear_model(fn, scorecol, qvalcol, qvalthreshold):
         if qval > qvalthreshold:
             pepq.append(log(qval, 10))
             pepscore.append(float(peptide[scorecol]))
-    if len(pepq) <= 1:
+    if len(pepq) < 10:
         slope, intercept = False, False
         print('Could not fit linear model through q-values, as only {} q-values '
                 'was/were above the q-value threshold of {} for inclusion'.format(len(pepq), qvalthreshold))
