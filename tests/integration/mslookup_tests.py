@@ -52,24 +52,15 @@ class TestDecoyFa(SearchspaceLookup):
     command = 'makedecoy'
     infilename = 'twoproteins.fasta'
 
-    def all_seqs_in_db(self, dbfn, sequences, seqtype):
-        db = sqlite3.connect(dbfn)
-        seqs_in_db = set()
-        for seq in sequences:
-            seqs_in_db.add(self.seq_in_db(db, seq, seqtype))
-        db.close()
-        return seqs_in_db == set([True])
-
     def run_check(self, options):
+        self.resultfn = os.path.join(self.workdir, 'decoy.fa')
         options.extend(['-o', self.resultfn])
         self.run_command(options)
 
     def run_without_db(self, options):
-        self.resultfn = os.path.join(self.workdir, 'decoy.fa')
         self.run_check(options)
 
     def run_with_existing_db(self, options):
-        self.resultfn = os.path.join(self.workdir, 'decoy.fa')
         self.copy_db_to_workdir('decoycheck.sqlite', 'decoycheck.sqlite')
         options.extend(['--dbfile', 'decoycheck.sqlite'])
         self.run_check(options)
@@ -86,17 +77,26 @@ class TestDecoyFa(SearchspaceLookup):
                     self.assertEqual(set(seq.seq), set(checkfa[seqid].seq))
                 else:
                     raise
+        for seqid, seq in checkfa.items():
+            try:
+                self.assertEqual(seq.seq, resfa[seqid].seq)
+            except AssertionError:
+                if targetscrambling:
+                    self.assertEqual(seq.seq[-1], resfa[seqid].seq[-1])
+                    self.assertEqual(set(seq.seq), set(resfa[seqid].seq))
+                else:
+                    raise
 
     def test_tryprev_predb(self):
         self.run_with_existing_db(['--scramble', 'tryp_rev', '--maxshuffle', '10'])
-        self.check_seqs('decoy_tryprev.fasta', targetscrambling=True)
+        self.check_seqs('decoy_tryprev_targetcheck.fasta', targetscrambling=True)
 
     def test_tryprev_yesdb(self):
         self.run_without_db(['--scramble', 'tryp_rev'])
         self.check_seqs('decoy_tryprev_targetcheck.fasta', targetscrambling=True)
 
     def test_tryprev_yesdb_minlen(self):
-        self.run_without_db(['--scramble', 'tryp_rev', '--minlen', '4'])
+        self.run_without_db(['--scramble', 'tryp_rev', '--minlen', '5'])
         self.check_seqs('decoy_tryprev_check_minlen.fasta', targetscrambling=True)
 
     def test_tryprev_ignore_db(self):

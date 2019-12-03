@@ -95,7 +95,6 @@ def tryp_rev(seq, lookup, do_trypsinize, miss_cleavage, minlen, max_shuffle):
         segments = trypsinize(seq, miss_cleavage=miss_cleavage)
     else:
         segments = [str(seq.seq)]
-    nr_peptides = len(segments)
     final_seq = {}
     decoy_segs = {}
     for i, s in enumerate(segments):
@@ -106,32 +105,33 @@ def tryp_rev(seq, lookup, do_trypsinize, miss_cleavage, minlen, max_shuffle):
                 decoy_segs[i] = s[::-1]
         else:
             decoy_segs[i] = s
-    nr_discarded = 0
+    nr_decoymatching = 0
     if minlen:
         decoy_segs = {k: (v if len(v) >=minlen else '') for k,v in decoy_segs.items() }
+    nr_peptides = len([x for x in decoy_segs.values() if x != ''])
     if lookup is not None:
         shufflecount = 0
-        targets, tests = True, {k: (v, 0) for k,v in decoy_segs.items()}
+        targets, tests = True, {k: (v, 0, v) for k,v in decoy_segs.items()}
         while targets:
             targets = lookup.get_multi_seq([x[0] for x in tests.values()])
-            for i, (s, shufcount) in [(k,v) for k,v in tests.items()]: # list comprehension to not have dict change during iteration
+            for i, (s, shufcount, origdecoy) in [(k,v) for k,v in tests.items()]: # list comprehension to not have dict change during iteration
                 if s not in targets:
                     decoy_segs[i] = tests.pop(i)[0]
                 elif shufcount < max_shuffle:
                     nterm = list(s[:-1])
                     shuffle(nterm)
-                    tests[i] = ('{}{}'.format(''.join(nterm), s[-1]), shufcount + 1)
+                    tests[i] = ('{}{}'.format(''.join(nterm), s[-1]), shufcount + 1, origdecoy)
                 else:
-                    decoy_segs[i] = ''
+                    decoy_segs[i] = origdecoy
                     tests.pop(i)
-                    nr_discarded += 1
+                    nr_decoymatching += 1
     if set(decoy_segs.values()) != {''}:
         seq.seq = Seq(''.join([decoy_segs[i] for i in range(0, len(decoy_segs))]))
         seq.id = 'decoy_{}'.format(seq.name)
         seq.description = 'decoy_{}'.format(seq.description)
     else:
         seq = False
-    return seq, nr_discarded, nr_peptides
+    return seq, nr_decoymatching, nr_peptides
 
 
 def prot_rev(seq):
@@ -143,15 +143,17 @@ def prot_rev(seq):
 def create_decoy_fa(fastafn, method, lookup, is_trypsinized, miss_cleavage, minlen, max_shuffle):
     outfasta = SeqIO.parse(fastafn, 'fasta')
     if method == 'prot_rev':
-        return (prot_rev(x) for x in outfasta)
+        for seq in outfasta:
+            yield prot_rev(seq)
     if method == 'tryp_rev':
-        discarded, nr_peptides = 0, 0
+        decoymatching, nr_peptides = 0, 0
         outtryp = (tryp_rev(x, lookup, is_trypsinized, miss_cleavage, minlen, 
             max_shuffle) for x in outfasta)
-        for seq, nr_discarded, nr_pep in outtryp:
-            discarded += nr_discarded
+        for seq, nr_decoymatching, nr_pep in outtryp:
+            decoymatching += nr_decoymatching
             nr_peptides += nr_pep
             if seq:
                 yield seq
-        print('Discarded {} out of a total of {} peptides that matched target DB and '
-                'could not be shuffled'.format(discarded, nr_peptides))
+        if decoymatching:
+            print('Unable to shuffle {} decoys (of a total of {} decoy peptides) '
+                    'that matched target DB (retained non-shuffled)'.format(decoymatching, nr_peptides))
