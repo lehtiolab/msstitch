@@ -36,11 +36,16 @@ class SearchSpaceDB(DatabaseConnection):
         self.index_column('pepix', 'protein_peptides', 'seq')
         self.conn.commit()
 
-    def get_multi_seq(self, seqs):
-        sql = 'SELECT seqs FROM known_searchspace WHERE seqs IN ({})'.format(
-                ', '.join('?' for _ in seqs))
+    def get_multi_seq(self, allseqs):
         cursor = self.get_cursor()
-        return set([x[0] for x in cursor.execute(sql, seqs)])
+        maxparam = 999
+        allseqs_found = set()
+        for i in range(0, len(allseqs), maxparam):
+            seqs = allseqs[i:i+maxparam]
+            sql = 'SELECT seqs FROM known_searchspace WHERE seqs IN ({})'.format(
+                    ', '.join('?' for _ in seqs))
+            [allseqs_found.add(x[0]) for x in cursor.execute(sql, seqs)]
+        return allseqs_found
 
     def check_seq_exists(self, seq, amount_ntermwildcards):
         """Look up sequence in sqlite DB. Returns True or False if it
