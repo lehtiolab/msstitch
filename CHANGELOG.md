@@ -1,6 +1,14 @@
 # Changelog
 
-## [2.17] - 2019-11-
+## [2.18] - 2019-12-04
+### Changed
+- makedecoy shuffles x times and then does no longer throw out the peptide but keeps the original decoy. Otherwise the decoy database gets smaller
+
+### Fixed
+- makedecoy with target checking works also on long proteins, which exceed the max parameter setting for SQLite 
+
+
+## [2.17] - 2019-11-28
 ### Added
 - FDR calculator from percolator output for PSM tables from MSGF, `msspsmtable percolator`
 - Missed cleavage count column in PSM table as an option to `msspsmtable specdata --miscleav`
