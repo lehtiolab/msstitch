@@ -86,17 +86,18 @@ class TestModelQvals(basetests.PeptableTest):
     suffix = '_qmodel.txt'
 
     def test_modelqvals(self):
-        score, fdr = 'percolator svm-score', '^q-value'
-        options = ['--scorecolpattern', score, '--fdrcolpattern', fdr]
+        score, fdr, qthres = 'percolator svm-score', '^q-value', 1e-5
+
+        options = ['--scorecolpattern', score, '--fdrcolpattern', fdr, '--qvalthreshold', str(qthres)]
         self.run_command(options)
         scores, qvalues = [], []
         for line in self.tsv_generator(self.infile[0]):
-            if float(line[fdr[1:]]) > 10e-4:
+            if float(line[fdr[1:]]) > qthres:
                 scores.append(float(line[score]))
                 qvalues.append(log(float(line[fdr[1:]]), 10))
         slope, intercept = polyfit(scores, qvalues, deg=1)
         for line in self.tsv_generator(self.resultfn):
-            self.assertAlmostEqual(float(line[fdr[1:] + ' (linear modeled)']),
+            self.assertEqual(float(line[fdr[1:] + ' (linear modeled)']),
                                    10 ** (float(line[score]) *
                                           slope + intercept))
 
