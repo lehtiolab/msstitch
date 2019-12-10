@@ -9,13 +9,13 @@ def simple_val_fetch(feature, sqlmap, headerfields, valkey):
 
 def fill_mergefeature(outfeature, iso_fun, ms1_fun, prob_fun, fdr_fun, pep_fun,
                       pdata_fun, feature, sqlfieldmap, headerfields,
-                      featuredata_map):
+                      featuredata_map, accfield=False):
     check_feat = {k: v for k, v in outfeature.items()}
     for fun in [iso_fun, ms1_fun, prob_fun, fdr_fun, pep_fun]:
         outfeature.update(fun(feature, sqlfieldmap, headerfields))
     if outfeature == check_feat:
         return
-    outfeature.update(pdata_fun(outfeature, featuredata_map, headerfields))
+    outfeature.update(pdata_fun(outfeature, featuredata_map, headerfields, accfield))
 
 
 def get_isobaric_quant(feature, sqlmap, headerfields):
@@ -26,5 +26,7 @@ def get_isobaric_quant(feature, sqlmap, headerfields):
     nopsms = feature[sqlmap['isoq_psms']]
     if quant is None:
         return {}
-    return {headerfields['isoquant'][chan][pool]: quant,
-            headerfields['isoquant'][psmfield][pool]: nopsms}
+    qfeat = {headerfields['isoquant'][chan][pool]: quant}
+    if psmfield is not None:
+        qfeat[headerfields['isoquant'][psmfield][pool]] = nopsms
+    return qfeat

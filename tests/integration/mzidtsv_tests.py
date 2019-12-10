@@ -1,4 +1,5 @@
 import os
+import re
 from lxml import etree
 from statistics import median
 
@@ -6,13 +7,27 @@ from app.dataformats import mzidtsv as constants
 from tests.integration import basetests
 
 
-class TestAddSpecData(basetests.MzidTSVBaseTest):
+class TestAddPSMData(basetests.MzidTSVBaseTest):
     command = 'specdata'
     suffix = '_spectradata.tsv'
     infilename = 'mzidtsv_filtered_fr1-2_nospecdata.txt'
 
-    def test_addspecdata(self):
+    # TODO duplicated code, decide when we know what is to be in this (add data) module
+    def test_addspecdata_basic(self):
         options = ['--dbfile', self.dbfile, '--spectracol', '2']
+        self.run_command(options)
+        sql = ('SELECT pr.rownr, sp.retention_time, '
+               'sp.ion_injection_time '
+               'FROM psmrows AS pr JOIN psms USING(psm_id) '
+               'JOIN mzml AS sp USING(spectra_id) '
+               'JOIN mzmlfiles USING(mzmlfile_id) '
+               'ORDER BY pr.rownr')
+        fields = ['Retention time(min)', 'Ion injection time(ms)']
+        expected_values = self.process_dbvalues_both(self.dbfile, sql, [], [1, 2], fields)
+        self.check_results_sql(fields, self.rowify(expected_values))
+
+    def test_addspec_miscleav_bioset(self):
+        options = ['--dbfile', self.dbfile, '--spectracol', '2', '--addmiscleav', '--addbioset']
         self.run_command(options)
         sql = ('SELECT pr.rownr, bs.set_name, sp.retention_time, '
                'sp.ion_injection_time '
@@ -25,7 +40,12 @@ class TestAddSpecData(basetests.MzidTSVBaseTest):
                   'Ion injection time(ms)']
         expected_values = self.process_dbvalues_both(self.dbfile, sql, [],
                                                      [1, 2, 3], fields)
-        self.check_results(fields, self.rowify(expected_values))
+        self.check_results_sql(fields, self.rowify(expected_values))
+
+        for val, exp in zip(self.get_values(['missed_cleavage']), self.get_values(['Peptide'], self.infile[0])):
+            exp = re.sub('[0-9\+\.]', '', exp[0][1])[:-1]
+            self.assertEqual(int(val[0][1]), exp.count('K') + exp.count('R') - exp.count('KP') - exp.count('RP'))
+
 
 
 class TestQuantTSV(basetests.MzidTSVBaseTest):
@@ -44,7 +64,7 @@ class TestQuantTSV(basetests.MzidTSVBaseTest):
                                                        '128N', '128C', '129N',
                                                        '129C', '130N', '130C',
                                                        '131']]
-        self.check_results(fields, self.rowify(expected_values))
+        self.check_results_sql(fields, self.rowify(expected_values))
 
     def test_quanttsv_precursor(self):
         dbfile = os.path.join(self.fixdir, 'mzidtsv_db.sqlite')
@@ -55,7 +75,7 @@ class TestQuantTSV(basetests.MzidTSVBaseTest):
                'LEFT OUTER JOIN ms1_align USING(spectra_id) '
                'LEFT OUTER JOIN ms1_quant AS pq USING(feature_id)')
         expected_values = self.get_values_from_db(self.dbfile, sql)
-        self.check_results(['MS1 area'], self.rowify(expected_values))
+        self.check_results_sql(['MS1 area'], self.rowify(expected_values))
 
     def test_quanttsv_both(self):
         dbfile = os.path.join(self.fixdir, 'mzidtsv_db.sqlite')
@@ -75,51 +95,28 @@ class TestQuantTSV(basetests.MzidTSVBaseTest):
                                                        '129C', '130N', '130C',
                                                        '131']]
         fields.append('MS1 area')
-        self.check_results(fields, self.rowify(expected_values))
+        self.check_results_sql(fields, self.rowify(expected_values))
 
 
 class TestPercoTSV(basetests.MzidTSVBaseTest):
     command = 'percolator'
-    suffix = '_percolated.tsv'
-    infilename = 'mzidtsv_fr0.txt'
-    field_p_map = {'percolator svm-score': 'score',
-                   'PSM p-value': 'psm_p_value',
-                   'PSM q-value': 'psm_q_value',
-                   'PSM-PEP': 'psm_pep',
-                   'peptide q-value': 'peptide_q_value',
-                   'peptide PEP': 'peptide_pep',
-                   }
+    suffix = '_fdr.tsv'
+    infilename = 'mzidtsv_td'
 
-    def test_add_percolator(self):
-        mzidfn = os.path.join(self.fixdir, 'msgfperco_fr0.mzid')
-        options = ['--mzid', mzidfn]
+    def test_add_tdc_fdr(self):
+        mzidfn = os.path.join(self.fixdir, 'msgf.mzid')
+        percofn = os.path.join(self.fixdir, 'perco.xml')
+        options = ['--mzid', mzidfn, '--perco', percofn]
         self.run_command(options)
-        expected = self.get_percolator_from_msgf(mzidfn,
-                                                 self.field_p_map.keys())
-        self.check_results(self.field_p_map.keys(), expected)
-
-    def get_percolator_from_msgf(self, msgffile, checkfields):
-        count = 0
-        ns = self.get_xml_namespace(msgffile)
-        for ac, specidres in etree.iterparse(
-                msgffile, tag='{%s}'
-                'SpectrumIdentificationResult' % ns['xmlns']):
-            for result in specidres.findall(
-                    '{%s}SpectrumIdentificationItem' % ns['xmlns']):
-                perco = [x for x in
-                         result.findall('{%s}userParam' % ns['xmlns'])
-                         if x.attrib['name'].split(':')[0] == 'percolator']
-                perco = {x.attrib['name'].replace('percolator:', ''):
-                         x.attrib['value'] for x in perco}
-                if not perco:
-                    perco = {key: None for key in self.field_p_map.values()}
-                #outresult = [(count, 'SpecID', sid)]
-                outresult = []
-                outresult.extend([(count, field,
-                                   perco[self.field_p_map[field]])
-                                  for field in checkfields])
-                yield outresult
-                count += 1
+        checkfields = ['percolator svm-score', 'PSM q-value', 'peptide q-value', 'TD']
+        with open(os.path.join(self.fixdir, 'mzidtsv_td_perco')) as fp:
+            header = next(fp).strip().split('\t')
+            expected = [line.strip().split('\t') for line in fp]
+        expected = [{field: line[i] for i, field in enumerate(header)} for line in expected]
+        for res, exp in zip(self.get_values(header), expected):
+            for i, field in enumerate(header):
+                self.assertEqual(field, res[i][1])
+                self.assertEqual(exp[field], res[i][2])
 
 
 class TestMergeTSV(basetests.MzidTSVBaseTest):
@@ -189,7 +186,6 @@ class TestConffiltTSV(basetests.MzidTSVBaseTest):
             options.extend(['--confidence-col', str(confcol)])
         elif confpat:
             options.extend(['--confcolpattern', confpat])
-        print(options)
         self.run_command(options)
         asserter = {'lower': self.assertLess,
                     'higher': self.assertGreater}[better]

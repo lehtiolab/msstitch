@@ -22,10 +22,8 @@ class TestPSM2Peptable(basetests.PeptableTest):
         striplist.extend(['Files/scans for peptide', 'MS1 area',
                           'MS1 area (highest of all PSMs)'])
         for peptide in self.tsv_generator(self.resultfn):
-            for newkey, oldkey in zip(['Peptide', 'peptide PEP',
-                                       'peptide q-value', 'Protein'],
-                                      ['Peptide sequence', 'PEP', 'q-value',
-                                       'Protein(s)']):
+            for newkey, oldkey in zip(['Peptide', 'peptide q-value', 'Protein'],
+                                      ['Peptide sequence', 'q-value', 'Protein(s)']):
                 peptide[newkey] = peptide.pop(oldkey)
             mapping_psms = psms[peptide['Peptide']]
             toppsm = mapping_psms[str(max([float(score) for score
@@ -76,7 +74,7 @@ class TestIsoquant(basetests.PeptableTest):
     def test_isoquant(self):
         isotable = os.path.join(self.fixdir, 'peptable_isoquant.txt')
         options = ['--quantfile', isotable, '--isobquantcolpattern', 'fake_ch',
-                   '--qaccpattern', 'accession']
+                   '--qaccpattern', 'Protein ID']
         self.run_command(options)
         self.isoquant_check(isotable, 'Peptide sequence', self.channels,
                             self.nopsms)
@@ -88,19 +86,28 @@ class TestModelQvals(basetests.PeptableTest):
     suffix = '_qmodel.txt'
 
     def test_modelqvals(self):
-        score, fdr = 'percolator svm-score', '^q-value'
-        options = ['--scorecolpattern', score, '--fdrcolpattern', fdr]
+        score, fdr, qthres = 'percolator svm-score', '^q-value', 1e-5
+
+        options = ['--scorecolpattern', score, '--fdrcolpattern', fdr, '--qvalthreshold', str(qthres)]
         self.run_command(options)
         scores, qvalues = [], []
         for line in self.tsv_generator(self.infile[0]):
-            if float(line[fdr[1:]]) > 10e-4:
+            if float(line[fdr[1:]]) > qthres:
                 scores.append(float(line[score]))
                 qvalues.append(log(float(line[fdr[1:]]), 10))
         slope, intercept = polyfit(scores, qvalues, deg=1)
         for line in self.tsv_generator(self.resultfn):
-            self.assertAlmostEqual(float(line[fdr[1:] + ' (linear modeled)']),
+            self.assertEqual(float(line[fdr[1:] + ' (linear modeled)']),
                                    10 ** (float(line[score]) *
                                           slope + intercept))
+
+    def test_modelqvals_none_included(self):
+        score, fdr = 'percolator svm-score', '^q-value'
+        options = ['--scorecolpattern', score, '--fdrcolpattern', fdr, '--qvalthreshold', '1']
+        self.run_command(options)
+        for line in self.tsv_generator(self.resultfn):
+            self.assertEqual(line[fdr[1:] + ' (linear modeled)'], 'NA')
+
 
 
 class TestBuild(basetests.PeptableTest):
@@ -135,8 +142,8 @@ class TestBuild(basetests.PeptableTest):
                'JOIN peptide_fdr AS pf USING(pep_id) '
                'JOIN peptide_pep AS pp USING(pep_id) '
                )
-        self.check_build_values(sql, ['MS1 area (highest of all PSMs)',
-                                      'q-value', 'PEP'], 'Peptide sequence')
+        self.check_build_values(sql, ['MS1 area (highest of all PSMs)', 'q-value', ],
+                'Peptide sequence')
 
     def check_genes(self):
         # FIXME get a db WITHOUT protein groups for genecentric peptides
@@ -224,6 +231,7 @@ class TestBuild(basetests.PeptableTest):
         self.check(genecentric=True)
 
     def test_noncentric(self):
+        self.dbfile = os.path.join(self.fixdir, 'peptable_db_noncentric.sqlite')
         options = ['--fdr', '--pep', '--isobaric', '--precursor',
                    '--dbfile', self.dbfile, '--noncentric']
         self.run_command(options)

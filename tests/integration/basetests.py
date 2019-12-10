@@ -115,8 +115,11 @@ class BaseTest(unittest.TestCase):
             root.remove(child)
         return root
 
-    def copy_db_to_workdir(self, dbfn):
-        shutil.copy(os.path.join(self.fixdir, dbfn), self.resultfn)
+    def copy_db_to_workdir(self, dbfn, dst=False):
+        if not dst: 
+            shutil.copy(os.path.join(self.fixdir, dbfn), self.resultfn)
+        else:
+            shutil.copy(os.path.join(self.fixdir, dbfn), dst)
 
     def get_float_or_na(self, value):
         try:
@@ -217,7 +220,7 @@ class MzidTSVBaseTest(BaseTest):
                 row = [record]
                 rownr += 1
 
-    def check_results(self, checkfields, expected_values):
+    def check_results_sql(self, checkfields, expected_values):
         for resultvals, exp_vals in zip(self.get_values(checkfields),
                                         expected_values):
             for resultval, expectval in zip(resultvals, exp_vals):
@@ -246,8 +249,10 @@ class MzidTSVBaseTest(BaseTest):
                     result = [record[0]] + [record[x] for x in channel_fields]
                     outresults.append(tuple(result))
 
-    def get_values(self, checkfields):
-        with open(self.resultfn) as fp:
+    def get_values(self, checkfields, outfile=False):
+        if not outfile:
+            outfile = self.resultfn
+        with open(outfile) as fp:
             header = next(fp).strip('\n').split('\t')
             fieldindices = [header.index(field) for field in checkfields]
             row = 0
@@ -305,18 +310,19 @@ class PepProtableTest(BaseTest):
         else:
             self.assertTrue(expected == {})
 
-    def check_built_isobaric(self, sql, accession, cutoff=False):
+    def check_built_isobaric(self, sql, accession, check_nr_psms=True, cutoff=False):
         expected = {}
         for rec in self.get_values_from_db(self.dbfile, sql):
+            am_psm = rec[4]
             try:
-                expected[rec[0]][rec[1]][rec[2]] = [rec[3], rec[4]]
+                expected[rec[0]][rec[1]][rec[2]] = [rec[3], am_psm]
             except KeyError:
                 try:
-                    expected[rec[0]][rec[1]] = {rec[2]: [rec[3], rec[4]]}
+                    expected[rec[0]][rec[1]] = {rec[2]: [rec[3], am_psm]}
                 except KeyError:
-                    expected[rec[0]] = {rec[1]: {rec[2]: [rec[3], rec[4]]}}
+                    expected[rec[0]] = {rec[1]: {rec[2]: [rec[3], am_psm]}}
             if cutoff:
-                expected[rec[0]][rec[1]][rec[2]] = [rec[3], rec[4], rec[5]]
+                expected[rec[0]][rec[1]][rec[2]] = [rec[3], am_psm, rec[5]]
         for line in self.tsv_generator(self.resultfn):
             for setname, fields in expected[line[accession]].items():
                 for field, exp_val in fields.items():
@@ -324,8 +330,9 @@ class PepProtableTest(BaseTest):
                     if cutoff and exp_val[2] > cutoff:
                         exp_val = ['NA', 'NA']
                     self.assertEqual(line[setfield], str(exp_val[0]))
-                    nr_psms = line['{} - # quanted PSMs'.format(setfield)]
-                    self.assertEqual(nr_psms, str(exp_val[1]))
+                    if check_nr_psms:
+                        nr_psms = line['{} - # quanted PSMs'.format(setfield)]
+                        self.assertEqual(nr_psms, str(exp_val[1]))
             expected.pop(line[accession])
         self.check_exp_empty(expected, cutoff)
 
@@ -361,53 +368,57 @@ class ProttableTest(PepProtableTest):
     def check_protein_data(self, centrictype):
         centric = {'proteincentric': 'pc', 'genecentric': 'gc',
                    'assoccentric': 'ac'}[centrictype]
-        sql_map = {'pc': {'primary':
-                          ['pgm', 'protein_acc', 'protein_group_master'],
-                          'fields': ['g.gene_acc', 'aid.assoc_id',
-                                     'pc.coverage'],
-                          'joins':
-                          ['JOIN genes AS g USING(protein_acc) ',
-                           'JOIN associated_ids AS aid USING(protein_acc) ',
-                           'JOIN protein_coverage AS pc USING(protein_acc)',
-                           ]},
-                   'gc': {'primary': ['g', 'gene_acc', 'genes'],
-                          'fields': ['"NA"'] * 3,
-                          'joins':
-                          ['JOIN associated_ids USING(protein_acc) ',
-                           ]},
-                   'ac': {'primary': ['aid', 'assoc_id', 'associated_ids'],
-                          'fields': ['"NA"'] * 3,
-                          'joins':
-                          ['JOIN genes USING(protein_acc) ',
-                           ]},
-                   }[centric]
+        if centric == 'pc':
+            sql = (
+            'SELECT p.protein_acc,GROUP_CONCAT(g.gene_acc),GROUP_CONCAT(aid.assoc_id),pd.description,pcov.coverage '
+            'FROM protein_group_master AS p '
+            'JOIN associated_ids AS aid USING(protein_acc) '
+            'JOIN genes AS g USING(protein_acc) '
+            'JOIN prot_desc AS pd USING(protein_acc) '
+            'JOIN protein_coverage AS pcov USING(protein_acc) '
+            'GROUP BY g.gene_acc'
+            )
+        elif centric == 'gc':
+            sql = (
+            'SELECT g.gene_acc, GROUP_CONCAT(aid.assoc_id),GROUP_CONCAT(p.protein_acc),pd.description '
+            'FROM genes AS g '
+            'JOIN associated_ids AS aid USING(protein_acc) '
+            'JOIN proteins AS p USING(protein_acc) '
+            'JOIN prot_desc AS pd USING(protein_acc) '
+            'GROUP BY g.gene_acc'
+            )
+        elif centric == 'ac':
+            sql = (
+            'SELECT aid.assoc_id, GROUP_CONCAT(g.gene_acc),GROUP_CONCAT(p.protein_acc),pd.description '
+            'FROM associated_ids AS aid '
+            'JOIN genes AS g USING(protein_acc) '
+            'JOIN proteins AS p USING(protein_acc) '
+            'JOIN prot_desc AS pd USING(protein_acc) '
+            'GROUP BY aid.assoc_id'
+            )
+        expected = {rec[0]: rec[1:] for rec in
+                    self.get_values_from_db(self.dbfile, sql)}
+        pdatalup = {
+                'pc': {'acc': 'Protein ID', 'fields': [('Gene ID', 0), ('Gene Name', 1), ('Coverage', 3)]},
+                'gc': {'acc': 'Gene ID', 'fields': [('Gene Name', 0), ('Protein ID(s)', 1)]},
+                'ac': {'acc': 'Gene Name', 'fields': [('Gene ID', 0), ('Protein ID(s)', 1)]},
+                }
+        for row in self.tsv_generator(self.resultfn):
+            acc = row[pdatalup[centric]['acc']]
+            for (field, ix) in pdatalup[centric]['fields']:
+                self.assertEqual(set(str(row[field]).split(';')), set(str(expected[acc][ix]).split(',')))
+            self.assertEqual(row['Description'], expected[acc][2])
 
-        sql = ('SELECT {0}.{1}, {3}, {4}, pd.description, {5} '
-               'FROM {2} AS {0} '
-               '{6} '
-               'JOIN prot_desc AS pd USING(protein_acc)')
-        sql_adds = sql_map['primary'] + sql_map['fields']
-        sql_adds.append(' '.join(sql_map['joins']))
-        sql = sql.format(*sql_adds)
-        psm_sql_map = {'pc': ('pgm', 'protein_acc', 'protein_group_master'),
-                       'gc': ('g', 'gene_acc', 'genes'),
-                       'ac': ('aid', 'assoc_id', 'associated_ids')}[centric]
         psm_sql = ('SELECT {0}.{1}, pp.psm_id, ps.sequence '
                    'FROM {2} AS {0} '
                    'JOIN protein_psm AS pp USING(protein_acc) '
                    'JOIN psms USING(psm_id) '
                    'JOIN peptide_sequences AS ps USING(pep_id) '
                    )
+        psm_sql_map = {'pc': ('pgm', 'protein_acc', 'protein_group_master'),
+                       'gc': ('g', 'gene_acc', 'genes'),
+                       'ac': ('aid', 'assoc_id', 'associated_ids')}[centric]
         psm_sql = psm_sql.format(*psm_sql_map)
-        expected = {rec[0]: rec[1:] for rec in
-                    self.get_values_from_db(self.dbfile, sql)}
-        for protein in self.tsv_generator(self.resultfn):
-            pacc = protein['Protein accession']
-            self.assertEqual(protein['Gene'], expected[pacc][0])
-            self.assertEqual(protein['Associated gene ID'], expected[pacc][1])
-            self.assertEqual(protein['Description'], expected[pacc][2])
-            self.assertEqual(protein['Coverage'], str(expected[pacc][3]))
-
         expected, unipeps = {}, {}
         for rec in self.get_values_from_db(self.dbfile, psm_sql):
             pacc = rec[0]
@@ -426,7 +437,7 @@ class ProttableTest(PepProtableTest):
             if len(prot) == 1:
                 expected[prot.pop()]['unipep'] += 1
         for protein in self.tsv_generator(self.resultfn):
-            pacc = protein['Protein accession']
+            pacc = protein[pdatalup[centric]['acc']]
             poolname = 'S1'
             self.assertEqual(protein['{}_# Unique peptides'.format(poolname)],
                              str(expected[pacc]['unipep']))

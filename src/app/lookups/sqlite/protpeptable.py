@@ -51,11 +51,15 @@ class ProtPepTable(ResultLookupInterface):
                 self.table_map[self.datatype]['fntable']),
             tables)
 
-    def store_quant_channels(self, quantchannels):
+    def store_quant_channels(self, quantchannels, psmnrcols):
         table = self.table_map[self.datatype]['isochtable']
-        self.store_many(
-            'INSERT INTO {}({}, channel_name, amount_psms_name) VALUES'
-            '(?, ?, ?)'.format(table, self.colmap[table][1]), quantchannels)
+        if psmnrcols:
+            sql = ('INSERT INTO {}({}, channel_name, amount_psms_name) VALUES'
+                   '(?, ?, ?)'.format(table, self.colmap[table][1]))
+        else:
+            sql = ('INSERT INTO {}({}, channel_name) VALUES'
+                   '(?, ?)'.format(table, self.colmap[table][1]))
+        self.store_many(sql, quantchannels)
 
     def get_quantchannel_map(self):
         outdict = {}
@@ -71,12 +75,15 @@ class ProtPepTable(ResultLookupInterface):
                 outdict[fnid] = {channel_name: (channel_id, amount_psms_name)}
         return outdict
 
-    def store_isobaric_quants(self, quants):
+    def store_isobaric_quants(self, quants, psmnrcols):
         table = self.table_map[self.datatype]['isoqtable']
-        self.store_many(
-            'INSERT INTO {}({}, channel_id, quantvalue, amount_psms) '
-            'VALUES '
-            '(?, ?, ?, ?)'.format(table, self.colmap[table][1]), quants)
+        if psmnrcols:
+            sql = ('INSERT INTO {}({}, channel_id, quantvalue, amount_psms) ' 
+                   'VALUES ' '(?, ?, ?, ?)'.format(table, self.colmap[table][1]))
+        else:
+            sql = ('INSERT INTO {}({}, channel_id, quantvalue) ' 
+                   'VALUES ' '(?, ?, ?)'.format(table, self.colmap[table][1]))
+        self.store_many(sql, quants)
 
     def get_tablefn_map(self):
         table = self.table_map[self.datatype]['fntable']
@@ -126,29 +133,58 @@ class ProtPepTable(ResultLookupInterface):
                'protein_group_master AS pgm '
                'JOIN protein_group_content AS pgc USING(master_id)')
         return cursor.execute(sql)
+    
+    def get_protein_gene_symbol_for_map(self):
+        fields = ['p.protein_acc', 'pep.sequence', 'pd.description',
+                  'pcov.coverage', 'g.gene_acc', 'aid.assoc_id']
+        sql = (
+                'SELECT {} FROM {} AS p '
+                'JOIN protein_psm USING(protein_acc) '
+                'JOIN psms USING(psm_id) '
+                'JOIN peptide_sequences AS pep USING(pep_id) '
+                'LEFT OUTER JOIN prot_desc AS pd USING(protein_acc) '
+                'LEFT OUTER JOIN protein_coverage '
+                'AS pcov USING(protein_acc) '
+                'LEFT OUTER JOIN genes AS g USING(protein_acc) '
+                'LEFT OUTER JOIN associated_ids AS aid USING(protein_acc)'
+                )
+        sql = sql.format(','.join(fields), 'protein_group_master')
+        cursor = self.get_cursor()
+        return cursor.execute(sql)
 
+    def get_unique_peptide_nrs_base(self, acc, joins):
+        sql = (
+                'SELECT COUNT(sequence), set_name, {0} FROM ( '
+
+                'SELECT sequence, set_name, {0} FROM ( '
+
+                'SELECT DISTINCT pep.sequence, bs.set_name, acctable.{0} FROM '
+                'peptide_sequences AS pep JOIN psms USING(pep_id) '
+                'JOIN mzml USING(spectra_id) JOIN mzmlfiles USING(mzmlfile_id) '
+                'JOIN biosets AS bs USING(set_id) '
+                'JOIN protein_psm AS pp USING(psm_id) '
+                '{1})'
+
+                'GROUP BY sequence,set_name HAVING COUNT(sequence)=1) '
+
+                'GROUP BY {0}, set_name')
+        cursor = self.get_cursor()
+        sql = sql.format(acc, joins)
+        return cursor.execute(sql)
+        
     def get_proteins_psms_for_map(self):
         """Gets protein-PSM combinations and other info for creating a map
         of protein data. This particular version is protein-group centric"""
-        fields = ['p.protein_acc', 'sets.set_name',
-                  'pep.sequence', 'psm.psm_id', 'pd.description',
-                  'pcov.coverage', 'g.gene_acc', 'aid.assoc_id']
-        extrajoins = ('LEFT OUTER JOIN prot_desc AS pd USING(protein_acc) '
-                      'LEFT OUTER JOIN protein_coverage '
-                      'AS pcov USING(protein_acc) '
-                      'LEFT OUTER JOIN genes AS g USING(protein_acc) '
-                      'LEFT OUTER JOIN associated_ids AS aid '
-                      'USING(protein_acc)'
-                      )
+        fields = ['p.protein_acc', 'sets.set_name', 'pep.sequence', 'psm.psm_id']
         firstjoin = ('psm_protein_groups', 'ppg', 'master_id')
-        return self.get_proteins_psms('protein_group_master', fields,
-                                      firstjoin, extrajoins)
+        return self.get_proteins_psms('protein_group_master', fields, firstjoin)
 
-    def get_unique_gene_psms(self, genetable, fields, firstjoin, extrajoins):
+    def get_unique_gene_psms(self, genetable, fields, firstjoin):
+        """Uniques the results from get_proteins_psms so each PSM as defined
+        by gene ID / setname / psm_id will only occur once"""
         lastgene = None
         gpsms_out, gp_ids = [], []
-        for gpsm in self.get_proteins_psms(genetable, fields, firstjoin,
-                                           extrajoins):
+        for gpsm in self.get_proteins_psms(genetable, fields, firstjoin):
             if gpsm[0] != lastgene:
                 for outpsm in gpsms_out:
                     yield outpsm
@@ -161,8 +197,7 @@ class ProtPepTable(ResultLookupInterface):
         for outpsm in gpsms_out:
             yield outpsm
 
-    def get_proteins_psms(self, firsttable, fields, firstjoin,
-                          extrajoins=False):
+    def get_proteins_psms(self, firsttable, fields, firstjoin):
         joins = [firstjoin]
         joins.extend([('psms', 'psm', 'psm_id'),
                       ('peptide_sequences', 'pep', 'pep_id'),
@@ -172,8 +207,6 @@ class ProtPepTable(ResultLookupInterface):
                       ])
         join_sql = ' '.join(['JOIN {} AS {} USING({})'.format(
             j[0], j[1], j[2]) for j in joins])
-        if extrajoins:
-            join_sql = '{} {}'.format(join_sql, extrajoins)
         sql = ('SELECT {} FROM {} '
                'AS p'.format(', '.join(fields), firsttable))
         sql = '{} {} ORDER BY {}, sets.set_name'.format(sql, join_sql,

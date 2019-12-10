@@ -40,21 +40,26 @@ def qvalue_generator(fdrheader, sorted_features):
         outfeat = {k: v for k, v in feat.items()}
         score = get_score(outfeat)
         if score != previousscore:
+            # new score, all proteins with previous score get same fdr
             previousscore = score
-            fdr = tdcounter['decoy'] / float(tdcounter['decoy'] +
-                                             tdcounter['target'])
-            for feat in sorted(outfeats,
-                               key=lambda x: x[prottabledata.HEADER_PROTEIN]):
+            try:
+                fdr = tdcounter['decoy'] / float(tdcounter['target'])
+            except ZeroDivisionError:
+                fdr = 1
+            for feat in sorted(outfeats, key=lambda x: x[prottabledata.HEADER_PROTEIN]):
                 feat[fdrheader] = fdr
                 yield feat
             outfeats = []
         tdcounter[outfeat['target_decoy']] += 1
+        # Only report target hits so FDR=D/T
         if outfeat['target_decoy'] == 'target':
             outfeats.append(outfeat)
-    # Only report target hits so FDR=D/T
-    fdr = tdcounter['decoy'] / float(tdcounter['target'])
-    for feat in sorted(outfeats,
-                       key=lambda x: x[prottabledata.HEADER_PROTEIN]):
+    # All proteins from bottom of list (no new score) get FDR as well
+    try:
+        fdr = tdcounter['decoy'] / float(tdcounter['target'])
+    except ZeroDivisionError:
+        fdr = 1
+    for feat in sorted(outfeats, key=lambda x: x[prottabledata.HEADER_PROTEIN]):
         feat[fdrheader] = fdr
         yield feat
 

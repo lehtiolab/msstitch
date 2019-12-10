@@ -58,6 +58,10 @@ def get_proteins_genes(fastafn, fastadelim=None, genefield=None):
                                      'Description', 'HGNC symbol',
                                      'Associated Gene Name'):
             yield line
+    elif 'Gene stable ID' in firstline.split('\t'):
+        for line in parse_biomart_fn(fastafn, 'Gene stable ID', 'Protein stable ID',
+                                     'Gene description', 'HGNC symbol', 'Gene name'):
+            yield line
 
 
 def parse_protein_identifier(record):

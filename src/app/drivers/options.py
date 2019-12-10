@@ -36,12 +36,6 @@ shared_options = {
     'fasta': {'driverattr': 'fasta', 'dest': 'fasta',
               'type': 'file', 'help': 'FASTA sequence database',
               'required': False, 'default': False, 'clarg': '--fasta'},
-    'trypsinize': {'driverattr': 'trypsinize', 'dest': 'trypsinize',
-                   'clarg': '--notrypsin', 'required': False,
-                   'action': 'store_const', 'const': False, 'default': True,
-                   'help': 'Do not trypsinize. User is expected to deliver a'
-                   'pretrypsinized FASTA file'
-                   },
     'featuretype': {'driverattr': 'featuretype', 'dest': 'featuretype',
                     'help': 'Feature type to use for qvality. Can either be '
                     'psm or peptide.', 'clarg': '--feattype',
@@ -118,7 +112,44 @@ shared_options = {
     'minlength': {'driverattr': 'minlength', 'dest': 'minlength', 'default': 0,
                   'help': 'Minimum length of peptide to be included',
                   'type': int, 'clarg': '--minlen', 'required': False},
+    'addbioset': {'driverattr': 'addbioset', 'dest': 'addbioset',
+            'clarg': '--addbioset', 'required': False, 'action': 'store_const',
+            'default': False, 'const': True,
+            'help': 'Add biological setname from DB lookup to PSM table',
+               },
+    'addmiscleav': {'driverattr': 'addmiscleav', 'dest': 'addmiscleav',
+            'clarg': '--addmiscleav', 'required': False, 'action': 'store_const',
+            'default': False, 'const': True, 'help': 'Add missed cleavages to PSM table',
+               },
 }
+
+sequence_options = {
+    'scramble': {
+        'driverattr': 'scramble', 'dest': 'scramble', 'clarg': '--scramble',
+        'help': 'Decoy scrambling method, use: "reverse": reverse peptides fully, '
+        '"tryp_rev": tryptic reverse, or "prot_rev": protein reverse.',
+        'required': False, 'default': 'tryp_rev'},
+    'ignoretarget': {
+        'driverattr': 'ignoretarget', 'dest': 'ignoretarget', 'clarg': '--ignore-target-hits',
+        'help': 'Do not remove tryptic peptides from sequence where they match target DB',
+        'required': False, 'action': 'store_const', 'const': True, 'default': False},
+    'trypsinize': {'driverattr': 'trypsinize', 'dest': 'trypsinize',
+               'clarg': '--notrypsin', 'required': False,
+               'action': 'store_const', 'const': False, 'default': True,
+               'help': 'Do not trypsinize. User is expected to deliver a'
+               'pretrypsinized FASTA file'
+               },
+    'max_shuffle': {'driverattr': 'max_shuffle', 'dest': 'max_shuffle',
+               'clarg': '--maxshuffle', 'required': False, 'type': int, 'default': 10,
+               'help': 'Amount of times to attempt to shuffle a decoy reversed peptide '
+               'to make it not match target peptides, before discarding it.'
+               ' Used when using tryptic peptide reversal (not protein reversal)'},
+    'miss_cleavage': {'driverattr': 'miss_cleavage', 'dest': 'miss_cleavage',
+               'clarg': '--miscleav', 'required': False, 'type': int, 'default': 0,
+               'help': 'Amount of missed cleavages to allow when trypsinizing',
+               },
+        }
+
 
 mslookup_options = {
     'falloff': {'driverattr': 'falloff', 'dest': 'falloff',
@@ -296,8 +327,11 @@ mzidtsv_options = {
                     'to a new table, or when no --protcol is specified, '
                     'pastes ratios to the PSM table they are fetched from.',
                     'type': 'file', 'required': False},
-    'mzidfn': {'driverattr': 'mzidfn', 'clarg': '--mzid', 'help': 'mzIdentML',
-               'type': 'file'},
+    'percofn': {'driverattr': 'percofn', 'clarg': '--perco', 'help': 'Percolator '
+        'XML output file', 'type': 'file'},
+    'mzidfns': {'driverattr': 'mzidfns', 'clarg': '--mzids', 'help': 'MzIdentML '
+        ' output files belonging to PSM table TSV files, use same order as for TSVs', 
+        'type': 'file', 'nargs': '+'},
     'bioset': {'driverattr': 'bioset', 'clarg': '--bioset', 'const': True,
                'action': 'store_const', 'default': False,
                'help': 'this enables automatic splitting on '
@@ -418,4 +452,9 @@ peptable_options.update({
                     'data in output, but use gene names instead. '
                     'These need to have been stored when '
                     'creating a PSM lookup.'},
+    'qvalthreshold': {'driverattr': 'qvalthreshold', 'dest': 'qvalthreshold',
+        'type': float, 'clarg': '--qvalthreshold', 'help': 'Specifies the '
+        'inclusion threshold for q-values to fit a linear model to. Any scores/'
+        'q-values below this threshold will not be used.', 'default': 10e-4,
+        'required': False},
 })

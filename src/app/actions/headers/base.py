@@ -14,7 +14,7 @@ def generate_general_header(headerfields, fieldtypes, firstfield, oldheader,
     if not oldheader:
         header = [firstfield]
     else:
-        header = oldheader[:]
+        header = [firstfield] + oldheader[1:]
     poolfields = OrderedDict()
     poolfields[None] = []  # Have non-pool/set columns come before pool-columns
     if group_by_field:
@@ -47,14 +47,17 @@ def generate_general_header(headerfields, fieldtypes, firstfield, oldheader,
     return header
 
 
-def generate_headerfields(headertypes, allfield_defs, poolnames, db=False):
+def generate_headerfields(headertypes, allfield_defs, poolnames, db=False, genecentric=False):
     """Returns a headerfields object (dict) which contains information on
     fields of the header, including optional pool names"""
     hfields = {}
     for fieldtype in headertypes:
         if fieldtype == 'isoquant':
             continue
-        hfield_definitions = allfield_defs[fieldtype](poolnames)
+        elif fieldtype == 'proteindata':
+            hfield_definitions = allfield_defs[fieldtype](poolnames, genecentric)
+        else:
+            hfield_definitions = allfield_defs[fieldtype](poolnames)
         hfields[fieldtype] = OrderedDict()
         for fieldname, poolnames in hfield_definitions.items():
             hfields[fieldtype][fieldname] = get_header_field(fieldname,

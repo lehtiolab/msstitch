@@ -21,7 +21,8 @@ class ModelQValuesDriver(PepProttableDriver):
     def set_options(self):
         super().set_options()
         self.options.update(self.define_options(['scorecolpattern',
-                                                 'fdrcolpattern'],
+                                                 'fdrcolpattern',
+                                                 'qvalthreshold'],
                                                 peptable_options))
         self.options['--fdrcolpattern'].update({'required': True})
 
@@ -39,4 +40,4 @@ class ModelQValuesDriver(PepProttableDriver):
         self.features = prep.recalculate_qvals_linear_model(self.fn,
                                                             self.scorecol,
                                                             self.qvalcol,
-                                                            10e-4)
+                                                            self.qvalthreshold)

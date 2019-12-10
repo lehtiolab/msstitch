@@ -1,4 +1,4 @@
-Protein accession	Q-score best peptide
+Protein ID	Q-score best peptide
 decoy_SHMT2	1.0089512235473235
 decoy_ALDOA	0.7647241233129475
 decoy_CASP7	0.44538971477383593

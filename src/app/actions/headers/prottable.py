@@ -6,16 +6,16 @@ from app.actions.headers.base import (generate_general_header,
 from app.dataformats import prottable as prottabledata
 
 
-def generate_header(headerfields, oldheader, group_by_field):
+def generate_protein_header(headerfields, oldheader, group_by_field, genecentric):
     """Returns a header as a list, ready to write to TSV file"""
     fieldtypes = ['proteindata', 'probability', 'proteinfdr', 'proteinpep',
                   'precursorquant', 'isoquant', 'bestpepscore']
-    return generate_general_header(headerfields, fieldtypes,
-                                   prottabledata.HEADER_PROTEIN, oldheader,
+    firstfield = prottabledata.ACCESSIONS[genecentric]
+    return generate_general_header(headerfields, fieldtypes, firstfield, oldheader,
                                    group_by_field)
 
 
-def get_prottable_headerfields(headertypes, lookup=False, poolnames=False):
+def get_prottable_headerfields(headertypes, lookup=False, poolnames=False, genecentric=False):
     """Called by driver to generate headerfields object"""
     field_defs = {'isoquant': get_isoquant_fields,
                   'precursorquant': get_precursorquant_fields,
@@ -25,7 +25,7 @@ def get_prottable_headerfields(headertypes, lookup=False, poolnames=False):
                   'proteinpep': get_proteinpep_fields,
                   'bestpepscore': get_bestpeptide_fields,
                   }
-    return generate_headerfields(headertypes, field_defs, poolnames, lookup)
+    return generate_headerfields(headertypes, field_defs, poolnames, lookup, genecentric)
 
 
 def get_precursorquant_fields(poolnames=False):
@@ -44,18 +44,24 @@ def get_proteinpep_fields(poolnames=False):
     return {prottabledata.HEADER_PEP: poolnames}
 
 
-def get_proteininfo_fields(poolnames=False):
+def get_proteininfo_fields(poolnames=False, genecentric=False):
     """Returns header fields for protein (group) information.
     Some fields are shared between pools, others are specific
     for a pool"""
     allfields = OrderedDict()
-    basefields = [prottabledata.HEADER_GENE,
-                  prottabledata.HEADER_ASSOCIATED,
-                  prottabledata.HEADER_DESCRIPTION,
-                  prottabledata.HEADER_COVERAGE,
-                  prottabledata.HEADER_NO_PROTEIN,
-                  prottabledata.HEADER_CONTENTPROT,
-                  ]
+    basefields = {
+            False: [
+                prottabledata.HEADER_GENEID, prottabledata.HEADER_GENENAME,
+                prottabledata.HEADER_DESCRIPTION, prottabledata.HEADER_COVERAGE,
+                prottabledata.HEADER_NO_PROTEIN, prottabledata.HEADER_CONTENTPROT,
+                ],
+            'genes': [
+                prottabledata.HEADER_GENENAME, prottabledata.HEADER_PROTEINS,
+                prottabledata.HEADER_DESCRIPTION],
+            'assoc': [
+                prottabledata.HEADER_GENEID, prottabledata.HEADER_PROTEINS,
+                prottabledata.HEADER_DESCRIPTION],
+            }[genecentric]
     poolfields = [prottabledata.HEADER_NO_UNIPEP,
                   prottabledata.HEADER_NO_PEPTIDE,
                   prottabledata.HEADER_NO_PSM,

@@ -1,4 +1,4 @@
-Protein accession	fake_ch0	fake_ch1	fake_ch2	fake_ch3	fake_ch4	fake_ch5	fake_ch6	fake_ch7	fake_ch0 - # quanted PSMs	fake_ch1 - # quanted PSMs	fake_ch2 - # quanted PSMs	fake_ch3 - # quanted PSMs	fake_ch4 - # quanted PSMs	fake_ch5 - # quanted PSMs	fake_ch6 - # quanted PSMs	fake_ch7 - # quanted PSMs
+Protein ID	fake_ch0	fake_ch1	fake_ch2	fake_ch3	fake_ch4	fake_ch5	fake_ch6	fake_ch7	fake_ch0 - # quanted PSMs	fake_ch1 - # quanted PSMs	fake_ch2 - # quanted PSMs	fake_ch3 - # quanted PSMs	fake_ch4 - # quanted PSMs	fake_ch5 - # quanted PSMs	fake_ch6 - # quanted PSMs	fake_ch7 - # quanted PSMs
 ABCD	1	1.12409801404631	0.948905035118128	0.530267276562823	0.836160085733818	0.709671181981296	1.03591743278747	1.04893770789526	2	2	2	2	2	2	2	2
 CDEF	1	0.954194268068633	1.68507574784277	1.88737268341815	1	1	0.645260728800023	0.872295441314488	1	1	1	1	1	1	1	1
 DEFG	1	1.13116285454781	1.44674870443487	1.45296218105777	1.13793183637497	1.25237159822673	0.948026291727098	1	1	1	1	1	1	1	1	1

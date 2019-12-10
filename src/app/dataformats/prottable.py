@@ -1,6 +1,9 @@
 HEADER_ACCESSION = 'Accession'
-HEADER_PROTEIN = 'Protein accession'
+HEADER_PROTEIN = 'Protein ID'
+HEADER_PROTEINS = 'Protein ID(s)'
 HEADER_GENE = 'Gene'
+HEADER_GENEID = 'Gene ID'
+HEADER_GENENAME = 'Gene Name'
 HEADER_ASSOCIATED = 'Associated gene ID'
 HEADER_DESCRIPTION = 'Description'
 HEADER_COVERAGE = 'Coverage'
@@ -19,3 +22,8 @@ HEADER_PEP = 'PEP'
 HEADER_QVAL_MODELED = 'q-value (linear model)'
 HEADER_QSCORE = 'Q-score best peptide'
 PICKED_HEADER = [HEADER_PROTEIN, HEADER_QSCORE]
+ACCESSIONS = {
+        False: HEADER_PROTEIN, 
+        'genes': HEADER_GENEID,
+        'assoc': HEADER_GENENAME,
+        }

@@ -6,15 +6,17 @@ from app.drivers.pepprottable import PepProttableDriver
 
 class ProttableDriver(PepProttableDriver):
     def __init__(self):
+        self.genecentric = False
         super().__init__()
         self.infiletype = 'protein table'
 
     def create_header(self):
         self.headerfields = head.get_prottable_headerfields(self.headertypes,
                                                             self.lookup,
-                                                            self.poolnames)
-        self.header = head.generate_header(self.headerfields, self.oldheader,
-                                           self.group_by_field)
+                                                            self.poolnames,
+                                                            self.genecentric)
+        self.header = head.generate_protein_header(self.headerfields, self.oldheader, 
+                self.group_by_field, self.genecentric)
 
 
 class ProttableAddData(ProttableDriver):

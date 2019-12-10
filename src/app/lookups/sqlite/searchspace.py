@@ -12,19 +12,19 @@ class SearchSpaceDB(DatabaseConnection):
         This way we can still use the index.
         """
         if reverse_seqs:
-            peps = [(x[0][::-1],) for x in peps]
+            peps = ((x[0][::-1],) for x in peps)
         cursor = self.get_cursor()
         cursor.executemany(
-            'INSERT INTO known_searchspace(seqs) VALUES (?)', peps)
+            'INSERT OR IGNORE INTO known_searchspace(seqs) VALUES (?)', peps)
         self.conn.commit()
 
     def index_peps(self, reverse_seqs):
         if reverse_seqs:
             self.index_column('reverse_seqs_index', 'known_searchspace',
-                              'seqs COLLATE NOCASE')
+                              'seqs COLLATE NOCASE', unique=True)
         else:
-            self.index_column('reverse_seqs_index', 'known_searchspace',
-                              'seqs')
+            self.index_column('sequence_index', 'known_searchspace',
+                              'seqs', unique=True)
 
     def store_pep_proteins(self, pepproteins):
         cursor = self.get_cursor()
@@ -35,6 +35,17 @@ class SearchSpaceDB(DatabaseConnection):
     def index_proteins(self):
         self.index_column('pepix', 'protein_peptides', 'seq')
         self.conn.commit()
+
+    def get_multi_seq(self, allseqs):
+        cursor = self.get_cursor()
+        maxparam = 999
+        allseqs_found = set()
+        for i in range(0, len(allseqs), maxparam):
+            seqs = allseqs[i:i+maxparam]
+            sql = 'SELECT seqs FROM known_searchspace WHERE seqs IN ({})'.format(
+                    ', '.join('?' for _ in seqs))
+            [allseqs_found.add(x[0]) for x in cursor.execute(sql, seqs)]
+        return allseqs_found
 
     def check_seq_exists(self, seq, amount_ntermwildcards):
         """Look up sequence in sqlite DB. Returns True or False if it

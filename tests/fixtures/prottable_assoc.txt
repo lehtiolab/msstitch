@@ -1,4 +1,4 @@
-Protein accession
+Protein ID
 SHMT2
 ALDOA
 CASP7

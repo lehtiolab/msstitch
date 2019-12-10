@@ -49,6 +49,8 @@ def create_pep_protein_quant_lookup(fns, pqdb, poolnames, featcolnr, patterns,
         return
     if psmnrpattern is not None:
         psmcolmap = get_colmap(fns, psmnrpattern)
+    else:
+        psmcolmap = False
     create_isobaric_quant_lookup(fns, tablefn_map,
                                  feat_map, pqdb,
                                  featcolnr,
@@ -102,9 +104,9 @@ def create_isobaric_quant_lookup(fns, tablefn_map, featmap, pqdb,
     """Creates a lookup dict from peptide/protein quant input files and some
     input parameters. This assumes the order of quant columns and
     number-of-PSM columns is the same."""
-    pqdb.store_quant_channels(map_psmnrcol_to_quantcol(allquantcols,
-                                                       psmcolmap,
-                                                       tablefn_map))
+    pqdb.store_quant_channels(
+            map_psmnrcol_to_quantcol(allquantcols, psmcolmap, tablefn_map),
+            psmcolmap)
     quantmap = pqdb.get_quantchannel_map()
     to_store = []
     for fn, header, pquant in tsvreader.generate_tsv_pep_protein_quants(fns):
@@ -112,9 +114,9 @@ def create_isobaric_quant_lookup(fns, tablefn_map, featmap, pqdb,
                                      featmap, featcolnr, quantmap)
         to_store.extend(pqdata)
         if len(to_store) > 10000:
-            pqdb.store_isobaric_quants(to_store)
+            pqdb.store_isobaric_quants(to_store, psmcolmap)
             to_store = []
-    pqdb.store_isobaric_quants(to_store)
+    pqdb.store_isobaric_quants(to_store, psmcolmap)
 
 
 def map_psmnrcol_to_quantcol(quantcols, psmcols, tablefn_map):

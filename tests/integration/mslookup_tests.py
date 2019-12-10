@@ -13,6 +13,127 @@ class SearchspaceLookup(basetests.BaseTest):
     executable = 'msslookup'
 
 
+class TestTrypsinize(SearchspaceLookup):
+    suffix = '_tryp.fa'
+    command = 'trypsinize'
+    infilename = 'proteins.fasta'
+
+    def run_case(self, minlen, cutproline, miscleav):
+        options = ['-o', self.resultfn]
+        seqtype = 'fully_tryptic'
+        if minlen:
+            options.extend(['--minlen', str(minlen)])
+        if cutproline:
+            options.extend(['--cutproline'])
+            seqtype = 'proline_cuts'
+        if miscleav:
+            options.extend(['--miscleav', str(miscleav)])
+            seqtype = 'miscleav'
+        cmd = self.run_command(options)
+        with open(os.path.join(self.fixdir, 'peptides_trypsinized.yml')) as fp:
+            tryp_sequences = yaml.load(fp)
+        for rec in SeqIO.parse(self.resultfn, 'fasta'):
+            self.assertEqual(tryp_sequences[seqtype][str(rec.seq)], rec.id)
+            if minlen:
+                self.assertGreaterEqual(len(str(rec.seq)), minlen)
+
+
+    def test_fullytryptic(self):
+        self.run_case(8, False, False)
+
+    def test_prolinecut(self):
+        self.run_case(False, True, False)
+
+    def test_miss_cleavage(self):
+        self.run_case(False, False, 1)
+
+
+class TestDecoyFa(SearchspaceLookup):
+    command = 'makedecoy'
+    infilename = 'twoproteins.fasta'
+
+    def run_check(self, options):
+        self.resultfn = os.path.join(self.workdir, 'decoy.fa')
+        options.extend(['-o', self.resultfn])
+        self.run_command(options)
+
+    def run_without_db(self, options):
+        self.run_check(options)
+
+    def run_with_existing_db(self, options):
+        self.copy_db_to_workdir('decoycheck.sqlite', 'decoycheck.sqlite')
+        options.extend(['--dbfile', 'decoycheck.sqlite'])
+        self.run_check(options)
+
+    def check_seqs(self, checkfile, targetscrambling=False):
+        checkfa = SeqIO.index(os.path.join(self.fixdir, checkfile), 'fasta')
+        resfa = SeqIO.index(self.resultfn, 'fasta')
+        for seqid, seq in resfa.items():
+            try:
+                self.assertEqual(seq.seq, checkfa[seqid].seq)
+            except AssertionError:
+                if targetscrambling:
+                    self.assertEqual(seq.seq[-1], checkfa[seqid].seq[-1])
+                    self.assertEqual(set(seq.seq), set(checkfa[seqid].seq))
+                else:
+                    raise
+        for seqid, seq in checkfa.items():
+            try:
+                self.assertEqual(seq.seq, resfa[seqid].seq)
+            except AssertionError:
+                if targetscrambling:
+                    self.assertEqual(seq.seq[-1], resfa[seqid].seq[-1])
+                    self.assertEqual(set(seq.seq), set(resfa[seqid].seq))
+                else:
+                    raise
+
+    def test_tryprev_predb(self):
+        self.run_with_existing_db(['--scramble', 'tryp_rev', '--maxshuffle', '10'])
+        self.check_seqs('decoy_tryprev_targetcheck.fasta', targetscrambling=True)
+
+    def test_tryprev_yesdb(self):
+        self.run_without_db(['--scramble', 'tryp_rev'])
+        self.check_seqs('decoy_tryprev_targetcheck.fasta', targetscrambling=True)
+
+    def test_tryprev_yesdb_minlen(self):
+        self.run_without_db(['--scramble', 'tryp_rev', '--minlen', '5'])
+        self.check_seqs('decoy_tryprev_check_minlen.fasta', targetscrambling=True)
+
+    def test_tryprev_ignore_db(self):
+        self.run_without_db(['--scramble', 'tryp_rev', '--ignore-target-hits'])
+        self.check_seqs('decoy_tryprev.fasta', targetscrambling=True)
+
+    def test_protrev(self):
+        self.run_without_db(['--scramble', 'prot_rev'])
+        self.check_seqs('decoy_twoproteins.fasta')
+
+
+class TestDecoyFaPretryp(SearchspaceLookup):
+    command = 'makedecoy'
+    infilename = 'twoproteins_tryp.fa'
+
+    def test_tryprev_predb_trypsinized(self):
+        self.infilename = 'twoproteins_tryp.fa'
+        self.resultfn = os.path.join(self.workdir, 'decoy.fa')
+        options = ['--scramble', 'tryp_rev', '--notrypsin', '-o', self.resultfn]
+        self.run_command(options)
+        self.check_seqs('decoy_twoproteins_tryp.fa', True)
+
+    def check_seqs(self, checkfile, targetscrambling=False):
+        checkfa = SeqIO.index(os.path.join(self.fixdir, checkfile), 'fasta')
+        resfa = SeqIO.index(self.resultfn, 'fasta')
+        for seqid, seq in resfa.items():
+            try:
+                self.assertEqual(seq.seq, checkfa[seqid].seq)
+            except AssertionError:
+                # peptide may have been shuffled when in db
+                if targetscrambling:
+                    self.assertEqual(seq.seq[-1], checkfa[seqid].seq[-1])
+                    self.assertEqual(set(seq.seq), set(checkfa[seqid].seq))
+                else:
+                    raise
+
+
 class TestTrypticLookup(SearchspaceLookup):
     command = 'seqspace'
 
@@ -29,9 +150,10 @@ class TestTrypticLookup(SearchspaceLookup):
             options = []
         with open(os.path.join(self.fixdir, 'peptides_trypsinized.yml')) as fp:
             tryp_sequences = yaml.load(fp)
-        sequences = tryp_sequences['fully_tryptic']
         if seqtype is not None:
-            sequences.extend(tryp_sequences[seqtype])
+            sequences = tryp_sequences[seqtype]
+        else:
+            sequences = tryp_sequences['fully_tryptic']
         self.run_command(options)
         self.assertTrue(self.all_seqs_in_db(self.resultfn,
                                             sequences, seqtype))
@@ -621,11 +743,11 @@ class TestProteintableLookup(TestProtPepTableLookup):
                    'JOIN protquant_channels AS pc USING(channel_id)')
         self.check_isobaric(iso_sql)
 
-    def test_genecentric(self):
+    def test_genecentric_no_psmnrs(self):
         options = ['--setnames', 'S1', '--genecentric', 'genes',
                    '--isobquantcolpattern', 'itraq4plex', '--fdrcolpattern',
-                   'q-value', '--pepcolpattern', 'PEP', '--psmnrcolpattern',
-                   'quanted', '--ms1quantcolpattern', 'area', '--protcol', '2',
+                   'q-value', '--pepcolpattern', 'PEP', 
+                   '--ms1quantcolpattern', 'area', '--protcol', '2',
                    '--probcolpattern', 'probability']
         sql = ('SELECT p.gene_acc, ppq.quant, pf.fdr, pp.pep, '
                'ppr.probability '

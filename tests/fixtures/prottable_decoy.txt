@@ -1,4 +1,4 @@
-Protein accession	Q-score best peptide
+Protein ID	Q-score best peptide
 decoy_ENSP00000261438	1.0089512235473235
 decoy_ENSP00000425909	0.7647241233129475
 decoy_ENSP00000442321	0.44538971477383593

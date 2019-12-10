@@ -348,7 +348,7 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                  'description TEXT',
                                  'FOREIGN KEY(protein_acc) '
                                  'REFERENCES proteins(protein_acc)'],
-                   'known_searchspace': ['seqs TEXT'],
+                   'known_searchspace': ['seqs TEXT UNIQUE'],
                    'protein_peptides': ['seq TEXT', 'protid TEXT',
                                         'pos INTEGER'],
                    }
@@ -389,6 +389,7 @@ class DatabaseConnection(object):
         cur.execute('PRAGMA FOREIGN_KEYS=ON')
         cur.execute('PRAGMA cache_size=10000')
         cur.execute('PRAGMA journal_mode=MEMORY')
+        cur.execute('PRAGMA synchronous=OFF')
 
     def get_cursor(self):
         """Quickly get cursor, abstracting connection"""
@@ -398,12 +399,13 @@ class DatabaseConnection(object):
         """Close connection to db, abstracts connection object"""
         self.conn.close()
 
-    def index_column(self, index_name, table, column):
+    def index_column(self, index_name, table, column, unique=False):
         """Called by interfaces to index specific column in table"""
         cursor = self.get_cursor()
+        unique = 'unique' if unique else ''
         try:
             cursor.execute(
-                'CREATE INDEX {0} on {1}({2})'.format(index_name, table, column))
+                'CREATE {3} INDEX {0} on {1}({2})'.format(index_name, table, column, unique))
         except sqlite3.OperationalError as error:
             print(error)
             print('Skipping index creation and assuming it exists already')

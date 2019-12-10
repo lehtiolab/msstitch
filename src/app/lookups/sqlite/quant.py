@@ -27,13 +27,13 @@ class QuantDB(ResultLookupInterface):
         cursor = self.get_cursor()
         return cursor.execute(sql), sqlfields
 
-    def get_precursor_quant_window(self, windowsize, minmz):
+
+    def get_fnfeats(self, fn_id):
         cursor = self.get_cursor()
         return cursor.execute(
-            'SELECT feature_id, mzmlfile_id, charge, mz, retention_time '
+            'SELECT mz, feature_id, charge, retention_time '
             'FROM ms1_quant '
-            'WHERE mz > ? ORDER BY mz '
-            'LIMIT ?', (minmz, windowsize))
+            'WHERE mzmlfile_id=?', (fn_id,))
 
     def get_all_quantmaps(self):
         """Returns all unique quant channels from lookup as list"""
@@ -59,6 +59,18 @@ class IsobaricQuantDB(QuantDB):
     def index_isobaric_quants(self):
         self.index_column('spectraid_index', 'isobaric_quant', 'spectra_id')
         self.index_column('channel_id_index', 'isobaric_quant', 'channel_id')
+
+    def get_specmap(self, fn_id, retention_time=False, scan_nr=False):
+        """Returns all spectra ids for spectra filename, keyed by 
+        retention time"""
+        cursor = self.get_cursor()
+        values = [fn_id]
+        if retention_time:
+            sql = 'SELECT retention_time,spectra_id FROM mzml WHERE mzmlfile_id=? '
+        elif scan_nr:
+            sql = 'SELECT scan_nr,spectra_id FROM mzml WHERE mzmlfile_id=? '
+        cursor.execute(sql, tuple(values))
+        return {k: sid for k,sid in cursor.fetchall()}
 
     def get_channelmap(self):
         cursor = self.get_cursor()
@@ -87,4 +99,4 @@ class PrecursorQuantDB(QuantDB):
     def get_spectra_mz_sorted(self):
         return self.get_cursor().execute(
             'SELECT spectra_id, mzmlfile_id, charge, mz, retention_time '
-            'FROM mzml ORDER BY mz')
+            'FROM mzml ORDER BY mzmlfile_id,mz')
