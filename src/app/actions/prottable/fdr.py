@@ -91,7 +91,7 @@ def get_score(protein):
 def create_td_gene_map(tfastafn, dfastafn, fastadelim, genefield):
     tfasta = (x[1].split('.')[0] for x in
               fasta.get_proteins_genes(tfastafn, fastadelim, genefield))
-    dfasta = (x[1].split('.')[0] for x in
+    dfasta = ('{}{}'.format(mzidtsvdata.DECOY_PREFIX, x[1].split('.')[0]) for x in
               fasta.get_proteins_genes(dfastafn, fastadelim, genefield))
     tdmap = {}
     for target, decoy in zip(tfasta, dfasta):
