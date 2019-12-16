@@ -68,11 +68,15 @@ def store_proteins_descriptions(pgdb, fastafn, tsvfn, mapfn, header, decoy,
         proteins = [x for x in proteins]
         pgdb.store_proteins(proteins, evidences, sequences)
         if not mapfn:
+            prefixlen = len(mzidtsvdata.DECOY_PREFIX)
             associations = fastareader.get_proteins_genes(fastafn, fastadelim,
                                                           genefield)
             genes, descriptions = [], []
             for assoc in associations:
-                genes.append((assoc[1], assoc[0]))
+                gene = assoc[1]
+                if decoy and gene[:prefixlen] != mzidtsvdata.DECOY_PREFIX:
+                    gene = '{}{}'.format(mzidtsvdata.DECOY_PREFIX, assoc[1])
+                genes.append((gene, assoc[0]))
                 descriptions.append((assoc[0], assoc[3]))
             pgdb.store_descriptions(descriptions)
             pgdb.store_genes(genes)
