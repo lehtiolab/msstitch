@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.19] - 2019-12-16
+### Fixed
+- Protein FDR calculation for ENSG entries was correct but only if the fasta file contained a decoy_ prefix on the ENSG entries, which they did not
+  in the case of makedecoy generated.
+
+
 ## [2.18] - 2019-12-04
 ### Changed
 - makedecoy shuffles x times and then does no longer throw out the peptide but keeps the original decoy. Otherwise the decoy database gets smaller
