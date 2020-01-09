@@ -53,23 +53,30 @@ def split_target_decoy(elements, ns, filter_type):
             elements[feat], td[filter_type], ns)
     return feats_to_process
 
-
-def protein_header_split_generator(elements, headers, ns):
+def protein_header_split_generator(elements, ns, can_headers, headers):
     """Loop through proteins of each PSM/peptide. If a protein does not
     match any of headers, discard PSM/peptide immediately"""
     for el in elements:
-        header_not_matching = False
+        header_matching = False
+        can = False
         for protein in el.findall('{%s}protein_id' % ns['xmlns']):
-            if not any((re.search(h, protein.text) for h in headers)):
-                header_not_matching = True
-                break
-        if header_not_matching:
-            formatting.clear_el(el)
-        else:
+            if any(re.search(h, protein.text) for h in can_headers):
+                can = True
+                break #as soon as a canonical match was found break
+            
+            """for classes other than known,
+               check if there is at least one protein matching the specified header
+               and those with matches to the canonical proteins will not be used"""
+            if any(re.search(h, protein.text) for h in headers):
+                    header_matching = True
+        if (header_matching and not can) or ((headers == can_headers) and can):
             yield formatting.string_and_clear(el, ns)
-
+        else:
+            formatting.clear_el(el)
 
 def split_protein_header_id_type(elements, ns, protheaders):
-    headers = protheaders.strip(';').split(';')
-    return {x: protein_header_split_generator(elements[x], headers, ns)
+    can_headers = protheaders.split('|')[0].split(':')[-1].strip(';').split(';')
+    other_headers = protheaders.split('|')[-1].split(':')[-1].strip(';').split(';')
+    return {x: protein_header_split_generator(elements[x], ns, can_headers, other_headers)
             for x in ['psm', 'peptide']}
+
