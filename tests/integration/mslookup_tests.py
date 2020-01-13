@@ -2,7 +2,7 @@ from tests.integration import basetests
 
 import os
 import sqlite3
-import yaml
+import json
 from Bio import SeqIO
 from lxml import etree
 
@@ -31,7 +31,7 @@ class TestTrypsinize(SearchspaceLookup):
             seqtype = 'miscleav'
         cmd = self.run_command(options)
         with open(os.path.join(self.fixdir, 'peptides_trypsinized.yml')) as fp:
-            tryp_sequences = yaml.load(fp)
+            tryp_sequences = json.load(fp)
         for rec in SeqIO.parse(self.resultfn, 'fasta'):
             self.assertEqual(tryp_sequences[seqtype][str(rec.seq)], rec.id)
             if minlen:
@@ -149,7 +149,7 @@ class TestTrypticLookup(SearchspaceLookup):
         if options is None:
             options = []
         with open(os.path.join(self.fixdir, 'peptides_trypsinized.yml')) as fp:
-            tryp_sequences = yaml.load(fp)
+            tryp_sequences = json.load(fp)
         if seqtype is not None:
             sequences = tryp_sequences[seqtype]
         else:
@@ -205,7 +205,7 @@ class TestWholeProteinSeqLookup(SearchspaceLookup):
 
     def query_db_assert(self, options):
         with open(os.path.join(self.fixdir, 'allpeptides_proteins.yml')) as fp:
-            sequences = [x.replace('L', 'I') for x in yaml.load(fp)]
+            sequences = [x.replace('L', 'I') for x in json.load(fp)]
         options.extend(['--minlen', '6'])
         self.run_command(options)
         self.assertTrue(self.all_seqs_in_db(self.resultfn, sequences,
