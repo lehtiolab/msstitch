@@ -19,7 +19,7 @@ def switch_psm_to_peptable_fields(oldheader):
 
 
 def get_psm2pep_header(oldheader, isobq_pattern=False, precurqfield=False):
-    header = oldheader[:]
+    header = [x for x in oldheader if x != mzidtsvdata.HEADER_SPECFILE]
     if isobq_pattern:
         isocols = tsv.get_columns_by_pattern(header, isobq_pattern)
         for col in isocols:
@@ -27,9 +27,8 @@ def get_psm2pep_header(oldheader, isobq_pattern=False, precurqfield=False):
     if precurqfield:
         header = [peptabledata.HEADER_AREA if x == precurqfield
                   else x for x in header]
-    peptable_header = [peptabledata.HEADER_LINKED_PSMS]
-    ix = header.index(mzidtsvdata.HEADER_PEPTIDE)
-    header = header[:ix] + peptable_header + header[ix:]
+    header = [peptabledata.HEADER_PEPTIDE, 
+            peptabledata.HEADER_LINKED_PSMS] + [x for x in header if x != mzidtsvdata.HEADER_PEPTIDE]
     switch_map = switch_psm_to_peptable_fields(header)
     return [switch_map[field] if field in switch_map else field
             for field in header]
