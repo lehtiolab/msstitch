@@ -30,7 +30,7 @@ class SpectraLookupDriver(base.LookupDriver):
     def set_options(self):
         super().set_options()
         self.options['--dbfile'].update({'required': False, 'default': None})
-        self.options.update(self.define_options(['multifiles', 'setnames'],
+        self.options.update(self.define_options(['outfile', 'multifiles', 'setnames'],
                                                 mslookup_options))
 
     def create_lookup(self):

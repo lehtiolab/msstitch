@@ -281,6 +281,15 @@ class TestSpectraLookup(basetests.MSLookupTest):
         self.run_command(options)
         self.check_spectra(setnames)
 
+    def test_spectra_newdb_filename(self):
+        setnames = ['Set1']
+        outfn = 'testresult.sql'
+        self.resultfn = os.path.join(self.workdir, outfn)
+        options = ['-o', outfn, '--setnames']
+        options.extend(setnames)
+        self.run_command(options)
+        self.check_spectra(setnames)
+
     def test_spectra_olddb(self):
         self.copy_db_to_workdir('bioset_lookup.sqlite')
         setnames = ['Set1']
