@@ -33,6 +33,7 @@ def create_isobaric_quant_lookup(quantdb, specfn_consensus_els, channelmap):
                            qdata[channel_no]))
             if len(quants) == DB_STORE_CHUNK:
                 quantdb.store_isobaric_quants(quants)
+                quants = []
     quantdb.store_isobaric_quants(quants)
     quantdb.index_isobaric_quants()
 
