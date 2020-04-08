@@ -1,6 +1,5 @@
 import os
 from app.readers import xml as basereader
-from app.readers import ml
 from app.readers import xmlformatting as formatting
 
 
@@ -10,16 +9,16 @@ def mzmlfn_ms2_spectra_generator(mzmlfiles):
         mslvl = fetch_cvparam_value_by_name(specparams, 'ms level')
         if mslvl != '2':
             continue
-        scannr = get_spec_scan_nr(spec)
-        rt = fetch_cvparams_values_from_subel(spec, 'scan',
-                                              ['scan start time'], ns)
-        iit = fetch_cvparams_values_from_subel(spec, 'scan',
-                                               ['ion injection time'], ns)
-        mz, charge = fetch_cvparams_values_from_subel(spec, 'selectedIon',
-                                                      ['selected ion m/z',
-                                                       'charge state'], ns)
-        yield fn, {'scan': scannr, 'rt': rt[0], 'iit': iit[0], 'mz': mz,
-                   'charge': charge}
+        specscanid = spec.attrib['id']
+        rt, iit, ionmob  = fetch_cvparams_values_from_subel(spec, 'scan', [
+            'scan start time', 
+            'ion injection time', 
+            'inverse reduced ion mobility'], ns)
+        mz, charge = fetch_cvparams_values_from_subel(spec, 'selectedIon', [
+            'selected ion m/z',
+            'charge state'], ns)
+        yield fn, {'specscanid': specscanid, 'ionmob': ionmob, 'rt': rt, 'iit': iit, 
+                'mz': mz, 'charge': charge}
         formatting.clear_el(spec)
 
 
@@ -61,8 +60,3 @@ def fetch_cvparam_value_by_name(params, name):
 
 def get_all_cvparams(element, ns):
     return element.findall('{%s}cvParam' % ns['xmlns'])
-
-
-def get_spec_scan_nr(spectrum):
-    """Returns scan number of mzML spectrum as a str."""
-    return ml.get_scan_nr(spectrum, 'id')

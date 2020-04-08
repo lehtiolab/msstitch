@@ -4,18 +4,24 @@ from app.lookups.sqlite.biosets import BioSetDB
 class SpectraDB(BioSetDB):
     def add_tables(self):
         super().add_tables()
-        self.create_tables(['mzml'])
+        self.create_tables(['mzml', 'ioninjtime', 'ionmob'])
 
-    def store_mzmls(self, spectra):
+    def store_mzmls(self, spectra, ioninj, ionmob):
         self.store_many(
-            'INSERT INTO mzml(spectra_id, mzmlfile_id, scan_nr, charge, mz, '
-            'retention_time, ion_injection_time) '
-            'VALUES (?, ?, ?, ?, ?, ?, ?)', spectra)
+            'INSERT INTO mzml(spectra_id, mzmlfile_id, scan_sid, charge, mz, '
+            'retention_time) '
+            'VALUES (?, ?, ?, ?, ?, ?)', spectra)
+        self.store_many(
+            'INSERT INTO ioninjtime(spectra_id, ion_injection_time) '
+            'VALUES(?, ?)', ioninj)
+        self.store_many(
+            'INSERT INTO ionmob(spectra_id, ion_mobility) '
+            'VALUES(?, ?)', ionmob)
 
     def index_mzml(self):
         self.index_column('spectra_id_index', 'mzml', 'spectra_id')
         self.index_column('mzmlfnid_mzml_index', 'mzml', 'mzmlfile_id')
-        self.index_column('scan_index', 'mzml', 'scan_nr')
+        self.index_column('scan_index', 'mzml', 'scan_sid')
         self.index_column('specrt_index', 'mzml', 'retention_time')
         self.index_column('specmz_index', 'mzml', 'mz')
 

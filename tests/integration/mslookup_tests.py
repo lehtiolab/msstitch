@@ -223,25 +223,32 @@ class TestWholeProteinSeqLookup(SearchspaceLookup):
         self.query_db_assert(options)
 
 
-class TestSpectraLookup(basetests.MSLookupTest):
+class SpectraLookup(basetests.MSLookupTest):
     command = 'spectra'
-    infilename = 'few_spectra.mzML'
-
-    def check_spectra(self, bsets):
-        sql = ('SELECT mf.mzmlfilename, bs.set_name, s.scan_nr, s.charge, '
-               's.mz, s.retention_time, s.ion_injection_time, s.spectra_id '
+    def check_spectra(self, bsets, ionmob=False):
+        sql = ('SELECT mf.mzmlfilename, bs.set_name, s.scan_sid, s.charge, '
+               's.mz, s.retention_time, s.spectra_id '
+               '{} '
                'FROM mzml AS s '
+               '{} '
                'JOIN mzmlfiles AS mf USING(mzmlfile_id) '
                'JOIN biosets AS bs USING(set_id)')
+        if ionmob:
+            ionsql = (', imob.ion_mobility', ' JOIN ionmob AS imob USING(spectra_id) ')
+        else:
+            ionsql = (', iit.ion_injection_time', ' JOIN ioninjtime AS iit USING(spectra_id) ')
+        sql = sql.format(*ionsql)
         specrecs = {}
         for rec in self.get_values_from_db(self.resultfn, sql):
             specrecs[rec[2]] = {'fn': rec[0], 'bs': rec[1], 'charge': rec[3],
-                                'mz': rec[4], 'rt': rec[5], 'iit': rec[6],
-                                'sid': rec[7]}
-        for scannr, spec in self.get_spectra_mzml(self.infile, bsets):
+                                'mz': rec[4], 'rt': rec[5], 
+                                'sid': rec[6],
+                                'ion_something': rec[7],
+                                }
+        for scannr, spec in self.get_spectra_mzml(self.infile, bsets, ionmob):
             self.assertEqual(spec, specrecs[scannr])
 
-    def get_spectra_mzml(self, infiles, bsets):
+    def get_spectra_mzml(self, infiles, bsets, ionmob):
         def get_cvparam_value(parent, name, ns):
             return [x.attrib['value'] for x in
                     parent.findall('{%s}cvParam' % ns['xmlns'])
@@ -259,20 +266,32 @@ class TestSpectraLookup(basetests.MSLookupTest):
                     infile, tag='{%s}spectrum' % ns['xmlns']):
                 if get_cvparam_value(spectrum, 'ms level', ns)[0] != "2":
                     continue
-                scannr = spectrum.attrib['id'].split()[2].split('=')[1]
+                scansid = spectrum.attrib['id']
                 scan = multifind(['scanList', 'scan'], spectrum, ns)
                 precursor = multifind(['precursorList', 'precursor',
                                        'selectedIonList', 'selectedIon'],
                                       spectrum, ns)
                 rt = get_cvparam_value(scan, 'scan start time', ns)[0]
-                iit = get_cvparam_value(scan, 'ion injection time', ns)[0]
-                charge = get_cvparam_value(precursor, 'charge state', ns)[0]
+                if ionmob:
+                    ion = get_cvparam_value(scan, 'inverse reduced ion mobility', ns)[0]
+                else:
+                    ion = get_cvparam_value(scan, 'ion injection time', ns)[0]
+                print(etree.tostring(precursor))
+                charge = get_cvparam_value(precursor, 'charge state', ns)
+                charge = charge[0] if len(charge) else False
                 mz = get_cvparam_value(precursor, 'selected ion m/z', ns)[0]
                 exp_data = {'fn': os.path.basename(infile), 'bs': bset,
                             'charge': int(charge),
-                            'sid': '{}_{}'.format(mzfnid + 1, scannr),
-                            'mz': float(mz), 'rt': float(rt), 'iit': float(iit)}
-                yield scannr, exp_data
+                            'sid': '{}_{}'.format(mzfnid + 1, scansid),
+                            'mz': float(mz), 'rt': round(float(rt), 12), 'ion_something': round(float(ion), 12)}
+                if not charge:
+                    import sys; sys.stderr.write('{}\n'.format(charge))
+                    sys.stderr.write('{}\n'.format(exp_data))
+                yield scansid, exp_data
+
+
+class TestDDAThermoSpectraLookup(SpectraLookup):
+    infilename = 'few_spectra.mzML'
 
     def test_spectra_newdb(self):
         setnames = ['Set1']
@@ -297,6 +316,17 @@ class TestSpectraLookup(basetests.MSLookupTest):
         options.extend(setnames)
         self.run_command(options)
         self.check_spectra(setnames)
+
+
+class TestDDATIMSSpectraLookup(SpectraLookup):
+    infilename = 'few_spec_timstof.mzML'
+
+    def test_spectra_newdb(self):
+        setnames = ['Set1']
+        options = ['--setnames']
+        options.extend(setnames)
+        self.run_command(options)
+        self.check_spectra(setnames, ionmob=True)
 
 
 class TestPSMLookup(basetests.MSLookupTest):
