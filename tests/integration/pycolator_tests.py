@@ -86,23 +86,34 @@ class TestSplitProteinHeader(TestSplit):
     suffix = ''
 
     def test_splitprotein(self):
-        protheaders = ['ENSP', 'random;decoy']
+        protheaders = ['^ENSP000002', 'ENSP000002|^ENSP000003']
         self.suffix = ''
         options = ['--protheaders'] + protheaders
         self.run_command(options)
-        ensp_result = os.path.join(self.workdir, self.infilename + '_h0.xml')
-        fake_result = os.path.join(self.workdir, self.infilename + '_h1.xml')
-        ensp_contents, dr_contents = self.do_check('splitprotein_h0.xml',
-                                                   'splitprotein_h1.xml',
-                                                   ensp_result, fake_result)
-        ns = self.get_xml_namespace(ensp_result)
+        ensp2_incl = os.path.join(self.workdir, self.infilename + '_h0.xml')
+        ensp3_not_2 = os.path.join(self.workdir, self.infilename + '_h1.xml')
+        first_expected = os.path.join(self.fixdir, 'perco.xml_h0.xml')
+        second_expected = os.path.join(self.fixdir, 'perco.xml_h1.xml')
+        incl_exp_contents = self.read_percolator_out(first_expected)
+        excl_exp_contents = self.read_percolator_out(second_expected)
+        incl_contents = self.read_percolator_out(ensp2_incl)
+        excl_contents = self.read_percolator_out(ensp3_not_2)
+        self.assertEqual(len(incl_contents['psms']),
+                         len(incl_exp_contents['psms']))
+        self.assertEqual(len(incl_contents['peptides']),
+                         len(incl_exp_contents['peptides']))
+        self.assertEqual(len(excl_contents['psms']),
+                         len(excl_exp_contents['psms']))
+        self.assertEqual(len(excl_contents['peptides']),
+                         len(excl_exp_contents['peptides']))
+        ns = self.get_xml_namespace(ensp2_incl)
         for feat in ['psms', 'peptides']:
-            for el in ensp_contents[feat]:
-                self.assertEqual(
-                    el.find('{%s}protein_id' % ns['xmlns']).text[:4], 'ENSP')
-            for el in dr_contents[feat]:
-                self.assertIn(el.find('{%s}protein_id' % ns['xmlns']).text[:6],
-                              ['decoy_', 'random'])
+            for el in incl_contents[feat]:
+                self.assertIn(
+                        'ENSP000002', [x.text[:10] for x in el.findall('{%s}protein_id' % ns['xmlns'])])
+            for el in excl_contents[feat]:
+                self.assertIn('ENSP000003', [x.text[:10] for x in el.findall('{%s}protein_id' % ns['xmlns'])])
+                self.assertNotIn('ENSP000002', [x.text[:10] for x in el.findall('{%s}protein_id' % ns['xmlns'])])
 
 
 class TestSplitTD(TestSplit):
