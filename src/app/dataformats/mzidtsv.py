@@ -2,6 +2,7 @@ DECOY_PREFIX = 'decoy_'
 
 HEADER_SPECFILE = '#SpecFile'
 HEADER_SCANNR = 'ScanNum'
+HEADER_SPECSCANID = 'SpecID'
 HEADER_CHARGE = 'Charge'
 HEADER_PEPTIDE = 'Peptide'
 HEADER_PROTEIN = 'Protein'

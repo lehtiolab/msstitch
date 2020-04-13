@@ -67,7 +67,7 @@ def generate_tsv_psms_line(fn):
 
 def get_psm_id(line):
     return '{0}_{1}_{2}'.format(line[mzidtsvdata.HEADER_SPECFILE],
-                                line[mzidtsvdata.HEADER_SCANNR],
+                                line[mzidtsvdata.HEADER_SPECSCANID],
                                 line[mzidtsvdata.HEADER_PEPTIDE])
 
 
@@ -88,7 +88,7 @@ def get_psm(line, unroll=False, specfncol=None):
     Return values:
         specfn          -   str
         psm_id 	 	-   str
-        scan            -   str
+        specscanid      -   str
         peptideseq      -   str
         score		-   str
     """
@@ -96,10 +96,10 @@ def get_psm(line, unroll=False, specfncol=None):
         specfncol = mzidtsvdata.HEADER_SPECFILE
     specfn = line[specfncol]
     psm_id = get_psm_id(line)
-    scan = line[mzidtsvdata.HEADER_SCANNR]
+    specscanid = line[mzidtsvdata.HEADER_SPECSCANID]
     peptideseq = get_psm_sequence(line, unroll)
     score = line[mzidtsvdata.HEADER_MSGFSCORE]
-    return specfn, psm_id, scan, peptideseq, score
+    return specfn, psm_id, specscanid, peptideseq, score
 
 
 def get_psm_sequence(line, unroll=False):

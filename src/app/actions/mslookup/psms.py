@@ -22,7 +22,7 @@ def create_psm_lookup(fn, fastafn, mapfn, header, pgdb, unroll=False,
     pepseqmap = pgdb.get_peptide_seq_map()
     psms = []
     for row, psm in enumerate(tsvreader.generate_tsv_psms(fn, header)):
-        specfn, psm_id, scan, seq, score = tsvreader.get_psm(psm, unroll,
+        specfn, psm_id, specscanid, seq, score = tsvreader.get_psm(psm, unroll,
                                                              specfncol)
         if len(psms) % DB_STORE_CHUNK == 0:
             pgdb.store_psms(psms)
@@ -32,8 +32,8 @@ def create_psm_lookup(fn, fastafn, mapfn, header, pgdb, unroll=False,
                      'seq': pepseqmap[seq],
                      'score': score,
                      'specfn': mzmlmap[specfn],
-                     'scannr': scan,
-                     'spec_id': '{}_{}'.format(mzmlmap[specfn], scan),
+                     #'scan': scan,
+                     'spec_id': '{}_{}'.format(mzmlmap[specfn], specscanid),
                      })
     pgdb.store_psms(psms)
     pgdb.index_psms()

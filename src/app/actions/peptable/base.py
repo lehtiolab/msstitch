@@ -14,7 +14,7 @@ def add_peptide(allpeps, psm, key, score, fncol=False, new=False):
 
 def add_psm_link(peptide, psm, fncol):
     peptide['psms'].append('{0}_{1}'.format(psm[fncol],
-                                            psm[psmtsvdata.HEADER_SCANNR]))
+                                            psm[psmtsvdata.HEADER_SPECSCANID]))
 
 
 def evaluate_peptide(peptides, psm, key, higherbetter, scorecol, fncol=False):
