@@ -6,13 +6,12 @@ from app.readers import fasta as fastareader
 DB_STORE_CHUNK = 100000
 
 
-def create_psm_lookup(fn, fastafn, mapfn, header, pgdb, unroll=False,
-                      specfncol=None, decoy=False,
-                      fastadelim=None, genefield=None):
+def create_psm_lookup(fn, fastafn, header, pgdb, unroll=False,
+                      specfncol=None, fastadelim=None, genefield=None):
     """Reads PSMs from file, stores them to a database backend in chunked PSMs.
     """
-    proteins = store_proteins_descriptions(pgdb, fastafn, fn, mapfn, header,
-                                           decoy, fastadelim, genefield)
+    proteins = store_proteins_descriptions(pgdb, fastafn, fn, header,
+                                           fastadelim, genefield)
     mzmlmap = pgdb.get_mzmlfile_map()
     sequences = {}
     for psm in tsvreader.generate_tsv_psms(fn, header):
@@ -32,7 +31,6 @@ def create_psm_lookup(fn, fastafn, mapfn, header, pgdb, unroll=False,
                      'seq': pepseqmap[seq],
                      'score': score,
                      'specfn': mzmlmap[specfn],
-                     #'scan': scan,
                      'spec_id': '{}_{}'.format(mzmlmap[specfn], specscanid),
                      })
     pgdb.store_psms(psms)
@@ -40,57 +38,19 @@ def create_psm_lookup(fn, fastafn, mapfn, header, pgdb, unroll=False,
     store_psm_protein_relations(fn, header, pgdb, proteins)
 
 
-def get_protein_gene_map(mapfn, proteins, decoy):
-    gpmap = {}
-    for protein, gene, symbol, desc in fastareader.get_proteins_genes(mapfn):
-        if protein in proteins:
-            protein = proteins[protein][0]
-            if decoy:
-                symbol = '{}{}'.format(mzidtsvdata.DECOY_PREFIX, symbol)
-                gene = '{}{}'.format(mzidtsvdata.DECOY_PREFIX, gene)
-                desc = None
-            gpmap[protein] = {'gene': gene, 'symbol': symbol, 'desc': desc}
-    return gpmap
-
-
-def store_proteins_descriptions(pgdb, fastafn, tsvfn, mapfn, header, decoy,
-                                fastadelim, genefield):
+def store_proteins_descriptions(pgdb, fastafn, tsvfn, header, fastadelim, genefield):
     if not fastafn:
-        proteins = {}
+        prots = {}
         for psm in tsvreader.generate_tsv_psms(tsvfn, header):
-            proteins.update({x: 1 for x in
+            prots.update({x: 1 for x in
                              tsvreader.get_proteins_from_psm(psm)})
-        proteins = [(protein,) for protein in proteins.keys()]
-        pgdb.store_proteins(proteins)
+        prots = [(protein,) for protein in prots.keys()]
+        pgdb.store_proteins(prots)
     else:
-        proteins, sequences, evidences = fastareader.get_proteins_for_db(
-            fastafn)
-        proteins = [x for x in proteins]
-        pgdb.store_proteins(proteins, evidences, sequences)
-        if not mapfn:
-            prefixlen = len(mzidtsvdata.DECOY_PREFIX)
-            associations = fastareader.get_proteins_genes(fastafn, fastadelim,
-                                                          genefield)
-            genes, descriptions = [], []
-            for assoc in associations:
-                gene = assoc[1]
-                if decoy and gene[:prefixlen] != mzidtsvdata.DECOY_PREFIX:
-                    gene = '{}{}'.format(mzidtsvdata.DECOY_PREFIX, assoc[1])
-                genes.append((gene, assoc[0]))
-                descriptions.append((assoc[0], assoc[3]))
-            pgdb.store_descriptions(descriptions)
-            pgdb.store_genes(genes)
-    if mapfn:
-        proteins_with_versions = {}
-        for protein in proteins:
-            proteins_with_versions[protein[0].split('.')[0]] = protein
-        if decoy:
-            mod = fastareader.get_decoy_mod_string(proteins[0][0])
-            proteins_with_versions = {k.replace(mod, ''): v for k, v
-                                      in proteins_with_versions.items()}
-        gpmap = get_protein_gene_map(mapfn, proteins_with_versions, decoy)
-        pgdb.store_gene_and_associated_id(gpmap)
-    return set([x[0] for x in proteins])
+        prots, seqs, desc, evids, ensgs, symbols = fastareader.get_proteins_for_db(
+            fastafn, fastadelim, genefield)
+        pgdb.store_fasta(prots, evids, seqs, desc, ensgs, symbols)
+    return set([x[0] for x in prots])
 
 
 def store_psm_protein_relations(fn, header, pgdb, proteins):

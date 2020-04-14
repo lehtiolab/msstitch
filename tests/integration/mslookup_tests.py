@@ -332,25 +332,57 @@ class TestDDATIMSSpectraLookup(SpectraLookup):
 class TestPSMLookup(basetests.MSLookupTest):
     command = 'psms'
     base_db_fn = 'spectra_lookup.sqlite'
+    infilename = 'few_spectra.tsv_fdr.tsv'
+    """DB and PSM table contain:
+    - ENSEMBL proteins
+    - a Uniprot swiss protein
+    - A self-annotated protein
+    - A non-annotated (only peptide) proteins
+    """
 
     def check_db_fasta(self, fasta, exp_proteins=None, desc=True):
         if exp_proteins is None:
-            exp_proteins = {rec.id: {'seq': rec.seq, 'desc': rec.description}
-                            for rec in SeqIO.parse(fasta, 'fasta')}
+            exp_proteins = {}
+            for rec in SeqIO.parse(fasta, 'fasta'):
+                rd = rec.description
+                gene = 'NA'
+                if 'gene_symbol:' in rd:
+                    six = rd.index('gene_symbol:') + 12
+                    gix = rd.index('gene:') + 5 
+                    gene = rd[gix: rd.index(' ', gix)]
+                    desc = rd[rd.index('description:') + 12:]
+                elif 'GN=' in rd:
+                    six = rd.index('GN=') + 3
+                    desc = [x for x in rd.split() if '=' not in x][1:]
+                elif 'msstitch_fake_gene' in rd:
+                    # special case fake fasta record for non-standard gene 
+                    six, desc = False, 'NA'
+                    symbol = rd.split()[-1]
+                elif 'msstitch_fake_onlypeptide' in rd:
+                    # special fake fasta record for unannotated peptide
+                    six, symbol, desc = False, 'NA', 'NA'
+                exp_proteins[rec.id] = {
+                        'seq': rec.seq,
+                        'gene': gene,
+                        'desc': desc,
+                        'symbol': rd[six: rd.index(' ', six)] if six else 'NA',
+                        }
         self.check_db_base(exp_proteins)
-        sql = ('SELECT ps.protein_acc, ps.sequence, pd.description '
-               'FROM protein_seq AS ps '
-               'JOIN prot_desc AS pd USING(protein_acc)')
+        sql = ('SELECT ps.protein_acc, ps.sequence, g.gene_acc, aid.assoc_id, pd.description'
+               ' FROM genes AS g JOIN associated_ids AS aid USING(protein_acc)'
+               ' JOIN protein_seq AS ps USING(protein_acc)'
+               ' JOIN prot_desc AS pd USING(protein_acc)')
         if not desc:
             sql = ('SELECT ps.protein_acc, ps.sequence '
                    'FROM protein_seq AS ps '
                    'JOIN prot_desc AS pd USING(protein_acc)')
-        for result_protein in self.get_values_from_db(self.resultfn, sql):
-            self.assertEqual(exp_proteins[result_protein[0]]['seq'],
-                             result_protein[1])
+        for prot, seq, gene, aid, desc in self.get_values_from_db(self.resultfn,
+                                                             sql):
+            self.assertEqual(exp_proteins[prot]['seq'], seq)
             if desc:
-                self.assertEqual(exp_proteins[result_protein[0]]['desc'],
-                                 result_protein[2])
+                self.assertEqual(exp_proteins[prot]['gene'], gene)
+                self.assertEqual(exp_proteins[prot]['symbol'], aid)
+                self.assertEqual(exp_proteins[prot]['desc'], desc)
 
     def check_db_base(self, expected_proteins=None):
         expected_psms = self.get_expected_psms()
@@ -387,174 +419,17 @@ class TestPSMLookup(basetests.MSLookupTest):
                          }
         return psms
 
-
-class TestPSMLookupEnsemblBase(TestPSMLookup):
-    def check_db_map(self, fasta, martmap, versioned=False):
-        exp_proteins = {rec.id: {'seq': rec.seq}
-                        for rec in SeqIO.parse(fasta, 'fasta')}
-        header = self.get_tsvheader(martmap)
-        try:
-            pix = header.index('Ensembl Protein ID')
-        except ValueError:
-            # new biomart version (2017 jan) has no "Ensembl" in header fields
-            pix = header.index('Protein ID')
-            gix = header.index('Gene ID')
-        else:
-            gix = header.index('Ensembl Gene ID')
-        six = header.index('HGNC symbol')
-        dix = header.index('Description')
-        for line in self.get_all_lines(martmap):
-            line = line.strip('\n').split('\t')
-            if versioned:
-                pacc = '{}.2'.format(line[pix])
-            else:
-                pacc = line[pix]
-            exp_proteins[pacc].update({'gene': line[gix],
-                                       'symb': line[six],
-                                       'desc': line[dix],
-                                       })
-        self.check_db_fasta(fasta, exp_proteins)
-        sql = ('SELECT g.protein_acc, g.gene_acc, aid.assoc_id, pd.description'
-               ' FROM genes AS g JOIN associated_ids AS aid USING(protein_acc)'
-               ' JOIN prot_desc AS pd USING(protein_acc)')
-        count = 0
-        for prot, gene, aid, desc in self.get_values_from_db(self.resultfn,
-                                                             sql):
-            count += 1
-            self.assertEqual(gene, exp_proteins[prot]['gene'])
-            self.assertEqual(aid, exp_proteins[prot]['symb'])
-            self.assertEqual(desc, exp_proteins[prot]['desc'])
-        self.assertNotEqual(count, 0)
-
-    def check_db_decoy(self, fasta, martmap):
-        def decoymod(accession):
-            return 'decoy_{}'.format(accession)
-        exp_proteins = {rec.id: {'seq': rec.seq}
-                        for rec in SeqIO.parse(fasta, 'fasta')}
-        header = self.get_tsvheader(martmap)
-        pix = header.index('Ensembl Protein ID')
-        gix = header.index('Ensembl Gene ID')
-        six = header.index('HGNC symbol')
-        dix = header.index('Description')
-        for line in self.get_all_lines(martmap):
-            line = line.strip('\n').split('\t')
-            prot = decoymod(line[pix])
-            exp_proteins[prot].update({'gene': decoymod(line[gix]),
-                                       'symb': decoymod(line[six]),
-                                       'desc': decoymod(line[dix]),
-                                       })
-        self.check_db_fasta(fasta, exp_proteins, desc=False)
-        sql = ('SELECT g.protein_acc, g.gene_acc, aid.assoc_id '
-               'FROM genes AS g JOIN associated_ids AS aid USING(protein_acc)')
-        for prot, gene, aid in self.get_values_from_db(self.resultfn, sql):
-            self.assertEqual(gene, exp_proteins[prot]['gene'])
-            self.assertEqual(aid, exp_proteins[prot]['symb'])
-
-
-class TestPSMLookupEnsembl(TestPSMLookupEnsemblBase):
-    infilename = 'mzidtsv_filtered_fr1-2.txt'
-
     def test_no_fasta(self):
-        options = ['--spectracol', '2']
+        options = ['--spectracol', '1']
         self.run_command(options)
         self.check_db_base()
 
     def test_with_fasta(self):
-        fastafn = os.path.join(self.fixdir, 'ensembl.fasta')
-        options = ['--spectracol', '2', '--fasta', fastafn]
+        fastafn = os.path.join(self.fixdir, 'ens99_small.fasta')
+        options = ['--spectracol', '1', '--fasta', fastafn, 
+                   '--fastadelim', 'pipe', '--genefield', '2']
         self.run_command(options)
         self.check_db_fasta(fastafn)
-
-    def test_fasta_map(self):
-        fastafn = os.path.join(self.fixdir, 'ensembl.fasta')
-        mapfn = os.path.join(self.fixdir, 'biomart.map')
-        options = ['--spectracol', '2', '--fasta', fastafn, '--map', mapfn]
-        self.run_command(options)
-        self.check_db_map(fastafn, mapfn)
-
-    def test_newversion_fasta_map(self):
-        fastafn = os.path.join(self.fixdir, 'ensembl.fasta')
-        mapfn = os.path.join(self.fixdir, 'new_biomart.map')
-        options = ['--spectracol', '2', '--fasta', fastafn, '--map', mapfn]
-        self.run_command(options)
-        self.check_db_map(fastafn, mapfn)
-
-    def test_fasta_map_decoy(self):
-        self.infile = os.path.join(self.fixdir,
-                                   'mzidtsv_filtered_fr1-2_decoy.txt')
-        fastafn = os.path.join(self.fixdir, 'decoy_ensembl.fasta')
-        mapfn = os.path.join(self.fixdir, 'biomart.map')
-        options = ['--spectracol', '2', '--fasta', fastafn,
-                   '--map', mapfn, '--decoy']
-        self.run_command(options)
-        self.check_db_decoy(fastafn, mapfn)
-
-
-class TestPSMLookupEnsemblExtraPeptides(TestPSMLookupEnsemblBase):
-    """For when a DB has been used to which a user has added e.g. novel
-    peptides, which are not annotated to a protein"""
-
-    infilename = 'mzidtsv_filtered_fr1-2_extrapep.txt'
-
-    def test_no_fasta(self):
-        options = ['--spectracol', '2']
-        self.run_command(options)
-        self.check_db_base()
-
-    def test_with_fasta(self):
-        fastafn = os.path.join(self.fixdir, 'ensembl_extrapep.fasta')
-        options = ['--spectracol', '2', '--fasta', fastafn]
-        self.run_command(options)
-        self.check_db_fasta(fastafn)
-
-    def test_fasta_map(self):
-        fastafn = os.path.join(self.fixdir, 'ensembl_extrapep.fasta')
-        mapfn = os.path.join(self.fixdir, 'biomart.map')
-        options = ['--spectracol', '2', '--fasta', fastafn, '--map', mapfn]
-        self.run_command(options)
-        self.check_db_map(fastafn, mapfn)
-
-    def test_fasta_map_decoy(self):
-        self.infile = os.path.join(self.fixdir,
-                                   'mzidtsv_filtered_fr1-2_extrapep_decoy.txt')
-        fastafn = os.path.join(self.fixdir, 'decoy_ensembl_extrapep.fasta')
-        mapfn = os.path.join(self.fixdir, 'biomart.map')
-        options = ['--spectracol', '2', '--fasta', fastafn,
-                   '--map', mapfn, '--decoy']
-        self.run_command(options)
-        self.check_db_decoy(fastafn, mapfn)
-
-
-class TestPSMLookupEnsemblVersioned(TestPSMLookupEnsemblBase):
-    infilename = 'mzidtsv_filtered_fr1-2_versioned_ensembl.txt'
-
-    def test_fasta_map_versions(self):
-        fastafn = os.path.join(self.fixdir, 'ensembl_versioned.fasta')
-        mapfn = os.path.join(self.fixdir, 'biomart.map')
-        options = ['--spectracol', '2', '--fasta', fastafn, '--map', mapfn]
-        self.run_command(options)
-        self.check_db_map(fastafn, mapfn, versioned=True)
-
-
-class TestPSMLookupDelimitedFasta(TestPSMLookup):
-    infilename = 'mzidtsv_filtered_fr1-2_notensembl.txt'
-
-    def test_with_fasta_with_delim(self):
-        fastafn = os.path.join(self.fixdir, 'delim_header.fasta')
-        field, delim, delimname = '2', '|', 'pipe'
-        options = ['--spectracol', '2', '--fasta', fastafn,
-                   '--fastadelim', delimname, '--genefield', field]
-        self.run_command(options)
-        self.check_db_fasta_with_own_format_delimiter(fastafn, delim, field)
-
-    def check_db_fasta_with_own_format_delimiter(self, fasta, delim, field):
-        self.check_db_fasta(fasta)
-        exp_proteins = {rec.id:
-                        {'gene': rec.description.split(delim)[int(field) - 1]}
-                        for rec in SeqIO.parse(fasta, 'fasta')}
-        sql = ('SELECT g.protein_acc, g.gene_acc FROM genes AS g ')
-        for prot, gene in self.get_values_from_db(self.resultfn, sql):
-            self.assertEqual(gene, exp_proteins[prot]['gene'])
 
 
 class TestIsoquantLookup(basetests.MSLookupTest):

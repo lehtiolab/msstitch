@@ -8,6 +8,26 @@ class PSMDB(ResultLookupInterface):
                             'prot_desc', 'protein_psm', 'genes',
                             'associated_ids'])
 
+    def store_fasta(self, prot, evids, seq, desc, ensg, symbols):
+        self.store_proteins(prot, evidence_lvls=evids, sequences=seq)
+        cursor = self.get_cursor()
+        cursor.executemany(
+            'INSERT INTO prot_desc(protein_acc, description) '
+            'VALUES(?, ?)', desc)
+        self.conn.commit()
+        self.index_column('protdesc_index', 'prot_desc', 'protein_acc')
+        cursor = self.get_cursor()
+        cursor.executemany(
+            'INSERT INTO genes(gene_acc, protein_acc) VALUES(?, ?)', ensg)
+        self.conn.commit()
+        self.index_column('gene_index', 'genes', 'protein_acc')
+        cursor = self.get_cursor()
+        cursor.executemany(
+            'INSERT INTO associated_ids(assoc_id, protein_acc) VALUES(?, ?)',
+            symbols)
+        self.conn.commit()
+        self.index_column('associd_index', 'associated_ids', 'protein_acc')
+
     def store_proteins(self, proteins, evidence_lvls=False, sequences=False):
         cursor = self.get_cursor()
         cursor.executemany(
@@ -26,37 +46,6 @@ class PSMDB(ResultLookupInterface):
         self.conn.commit()
         self.index_column('proteins_index', 'proteins', 'protein_acc')
         self.index_column('evidence_index', 'protein_evidence', 'protein_acc')
-
-    def store_descriptions(self, descriptions):
-        cursor = self.get_cursor()
-        cursor.executemany(
-            'INSERT INTO prot_desc(protein_acc, description) '
-            'VALUES(?, ?)', descriptions)
-        self.conn.commit()
-        self.index_column('protdesc_index', 'prot_desc', 'protein_acc')
-
-    def store_gene_and_associated_id(self, feats):
-        genes = ((mapped['gene'], protein) for protein, mapped in feats.items())
-        self.store_genes(genes)
-        syms = ((mapped['symbol'], protein) for protein, mapped in feats.items())
-        self.store_associated_ids(syms)
-        descs = ((protein, mapped['desc']) for protein, mapped in feats.items())
-        self.store_descriptions(descs)
-
-    def store_genes(self, genes):
-        cursor = self.get_cursor()
-        cursor.executemany(
-            'INSERT INTO genes(gene_acc, protein_acc) VALUES(?, ?)', genes)
-        self.conn.commit()
-        self.index_column('gene_index', 'genes', 'protein_acc')
-
-    def store_associated_ids(self, assoc_ids):
-        cursor = self.get_cursor()
-        cursor.executemany(
-            'INSERT INTO associated_ids(assoc_id, protein_acc) VALUES(?, ?)',
-            assoc_ids)
-        self.conn.commit()
-        self.index_column('associd_index', 'associated_ids', 'protein_acc')
 
     def get_protein_gene_map(self):
         cursor = self.get_cursor()
@@ -118,4 +107,3 @@ class PSMDB(ResultLookupInterface):
     def index_protein_peptides(self):
         self.index_column('protein_index', 'protein_psm', 'protein_acc')
         self.index_column('protpsmid_index', 'protein_psm', 'psm_id')
-

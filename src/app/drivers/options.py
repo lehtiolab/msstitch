@@ -164,12 +164,6 @@ mslookup_options = {
                 'flag in order for the lookup to work, since sequences '
                 'will be stored and looked up reversed', 'required': False
                 },
-    'mapfn': {'driverattr': 'mapfn', 'dest': 'mapfn',
-              'type': 'file', 'clarg': '--map',
-              'required': False, 'help': 'File that contains '
-              'a map obtained from ENSEMBL BioMart which '
-              'should contain mappings from protein accession '
-              'to Gene ENSG and Symbol.'},
     'decoy': {'driverattr': 'decoy', 'dest': 'decoy', 'clarg': '--decoy',
               'action': 'store_const', 'const': True,
               'default': False, 'help': 'Specifies lookup is '

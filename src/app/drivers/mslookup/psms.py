@@ -11,8 +11,7 @@ class PSMLookupDriver(base.LookupDriver):
                    'several steps later on, such as protein grouping and '
                    'PSM quantitation. PSM TSV table passed to -i, '
                    'With flag --unroll, --spectracol, and specify a FASTA '
-                   'file with --fasta, a Biomart map file with --map. When '
-                   'using --map for a decoy lookup, use --decoy.')
+                   'file with --fasta.')
 
     def __init__(self):
         super().__init__()
@@ -20,8 +19,7 @@ class PSMLookupDriver(base.LookupDriver):
 
     def set_options(self):
         super().set_options()
-        self.options.update(self.define_options(['spectracol', 'mapfn',
-                                                 'decoy', 'fasta', 'unroll',
+        self.options.update(self.define_options(['spectracol', 'fasta', 'unroll',
                                                  'genefield', 'fastadelim'],
                                                 mslookup_options))
 
@@ -30,6 +28,5 @@ class PSMLookupDriver(base.LookupDriver):
         specfncol = header[int(self.spectracol) - 1]
         fastadelim, genefield = self.get_fastadelim_genefield(self.fastadelim,
                                                               self.genefield)
-        lookup.create_psm_lookup(self.fn, self.fasta, self.mapfn, header,
-                                 self.lookup, self.unroll, specfncol,
-                                 self.decoy, fastadelim, genefield)
+        lookup.create_psm_lookup(self.fn, self.fasta, header, self.lookup, 
+                self.unroll, specfncol, fastadelim, genefield)
