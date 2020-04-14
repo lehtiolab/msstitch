@@ -64,13 +64,16 @@ def store_psm_protein_relations(fn, header, pgdb, proteins):
     store_soon = False
     for psm in tsvreader.generate_tsv_psms(fn, header):
         psm_id, prots = tsvreader.get_pepproteins(psm)
-        prots = [x for x in prots if x in proteins]
+        # TODO can this be removed permanently? 
+        # Filter proteins to only include those that match the protein 
+        # accessions in fasta so we get the correct names, filter out the badly annotated peptides
+        # prots = [x for x in prots if x in proteins]
         try:
             # In case the PSMs are presented unrolled
             allpsms[psm_id].extend(prots)
         except KeyError:
             allpsms[psm_id] = prots
-        if len(psmids_to_store) % DB_STORE_CHUNK == 0:
+        if len(psmids_to_store) > DB_STORE_CHUNK:
             store_soon = True
         if store_soon and last_id != psm_id:
             pgdb.store_peptides_proteins(allpsms, psmids_to_store)

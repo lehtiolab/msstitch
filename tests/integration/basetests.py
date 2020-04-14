@@ -204,11 +204,12 @@ class BaseTestPycolator(BaseTest):
 
 class MzidTSVBaseTest(BaseTest):
     executable = 'msspsmtable'
-    infilename = 'mzidtsv.txt'
+    infilename = 'few_spectra.tsv'
+    dbfn = 'target_psms.sqlite'
 
     def setUp(self):
         super().setUp()
-        self.dbfile = os.path.join(self.fixdir, 'mzidtsv_db.sqlite')
+        self.dbfile = os.path.join(self.fixdir, self.dbfn)
 
     def rowify(self, records):
         row, rownr = [], 0

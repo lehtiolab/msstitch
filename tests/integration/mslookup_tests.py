@@ -332,7 +332,7 @@ class TestDDATIMSSpectraLookup(SpectraLookup):
 class TestPSMLookup(basetests.MSLookupTest):
     command = 'psms'
     base_db_fn = 'spectra_lookup.sqlite'
-    infilename = 'few_spectra.tsv_fdr.tsv'
+    infilename = 'target.tsv'
     """DB and PSM table contain:
     - ENSEMBL proteins
     - a Uniprot swiss protein
