@@ -11,8 +11,8 @@ def get_proteins_for_db(fastafn, fastadelim, genefield):
     proteins = ((x,) for x in records.keys())
     sequences = ((acc, str(rec.seq)) for acc, (rec, rtype) in records.items())
     desc = ((acc, get_description(rec, rtype)) for acc, (rec, rtype) in records.items() if rtype)
-    evid = ((acc, get_uniprot_evidence_level(rec)) for acc, (rec, rtype) in 
-        records.items() if rtype == 'swiss')
+    evid = ((acc, get_uniprot_evidence_level(rec, rtype)) for acc, (rec, rtype) in 
+        records.items())
     ensgs = ((get_ensg(rec), acc) for acc, (rec, rtype) in records.items()
             if rtype == 'ensembl')
     def sym_out():
@@ -105,10 +105,12 @@ def get_symbol(record, rectype, fastadelim, genefield):
         return 'NA'
 
 
-def get_uniprot_evidence_level(record):
+def get_uniprot_evidence_level(record, rtype):
     """Returns uniprot protein existence evidence level for a fasta header.
     Evidence levels are 1-5, but we return 5 - x since sorting still demands
     that higher is better."""
+    if rtype != 'swiss':
+        return -1
     for item in record.description.split():
         item = item.split('=')
         try:
