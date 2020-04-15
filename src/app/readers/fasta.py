@@ -83,18 +83,18 @@ def get_other_gene(record, fastadelim, genefield):
 def get_ensg(record):
     fields = [x.split(':') for x in record.description.split()]
     try:
-        return [x[1] for x in fields if x[0] == 'gene'][0]
-    except:
+        return [x[1] for x in fields if x[0] == 'gene' and len(x) == 2][0]
+    except IndexError:
         raise RuntimeError('ENSEMBL detected but cannot find gene ENSG in fasta')
 
 
 def get_symbol(record, rectype, fastadelim, genefield):
     if rectype == 'ensembl':
         fields = [x.split(':') for x in record.description.split()]
-        sym = [x[1] for x in fields if x[0] == 'gene_symbol']
+        sym = [x[1] for x in fields if x[0] == 'gene_symbol' and len(x) == 2]
     elif rectype == 'swiss':
         fields = [x.split('=') for x in record.description.split()]
-        sym = [x[1] for x in fields if x[0] == 'GN']
+        sym = [x[1] for x in fields if x[0] == 'GN' and len(x) == 2]
     elif fastadelim in record.description and genefield:
         return record.description.split(fastadelim)[genefield]
     else:
@@ -114,7 +114,7 @@ def get_uniprot_evidence_level(record, rtype):
     for item in record.description.split():
         item = item.split('=')
         try:
-            if item[0] == 'PE':
+            if item[0] == 'PE' and len(item) == 2:
                 return 5 - int(item[1])
         except IndexError:
             continue
