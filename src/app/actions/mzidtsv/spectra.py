@@ -32,8 +32,11 @@ def generate_psms_spectradata(lookup, tsvfn, oldheader, bioset, miscleav):
     for (row, psm), specdata in psm_specdata:
         outpsm = {x: y for x, y in psm.items()}
         if row == int(specdata[0]):
+            inj = str(specdata[3])
+            imob = str(specdata[4])
             outpsm.update({mzidtsvdata.HEADER_RETENTION_TIME: str(specdata[2]),
-                           mzidtsvdata.HEADER_INJECTION_TIME: str(specdata[3]),
+                           mzidtsvdata.HEADER_INJECTION_TIME: inj if inj != 'None' else 'NA',
+                           mzidtsvdata.HEADER_ION_MOB: imob if imob != 'None' else 'NA',
                            })
             if bioset:
                 outpsm[mzidtsvdata.HEADER_SETNAME] = str(specdata[1])

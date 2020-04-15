@@ -10,42 +10,51 @@ from tests.integration import basetests
 class TestAddPSMData(basetests.MzidTSVBaseTest):
     command = 'specdata'
     suffix = '_spectradata.tsv'
-    infilename = 'mzidtsv_filtered_fr1-2_nospecdata.txt'
-
-    # TODO duplicated code, decide when we know what is to be in this (add data) module
-    def test_addspecdata_basic(self):
-        options = ['--dbfile', self.dbfile, '--spectracol', '2']
-        self.run_command(options)
-        sql = ('SELECT pr.rownr, sp.retention_time, '
-               'sp.ion_injection_time '
-               'FROM psmrows AS pr JOIN psms USING(psm_id) '
-               'JOIN mzml AS sp USING(spectra_id) '
-               'JOIN mzmlfiles USING(mzmlfile_id) '
-               'ORDER BY pr.rownr')
-        fields = ['Retention time(min)', 'Ion injection time(ms)']
-        expected_values = self.process_dbvalues_both(self.dbfile, sql, [], [1, 2], fields)
-        self.check_results_sql(fields, self.rowify(expected_values))
+    infilename = 'few_spectra.tsv_fdr.tsv'
 
     def test_addspec_miscleav_bioset(self):
-        options = ['--dbfile', self.dbfile, '--spectracol', '2', '--addmiscleav', '--addbioset']
+        options = ['--dbfile', self.dbfile, '--spectracol', '1', '--addmiscleav', '--addbioset']
         self.run_command(options)
         sql = ('SELECT pr.rownr, bs.set_name, sp.retention_time, '
-               'sp.ion_injection_time '
+               'iit.ion_injection_time, im.ion_mobility '
                'FROM psmrows AS pr JOIN psms USING(psm_id) '
                'JOIN mzml AS sp USING(spectra_id) '
+               'JOIN ioninjtime AS iit USING(spectra_id) '
+               'JOIN ionmob AS im USING(spectra_id) '
                'JOIN mzmlfiles USING(mzmlfile_id) '
                'JOIN biosets AS bs USING(set_id) '
                'ORDER BY pr.rownr')
         fields = ['Biological set', 'Retention time(min)',
-                  'Ion injection time(ms)']
+                  'Ion injection time(ms)', 'Ion mobility(Vs/cm2)']
         expected_values = self.process_dbvalues_both(self.dbfile, sql, [],
-                                                     [1, 2, 3], fields)
+                                                     [1, 2, 3, 4], fields)
         self.check_results_sql(fields, self.rowify(expected_values))
-
         for val, exp in zip(self.get_values(['missed_cleavage']), self.get_values(['Peptide'], self.infile[0])):
             exp = re.sub('[0-9\+\.]', '', exp[0][1])[:-1]
             self.assertEqual(int(val[0][1]), exp.count('K') + exp.count('R') - exp.count('KP') - exp.count('RP'))
 
+    def test_ionmobility(self):
+        self.infilename = 'few_spec_timstof.tsv'
+        self.dbfile = os.path.join(self.fixdir, 'td_psms_timstof.sqlite')
+        options = ['--dbfile', self.dbfile, '--spectracol', '1', '--addmiscleav', '--addbioset']
+        self.run_command(options)
+        sql = ('SELECT pr.rownr, bs.set_name, sp.retention_time, '
+               'iit.ion_injection_time, im.ion_mobility '
+               'FROM psmrows AS pr JOIN psms USING(psm_id) '
+               'JOIN mzml AS sp USING(spectra_id) '
+               'JOIN ioninjtime AS iit USING(spectra_id) '
+               'JOIN ionmob AS im USING(spectra_id) '
+               'JOIN mzmlfiles USING(mzmlfile_id) '
+               'JOIN biosets AS bs USING(set_id) '
+               'ORDER BY pr.rownr')
+        fields = ['Biological set', 'Retention time(min)',
+                  'Ion injection time(ms)', 'Ion mobility(Vs/cm2)']
+        expected_values = self.process_dbvalues_both(self.dbfile, sql, [],
+                                                     [1, 2, 3, 4], fields)
+        self.check_results_sql(fields, self.rowify(expected_values))
+        for val, exp in zip(self.get_values(['missed_cleavage']), self.get_values(['Peptide'], self.infile[0])):
+            exp = re.sub('[0-9\+\.]', '', exp[0][1])[:-1]
+            self.assertEqual(int(val[0][1]), exp.count('K') + exp.count('R') - exp.count('KP') - exp.count('RP'))
 
 
 class TestQuantTSV(basetests.MzidTSVBaseTest):

@@ -28,10 +28,12 @@ class SpectraDB(BioSetDB):
     def get_exp_spectra_data_rows(self):
         cursor = self.get_cursor()
         return cursor.execute('SELECT pr.rownr, bs.set_name, sp.retention_time, '
-                              'sp.ion_injection_time '
+                              'iit.ion_injection_time, im.ion_mobility '
                               'FROM psmrows AS pr '
                               'JOIN psms AS p USING(psm_id) '
                               'JOIN mzml AS sp USING(spectra_id) '
+                              'LEFT OUTER JOIN ioninjtime AS iit USING(spectra_id) '
+                              'LEFT OUTER JOIN ionmob AS im USING(spectra_id) '
                               'JOIN mzmlfiles as mf USING(mzmlfile_id) '
                               'JOIN biosets AS bs USING(set_id) '
                               'ORDER BY pr.rownr')
