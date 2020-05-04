@@ -53,12 +53,17 @@ def add_fdr_to_mzidtsv(psms, mzid_specidr, mzns, percodata):
     Mix-max FDR and instead use target-decoy competition.
     """
     # mzId results and PSM lines can be zipped
+    scan = 0
     for specidr in mzid_specidr:
         for specidi in specidr.findall('{%s}SpectrumIdentificationItem' % mzns['xmlns']):
             psm = next(psms)
             # percolator psm ID is: samplename_SII_scanindex_rank_scannr_charge_rank
             scanindex, rank = specidi.attrib['id'].replace('SII_', '').split('_')
-            scan = {x.split('=')[0]: x.split('=')[1] for x in specidr.attrib['spectrumID'].split(' ')}['scan']
+            try:
+                scan = int({x.split('=')[0]: x.split('=')[1] for x in specidr.attrib['spectrumID'].split(' ')}['scan'])
+            except KeyError:
+                # in e.g. timstof data there are no true scan numbers, percolator sets it by increment
+                scan += 1
             spfile = os.path.splitext(psm[psmheaders.HEADER_SPECFILE])[0]
             try:
                 percopsm = percodata['{fn}_SII_{ix}_{rk}_{sc}_{ch}_{rk}'.format(fn=spfile, ix=scanindex, sc=scan, rk=rank, ch=psm['Charge'])]
