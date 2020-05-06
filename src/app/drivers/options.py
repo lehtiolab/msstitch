@@ -386,17 +386,22 @@ prottable_options.update({
     't_fasta': {'driverattr': 't_fasta', 'clarg': '--targetfasta',
                 'type': 'file', 'help': 'FASTA file with target proteins '
                 'to determine best scoring proteins of target/decoy pairs '
-                'for pickqvality. In case using --picktype fasta',
+                'for pickqvality. In case using --picktype ensg/genename',
                 'required': False},
     'd_fasta': {'driverattr': 'd_fasta', 'clarg': '--decoyfasta',
                 'type': 'file', 'help': 'FASTA file with decoy proteins '
                 'to determine best scoring proteins of target/decoy pairs '
-                'for pickqvality. In case using --picktype fasta',
+                'for pickqvality. In case using --picktype ensg/genename',
                 'required': False},
     'picktype': {'driverattr': 'picktype', 'clarg': '--picktype',
-                 'type': 'pick', 'picks': ['fasta', 'result'],
-                 'help': 'Feature type to use for qvality. Can be one of '
-                 '[fasta, result].'},
+                 'type': 'pick', 'picks': ['ensg', 'genename', 'result'],
+                 'help': 'Feature type to use for determining picked FDR. Can '
+                 'be one of [ensg, genename, result]. "result" will infer T/D pairs '
+                 'from the protein table and may not be as cleanly matched as '
+                 'using ensg or genename options, which are based on being able to'
+                 ' find genes in the fasta. Use result when genes are coming '
+                 'from another source than your fasta input, or when you dont '
+                 'have exact matching target/decoy paired fasta.'},
     'mergecutoff': {'driverattr': 'mergecutoff', 'clarg': '--mergecutoff',
                     'type': float, 'default': False, 'help': 'FDR cutoff when '
                     'building merged protein table, to use when a cutoff has '

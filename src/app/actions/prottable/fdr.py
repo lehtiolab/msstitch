@@ -68,9 +68,9 @@ def get_picked_proteins(targetprot, decoyprot, theader, dheader, targetfasta,
                         decoyfasta, picktype, fastadelim, genefield):
     t_feats, d_feats = generate_accessionmaps(targetprot, decoyprot, theader,
                                               dheader)
-    if picktype == 'fasta':
-        tdmap = create_td_gene_map(targetfasta, decoyfasta,
-                                   fastadelim, genefield)
+    if picktype in ['ensg', 'genename']:
+        tdmap = create_td_gene_map(targetfasta, decoyfasta, picktype,
+                fastadelim, genefield)
     elif picktype == 'result':
         tdmap = create_td_assoc_map(targetprot, decoyprot, theader, dheader)
     picked_proteins = []
@@ -88,12 +88,10 @@ def get_score(protein):
         return False
 
 
-def create_td_gene_map(tfastafn, dfastafn, fastadelim, genefield):
+def create_td_gene_map(tfastafn, dfastafn, picktype, fastadelim, genefield):
     prefixlen = len(mzidtsvdata.DECOY_PREFIX)
-    tfasta = (x[1].split('.')[0] for x in
-              fasta.get_proteins_genes(tfastafn, fastadelim, genefield))
-    dfasta = ('{}{}'.format(mzidtsvdata.DECOY_PREFIX if x[1][:prefixlen] != mzidtsvdata.DECOY_PREFIX else '', x[1].split('.')[0]) for x in
-              fasta.get_proteins_genes(dfastafn, fastadelim, genefield))
+    tfasta = fasta.get_genes_pickfdr(tfastafn, picktype, fastadelim, genefield)
+    dfasta = fasta.get_genes_pickfdr(dfastafn, picktype, fastadelim, genefield)
     tdmap = {}
     for target, decoy in zip(tfasta, dfasta):
         tdmap[target] = decoy

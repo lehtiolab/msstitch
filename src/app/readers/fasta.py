@@ -80,6 +80,16 @@ def get_other_gene(record, fastadelim, genefield):
     return record.description.split(fastadelim)[genefield]
 
 
+def get_genes_pickfdr(fastafn, picktype, fastadelim, genefield):
+    """Called by protein FDR module for both ENSG and e.g. Uniprot"""
+    for rec in parse_fasta(fastafn):
+        rtype = get_record_type(rec)
+        if rtype == 'ensembl' and picktype == 'ensg':
+            yield get_ensg(rec)
+        elif picktype == 'genename':
+            yield get_symbol(rec, rtype, fastadelim, genefield)
+
+
 def get_ensg(record):
     fields = [x.split(':') for x in record.description.split()]
     try:
