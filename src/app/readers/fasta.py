@@ -19,7 +19,7 @@ def get_proteins_for_db(fastafn, fastadelim, genefield):
         symbols = ((get_symbol(rec, rtype, fastadelim, genefield), acc) for 
                 acc, (rec, rtype) in records.items() if rtype)
         othergene = ((get_other_gene(rec, fastadelim, genefield), acc) for acc, (rec, rtype) in records.items()
-                if not rtype and fastadelim in rec.description)
+                if not rtype and fastadelim and fastadelim in rec.description)
         yield from symbols
         yield from othergene
     return proteins, sequences, desc, evid, ensgs, sym_out()
@@ -105,7 +105,7 @@ def get_symbol(record, rectype, fastadelim, genefield):
     elif rectype == 'swiss':
         fields = [x.split('=') for x in record.description.split()]
         sym = [x[1] for x in fields if x[0] == 'GN' and len(x) == 2]
-    elif fastadelim in record.description and genefield:
+    elif fastadelim and fastadelim in record.description and genefield:
         return record.description.split(fastadelim)[genefield]
     else:
         return 'NA'
