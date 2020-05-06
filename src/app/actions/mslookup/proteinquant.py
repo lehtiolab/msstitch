@@ -4,12 +4,10 @@ from app.readers import tsv as tsvreader
 
 def create_peptidequant_lookup(fns, pqdb, poolnames, pepseq_colnr,
                                ms1_qcolpattern=None, isobqcolpattern=None,
-                               psmnrpattern=None, fdrcolpattern=None,
-                               pepcolpattern=None):
+                               psmnrpattern=None, fdrcolpattern=None):
     """Calls lower level function to create a peptide quant lookup"""
-    patterns = [ms1_qcolpattern, fdrcolpattern, pepcolpattern]
-    storefuns = [pqdb.store_precursor_quants, pqdb.store_fdr,
-                 pqdb.store_pep]
+    patterns = [ms1_qcolpattern, fdrcolpattern]
+    storefuns = [pqdb.store_precursor_quants, pqdb.store_fdr]
     create_pep_protein_quant_lookup(fns, pqdb, poolnames, pepseq_colnr,
                                     patterns, storefuns,
                                     isobqcolpattern, psmnrpattern)
@@ -18,11 +16,10 @@ def create_peptidequant_lookup(fns, pqdb, poolnames, pepseq_colnr,
 def create_proteinquant_lookup(fns, pqdb, poolnames, protacc_colnr,
                                ms1_qcolpattern=None, isobqcolpattern=None,
                                psmnrpattern=None, probcolpattern=None,
-                               fdrcolpattern=None, pepcolpattern=None):
+                               fdrcolpattern=None):
     """Calls lower level function to create a protein quant lookup"""
-    patterns = [ms1_qcolpattern, probcolpattern, fdrcolpattern, pepcolpattern]
-    storefuns = [pqdb.store_precursor_quants, pqdb.store_probability,
-                 pqdb.store_fdr, pqdb.store_pep]
+    patterns = [ms1_qcolpattern, probcolpattern, fdrcolpattern]
+    storefuns = [pqdb.store_precursor_quants, pqdb.store_fdr]
     create_pep_protein_quant_lookup(fns, pqdb, poolnames, protacc_colnr,
                                     patterns, storefuns, isobqcolpattern,
                                     psmnrpattern)

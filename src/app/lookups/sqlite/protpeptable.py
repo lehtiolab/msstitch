@@ -8,8 +8,6 @@ class ProtPepTable(ResultLookupInterface):
                              'isochtable': 'protquant_channels',
                              'prectable': 'protein_precur_quanted',
                              'fdrtable': 'protein_fdr',
-                             'peptable': 'protein_pep',
-                             'probabilitytable': 'protein_probability',
                              },
                  'gene': {'fntable': 'gene_tables',
                           'feattable': 'genes',
@@ -17,8 +15,6 @@ class ProtPepTable(ResultLookupInterface):
                           'isochtable': 'genequant_channels',
                           'prectable': 'gene_precur_quanted',
                           'fdrtable': 'gene_fdr',
-                          'peptable': 'gene_pep',
-                          'probabilitytable': 'gene_probability',
                           },
                  'assoc': {'fntable': 'gene_tables',
                            'feattable': 'associated_ids',
@@ -26,8 +22,6 @@ class ProtPepTable(ResultLookupInterface):
                            'isochtable': 'genequant_channels',
                            'prectable': 'assoc_precur_quanted',
                            'fdrtable': 'assoc_fdr',
-                           'peptable': 'assoc_pep',
-                           'probabilitytable': 'assoc_probability',
                            },
                  'peptide': {'fntable': 'peptide_tables',
                              'feattable': 'peptide_sequences',
@@ -35,7 +29,6 @@ class ProtPepTable(ResultLookupInterface):
                              'isochtable': 'pepquant_channels',
                              'prectable': 'peptide_precur_quanted',
                              'fdrtable': 'peptide_fdr',
-                             'peptable': 'peptide_pep',
                              }
                  }
 
@@ -114,12 +107,6 @@ class ProtPepTable(ResultLookupInterface):
 
     def store_fdr(self, fdr):
         self.store_singlecol('fdrtable', fdr)
-
-    def store_pep(self, pep):
-        self.store_singlecol('peptable', pep)
-
-    def store_probability(self, probabilities):
-        self.store_singlecol('probabilitytable', probabilities)
 
     def update_selects(self, selectmap, fields, fieldcount):
         selectmap.update({field: i + fieldcount
@@ -221,8 +208,7 @@ class ProtPepTable(ResultLookupInterface):
             'FROM {}'.format(self.table_map[self.datatype]['isochtable']))
         return cursor
 
-    def prepare_mergetable_sql(self, precursor=False, isobaric=False,
-                               probability=False, fdr=False, pep=False):
+    def prepare_mergetable_sql(self, precursor=False, isobaric=False, fdr=False):
         """Dynamically build SQL query to generate entries for the multi-set
         merged protein and peptide tables. E.g.
 
@@ -269,23 +255,11 @@ class ProtPepTable(ResultLookupInterface):
                           ['g', 'gt'], True))
             fld = ['preq_val']
             selectmap, count = self.update_selects(selectmap, fld, count)
-        if probability:
-            selects.extend(['gprob.probability'])
-            joins.append((self.table_map[self.datatype]['probabilitytable'],
-                          'gprob', ['g', 'gt'], True))
-            fld = ['prob_val']
-            selectmap, count = self.update_selects(selectmap, fld, count)
         if fdr:
             selects.extend(['gfdr.fdr'])
             joins.append((self.table_map[self.datatype]['fdrtable'], 'gfdr',
                           ['g', 'gt'], True))
             fld = ['fdr_val']
-            selectmap, count = self.update_selects(selectmap, fld, count)
-        if pep:
-            selects.extend(['gpep.pep'])
-            joins.append((self.table_map[self.datatype]['peptable'], 'gpep',
-                          ['g', 'gt'], True))
-            fld = ['pep_val']
             selectmap, count = self.update_selects(selectmap, fld, count)
         sql = ('SELECT {} FROM {} AS {} JOIN biosets AS bs '
                'JOIN {} AS gt ON gt.set_id=bs.set_id'.format(

@@ -18,7 +18,6 @@ class PeptideQuantLookupDriver(ProteinQuantLookupDriver):
                                                 mslookup_options))
         self.options.update(self.define_options(['genecentric'],
                                                 peptable_options))
-        self.options.pop('--probcolpattern')
         self.options.pop('--protcol')
 
     def parse_input(self, **kwargs):
@@ -34,5 +33,4 @@ class PeptideQuantLookupDriver(ProteinQuantLookupDriver):
                                            self.precursorquantcolpattern,
                                            self.quantcolpattern,
                                            self.psmnrcolpattern,
-                                           self.fdrcolpattern,
-                                           self.pepcolpattern)
+                                           self.fdrcolpattern)

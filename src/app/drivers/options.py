@@ -206,17 +206,6 @@ mslookup_options = {
                         'type': str, 'default': None, 'required': False,
                         'help': 'Unique text pattern to identify '
                         'number-of-psms column in input table.'},
-    'probcolpattern': {'driverattr': 'probcolpattern',
-                       'dest': 'probcolpattern', 'clarg': '--probcolpattern',
-                       'type': str, 'required': False,
-                       'default': None,
-                       'help': 'Unique text pattern to identify '
-                       'protein probability column in input table.'},
-    'pepcolpattern': {'driverattr': 'pepcolpattern', 'dest': 'pepcolpattern',
-                      'clarg': '--pepcolpattern', 'type': str,
-                      'required': False, 'default': None,
-                      'help': 'Unique text pattern to identify '
-                      'protein PEP column in input table.'},
 }
 mslookup_options['proteincol'] = {k: v for k, v
                                   in shared_options['proteincol'].items()}
@@ -367,9 +356,6 @@ pepprottable_options = {
     'fdr': {'driverattr': 'fdr', 'clarg': '--fdr', 'action': 'store_const',
             'default': False, 'const': True, 'required': False,
             'help': 'Output FDR data to table'},
-    'pep': {'driverattr': 'pep', 'clarg': '--pep', 'action': 'store_const',
-            'default': False, 'const': True, 'required': False,
-            'help': 'Output posterior error probabilities (PEP) to table.'},
     'quantfile': {'driverattr': 'quantfile', 'clarg': '--quantfile',
                   'type': 'file', 'help': 'File containing isobaric quant '
                   'data to add to table.'},
@@ -388,13 +374,6 @@ prottable_options['proteincol'].update(
     {'default': False, 'help':
      prottable_options['proteincol']['help'].format('Master protein')})
 prottable_options.update({
-    'setname': {'driverattr': 'setname', 'clarg': '--setname', 'type': str,
-                'help': 'Name of biological set to use when adding protein '
-                'info to the table'},
-    'probability': {'driverattr': 'probability', 'clarg': '--probability',
-                    'action': 'store_const', 'default': False, 'const': True,
-                    'help': 'Output protein probability to table.',
-                    'required': False},
     'psmfile': {'driverattr': 'psmfile', 'clarg': '--psmtable', 'type': 'file',
                 'help': 'PSM table file containing precursor quant data to '
                 'add to table.'},

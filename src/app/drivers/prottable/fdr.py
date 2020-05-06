@@ -72,35 +72,3 @@ class PickedFDRDriver(ProttableFDRDriver):
             self.target, self.decoyfn, self.targetheader, self.decoyheader,
             self.headerfields, self.t_fasta, self.d_fasta, self.picktype,
             fastadelim, genefield)
-
-
-class ProttableAddFDRDriver(ProttableAddData):
-    """Assigns FDR to protein table based on qvality output and protein table
-    probabilities"""
-    outsuffix = '_protfdr.txt'
-    command = 'fdr'
-    commandhelp = ('Add protein FDR to protein table by comparing '
-                   'score (peptide q-value, protein probability, etc) '
-                   'with qvality lookup table. Needs --scorecolpattern and '
-                   'qvality output file specified with --qvality')
-
-    def set_options(self):
-        super().set_options()
-        self.options.update(self.define_options(['qvalityout',
-                                                 'scorecolpattern'],
-                                                prottable_options))
-
-    def parse_input(self, **kwargs):
-        super().parse_input(**kwargs)
-        self.headertypes = ['proteinfdr', 'proteinpep']
-
-    def initialize_input(self):
-        super().initialize_input()
-        self.scorecol = reader.get_cols_in_file(self.scorecolpattern,
-                                                self.oldheader, True)
-
-    def set_feature_generator(self):
-        self.features = action.add_protein_fdr(self.qvalityout,
-                                               self.in_proteins,
-                                               self.headerfields,
-                                               self.scorecol)

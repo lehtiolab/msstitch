@@ -8,7 +8,7 @@ from app.dataformats import prottable as prottabledata
 
 def generate_protein_header(headerfields, oldheader, group_by_field, genecentric):
     """Returns a header as a list, ready to write to TSV file"""
-    fieldtypes = ['proteindata', 'probability', 'proteinfdr', 'proteinpep',
+    fieldtypes = ['proteindata', 'proteinfdr', 'proteinpep',
                   'precursorquant', 'isoquant', 'bestpepscore']
     firstfield = prottabledata.ACCESSIONS[genecentric]
     return generate_general_header(headerfields, fieldtypes, firstfield, oldheader,
@@ -19,7 +19,6 @@ def get_prottable_headerfields(headertypes, lookup=False, poolnames=False, genec
     """Called by driver to generate headerfields object"""
     field_defs = {'isoquant': get_isoquant_fields,
                   'precursorquant': get_precursorquant_fields,
-                  'probability': get_probability_fields,
                   'proteindata': get_proteininfo_fields,
                   'proteinfdr': get_proteinfdr_fields,
                   'proteinpep': get_proteinpep_fields,
@@ -30,10 +29,6 @@ def get_prottable_headerfields(headertypes, lookup=False, poolnames=False, genec
 
 def get_precursorquant_fields(poolnames=False):
     return {prottabledata.HEADER_AREA: poolnames}
-
-
-def get_probability_fields(poolnames=False):
-    return {prottabledata.HEADER_PROBABILITY: poolnames}
 
 
 def get_proteinfdr_fields(poolnames=False):

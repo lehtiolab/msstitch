@@ -1,37 +1,12 @@
 from app.dataformats import prottable as prottabledata
 from app.actions.proteindata import (add_psms_to_proteindata,
-                                     add_protgene_to_protdata,
-                                     create_featuredata_map)
+                                     add_protgene_to_protdata)
 
 
 def count_peps_psms(proteindata, p_acc, pool):
     data = proteindata[p_acc]['pools'][pool]
     proteindata[p_acc]['pools'][pool]['psms'] = len(data['psms'])
     proteindata[p_acc]['pools'][pool]['peptides'] = len(data['peptides'])
-
-
-def add_protein_data(proteins, pgdb, headerfields, genecentric=False,
-                     pool_to_output=False):
-    """First creates a map with all master proteins with data,
-    then outputs protein data dicts for rows of a tsv. If a pool
-    is given then only output for that pool will be shown in the
-    protein table."""
-    proteindata = create_featuredata_map(pgdb, genecentric=genecentric,
-                                         psm_fill_fun=add_psms_to_proteindata,
-                                         pgene_fill_fun=add_protgene_to_protdata,
-                                         count_fun=count_peps_psms,
-                                         pool_to_output=pool_to_output,
-                                         get_uniques=True)
-    dataget_fun = {True: get_protein_data_genecentric,
-                   False: get_protein_data_pgrouped}[genecentric is not False]
-    firstfield = prottabledata.ACCESSIONS[genecentric]
-    for protein in proteins:
-        outprotein = {k: v for k, v in protein.items()}
-        outprotein[firstfield] = outprotein.pop(prottabledata.HEADER_PROTEIN)
-        protein_acc = protein[prottabledata.HEADER_PROTEIN]
-        outprotein.update(dataget_fun(proteindata, protein_acc, headerfields))
-        outprotein = {k: str(v) for k, v in outprotein.items()}
-        yield outprotein
 
 
 def get_protein_data_genecentric(proteindata, p_acc, headerfields):

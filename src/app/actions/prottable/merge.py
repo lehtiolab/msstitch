@@ -7,8 +7,7 @@ from app.actions.proteindata import create_featuredata_map
 
 
 def build_proteintable(pqdb, headerfields, mergecutoff, isobaric=False,
-                       precursor=False, probability=False, fdr=False,
-                       pep=False, genecentric=False):
+                       precursor=False, fdr=False, genecentric=False):
     """Fetches proteins and quants from joined lookup table, loops through
     them and when all of a protein's quants have been collected, yields the
     protein quant information."""
@@ -20,17 +19,11 @@ def build_proteintable(pqdb, headerfields, mergecutoff, isobaric=False,
     empty_return = lambda x, y, z: {}
     iso_fun = {True: get_isobaric_quant, False: empty_return}[isobaric]
     ms1_fun = {True: get_precursor_quant, False: empty_return}[precursor]
-    prob_fun = {True: get_prot_probability,
-                False: empty_return}[probability]
     fdr_fun = {True: get_prot_fdr,
                False: empty_return}[fdr]
-    pep_fun = {True: get_prot_pep,
-               False: empty_return}[pep]
     pdata_fun = {True: get_protein_data_genecentric,
                  False: get_protein_data}[genecentric is not False]
-    protein_sql, sqlfieldmap = pqdb.prepare_mergetable_sql(precursor, isobaric,
-                                                           probability, fdr,
-                                                           pep)
+    protein_sql, sqlfieldmap = pqdb.prepare_mergetable_sql(precursor, isobaric, fdr)
     accession_field = prottabledata.ACCESSIONS[genecentric]
     proteins = pqdb.get_merged_features(protein_sql)
     protein = next(proteins)
@@ -38,9 +31,8 @@ def build_proteintable(pqdb, headerfields, mergecutoff, isobaric=False,
     check_prot = {k: v for k, v in outprotein.items()}
     if not mergecutoff or protein_pool_fdr_cutoff(protein, sqlfieldmap,
                                                   mergecutoff):
-        fill_mergefeature(outprotein, iso_fun, ms1_fun, prob_fun, fdr_fun,
-                          pep_fun, pdata_fun, protein, sqlfieldmap,
-                          headerfields, pdmap, accession_field)
+        fill_mergefeature(outprotein, iso_fun, ms1_fun, fdr_fun, pdata_fun, 
+                protein, sqlfieldmap, headerfields, pdmap, accession_field)
     for protein in proteins:
         if mergecutoff and not protein_pool_fdr_cutoff(protein, sqlfieldmap,
                                                        mergecutoff):
@@ -53,9 +45,8 @@ def build_proteintable(pqdb, headerfields, mergecutoff, isobaric=False,
                 yield outprotein
             outprotein = {accession_field: p_acc}
             check_prot = {k: v for k, v in outprotein.items()}
-        fill_mergefeature(outprotein, iso_fun, ms1_fun, prob_fun, fdr_fun,
-                          pep_fun, pdata_fun, protein, sqlfieldmap,
-                          headerfields, pdmap, accession_field)
+        fill_mergefeature(outprotein, iso_fun, ms1_fun, fdr_fun, pdata_fun, 
+                protein, sqlfieldmap, headerfields, pdmap, accession_field)
     if outprotein != check_prot:
         yield outprotein
 
@@ -96,19 +87,7 @@ def get_precursor_quant(protein, sqlmap, headerfields):
                                 prottabledata.HEADER_AREA], 'preq_val')
 
 
-def get_prot_probability(protein, sqlmap, headerfields):
-    return simple_val_fetch(protein, sqlmap,
-                            headerfields['probability'][
-                                prottabledata.HEADER_PROBABILITY], 'prob_val')
-
-
 def get_prot_fdr(protein, sqlmap, headerfields):
     return simple_val_fetch(protein, sqlmap,
                             headerfields['proteinfdr'][
                                 prottabledata.HEADER_QVAL], 'fdr_val')
-
-
-def get_prot_pep(protein, sqlmap, headerfields):
-    return simple_val_fetch(protein, sqlmap,
-                            headerfields['proteinpep'][
-                                prottabledata.HEADER_PEP], 'pep_val')

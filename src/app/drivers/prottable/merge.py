@@ -18,8 +18,7 @@ class BuildProteinTableDriver(ProttableMergeDriver):
         super().set_options()
         self.options.update(self.define_options(['lookupfn', 'genecentric',
                                                  'isobaric', 'precursor',
-                                                 'probability', 'fdr', 'pep',
-                                                 'mock_infn', 'mergecutoff'],
+                                                 'fdr', 'mock_infn', 'mergecutoff'],
                                                 prottable_options))
 
     def parse_input(self, **kwargs):
@@ -39,6 +38,5 @@ class BuildProteinTableDriver(ProttableMergeDriver):
                                                        self.mergecutoff,
                                                        self.isobaric,
                                                        self.precursor,
-                                                       self.probability,
-                                                       self.fdr, self.pep,
+                                                       self.fdr,
                                                        self.genecentric)

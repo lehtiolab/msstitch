@@ -8,8 +8,7 @@ from app.actions.proteindata import create_featuredata_map
 
 
 def build_peptidetable(pqdb, headerfields, isobaric=False,
-                       precursor=False, fdr=False, pep=False,
-                       genecentric=False):
+                       precursor=False, fdr=False, genecentric=False):
     """Fetches peptides and quants from joined lookup table, loops through
     them and when all of a peptides quants/data have been collected, yields
     peptide quant information."""
@@ -22,19 +21,15 @@ def build_peptidetable(pqdb, headerfields, isobaric=False,
     ms1_fun = {True: get_precursor_quant, False: empty_return}[precursor]
     fdr_fun = {True: get_pep_fdr,
                False: empty_return}[fdr]
-    pep_fun = {True: get_peptide_pep,
-               False: empty_return}[pep]
     pdata_fun = get_protein_data
     peptide_sql, sqlfieldmap = pqdb.prepare_mergetable_sql(precursor, isobaric,
-                                                           probability=False,
-                                                           fdr=fdr, pep=pep)
+                                                           fdr=fdr)
     peptides = pqdb.get_merged_features(peptide_sql)
     peptide = next(peptides)
     outpeptide = {peptabledata.HEADER_PEPTIDE: peptide[sqlfieldmap['p_acc']]}
     check_pep = {k: v for k, v in outpeptide.items()}
-    fill_mergefeature(outpeptide, iso_fun, ms1_fun, empty_return, fdr_fun,
-                      pep_fun, pdata_fun, peptide, sqlfieldmap,
-                      headerfields, peptidedatamap)
+    fill_mergefeature(outpeptide, iso_fun, ms1_fun, fdr_fun, pdata_fun, peptide, 
+            sqlfieldmap, headerfields, peptidedatamap)
     for peptide in peptides:
         p_seq = peptide[sqlfieldmap['p_acc']]
         if p_seq != outpeptide[peptabledata.HEADER_PEPTIDE]:
@@ -42,9 +37,8 @@ def build_peptidetable(pqdb, headerfields, isobaric=False,
                 yield outpeptide
             outpeptide = {peptabledata.HEADER_PEPTIDE: p_seq}
             check_pep = {k: v for k, v in outpeptide.items()}
-        fill_mergefeature(outpeptide, iso_fun, ms1_fun, empty_return, fdr_fun,
-                          pep_fun, pdata_fun, peptide, sqlfieldmap,
-                          headerfields, peptidedatamap)
+        fill_mergefeature(outpeptide, iso_fun, ms1_fun, fdr_fun, pdata_fun, 
+                peptide, sqlfieldmap, headerfields, peptidedatamap)
     yield outpeptide
 
 

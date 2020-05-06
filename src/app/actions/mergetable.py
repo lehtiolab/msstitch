@@ -7,11 +7,10 @@ def simple_val_fetch(feature, sqlmap, headerfields, valkey):
     return {hfield: feature[sqlmap[valkey]]}
 
 
-def fill_mergefeature(outfeature, iso_fun, ms1_fun, prob_fun, fdr_fun, pep_fun,
-                      pdata_fun, feature, sqlfieldmap, headerfields,
-                      featuredata_map, accfield=False):
+def fill_mergefeature(outfeature, iso_fun, ms1_fun, fdr_fun, pdata_fun, feature, 
+        sqlfieldmap, headerfields, featuredata_map, accfield=False):
     check_feat = {k: v for k, v in outfeature.items()}
-    for fun in [iso_fun, ms1_fun, prob_fun, fdr_fun, pep_fun]:
+    for fun in [iso_fun, ms1_fun, fdr_fun]:
         outfeature.update(fun(feature, sqlfieldmap, headerfields))
     if outfeature == check_feat:
         return

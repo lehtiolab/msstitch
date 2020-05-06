@@ -31,10 +31,8 @@ class PeptableMergeDriver(PeptableDriver):
 
     def initialize_input(self):
         self.headertypes = ['proteindata']
-        for inflag, htype in zip([self.fdr, self.pep, self.precursor,
-                                  self.isobaric],
-                                 ['peptidefdr', 'peptidepep', 'precursorquant',
-                                  'isoquant']):
+        for inflag, htype in zip([self.fdr, self.precursor, self.isobaric],
+                                 ['peptidefdr', 'precursorquant', 'isoquant']):
             if inflag:
                 self.headertypes.append(htype)
         self.poolnames = [x[0] for x in self.lookup.get_all_poolnames()]

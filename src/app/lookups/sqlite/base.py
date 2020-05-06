@@ -127,15 +127,6 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                    'REFERENCES '
                                    'peptide_tables(peptable_id)'
                                    ],
-                   'peptide_pep': ['pep_id INTEGER',
-                                   'peptable_id INTEGER',
-                                   'pep DOUBLE',
-                                   'FOREIGN KEY(pep_id) '
-                                   'REFERENCES peptide_sequences(pep_id) '
-                                   'FOREIGN KEY(peptable_id) '
-                                   'REFERENCES '
-                                   'peptide_tables(peptable_id)'
-                                   ],
                    'protein_precur_quanted':
                    ['prot_precquant_id INTEGER PRIMARY KEY',
                     'pacc_id INTEGER',
@@ -218,33 +209,6 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                           'REFERENCES '
                                           'protein_tables(prottable_id)'
                                           ],
-                   'gene_probability': ['gene_id INTEGER',
-                                        'genetable_id INTEGER',
-                                        'probability DOUBLE',
-                                        'FOREIGN KEY(gene_id) '
-                                        'REFERENCES genes(gene_id) '
-                                        'FOREIGN KEY(genetable_id) '
-                                        'REFERENCES '
-                                        'gene_tables(genetable_id)'
-                                        ],
-                   'assoc_probability': ['gene_id INTEGER',
-                                         'genetable_id INTEGER',
-                                         'probability DOUBLE',
-                                         'FOREIGN KEY(gene_id) '
-                                         'REFERENCES associated_ids(gene_id) '
-                                         'FOREIGN KEY(genetable_id) '
-                                         'REFERENCES '
-                                         'gene_tables(genetable_id)'
-                                         ],
-                   'protein_probability': ['pacc_id INTEGER',
-                                           'prottable_id INTEGER',
-                                           'probability DOUBLE',
-                                           'FOREIGN KEY(pacc_id) '
-                                           'REFERENCES proteins(pacc_id) '
-                                           'FOREIGN KEY(prottable_id) '
-                                           'REFERENCES '
-                                           'protein_tables(prottable_id)'
-                                           ],
                    'gene_fdr': ['gene_id INTEGER',
                                 'genetable_id INTEGER',
                                 'fdr DOUBLE',
@@ -266,33 +230,6 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                    'protein_fdr': ['pacc_id INTEGER',
                                    'prottable_id INTEGER',
                                    'fdr DOUBLE',
-                                   'FOREIGN KEY(pacc_id) '
-                                   'REFERENCES proteins(pacc_id) '
-                                   'FOREIGN KEY(prottable_id) '
-                                   'REFERENCES '
-                                   'protein_tables(prottable_id)'
-                                   ],
-                   'gene_pep': ['gene_id INTEGER',
-                                'genetable_id INTEGER',
-                                'pep DOUBLE',
-                                'FOREIGN KEY(gene_id) '
-                                'REFERENCES genes(gene_id) '
-                                'FOREIGN KEY(genetable_id) '
-                                'REFERENCES '
-                                'gene_tables(genetable_id)'
-                                ],
-                   'assoc_pep': ['gene_id INTEGER',
-                                 'genetable_id INTEGER',
-                                 'pep DOUBLE',
-                                 'FOREIGN KEY(gene_id) '
-                                 'REFERENCES associated_ids(gene_id) '
-                                 'FOREIGN KEY(genetable_id) '
-                                 'REFERENCES '
-                                 'gene_tables(genetable_id)'
-                                 ],
-                   'protein_pep': ['pacc_id INTEGER',
-                                   'prottable_id INTEGER',
-                                   'pep DOUBLE',
                                    'FOREIGN KEY(pacc_id) '
                                    'REFERENCES proteins(pacc_id) '
                                    'FOREIGN KEY(prottable_id) '

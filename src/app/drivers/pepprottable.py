@@ -7,7 +7,6 @@ class PepProttableDriver(BaseDriver):
     def __init__(self):
         super().__init__()
         self.oldheader = False
-        self.probability = False
         self.poolnames = False
         self.group_by_field = False
 

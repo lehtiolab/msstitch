@@ -29,7 +29,7 @@ class BuildPeptideTableDriver(PeptableMergeDriver):
     def set_options(self):
         super().set_options()
         options = self.define_options(['lookupfn', 'genecentric', 'noncentric',
-                                       'isobaric', 'precursor', 'fdr', 'pep',
+                                       'isobaric', 'precursor', 'fdr', 
                                        'mock_infn'], peptable_options)
         self.options.update(options)
 
@@ -39,5 +39,5 @@ class BuildPeptideTableDriver(PeptableMergeDriver):
                                                        self.headerfields,
                                                        self.isobaric,
                                                        self.precursor,
-                                                       self.fdr, self.pep,
+                                                       self.fdr,
                                                        self.genecentric)

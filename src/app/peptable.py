@@ -2,12 +2,11 @@
 
 import sys
 from app.drivers import startup
-from app.drivers.peptable import (psmtopeptable, merge, model_qvals, isoquant)
+from app.drivers.peptable import (psmtopeptable, merge, model_qvals)
 
 
 def main():
     drivers = [psmtopeptable.MzidTSVPeptableDriver(),
-               isoquant.AddIsobaricQuantDriver(),
                model_qvals.ModelQValuesDriver(),
                merge.BuildPeptideTableDriver(),
                ]

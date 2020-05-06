@@ -7,9 +7,6 @@ class ProtTableDB(ProtPepTable):
               'proteins': ['pacc_id', 'protein_acc'],
               'protein_precur_quanted': ['pacc_id', 'prottable_id', 'quant'],
               'protein_fdr': ['pacc_id', 'prottable_id', 'fdr'],
-              'protein_pep': ['pacc_id', 'prottable_id', 'pep'],
-              'protein_probability': ['pacc_id', 'prottable_id',
-                                      'probability'],
               'protquant_channels': ['channel_id', 'prottable_id',
                                      'channel_name', 'amount_psms_name'],
               'protein_iso_quanted': ['proteinquant_id', 'pacc_id',
@@ -20,8 +17,7 @@ class ProtTableDB(ProtPepTable):
     def add_tables(self):
         self.create_tables(['protein_tables', 'protein_iso_quanted',
                             'protquant_channels', 'protein_precur_quanted',
-                            'protein_probability', 'protein_fdr',
-                            'protein_pep'])
+                            'protein_fdr'])
 
     def get_unique_peptide_nrs(self):
         return self.get_unique_peptide_nrs_base('protein_acc', 'JOIN protein_group_content USING(protein_acc) JOIN protein_group_master AS acctable USING(master_id)')
@@ -39,9 +35,6 @@ class GeneTableDB(ProtPepTable):
     colmap = {'genes': ['gene_id', 'gene_acc', 'protein_acc'],
               'gene_precur_quanted': ['gene_id', 'genetable_id', 'quant'],
               'gene_fdr': ['gene_id', 'genetable_id', 'fdr'],
-              'gene_pep': ['gene_id', 'genetable_id', 'pep'],
-              'gene_probability': ['gene_id', 'genetable_id',
-                                   'probability'],
               'genequant_channels': ['channel_id', 'genetable_id',
                                      'channel_name', 'amount_psms_name'],
               'gene_iso_quanted': ['genequant_id', 'gene_id',
@@ -51,8 +44,7 @@ class GeneTableDB(ProtPepTable):
     def add_tables(self):
         self.create_tables(['gene_tables', 'gene_iso_quanted',
                             'genequant_channels', 'gene_precur_quanted',
-                            'gene_probability', 'gene_fdr',
-                            'gene_pep'])
+                            'gene_fdr'])
 
     def get_protein_gene_symbol_for_map(self):
         fields = ['p.gene_acc', 'pd.description',
@@ -103,8 +95,7 @@ class GeneTableAssocIDsDB(GeneTableDB):
     def add_tables(self):
         self.create_tables(['gene_tables', 'assoc_iso_quanted',
                             'genequant_channels', 'assoc_precur_quanted',
-                            'assoc_probability', 'assoc_fdr',
-                            'assoc_pep'])
+                            'assoc_fdr'])
 
     def get_unique_peptide_nrs(self):
         return self.get_unique_peptide_nrs_base('assoc_id', 'JOIN associated_ids AS acctable USING(protein_acc)')

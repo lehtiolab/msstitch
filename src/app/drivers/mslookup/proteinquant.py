@@ -24,9 +24,7 @@ class ProteinQuantLookupDriver(base.LookupDriver):
                                                  'quantcolpattern',
                                                  'psmnrcolpattern',
                                                  'precursorquantcolpattern',
-                                                 'probcolpattern',
                                                  'fdrcolpattern',
-                                                 'pepcolpattern',
                                                  'multifiles', 'proteincol'],
                                                 mslookup_options))
 
@@ -48,6 +46,4 @@ class ProteinQuantLookupDriver(base.LookupDriver):
                                            self.precursorquantcolpattern,
                                            self.quantcolpattern,
                                            self.psmnrcolpattern,
-                                           self.probcolpattern,
-                                           self.fdrcolpattern,
-                                           self.pepcolpattern)
+                                           self.fdrcolpattern)
