@@ -52,11 +52,13 @@ def create_searchspace(lookup, infile, minlen, proline_cut=False, reverse_seqs=T
 
 def create_trypsinized(proteins, proline_cut=False, miss_cleavage=0, minlen=0):
     for proseq in proteins:
+        trypnr = 0
         outpeps = trypsinize(str(proseq.seq), proline_cut, miss_cleavage)
         if minlen:
             outpeps = [pep for pep in outpeps if len(pep) >= minlen]
         for pep in outpeps:
-            trypseq = SeqIO.SeqRecord(Seq(pep), id=proseq.id, name=proseq.name, description='')
+            trypnr += 1
+            trypseq = SeqIO.SeqRecord(Seq(pep), id='{}_{}'.format(proseq.id, trypnr), name=proseq.name, description='')
             yield trypseq
 
 
