@@ -8,7 +8,7 @@ from tests.integration import basetests
 class TestPSM2Peptable(basetests.PeptableTest):
     command = 'psm2pep'
     suffix = '_peptable.tsv'
-    infilename = 'mzidtsv.txt'
+    infilename = 'quant_target.tsv'
 
     def check(self, fncol):
         psms = {}
@@ -18,9 +18,9 @@ class TestPSM2Peptable(basetests.PeptableTest):
                 psms[psm['Peptide']][score] = psm
             except KeyError:
                 psms[psm['Peptide']] = {score: psm}
-        striplist = ['fake_ch{}'.format(x) for x in range(8)]
-        striplist.extend(['#SpecFile', 'Files/scans for peptide', 'MS1 area',
-                          'MS1 area (highest of all PSMs)'])
+        wildcardstrip = 'tmt10plex_'
+        striplist = ['#SpecFile', 'Files/scans for peptide', 'MS1 area', 
+                'MS1 area (highest of all PSMs)']
         for peptide in self.tsv_generator(self.resultfn):
             for newkey, oldkey in zip(['Peptide', 'peptide q-value', 'Protein'],
                                       ['Peptide sequence', 'q-value', 'Protein(s)']):
@@ -29,9 +29,9 @@ class TestPSM2Peptable(basetests.PeptableTest):
             toppsm = mapping_psms[str(max([float(score) for score
                                            in mapping_psms.keys()]))]
             testpeptide = {k: v for k, v in peptide.items()
-                           if k not in striplist}
+                           if k not in striplist and not k.startswith(wildcardstrip)}
             testpsm = {k: v for k, v in toppsm.items()
-                       if k not in striplist}
+                       if k not in striplist and not k.startswith(wildcardstrip)}
             self.assertEqual(testpeptide, testpsm)
             ms1s = [self.get_float_or_na(psm['MS1 area'])
                     for psm in mapping_psms.values()]
@@ -46,49 +46,35 @@ class TestPSM2Peptable(basetests.PeptableTest):
             with open(self.infile[0]) as fp:
                 fnfield = next(fp).strip().split('\t')[fncol - 1]
             self.assertEqual(psmfnscans,
-                             set(['{}_{}'.format(psm[fnfield], psm['ScanNum'])
+                             set(['{}_{}'.format(psm[fnfield], psm['SpecID'])
                                   for psm in mapping_psms.values()]))
 
     def test_psm2peptable(self):
         fncol = 1
         options = ['--spectracol', str(fncol), '--isobquantcolpattern',
-                   'fake_ch', '--scorecolpattern', 'svm',
+                   'tmt10plex', '--scorecolpattern', 'svm',
                    '--ms1quantcolpattern', 'MS1']
         self.run_command(options)
         self.check(fncol)
 
     def test_no_spectracol(self):
-        options = ['--isobquantcolpattern', 'fake_ch',
+        options = ['--isobquantcolpattern', 'tmt10plex',
                    '--scorecolpattern', 'svm', '--ms1quantcolpattern', 'MS1']
         self.run_command(options)
         self.check(1)
 
 
-class TestIsoquant(basetests.PeptableTest):
-    infilename = 'peptable_small.txt'
-    command = 'isoquant'
-    suffix = '_isoq.txt'
-    channels = ['fake_ch{}'.format(x) for x in range(0, 8)]
-    nopsms = ['{} - # quanted PSMs'.format(ch) for ch in channels]
-
-    def test_isoquant(self):
-        isotable = os.path.join(self.fixdir, 'peptable_isoquant.txt')
-        options = ['--quantfile', isotable, '--isobquantcolpattern', 'fake_ch',
-                   '--qaccpattern', 'Protein ID']
-        self.run_command(options)
-        self.isoquant_check(isotable, 'Peptide sequence', self.channels,
-                            self.nopsms)
-
-
 class TestModelQvals(basetests.PeptableTest):
     command = 'modelqvals'
-    infilename = 'peptable_small.txt'
+    infilename = 'target_pep_quant.tsv'
+
     suffix = '_qmodel.txt'
 
     def test_modelqvals(self):
         score, fdr, qthres = 'percolator svm-score', '^q-value', 1e-5
 
-        options = ['--scorecolpattern', score, '--fdrcolpattern', fdr, '--qvalthreshold', str(qthres)]
+        options = ['--scorecolpattern', score, '--fdrcolpattern', fdr,
+                '--qvalthreshold', str(qthres), '--minpepnr', str(4)]
         self.run_command(options)
         scores, qvalues = [], []
         for line in self.tsv_generator(self.infile[0]):
@@ -117,7 +103,7 @@ class TestBuild(basetests.PeptableTest):
 
     def setUp(self):
         super().setUp()
-        self.dbfile = os.path.join(self.fixdir, 'peptable_db.sqlite')
+        self.dbfile = os.path.join(self.fixdir, 'proteins_db.sqlite')
 
     def get_std_options(self):
         cmd = [self.executable, self.command, '-d', self.workdir]
@@ -135,12 +121,11 @@ class TestBuild(basetests.PeptableTest):
 
     def check_values(self):
         sql = ('SELECT ps.sequence, bs.set_name, '
-               'ppq.quant, pf.fdr, pp.pep '
+               'ppq.quant, pf.fdr '
                'FROM peptide_sequences AS ps '
                'JOIN biosets AS bs '
                'JOIN peptide_precur_quanted AS ppq USING(pep_id) '
                'JOIN peptide_fdr AS pf USING(pep_id) '
-               'JOIN peptide_pep AS pp USING(pep_id) '
                )
         self.check_build_values(sql, ['MS1 area (highest of all PSMs)', 'q-value', ],
                 'Peptide sequence')
@@ -201,9 +186,9 @@ class TestBuild(basetests.PeptableTest):
                 set([y for x in
                      expected[line['Peptide sequence']]['descriptions']
                      for y in x.split(';')]))
-            self.assertEqual(set(line['Gene(s)'].split(';')),
+            self.assertEqual(set(line['Gene ID(s)'].split(';')),
                              expected[line['Peptide sequence']]['genes'])
-            self.assertEqual(set(line['Associated gene ID(s)'].split(';')),
+            self.assertEqual(set(line['Gene name(s)'].split(';')),
                              expected[line['Peptide sequence']]['assoc'])
             self.assertEqual(set([line['Coverage(s)']]),
                              expected[line['Peptide sequence']]['cover'])
@@ -219,20 +204,20 @@ class TestBuild(basetests.PeptableTest):
         self.check_built_isobaric(sql, 'Peptide sequence')
 
     def test_proteincentric(self):
-        options = ['--fdr', '--pep', '--isobaric', '--precursor',
+        options = ['--fdr', '--isobaric', '--precursor',
                    '--dbfile', self.dbfile]
         self.run_command(options)
         self.check()
 
     def test_genecentric(self):
-        options = ['--fdr', '--pep', '--isobaric', '--precursor',
+        options = ['--fdr', '--isobaric', '--precursor',
                    '--dbfile', self.dbfile, '--genecentric']
         self.run_command(options)
         self.check(genecentric=True)
 
     def test_noncentric(self):
         self.dbfile = os.path.join(self.fixdir, 'peptable_db_noncentric.sqlite')
-        options = ['--fdr', '--pep', '--isobaric', '--precursor',
+        options = ['--fdr', '--isobaric', '--precursor',
                    '--dbfile', self.dbfile, '--noncentric']
         self.run_command(options)
         self.check(noncentric=True)

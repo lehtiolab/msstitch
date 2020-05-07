@@ -1,0 +1,89 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<percolator_output xmlns="http://per-colator.com/percolator_out/15" xmlns:p="http://per-colator.com/percolator_out/15" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://per-colator.com/percolator_out/15 https://github.com/percolator/percolator/raw/pout-1-5/src/xml/percolator_out.xsd" p:majorVersion="3" p:minorVersion="04" p:percolator_version="Percolator version 3.04.0">
+
+  <process_info>
+    <command_line>percolator -j percoin.tsv -X perco.xml -N 500000 --decoy-xml-output</command_line>
+    <other_command_line/>
+    <pi_0_psms>1</pi_0_psms>
+    <pi_0_peptides>1</pi_0_peptides>
+    <psms_qlevel>0</psms_qlevel>
+    <peptides_qlevel>0</peptides_qlevel>
+  </process_info>
+
+  <psms>
+<psm p:psm_id="few_spectra_SII_2_1_10001_3_1" p:decoy="false">
+      <svm_score>-0.185</svm_score>
+      <q_value>3.333e-01</q_value>
+      <pep>1.116e-05</pep>
+      <exp_mass>589.0050</exp_mass>
+      <calc_mass>589.005</calc_mass>
+      <peptide_seq n="K" c="K" seq="[UNIMOD:737]EPQK[UNIMOD:737]PEQPTPR"/>
+      <protein_id>ENSP00000363482.2</protein_id>
+      <protein_id>ENSP00000439811.1</protein_id>
+      <protein_id>ENSP00000442128.1</protein_id>
+      <protein_id>ENSP00000485513.1</protein_id>
+      <protein_id>ENSP00000352922.6</protein_id>
+      <protein_id>ENSP00000337541.5</protein_id>
+      <protein_id>ENSP00000344037.6</protein_id>
+      <protein_id>ENSP00000314417.7</protein_id>
+      <protein_id>ENSP00000282633.5</protein_id>
+      <protein_id>ENSP00000382277.2</protein_id>
+      <protein_id>ENSP00000481763.1</protein_id>
+      <p_value>0.000e+00</p_value>
+    </psm>
+    
+<psm p:psm_id="few_spectra_SII_9_1_10008_3_1" p:decoy="false">
+      <svm_score>-0.838</svm_score>
+      <q_value>3.333e-01</q_value>
+      <pep>3.952e-01</pep>
+      <exp_mass>757.0580</exp_mass>
+      <calc_mass>757.396</calc_mass>
+      <peptide_seq n="-" c="K" seq="[UNIMOD:737]M[UNIMOD:35]PGLVDSNPAPPESQEK[UNIMOD:737]"/>
+      <protein_id>ENSP00000417805.1</protein_id>
+      <protein_id>ENSP00000261070.2</protein_id>
+      <protein_id>ENSP00000417651.1</protein_id>
+      <protein_id>ENSP00000417923.1</protein_id>
+      <p_value>0.000e+00</p_value>
+    </psm>
+    
+</psms><peptides>
+<peptide p:peptide_id="[UNIMOD:737]EPQK[UNIMOD:737]PEQPTPR" p:decoy="false">
+      <svm_score>-0.185</svm_score>
+      <q_value>3.333e-01</q_value>
+      <pep>1.116e-05</pep>
+      <exp_mass>589.0050</exp_mass>
+      <calc_mass>589.005</calc_mass>
+      <protein_id>ENSP00000363482.2</protein_id>
+      <protein_id>ENSP00000439811.1</protein_id>
+      <protein_id>ENSP00000442128.1</protein_id>
+      <protein_id>ENSP00000485513.1</protein_id>
+      <protein_id>ENSP00000352922.6</protein_id>
+      <protein_id>ENSP00000337541.5</protein_id>
+      <protein_id>ENSP00000344037.6</protein_id>
+      <protein_id>ENSP00000314417.7</protein_id>
+      <protein_id>ENSP00000282633.5</protein_id>
+      <protein_id>ENSP00000382277.2</protein_id>
+      <protein_id>ENSP00000481763.1</protein_id>
+      <p_value>0.000e+00</p_value>
+      <psm_ids>
+        <psm_id>few_spectra_SII_2_1_10001_3_1</psm_id>
+      </psm_ids>
+    </peptide>
+    
+<peptide p:peptide_id="[UNIMOD:737]M[UNIMOD:35]PGLVDSNPAPPESQEK[UNIMOD:737]" p:decoy="false">
+      <svm_score>-0.838</svm_score>
+      <q_value>3.333e-01</q_value>
+      <pep>3.952e-01</pep>
+      <exp_mass>757.0580</exp_mass>
+      <calc_mass>757.396</calc_mass>
+      <protein_id>ENSP00000417805.1</protein_id>
+      <protein_id>ENSP00000261070.2</protein_id>
+      <protein_id>ENSP00000417651.1</protein_id>
+      <protein_id>ENSP00000417923.1</protein_id>
+      <p_value>0.000e+00</p_value>
+      <psm_ids>
+        <psm_id>few_spectra_SII_9_1_10008_3_1</psm_id>
+      </psm_ids>
+    </peptide>
+    
+</peptides></percolator_output>
