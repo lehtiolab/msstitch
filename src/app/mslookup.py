@@ -1,8 +1,7 @@
 #!/usr/bin/python3
 
 import sys
-from app.drivers.mslookup import (spectra, quant, proteingroups, proteinquant,
-        pepquant, psms, seqspace)
+from app.drivers.mslookup import (spectra, quant, proteinquant, pepquant, psms, seqspace)
 from app.drivers import startup
 
 
@@ -11,7 +10,6 @@ def main():
                psms.PSMLookupDriver(),
                quant.IsobaricQuantLookupDriver(),
                quant.PrecursorQuantLookupDriver(),
-               proteingroups.ProteinGroupLookupDriver(),
                pepquant.PeptideQuantLookupDriver(),
                proteinquant.ProteinQuantLookupDriver(),
                seqspace.SeqspaceLookupDriver(),
