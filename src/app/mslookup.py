@@ -1,14 +1,13 @@
 #!/usr/bin/python3
 
 import sys
-from app.drivers.mslookup import (spectra, quant, proteingroups, biosets,
-                                  proteinquant, pepquant, psms, seqspace)
+from app.drivers.mslookup import (spectra, quant, proteingroups, proteinquant,
+        pepquant, psms, seqspace)
 from app.drivers import startup
 
 
 def main():
-    drivers = [biosets.BioSetLookupDriver(),
-               spectra.SpectraLookupDriver(),
+    drivers = [spectra.SpectraLookupDriver(),
                psms.PSMLookupDriver(),
                quant.IsobaricQuantLookupDriver(),
                quant.PrecursorQuantLookupDriver(),
