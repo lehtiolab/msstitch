@@ -1,4 +1,3 @@
-from app.actions.pycolator import reassign as pyreassign
 from app.dataformats import prottable as prottabledata
 from app.dataformats import mzidtsv as mzidtsvdata
 from app.readers import tsv as reader
