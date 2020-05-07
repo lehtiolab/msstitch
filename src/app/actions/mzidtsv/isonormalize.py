@@ -41,7 +41,7 @@ def get_isobaric_ratios(psmfn, psmheader, channels, denom_channels, min_int,
     elif accessioncol and not targetfn:
         # generate new table with accessions
         return ({(k if not k == ISOQUANTRATIO_FEAT_ACC
-                  else prottabledata.HEADER_ACCESSION): v
+                  else prottabledata.HEADER_PROTEIN): v
                  for k, v in ratio.items()} for ratio in outratios)
 
 
@@ -164,32 +164,3 @@ def calculate_normalized_ratios(ratios, ch_medians, channels):
                       if quant[ch] != 'NA' else 'NA' for ch in channels})
         outratios.append(quant)
     return outratios
-
-
-def get_normalized_ratios(psmfn, header, channels, denom_channels,
-                          min_intensity, second_psmfn, secondheader):
-    """Calculates ratios for PSM tables containing isobaric channels with
-    raw intensities. Normalizes the ratios by median. NA values or values
-    below min_intensity are excluded from the normalization."""
-    ratios = []
-    if second_psmfn is not None:
-        median_psmfn = second_psmfn
-        medianheader = secondheader
-    else:
-        median_psmfn = psmfn
-        medianheader = header
-    for psm in reader.generate_tsv_psms(median_psmfn, medianheader):
-        ratios.append(calc_psm_ratios(psm, channels, denom_channels,
-                                      min_intensity))
-    ch_medians = isonormalizing.get_medians(channels, ratios)
-    report = ('Channel intensity medians used for normalization:\n'
-              '{}'.format('\n'.join(['{} - {}'.format(ch, ch_medians[ch])
-                                     for ch in channels])))
-    sys.stdout.write(report)
-    for psm in reader.generate_tsv_psms(psmfn, header):
-        psmratios = calc_psm_ratios(psm, channels, denom_channels,
-                                    min_intensity)
-        psm.update({ch: str(psmratios[ix] / ch_medians[ch])
-                    if psmratios[ix] != 'NA' else 'NA'
-                    for ix, ch in enumerate(channels)})
-        yield psm
