@@ -435,4 +435,8 @@ peptable_options.update({
         'inclusion threshold for q-values to fit a linear model to. Any scores/'
         'q-values below this threshold will not be used.', 'default': 10e-4,
         'required': False},
+    'minpeptidenr': {'driverattr': 'minpeptidenr', 'dest': 'minpeptidenr',
+        'type': int, 'clarg': '--minpepnr', 'default': 10, 'help': 'Specifies '
+        'the minimal amount of peptides (passing the --qvalthreshold) needed '
+        'to fit a linear model, default is 10.', 'required': False}
 })

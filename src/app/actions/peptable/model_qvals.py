@@ -5,8 +5,9 @@ from app.readers import tsv as reader
 from app.dataformats import peptable as peptabledata
 
 
-def recalculate_qvals_linear_model(fn, scorecol, qvalcol, qvalthreshold):
-    slope, intercept = fit_linear_model(fn, scorecol, qvalcol, qvalthreshold)
+def recalculate_qvals_linear_model(fn, scorecol, qvalcol, qvalthreshold, minpeptidenr):
+    slope, intercept = fit_linear_model(fn, scorecol, qvalcol, qvalthreshold,
+            minpeptidenr)
     for peptide in reader.generate_tsv_peptides(fn):
         outpeptide = {k: v for k, v in peptide.items()}
         score = float(outpeptide[scorecol])
@@ -18,7 +19,7 @@ def recalculate_qvals_linear_model(fn, scorecol, qvalcol, qvalthreshold):
         yield outpeptide
 
 
-def fit_linear_model(fn, scorecol, qvalcol, qvalthreshold):
+def fit_linear_model(fn, scorecol, qvalcol, qvalthreshold, minpeptidenr):
     pepq = []
     pepscore = []
     for peptide in reader.generate_tsv_peptides(fn):
@@ -26,10 +27,13 @@ def fit_linear_model(fn, scorecol, qvalcol, qvalthreshold):
         if qval > qvalthreshold:
             pepq.append(log(qval, 10))
             pepscore.append(float(peptide[scorecol]))
-    if len(pepq) < 10:
+    if len(pepq) < minpeptidenr:
         slope, intercept = False, False
         print('Could not fit linear model through q-values, as only {} q-values '
-                'was/were above the q-value threshold of {} for inclusion'.format(len(pepq), qvalthreshold))
+                '({} are needed) was/were above the q-value threshold of {} '
+                'for modeling inclusion (model is created from highest '
+                'q-values to approximate the stepped lower ones)'.format(
+                    len(pepq), minpeptidenr, qvalthreshold))
     else:
         slope, intercept = polyfit(pepscore, pepq, deg=1)
         print('Fitted linear model through qvalues (above {}) vs score. '
