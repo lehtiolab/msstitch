@@ -1,0 +1,71 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<percolator_output xmlns="http://per-colator.com/percolator_out/15" xmlns:p="http://per-colator.com/percolator_out/15" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://per-colator.com/percolator_out/15 https://github.com/percolator/percolator/raw/pout-1-5/src/xml/percolator_out.xsd" p:majorVersion="3" p:minorVersion="04" p:percolator_version="Percolator version 3.04.0">
+
+  <process_info>
+    <command_line>percolator -j percoin.tsv -X perco.xml -N 500000 --decoy-xml-output</command_line>
+    <other_command_line/>
+    <pi_0_psms>1</pi_0_psms>
+    <pi_0_peptides>1</pi_0_peptides>
+    <psms_qlevel>0</psms_qlevel>
+    <peptides_qlevel>0</peptides_qlevel>
+  </process_info>
+
+  <psms>
+<psm p:psm_id="few_spectra_SII_36_1_9872_2_1" p:decoy="false">
+      <svm_score>0.000000</svm_score>
+      <q_value>1.000000e+00</q_value>
+      <pep>4.829196e-01</pep>
+      <exp_mass>703.8800</exp_mass>
+      <calc_mass>703.880</calc_mass>
+      <peptide_seq n="R" c="R" seq="[UNIMOD:737]ASNEDGDIK[UNIMOD:737]"/>
+      <protein_id>ENSP00000246548.3</protein_id>
+      <protein_id>ENSP00000467433.2</protein_id>
+      <protein_id>ENSP00000437484.1</protein_id>
+      <p_value>0.000e+00</p_value>
+    </psm>
+    
+<psm p:psm_id="few_spectra_SII_23_1_9859_3_1" p:decoy="false">
+      <svm_score>-1.456</svm_score>
+      <q_value>1.000e+00</q_value>
+      <pep>1.000e+00</pep>
+      <exp_mass>720.6680</exp_mass>
+      <calc_mass>720.003</calc_mass>
+      <peptide_seq n="R" c="S" seq="[UNIMOD:737]GAVMEQGTSSSM[UNIMOD:35]TAESSPR"/>
+      <protein_id>ENSP00000297954.4</protein_id>
+      <protein_id>ENSP00000415038.1</protein_id>
+      <protein_id>ENSP00000378860.2</protein_id>
+      <p_value>0.000e+00</p_value>
+    </psm>
+  
+</psms><peptides>
+<peptide p:peptide_id="[UNIMOD:737]ASNEDGDIK[UNIMOD:737]" p:decoy="false">
+      <svm_score>0.000000</svm_score>
+      <q_value>1.000000e+00</q_value>
+      <pep>6.614077e-01</pep>
+      <exp_mass>703.8800</exp_mass>
+      <calc_mass>703.880</calc_mass>
+      <protein_id>ENSP00000246548.3</protein_id>
+      <protein_id>ENSP00000467433.2</protein_id>
+      <protein_id>ENSP00000437484.1</protein_id>
+      <p_value>0.000e+00</p_value>
+      <psm_ids>
+        <psm_id>few_spectra_SII_36_1_9872_2_1</psm_id>
+      </psm_ids>
+    </peptide>
+    
+<peptide p:peptide_id="[UNIMOD:737]GAVMEQGTSSSM[UNIMOD:35]TAESSPR" p:decoy="false">
+      <svm_score>-1.456</svm_score>
+      <q_value>1.000e+00</q_value>
+      <pep>1.000e+00</pep>
+      <exp_mass>720.6680</exp_mass>
+      <calc_mass>720.003</calc_mass>
+      <protein_id>ENSP00000297954.4</protein_id>
+      <protein_id>ENSP00000415038.1</protein_id>
+      <protein_id>ENSP00000378860.2</protein_id>
+      <p_value>0.000e+00</p_value>
+      <psm_ids>
+        <psm_id>few_spectra_SII_23_1_9859_3_1</psm_id>
+      </psm_ids>
+    </peptide>
+  
+</peptides></percolator_output>

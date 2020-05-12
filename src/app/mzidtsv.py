@@ -18,6 +18,5 @@ def main():
                proteingrouping.ProteinGroupDriver(),
                prot2gene.TSVGeneFromProteinDriver(),
                isonormalize.PSMIsoquantRatioDriver(),
-               isonormalize.PSMIsoquantNormalizeDriver(),
                ]
     startup.start_msstitch(drivers, sys.argv)

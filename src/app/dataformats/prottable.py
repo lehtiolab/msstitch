@@ -1,4 +1,3 @@
-HEADER_ACCESSION = 'Accession'
 HEADER_PROTEIN = 'Protein ID'
 HEADER_PROTEINS = 'Protein ID(s)'
 HEADER_GENEID = 'Gene ID'

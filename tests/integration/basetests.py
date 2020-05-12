@@ -11,6 +11,7 @@ from tempfile import mkdtemp
 class BaseTest(unittest.TestCase):
     testdir = 'tests'
     fixdir = os.path.join(os.getcwd(), testdir, 'fixtures')
+    basefixdir = os.path.join(os.getcwd(), testdir, 'base_fixtures')
     outdir = os.path.join(os.getcwd(), testdir, 'test_output')
 
     def setUp(self):
@@ -152,7 +153,7 @@ class BaseTest(unittest.TestCase):
 
 class BaseTestPycolator(BaseTest):
     executable = 'msspercolator'
-    infilename = 'percolator_out.xml'
+    infilename = 'perco.xml'
 
     def get_psm_pep_ids_from_file(self, fn):
         contents = self.read_percolator_out(fn)
@@ -344,7 +345,7 @@ class PeptableTest(PepProtableTest):
 
 class ProttableTest(PepProtableTest):
     executable = 'mssprottable'
-    infilename = 'prottable.txt'
+    infilename = 'target_proteins'
 
     def get_top_psms(self, fn, pepkey, valuekey, lowerbetter=False):
         top_vals = {}
@@ -439,7 +440,7 @@ class ProttableTest(PepProtableTest):
                 expected[prot.pop()]['unipep'] += 1
         for protein in self.tsv_generator(self.resultfn):
             pacc = protein[pdatalup[centric]['acc']]
-            poolname = 'S1'
+            poolname = 'Set1'
             self.assertEqual(protein['{}_# Unique peptides'.format(poolname)],
                              str(expected[pacc]['unipep']))
             self.assertEqual(protein['{}_# Peptides'.format(poolname)],

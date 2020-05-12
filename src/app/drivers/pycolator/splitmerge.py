@@ -33,20 +33,12 @@ class SplitDriver(base.PycolatorDriver):
         self.features = self.splitfunc(elements_to_split, self.ns, filter_type)
 
 
-class SplitTDDriver(SplitDriver):
-    command = 'splittd'
-    commandhelp = ('Splits target and decoy data, producing 2 output files')
-
-    def set_filter_types(self):
-        self.filter_types = [('target', '_target.xml'),
-                             ('decoy', '_decoy.xml')]
-
-    def set_features(self, filter_type):
-        self.splitfunc = preparation.split_target_decoy
-        super().set_features(filter_type)
-
-
 class SplitProteinDriver(SplitDriver):
+    """Using --protheaders "novel_ENSP" "ENSP|variant_"  will result in two output files,
+    the first containing all PSM/peptides containing at least one mapping with a header novel_ENSP,
+    and the second containing all PSMs/peptides containing at least one mapping with header variant_,
+    but no PSMs/peptides which map to ENSP headers.
+    """
     command = 'splitprotein'
     commandhelp = ('Splits input XML into multiple files depending based on '
                    'the protein headers specified. Each header class gets '
@@ -66,34 +58,3 @@ class SplitProteinDriver(SplitDriver):
         super().set_options()
         options = self.define_options(['protheaders'], pycolator_options)
         self.options.update(options)
-
-
-class MergeDriver(base.PycolatorDriver):
-    """Base class for merging multiple percolator fractions under different
-    sorts of filtering. It writes a single percolator out xml from
-    multiple fractions.
-    Namespace and static xml come from first percolator file.
-    Make sure fractions are from same percolator run."""
-    outsuffix = '_merged.xml'
-    command = 'merge'
-    commandhelp = 'Merges percolator xml files, nothing else.'
-
-    def parse_input(self, **kwargs):
-        super().parse_input(**kwargs)
-        self.mergefiles = self.fn[:]
-        self.fn = self.fn[0]
-
-    def set_options(self):
-        super().set_options()
-        options = self.define_options(['multifiles'], pycolator_options)
-        self.options.update(options)
-
-    def prepare(self):
-        self.ns, self.static_xml = self.prepare_percolator_output(self.fn)
-
-    def set_features(self):
-        """"Merge all psms and peptides"""
-        allpsms_str = readers.generate_psms_multiple_fractions_strings(
-            self.mergefiles, self.ns)
-        allpeps = preparation.merge_peptides(self.mergefiles, self.ns)
-        self.features = {'psm': allpsms_str, 'peptide': allpeps}

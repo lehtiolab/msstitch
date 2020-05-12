@@ -10,7 +10,7 @@ from tests.integration import basetests
 class TestAddPSMData(basetests.MzidTSVBaseTest):
     command = 'specdata'
     suffix = '_spectradata.tsv'
-    infilename = 'few_spectra.tsv_fdr.tsv'
+    infilename = 'target.tsv'
 
     def test_addspec_miscleav_bioset(self):
         options = ['--dbfile', self.dbfile, '--spectracol', '1', '--addmiscleav', '--addbioset']
@@ -60,6 +60,7 @@ class TestAddPSMData(basetests.MzidTSVBaseTest):
 class TestQuantTSV(basetests.MzidTSVBaseTest):
     command = 'quant'
     suffix = '_quant.tsv'
+    infilename = 'target.tsv'
 
     def test_quanttsv_isobaric(self):
         options = ['--dbfile', self.dbfile, '--isobaric']
@@ -76,8 +77,7 @@ class TestQuantTSV(basetests.MzidTSVBaseTest):
         self.check_results_sql(fields, self.rowify(expected_values))
 
     def test_quanttsv_precursor(self):
-        dbfile = os.path.join(self.fixdir, 'mzidtsv_db.sqlite')
-        options = ['--dbfile', dbfile, '--precursor']
+        options = ['--dbfile', self.dbfile, '--precursor']
         self.run_command(options)
         sql = ('SELECT pr.rownr, pq.intensity '
                'FROM psmrows AS pr JOIN psms USING(psm_id) '
@@ -87,8 +87,7 @@ class TestQuantTSV(basetests.MzidTSVBaseTest):
         self.check_results_sql(['MS1 area'], self.rowify(expected_values))
 
     def test_quanttsv_both(self):
-        dbfile = os.path.join(self.fixdir, 'mzidtsv_db.sqlite')
-        options = ['--dbfile', dbfile, '--isobaric', '--precursor']
+        options = ['--dbfile', self.dbfile, '--isobaric', '--precursor']
         self.run_command(options)
         sql = ('SELECT pr.rownr, ic.channel_name, iq.intensity, pq.intensity '
                'FROM psmrows AS pr JOIN psms USING(psm_id) '
@@ -110,15 +109,37 @@ class TestQuantTSV(basetests.MzidTSVBaseTest):
 class TestPercoTSV(basetests.MzidTSVBaseTest):
     command = 'percolator'
     suffix = '_fdr.tsv'
-    infilename = 'mzidtsv_td'
 
     def test_add_tdc_fdr(self):
-        mzidfn = os.path.join(self.fixdir, 'msgf.mzid')
+        mzidfn = os.path.join(self.fixdir, 'few_spectra.mzid')
         percofn = os.path.join(self.fixdir, 'perco.xml')
         options = ['--mzid', mzidfn, '--perco', percofn]
         self.run_command(options)
         checkfields = ['percolator svm-score', 'PSM q-value', 'peptide q-value', 'TD']
-        with open(os.path.join(self.fixdir, 'mzidtsv_td_perco')) as fp:
+        with open(os.path.join(self.fixdir, 'few_spectra.tsv_fdr.tsv')) as fp:
+            header = next(fp).strip().split('\t')
+            expected = [line.strip().split('\t') for line in fp]
+        expected = [{field: line[i] for i, field in enumerate(header)} for line in expected]
+        for res, exp in zip(self.get_values(checkfields), expected):
+            for i, field in enumerate(checkfields):
+                if field in checkfields:
+                    self.assertEqual(field, res[i][1])
+                    self.assertEqual(exp[field], res[i][2])
+
+
+class TestPercoTSVTIMS(basetests.MzidTSVBaseTest):
+    command = 'percolator'
+    suffix = '_fdr.tsv'
+    infilename = 'few_spec_timstof.tsv'
+    dbfn = 'spectra_lookup_timstof.sqlite'
+
+    def test_add_tdc_fdr_timstof(self):
+        mzidfn = os.path.join(self.fixdir, 'few_spec_timstof.mzid')
+        percofn = os.path.join(self.fixdir, 'perco_timstof.xml')
+        options = ['--mzid', mzidfn, '--perco', percofn]
+        self.run_command(options)
+        #checkfields = ['percolator svm-score', 'PSM q-value', 'peptide q-value', 'TD']
+        with open(os.path.join(self.fixdir, 'few_spec_timstof.tsv_fdr.tsv')) as fp:
             header = next(fp).strip().split('\t')
             expected = [line.strip().split('\t') for line in fp]
         expected = [{field: line[i] for i, field in enumerate(header)} for line in expected]
@@ -131,11 +152,10 @@ class TestPercoTSV(basetests.MzidTSVBaseTest):
 class TestMergeTSV(basetests.MzidTSVBaseTest):
     command = 'merge'
     suffix = '_concat.tsv'
-    infilename = 'mzidtsv_fr0.txt'
+    infilename = 'few_spectra.tsv'
 
     def test_mergetsv(self):
-        self.infile = [self.infile, os.path.join(self.fixdir,
-                                                 'mzidtsv_fr1.txt')]
+        self.infile = [self.infile, self.infile]
         self.run_command()
         resultlines = self.get_all_lines(self.resultfn)
         for expectfn in self.infile:
@@ -144,36 +164,35 @@ class TestMergeTSV(basetests.MzidTSVBaseTest):
 
 
 class TestSplitTSV(basetests.MzidTSVBaseTest):
-    infilename = 'mzidtsv_filtered_fr1-2.txt'
+    infilename = 'few_spectra.tsv'
     command = 'split'
     suffix = '_split.tsv'
 
     def setUp(self):
         super().setUp()
         self.resultfn = None
-        self.expectlines = self.get_all_lines(self.infile)
+        self.expectlines = [x for x in self.get_all_lines(self.infile)]
 
     def test_auto_bioset_column(self):
         self.run_command(['--bioset'])
-        resultfn = os.path.join(self.workdir, 'S1.tsv')
-        for line in self.get_all_lines(resultfn):
-            self.assertEqual(line, next(self.expectlines))
+        for resultfn in [os.path.join(self.workdir, '{}.tsv'.format(x)) for x in [2, 3]]:
+            for line in self.get_all_lines(resultfn):
+                self.assertIn(line, self.expectlines)
 
     def test_splitcol(self):
-        setnames = ['dataset_17694.dat_task_0.mzml',
-                    'dataset_17694.dat_task_1.mzml']
-        options = ['--splitcol', '1']
+        setnames = ['2', '3']
+        options = ['--splitcol', '8']
         self.run_command(options)
         resultfiles = [os.path.join(self.workdir, '{}.tsv'.format(setname))
                        for setname in setnames]
         for resultfn in resultfiles:
             for line in self.get_all_lines(resultfn):
-                self.assertEqual(line, next(self.expectlines))
+                self.assertIn(line, self.expectlines)
 
 
 class TestConffiltTSV(basetests.MzidTSVBaseTest):
     command = 'conffilt'
-    infilename = 'mzidtsv_fr0.txt'
+    infilename = 'few_spectra.tsv'
     suffix = '_filtconf.txt'
 
     def test_confidence_filter_lower(self):
@@ -206,27 +225,18 @@ class TestConffiltTSV(basetests.MzidTSVBaseTest):
         self.run_command_expect_error(options)
 
     def test_omit_conf_better(self):
-        options = ['--confidence-col', '18', '--confidence-lvl', '0.01']
+        options = ['--confidence-col', '1', '--confidence-lvl', '0.01']
         self.run_command_expect_error(options)
 
     def test_omit_conf_val(self):
-        options = ['--confidence-col', '18', '--confidence-better', 'lower']
+        options = ['--confidence-col', '1', '--confidence-better', 'lower']
         self.run_command_expect_error(options)
 
 
 class TestProteinGroup(basetests.MzidTSVBaseTest):
     command = 'proteingroup'
-    infilename = 'mzidtsv_filtered_fr1-2.txt'
+    infilename = 'target.tsv'
     suffix = '_protgroups.txt'
-    dbfile = 'mzidtsv_db.sqlite'
-
-    def run_and_analyze(self, options):
-        self.run_command(options)
-        result = self.parse_proteingroups(self.resultfn)
-        expected = self.parse_proteingroups(
-            os.path.join(self.fixdir,
-                         'mzidtsv_filtered_fr1-2_proteingrouped.txt'))
-        self.do_asserting(result, expected)
 
     def parse_proteingroups(self, fn):
         with open(fn) as fp:
@@ -250,20 +260,51 @@ class TestProteinGroup(basetests.MzidTSVBaseTest):
             expcontent = exp['content'].split(';')
             self.assertEqual(set(rescontent), set(expcontent))
 
-    def test_proteingroups(self):
-        options = ['--dbfile', self.dbfile]
-        self.expected = None
-        self.run_and_analyze(options)
+    def check_lup(self, sql, keyfun, valfun):
+        result = {keyfun(x): valfun(x) for x in
+                  self.get_values_from_db(self.workdb, sql)}
+        exp_file = os.path.join(self.fixdir, 'target_psms_pg.sqlite')
+        expected = {keyfun(x): valfun(x) for x in
+                    self.get_values_from_db(exp_file, sql)}
+        for key, value in result.items():
+            self.assertIn(key, expected.keys())
+            self.assertEqual(value, expected[key])
+
+    def test_pg(self):
+        self.workdb = os.path.join(self.workdir, self.dbfn)
+        self.copy_db_to_workdir(self.dbfn, self.workdb)
+        options = ['--dbfile', self.workdb]
+        self.run_command(options)
+        # Check on the lookup
+        sql = 'SELECT * FROM protein_coverage'
+        self.check_lup(sql, lambda x: x[0], lambda x: x[1])
+        sql = ('SELECT ppg.psm_id, pgm.protein_acc FROM psm_protein_groups '
+               'AS ppg JOIN protein_group_master AS pgm USING(master_id)')
+        self.check_lup(sql, lambda x: x[0], lambda x: x[1])
+        sql = ('SELECT pgm.protein_acc, pgc.protein_acc, pgc.peptide_count, '
+               'pgc.psm_count, pgc.protein_score '
+               'FROM protein_group_content AS pgc '
+               'JOIN protein_group_master AS pgm USING(master_id) '
+               'ORDER BY pgm.protein_acc, pgc.protein_acc')
+        self.check_lup(sql, lambda x: x[0], lambda x: x[1:])
+        sql = ('SELECT * FROM protein_group_master')
+        self.check_lup(sql, lambda x: x[1], lambda x: 1)
+        # Check the output TSV
+        result = self.parse_proteingroups(self.resultfn)
+        expected = self.parse_proteingroups(
+            os.path.join(self.fixdir, 'target_pg.tsv'))
+        self.do_asserting(result, expected)
 
 
 class TestAddGenes(basetests.MzidTSVBaseTest):
     command = 'genes'
     suffix = '_genes.txt'
-    infilename = 'mzidtsv_filtered_fr1-2.txt'
+    infilename = 'target.tsv'
+    db_fn = 'target_psms.sqlite'
 
     def test_addgenes(self):
         self.run_command(['--dbfile', self.dbfile])
-        for line in self.get_values(['Gene', 'Gene Symbol', 'Description',
+        for line in self.get_values(['Gene ID', 'Gene Name', 'Description',
                                      'Protein']):
             genes = line[0][2].split(';')
             assoc_ids = line[1][2].split(';')
@@ -329,12 +370,9 @@ class TestIso(basetests.MzidTSVBaseTest):
 
     def do_check(self, minint, stdout, normalize=False, medianpsms=None,
                  resultch=False):
-        channels = ['fake_ch{}'.format(x) for x in range(8)]
-        # TODO only for backwards compatibilty, remove if statement around
-        # assignment when msspsmtable isonormalize is removed
-        if not resultch:
-            resultch = ['ratio_{}'.format(x) for x in channels]
-        denom_ch = channels[0:2]
+        channels = ['tmt10plex_126'] + [x.format('tmt10plex_1', y+27) for x in ['{}{}C', '{}{}N'] for y in range(4)] + ['tmt10plex_131']
+        resultch = ['ratio_{}'.format(x) for x in channels]
+        denom_ch = [channels[0], channels[-1]]
         if normalize:
             ch_medians = self.check_normalize_medians(channels, denom_ch,
                                                       minint, stdout,
@@ -363,23 +401,23 @@ class TestIso(basetests.MzidTSVBaseTest):
 class TestIsoRatio(TestIso):
     suffix = '_ratio_isobaric.txt'
     command = 'isoratio'
-    infilename = 'mzidtsv.txt'
+    infilename = 'quant_target.tsv'
 
     def test_denomcolpattern(self):
-        stdout = self.run_command_stdout(['--isobquantcolpattern', 'fake_ch',
-                                          '--denompatterns', '_ch0', '_ch1'])
+        stdout = self.run_command_stdout(['--isobquantcolpattern', 'plex',
+                                          '--denompatterns', '_126', '_131'])
         self.do_check(0, stdout)
 
     def test_denomcolpattern_regex(self):
-        stdout = self.run_command_stdout(['--isobquantcolpattern', 'fake_ch',
-                                          '--denompatterns', '_ch[0-1]'])
+        stdout = self.run_command_stdout(['--isobquantcolpattern', 'plex',
+                                          '--denompatterns', '_1[23][61]'])
         self.do_check(0, stdout)
 
 
 class TestIsoFeatRatio(TestIso):
     suffix = '_ratio_isobaric.txt'
     command = 'isoratio'
-    infilename = 'mzidtsv_intensities.txt'
+    infilename = 'target_pg.tsv'
     channels = ['tmt10plex_{}'.format(x) for x in ['126', '127N', '127C',
                                                    '128N', '128C', '129N',
                                                    '129C', '130N', '130C',
@@ -387,67 +425,17 @@ class TestIsoFeatRatio(TestIso):
     nopsms = ['{} - # quanted PSMs'.format(ch) for ch in channels]
 
     def test_normalized_isoquant(self):
-        options = ['--protcol', '14', '--isobquantcolpattern', 'tmt10plex',
+        options = ['--protcol', '11', '--isobquantcolpattern', 'tmt10plex',
                    '--denompatterns', '_126', '--normalize', 'median']
         self.run_command(options)
-        self.isoquant_check(
-            os.path.join(self.fixdir, 'prottable_normalized_isoquant.txt'),
-            'Accession', self.channels, self.nopsms)
-
-    def test_normalized_othertable_isoquant(self):
-        prottable_ratiofn = os.path.join(self.fixdir,
-                                         'mzidtsv_ratios.txt')
-        options = ['--protcol', '14', '--isobquantcolpattern', 'tmt10plex',
-                   '--denompatterns', '_126', '--normalize', 'median',
-                   '--norm-ratios', prottable_ratiofn]
-        self.run_command(options)
-        self.isoquant_check(
-            os.path.join(self.fixdir, 'prottable_normalized_isoquant.txt'),
-            'Accession', self.channels, self.nopsms)
+        self.isoquant_check(os.path.join(self.fixdir, 'proteins_normquant'),
+            'Protein ID', self.channels, self.nopsms)
 
     def test_normalized_targettable_isoquant(self):
-        prottable_targettable = os.path.join(self.fixdir,
-                                             'prottable_only_acc.txt')
-        options = ['--protcol', '14', '--isobquantcolpattern', 'tmt10plex',
+        prottable_targettable = os.path.join(self.fixdir, 'target_proteins')
+        options = ['--protcol', '11', '--isobquantcolpattern', 'tmt10plex',
                    '--denompatterns', '_126', '--normalize', 'median',
                    '--targettable', prottable_targettable]
         self.run_command(options)
-        self.isoquant_check(
-            os.path.join(self.fixdir, 'prottable_normalized_isoquant.txt'),
-            'Protein accession', self.channels, self.nopsms)
-
-
-class TestIsoNormalize(TestIso):
-    suffix = '_normalized_isobaric.txt'
-    command = 'isonormalize'
-    infilename = 'mzidtsv.txt'
-    channels = ['fake_ch{}'.format(x) for x in range(8)]
-
-    def test_normalize(self):
-        stdout = self.run_command_stdout(['--isobquantcolpattern', 'fake_ch',
-                                          '--denomcols', '21', '22'])
-        self.do_check(0, stdout, normalize=True, resultch=self.channels)
-
-    def test_normalize_minint(self):
-        minint = 3000
-        stdout = self.run_command_stdout(['--isobquantcolpattern', 'fake_ch',
-                                          '--denomcols', '21', '22',
-                                          '--minint', str(minint)])
-        self.do_check(minint, stdout, normalize=True, resultch=self.channels)
-
-
-class TestIsoNormalizeTwofiles(TestIso):
-    infilename = 'mzidtsv_short.txt'
-    suffix = '_normalized_isobaric.txt'
-    command = 'isonormalize'
-    channels = ['fake_ch{}'.format(x) for x in range(8)]
-
-    def test_two_psm_files(self):
-        """Tests calculating medians on different file than the one doing the
-        median centering on"""
-        medianpsms = os.path.join(self.fixdir, 'mzidtsv.txt')
-        stdout = self.run_command_stdout(['--isobquantcolpattern', 'fake_ch',
-                                          '--denomcols', '21', '22',
-                                          '--medianpsms', medianpsms])
-        self.do_check(0, stdout, normalize=True, medianpsms=medianpsms,
-                      resultch=self.channels)
+        self.isoquant_check(os.path.join(self.fixdir, 'proteins_normquant'),
+                'Protein ID', self.channels, self.nopsms)

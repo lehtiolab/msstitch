@@ -24,9 +24,6 @@ shared_options = {
                    'in case some framework has changed the file '
                    'names. First column number is 1.', 'required': False,
                    'default': 1},
-    'decoyfn': {'driverattr': 'decoyfn', 'dest': 'decoyfn',
-                'help': 'Decoy input file (percolator out XML) for qvality',
-                'type': 'file', 'clarg': '--decoyfn'},
     'proline': {'driverattr': 'proline', 'dest': 'proline', 'required': False,
                 'clarg': '--cutproline', 'action': 'store_const',
                 'const': True, 'default': False, 'help': 'Flag to make '
@@ -218,25 +215,12 @@ mslookup_options['fasta']['help'] = ('FASTA sequence database to use when '
                                      'table from proteins')
 
 pycolator_options = {
-    'maxlength': {'driverattr': 'maxlength', 'dest': 'maxlength',
-                  'default': None, 'required': False,
-                  'help': 'Maximum length of peptide to be included in '
-                  'filtered data.', 'type': int, 'clarg': '--maxlen'},
-    'score': {'driverattr': 'score', 'dest': 'score', 'default': 'svm',
-              'help': 'Score to filter unique peptides on, e.g. svm',
-              'type': 'pick', 'picks': ['svm', 'q', 'pep', 'p'],
-              'clarg': '--score', 'required': False},
-    'qoptions': {'driverattr': 'qoptions', 'dest': 'qoptions',
-                 'required': False, 'clarg': '--qoptions', 'default': None,
-                 'help': 'Extra options that may be passed to qvality. '
-                 'Option form: --qoptions ***flag value ***flag ***flag value',
-                 'nargs': '+', 'type': str},
     'protheaders': {'driverattr': 'protheaders', 'clarg': '--protheaders',
                     'nargs': '+', 'type': str,
                     'help': 'Specify protein FASTA headers to split on. '
                     'Multiple headers of the same split-type can be grouped '
-                    'with semicolons. E.g. --protheaders ENSP;sp '
-                    'PSEUDOGEN;ncRNA would split into ENSP/swissprot peptides '
+                    'with semicolons. E.g. --protheaders \'ENSP;sp '
+                    'PSEUDOGEN;ncRNA\' would split into ENSP/swissprot peptides '
                     'and pseudogenes/non-coding RNA peptides.'},
     'deamidate': {'driverattr': 'deamidate', 'clarg': '--deamidate',
                   'action': 'store_const', 'default': False, 'const': True,
@@ -379,6 +363,9 @@ prottable_options.update({
                 'add to table.'},
     'pepfile': {'driverattr': 'pepfile', 'clarg': '--peptable', 'type': 'file',
                 'help': 'Peptide table file'},
+    'decoyfn': {'driverattr': 'decoyfn', 'dest': 'decoyfn',
+                'help': 'Decoy protein table input file',
+                'type': 'file', 'clarg': '--decoyfn'},
     'minlogscore': {'driverattr': 'minlogscore', 'clarg': '--logscore',
                     'action': 'store_const', 'default': False, 'const': True,
                     'required': False, 'help': 'Score, e.g. q-values will '
