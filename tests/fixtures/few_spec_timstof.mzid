@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<MzIdentML xmlns="http://psidev.info/psi/pi/mzIdentML/1.1" id="MS-GF+" version="1.1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://psidev.info/psi/pi/mzIdentML/1.1 http://www.psidev.info/files/mzIdentML1.1.0.xsd" creationDate="2020-05-06T13:42:34">
+<MzIdentML xmlns="http://psidev.info/psi/pi/mzIdentML/1.1" id="MS-GF+" version="1.1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://psidev.info/psi/pi/mzIdentML/1.1 http://www.psidev.info/files/mzIdentML1.1.0.xsd" creationDate="2020-05-11T12:21:50">
 <cvList>
   <cv fullName="PSI-MS" version="3.30.0" uri="https://raw.githubusercontent.com/HUPO-PSI/psi-ms-CV/master/psi-ms.obo" id="PSI-MS"/>
   <cv fullName="UNIMOD" uri="http://www.unimod.org/obo/unimod.obo" id="UNIMOD"/>
@@ -248,7 +248,7 @@
 </AnalysisProtocolCollection>
 <DataCollection>
   <Inputs>
-    <SearchDatabase numDatabaseSequences="815" location="/mnt/userdata/jorrit/testruns/msstitch/work/a3/d4c0d73ac30c9b25ba96370e152751/concatdb.fa" id="SearchDB_1">
+    <SearchDatabase numDatabaseSequences="816" location="/mnt/userdata/jorrit/testruns/msstitch/work/b5/76b7c5ea5fda0d6368f7f8fec4ff11/concatdb.fa" id="SearchDB_1">
       <FileFormat>
         <cvParam cvRef="PSI-MS" accession="MS:1001348" name="FASTA format"/>
       </FileFormat>
@@ -256,7 +256,7 @@
         <userParam name="concatdb.fa"/>
       </DatabaseName>
     </SearchDatabase>
-    <SpectraData location="/mnt/userdata/jorrit/testruns/msstitch/work/a3/d4c0d73ac30c9b25ba96370e152751/few_spec_timstof.mzML" id="SID_1" name="few_spec_timstof.mzML">
+    <SpectraData location="/mnt/userdata/jorrit/testruns/msstitch/work/b5/76b7c5ea5fda0d6368f7f8fec4ff11/few_spec_timstof.mzML" id="SID_1" name="few_spec_timstof.mzML">
       <FileFormat>
         <cvParam cvRef="PSI-MS" accession="MS:1000584" name="mzML file"/>
       </FileFormat>
@@ -279,8 +279,8 @@
           <PeptideEvidenceRef peptideEvidence_ref="PepEv_528077_SSWSRDDR_300"/>
           <cvParam cvRef="PSI-MS" accession="MS:1002049" name="MS-GF:RawScore" value="-13"/>
           <cvParam cvRef="PSI-MS" accession="MS:1002050" name="MS-GF:DeNovoScore" value="62"/>
-          <cvParam cvRef="PSI-MS" accession="MS:1002052" name="MS-GF:SpecEValue" value="1.17512376E-4"/>
-          <cvParam cvRef="PSI-MS" accession="MS:1002053" name="MS-GF:EValue" value="25.611235"/>
+          <cvParam cvRef="PSI-MS" accession="MS:1002052" name="MS-GF:SpecEValue" value="1.1750637E-4"/>
+          <cvParam cvRef="PSI-MS" accession="MS:1002053" name="MS-GF:EValue" value="25.623674"/>
           <userParam name="IsotopeError" value="2"/>
           <userParam name="AssumedDissociationMethod" value="CID"/>
           <userParam name="ExplainedIonCurrentRatio" value="0.09727563"/>
@@ -305,8 +305,8 @@
           <PeptideEvidenceRef peptideEvidence_ref="PepEv_194936_CSSVRR_71"/>
           <cvParam cvRef="PSI-MS" accession="MS:1002049" name="MS-GF:RawScore" value="-9"/>
           <cvParam cvRef="PSI-MS" accession="MS:1002050" name="MS-GF:DeNovoScore" value="27"/>
-          <cvParam cvRef="PSI-MS" accession="MS:1002052" name="MS-GF:SpecEValue" value="2.5686205E-4"/>
-          <cvParam cvRef="PSI-MS" accession="MS:1002053" name="MS-GF:EValue" value="54.98261"/>
+          <cvParam cvRef="PSI-MS" accession="MS:1002052" name="MS-GF:SpecEValue" value="2.5683644E-4"/>
+          <cvParam cvRef="PSI-MS" accession="MS:1002053" name="MS-GF:EValue" value="55.007175"/>
           <userParam name="IsotopeError" value="0"/>
           <userParam name="AssumedDissociationMethod" value="CID"/>
           <userParam name="ExplainedIonCurrentRatio" value="0.038964264"/>
@@ -332,8 +332,8 @@
           <PeptideEvidenceRef peptideEvidence_ref="PepEv_72156_SGGM+16ER_499"/>
           <cvParam cvRef="PSI-MS" accession="MS:1002049" name="MS-GF:RawScore" value="-21"/>
           <cvParam cvRef="PSI-MS" accession="MS:1002050" name="MS-GF:DeNovoScore" value="33"/>
-          <cvParam cvRef="PSI-MS" accession="MS:1002052" name="MS-GF:SpecEValue" value="6.0963293E-4"/>
-          <cvParam cvRef="PSI-MS" accession="MS:1002053" name="MS-GF:EValue" value="130.49496"/>
+          <cvParam cvRef="PSI-MS" accession="MS:1002052" name="MS-GF:SpecEValue" value="6.0965033E-4"/>
+          <cvParam cvRef="PSI-MS" accession="MS:1002053" name="MS-GF:EValue" value="130.57002"/>
           <userParam name="IsotopeError" value="-1"/>
           <userParam name="AssumedDissociationMethod" value="CID"/>
           <userParam name="ExplainedIonCurrentRatio" value="0.044705518"/>
@@ -359,8 +359,8 @@
           <PeptideEvidenceRef peptideEvidence_ref="PepEv_413381_DCSCRPR_1652"/>
           <cvParam cvRef="PSI-MS" accession="MS:1002049" name="MS-GF:RawScore" value="-38"/>
           <cvParam cvRef="PSI-MS" accession="MS:1002050" name="MS-GF:DeNovoScore" value="24"/>
-          <cvParam cvRef="PSI-MS" accession="MS:1002052" name="MS-GF:SpecEValue" value="0.0015428881"/>
-          <cvParam cvRef="PSI-MS" accession="MS:1002053" name="MS-GF:EValue" value="333.78226"/>
+          <cvParam cvRef="PSI-MS" accession="MS:1002052" name="MS-GF:SpecEValue" value="0.0015428594"/>
+          <cvParam cvRef="PSI-MS" accession="MS:1002053" name="MS-GF:EValue" value="333.95654"/>
           <userParam name="IsotopeError" value="1"/>
           <userParam name="AssumedDissociationMethod" value="CID"/>
           <userParam name="ExplainedIonCurrentRatio" value="0.024166564"/>
@@ -387,8 +387,8 @@
           <PeptideEvidenceRef peptideEvidence_ref="PepEv_218462_M+16TDTER_7"/>
           <cvParam cvRef="PSI-MS" accession="MS:1002049" name="MS-GF:RawScore" value="-30"/>
           <cvParam cvRef="PSI-MS" accession="MS:1002050" name="MS-GF:DeNovoScore" value="9"/>
-          <cvParam cvRef="PSI-MS" accession="MS:1002052" name="MS-GF:SpecEValue" value="0.001934896"/>
-          <cvParam cvRef="PSI-MS" accession="MS:1002053" name="MS-GF:EValue" value="414.17416"/>
+          <cvParam cvRef="PSI-MS" accession="MS:1002052" name="MS-GF:SpecEValue" value="0.0019348329"/>
+          <cvParam cvRef="PSI-MS" accession="MS:1002053" name="MS-GF:EValue" value="414.38702"/>
           <userParam name="IsotopeError" value="-1"/>
           <userParam name="AssumedDissociationMethod" value="CID"/>
           <userParam name="ExplainedIonCurrentRatio" value="0.01591077"/>
@@ -413,8 +413,8 @@
           <PeptideEvidenceRef peptideEvidence_ref="PepEv_125631_SSAEDQM+16R_6218"/>
           <cvParam cvRef="PSI-MS" accession="MS:1002049" name="MS-GF:RawScore" value="-36"/>
           <cvParam cvRef="PSI-MS" accession="MS:1002050" name="MS-GF:DeNovoScore" value="44"/>
-          <cvParam cvRef="PSI-MS" accession="MS:1002052" name="MS-GF:SpecEValue" value="0.0020029768"/>
-          <cvParam cvRef="PSI-MS" accession="MS:1002053" name="MS-GF:EValue" value="436.5388"/>
+          <cvParam cvRef="PSI-MS" accession="MS:1002052" name="MS-GF:SpecEValue" value="0.0020030215"/>
+          <cvParam cvRef="PSI-MS" accession="MS:1002053" name="MS-GF:EValue" value="436.78287"/>
           <userParam name="IsotopeError" value="-1"/>
           <userParam name="AssumedDissociationMethod" value="CID"/>
           <userParam name="ExplainedIonCurrentRatio" value="0.03429595"/>
@@ -440,8 +440,8 @@
           <PeptideEvidenceRef peptideEvidence_ref="PepEv_187292_YECRDI_1167"/>
           <cvParam cvRef="PSI-MS" accession="MS:1002049" name="MS-GF:RawScore" value="-44"/>
           <cvParam cvRef="PSI-MS" accession="MS:1002050" name="MS-GF:DeNovoScore" value="25"/>
-          <cvParam cvRef="PSI-MS" accession="MS:1002052" name="MS-GF:SpecEValue" value="0.0033306282"/>
-          <cvParam cvRef="PSI-MS" accession="MS:1002053" name="MS-GF:EValue" value="712.9376"/>
+          <cvParam cvRef="PSI-MS" accession="MS:1002052" name="MS-GF:SpecEValue" value="0.0033305485"/>
+          <cvParam cvRef="PSI-MS" accession="MS:1002053" name="MS-GF:EValue" value="713.31024"/>
           <userParam name="IsotopeError" value="-1"/>
           <userParam name="AssumedDissociationMethod" value="CID"/>
           <userParam name="ExplainedIonCurrentRatio" value="0.061996162"/>
@@ -470,8 +470,8 @@
           <PeptideEvidenceRef peptideEvidence_ref="PepEv_20363_EGGSGR_454"/>
           <cvParam cvRef="PSI-MS" accession="MS:1002049" name="MS-GF:RawScore" value="-20"/>
           <cvParam cvRef="PSI-MS" accession="MS:1002050" name="MS-GF:DeNovoScore" value="5"/>
-          <cvParam cvRef="PSI-MS" accession="MS:1002052" name="MS-GF:SpecEValue" value="0.006616048"/>
-          <cvParam cvRef="PSI-MS" accession="MS:1002053" name="MS-GF:EValue" value="1416.1982"/>
+          <cvParam cvRef="PSI-MS" accession="MS:1002052" name="MS-GF:SpecEValue" value="0.006616151"/>
+          <cvParam cvRef="PSI-MS" accession="MS:1002053" name="MS-GF:EValue" value="1416.9943"/>
           <userParam name="IsotopeError" value="-1"/>
           <userParam name="AssumedDissociationMethod" value="CID"/>
           <userParam name="ExplainedIonCurrentRatio" value="0.038797237"/>
@@ -496,8 +496,8 @@
           <PeptideEvidenceRef peptideEvidence_ref="PepEv_121098_ASSPEMDISADR_1685"/>
           <cvParam cvRef="PSI-MS" accession="MS:1002049" name="MS-GF:RawScore" value="-46"/>
           <cvParam cvRef="PSI-MS" accession="MS:1002050" name="MS-GF:DeNovoScore" value="55"/>
-          <cvParam cvRef="PSI-MS" accession="MS:1002052" name="MS-GF:SpecEValue" value="0.013979981"/>
-          <cvParam cvRef="PSI-MS" accession="MS:1002053" name="MS-GF:EValue" value="3106.6313"/>
+          <cvParam cvRef="PSI-MS" accession="MS:1002052" name="MS-GF:SpecEValue" value="0.013979914"/>
+          <cvParam cvRef="PSI-MS" accession="MS:1002053" name="MS-GF:EValue" value="3108.252"/>
           <userParam name="IsotopeError" value="0"/>
           <userParam name="AssumedDissociationMethod" value="CID"/>
           <userParam name="ExplainedIonCurrentRatio" value="0.031065747"/>
@@ -524,8 +524,8 @@
           <PeptideEvidenceRef peptideEvidence_ref="PepEv_194367_DNYELDEDTD_1368"/>
           <cvParam cvRef="PSI-MS" accession="MS:1002049" name="MS-GF:RawScore" value="-88"/>
           <cvParam cvRef="PSI-MS" accession="MS:1002050" name="MS-GF:DeNovoScore" value="60"/>
-          <cvParam cvRef="PSI-MS" accession="MS:1002052" name="MS-GF:SpecEValue" value="0.01538054"/>
-          <cvParam cvRef="PSI-MS" accession="MS:1002053" name="MS-GF:EValue" value="3388.0562"/>
+          <cvParam cvRef="PSI-MS" accession="MS:1002052" name="MS-GF:SpecEValue" value="0.015379414"/>
+          <cvParam cvRef="PSI-MS" accession="MS:1002053" name="MS-GF:EValue" value="3389.6074"/>
           <userParam name="IsotopeError" value="2"/>
           <userParam name="AssumedDissociationMethod" value="CID"/>
           <userParam name="ExplainedIonCurrentRatio" value="0.03814546"/>

@@ -138,7 +138,7 @@ class TestMS1Quant(basetests.ProttableTest):
         self.check()
 
     def test_with_protcol(self):
-        options = ['--psmtable', self.psmfile, '--protcol', '14']
+        options = ['--psmtable', self.psmfile, '--protcol', '11']
         self.run_command(options)
         self.check()
 
@@ -253,7 +253,8 @@ class TestFastaGenenamePickFDR(basetests.ProttableTest):
         tfasta = os.path.join(self.basefixdir, 'ens99_small.fasta')
         dfasta = os.path.join(self.fixdir, 'protrev_ens99_small.fasta')
         options = ['--decoyfn', self.decoyfn, '--targetfasta', tfasta,
-                   '--decoyfasta', dfasta, '--picktype', 'genename']
+                   '--decoyfasta', dfasta, '--picktype', 'genename',
+                   '--fastadelim', 'pipe', '--genefield', '2']
         self.run_command(options)
         expectedfn = os.path.join(self.fixdir, 'assoc_protfdr')
         self.check_lines(expectedfn, self.resultfn)

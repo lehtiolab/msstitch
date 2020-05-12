@@ -175,12 +175,12 @@ class TestSplitTSV(basetests.MzidTSVBaseTest):
 
     def test_auto_bioset_column(self):
         self.run_command(['--bioset'])
-        for resultfn in [os.path.join(self.workdir, '{}.tsv'.format(x)) for x in [3, 4, 5]]:
+        for resultfn in [os.path.join(self.workdir, '{}.tsv'.format(x)) for x in [2, 3]]:
             for line in self.get_all_lines(resultfn):
                 self.assertIn(line, self.expectlines)
 
     def test_splitcol(self):
-        setnames = ['3', '4', '5']
+        setnames = ['2', '3']
         options = ['--splitcol', '8']
         self.run_command(options)
         resultfiles = [os.path.join(self.workdir, '{}.tsv'.format(setname))
