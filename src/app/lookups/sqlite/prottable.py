@@ -63,11 +63,18 @@ class GeneTableDB(ProtPepTable):
         """Gets gene-PSM combinations from DB and filters out uniques
         on the fly. Filtering is done since PSM are stored per protein,
         not per gene, so there may be a lot of *plicates"""
-        fields = ['p.gene_acc', 'sets.set_name',
-                  'pep.sequence', 'psm.psm_id']
-        firstjoin = ('protein_psm', 'pp', 'protein_acc')
-        genetable = self.table_map[self.datatype]['feattable']
-        return self.get_unique_gene_psms(genetable, fields, firstjoin)
+        sql = (
+                'SELECT DISTINCT g.gene_acc, sets.set_name, pep.sequence, psms.psm_id '
+                'FROM genes AS g '
+                'JOIN protein_psm USING(protein_acc) '
+                'JOIN psms USING(psm_id) '
+                'JOIN peptide_sequences AS pep USING(pep_id) '
+                'JOIN mzml AS sp USING(spectra_id) '
+                'JOIN mzmlfiles AS mzfn USING(mzmlfile_id) '
+                'JOIN biosets AS sets USING(set_id)'
+                )
+        cursor = self.get_cursor()
+        return cursor.execute(sql)
              
     def get_unique_peptide_nrs(self):
         return self.get_unique_peptide_nrs_base('gene_acc', 'JOIN genes AS acctable USING(protein_acc)')
@@ -117,8 +124,15 @@ class GeneTableAssocIDsDB(GeneTableDB):
         """Gets gene-PSM combinations from DB and filters out uniques
         on the fly. Filtering is done since PSM are stored per protein,
         not per gene, so there may be a lot of *plicates"""
-        fields = ['p.assoc_id', 'sets.set_name',
-                  'pep.sequence', 'psm.psm_id']
-        firstjoin = ('protein_psm', 'pp', 'protein_acc')
-        genetable = self.table_map[self.datatype]['feattable']
-        return self.get_unique_gene_psms(genetable, fields, firstjoin)
+        sql = (
+                'SELECT DISTINCT aid.assoc_id, sets.set_name, pep.sequence, psms.psm_id '
+                'FROM associated_ids AS aid '
+                'JOIN protein_psm USING(protein_acc) '
+                'JOIN psms USING(psm_id) '
+                'JOIN peptide_sequences AS pep USING(pep_id) '
+                'JOIN mzml AS sp USING(spectra_id) '
+                'JOIN mzmlfiles AS mzfn USING(mzmlfile_id) '
+                'JOIN biosets AS sets USING(set_id)'
+                )
+        cursor = self.get_cursor()
+        return cursor.execute(sql)

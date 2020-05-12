@@ -405,8 +405,8 @@ peptable_options.update({
                    'containing PSM table spectrafiles (e.g. mzML) '
                    'if you want to track PSMs when creating peptide '
                    'tables', 'required': False},
-    'noncentric': {'driverattr': 'noncentric', 'dest': 'noncentric',
-                   'clarg': '--noncentric', 'action': 'store_const',
+    'nogroup': {'driverattr': 'nogroup',
+                   'clarg': '--no-group-annotation', 'action': 'store_const',
                    'const': True, 'default': False, 'required': False,
                    'help': 'Do not include protein group '
                    'or gene data in output, just use accessions. '},
@@ -414,9 +414,9 @@ peptable_options.update({
                     'clarg': '--genecentric', 'action': 'store_const',
                     'const': True, 'default': False, 'required': False,
                     'help': 'Do not include protein group '
-                    'data in output, but use gene names instead. '
-                    'These need to have been stored when '
-                    'creating a PSM lookup.'},
+                    'data in output, but use gene names instead to count peptides '
+                    'per feature, determine peptide-uniqueness.',
+                    },
     'qvalthreshold': {'driverattr': 'qvalthreshold', 'dest': 'qvalthreshold',
         'type': float, 'clarg': '--qvalthreshold', 'help': 'Specifies the '
         'inclusion threshold for q-values to fit a linear model to. Any scores/'

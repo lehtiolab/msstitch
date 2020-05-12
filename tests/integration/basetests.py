@@ -374,11 +374,11 @@ class ProttableTest(PepProtableTest):
             sql = (
             'SELECT p.protein_acc,GROUP_CONCAT(g.gene_acc),GROUP_CONCAT(aid.assoc_id),pd.description,pcov.coverage '
             'FROM protein_group_master AS p '
-            'JOIN associated_ids AS aid USING(protein_acc) '
-            'JOIN genes AS g USING(protein_acc) '
-            'JOIN prot_desc AS pd USING(protein_acc) '
+            'LEFT OUTER JOIN associated_ids AS aid USING(protein_acc) '
+            'LEFT OUTER JOIN genes AS g USING(protein_acc) '
+            'LEFT OUTER JOIN prot_desc AS pd USING(protein_acc) '
             'JOIN protein_coverage AS pcov USING(protein_acc) '
-            'GROUP BY g.gene_acc'
+            'GROUP BY p.protein_acc'
             )
         elif centric == 'gc':
             sql = (
@@ -393,12 +393,12 @@ class ProttableTest(PepProtableTest):
             sql = (
             'SELECT aid.assoc_id, GROUP_CONCAT(g.gene_acc),GROUP_CONCAT(p.protein_acc),pd.description '
             'FROM associated_ids AS aid '
-            'JOIN genes AS g USING(protein_acc) '
+            'LEFT OUTER JOIN genes AS g USING(protein_acc) '
             'JOIN proteins AS p USING(protein_acc) '
-            'JOIN prot_desc AS pd USING(protein_acc) '
+            'LEFT OUTER JOIN prot_desc AS pd USING(protein_acc) '
             'GROUP BY aid.assoc_id'
             )
-        expected = {rec[0]: rec[1:] for rec in
+        expected = {rec[0]: [x if x else 'NA' for x in rec[1:]] for rec in
                     self.get_values_from_db(self.dbfile, sql)}
         pdatalup = {
                 'pc': {'acc': 'Protein ID', 'fields': [('Gene ID', 0), ('Gene Name', 1), ('Coverage', 3)]},

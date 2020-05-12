@@ -137,9 +137,9 @@ class TestBuild(basetests.PeptableTest):
                'FROM peptide_sequences AS ps '
                'JOIN psms AS p USING(pep_id) '
                'JOIN protein_psm USING(psm_id) '
-               'JOIN prot_desc AS pd USING(protein_acc) '
-               'JOIN genes AS g USING(protein_acc) '
-               'JOIN associated_ids AS aid USING(protein_acc) '
+               'LEFT OUTER JOIN prot_desc AS pd USING(protein_acc) '
+               'LEFT OUTER JOIN genes AS g USING(protein_acc) '
+               'LEFT OUTER JOIN associated_ids AS aid USING(protein_acc) '
                'JOIN protein_coverage AS pc USING(protein_acc) '
                )
         self.check_peptide_relations(sql)
@@ -152,9 +152,9 @@ class TestBuild(basetests.PeptableTest):
                'JOIN psms AS p USING(pep_id) '
                'JOIN psm_protein_groups USING(psm_id) '
                'JOIN protein_group_master AS pm USING(master_id) '
-               'JOIN prot_desc AS pd USING(protein_acc) '
-               'JOIN genes AS g USING(protein_acc) '
-               'JOIN associated_ids AS aid USING(protein_acc) '
+               'LEFT OUTER JOIN prot_desc AS pd USING(protein_acc) '
+               'LEFT OUTER JOIN genes AS g USING(protein_acc) '
+               'LEFT OUTER JOIN associated_ids AS aid USING(protein_acc) '
                'JOIN protein_coverage AS pc USING(protein_acc) '
                )
         self.check_peptide_relations(sql)
@@ -162,6 +162,7 @@ class TestBuild(basetests.PeptableTest):
     def check_peptide_relations(self, sql):
         expected, psm_id, pep = {}, None, None
         for rec in self.get_values_from_db(self.dbfile, sql):
+            rec = [rec[0]] + ['NA' if x is None else x for x in rec[1:]]
             try:
                 expected[rec[0]]['psms'].add(rec[1])
             except KeyError:
@@ -215,9 +216,9 @@ class TestBuild(basetests.PeptableTest):
         self.run_command(options)
         self.check(genecentric=True)
 
-    def test_noncentric(self):
+    def test_nogroups(self):
         self.dbfile = os.path.join(self.fixdir, 'peptable_db_noncentric.sqlite')
         options = ['--fdr', '--isobaric', '--precursor',
-                   '--dbfile', self.dbfile, '--noncentric']
+                   '--dbfile', self.dbfile, '--no-group-annotation']
         self.run_command(options)
         self.check(noncentric=True)
