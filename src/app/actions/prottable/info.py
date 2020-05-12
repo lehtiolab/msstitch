@@ -33,7 +33,8 @@ def get_protein_data_base(proteindata, p_acc, headerfields):
                prottabledata.HEADER_NO_PEPTIDE,
                prottabledata.HEADER_NO_PSM,
                ]
-    outdict = {prottabledata.HEADER_DESCRIPTION: proteindata[p_acc]['desc']}
+    desc = proteindata[p_acc]['desc']
+    outdict = {prottabledata.HEADER_DESCRIPTION: desc if desc is not None else 'NA'}
     for pool, pdata in proteindata[p_acc]['pools'].items():
         pool_values = [pdata['unipeps'], pdata['peptides'], pdata['psms']]
         outdict.update({get_headerfieldtext(headerfields, hfield, pool): val
