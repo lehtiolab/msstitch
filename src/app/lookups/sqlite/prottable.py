@@ -1,7 +1,18 @@
 from app.lookups.sqlite.protpeptable import ProtPepTable
+from app.dataformats import prottable as ph
 
 
-class ProtTableDB(ProtPepTable):
+class ProtGeneTableBase(ProtPepTable):
+    stdheaderfields = [
+            ph.HEADER_NO_PSM,
+            ph.HEADER_NO_PEPTIDE,
+            ph.HEADER_NO_UNIPEP,
+            ph.HEADER_QVAL,
+            ]
+    singlefields = stdheaderfields + [ph.HEADER_AREA]
+
+
+class ProtTableDB(ProtGeneTableBase):
     datatype = 'protein'
     colmap = {'protein_group_master': ['master_id', 'protein_acc'],
               'proteins': ['pacc_id', 'protein_acc'],
@@ -14,20 +25,77 @@ class ProtTableDB(ProtPepTable):
                                       'amount_psms'],
               }
 
-    def add_tables(self):
+    def add_tables(self, tabletypes=[]):
         self.create_tables(['protein_tables', 'protein_iso_quanted',
                             'protquant_channels', 'protein_precur_quanted',
                             'protein_fdr'])
 
-    def get_unique_peptide_nrs(self):
-        return self.get_unique_peptide_nrs_base('protein_acc', 'JOIN protein_group_content USING(protein_acc) JOIN protein_group_master AS acctable USING(master_id)')
-
-    def get_precursorquant_headerfields(self):
+    def create_pdata_map(self):
+        """This runs only once, returns the data which is not dependent on sets,
+        in a dict with accessions as keys"""
+        sql = """
+SELECT pgm.master_id, pgm.protein_acc, IFNULL(g.gene_acc, 'NA'),
+    IFNULL(aid.assoc_id, 'NA'), cov.coverage, sub.pgc, 
+    sub.pgcnr, IFNULL(pd.description, 'NA') FROM protein_group_master AS pgm
+    LEFT OUTER JOIN (
+            SELECT master_id, GROUP_CONCAT(protein_acc) AS pgc, 
+            COUNT(protein_acc) AS pgcnr FROM protein_group_content 
+            GROUP BY master_id
+            ) AS sub ON sub.master_id=pgm.master_id 
+    LEFT OUTER JOIN protein_coverage AS cov ON 
+    pgm.protein_acc=cov.protein_acc 
+    LEFT OUTER JOIN genes AS g ON pgm.protein_acc=g.protein_acc
+    LEFT OUTER JOIN associated_ids AS aid ON aid.protein_acc=pgm.protein_acc
+    LEFT OUTER JOIN prot_desc AS pd ON pd.protein_acc=pgm.protein_acc
+    """
         cursor = self.get_cursor()
-        cursor.execute(
-            'SELECT DISTINCT prottable_id '
-            'FROM protein_precur_quanted')
+        pgdata = {}
+        for mid, macc, gacc, aid, cov, pgc, pgnr, desc in cursor.execute(sql):
+            pgdata[mid] = {
+                    ph.HEADER_PROTEIN: macc,
+                    ph.HEADER_GENEID: gacc,
+                    ph.HEADER_GENENAME: aid,
+                    ph.HEADER_COVERAGE: cov,
+                    ph.HEADER_CONTENTPROT: pgc,
+                    ph.HEADER_NO_PROTEIN: pgnr,
+                    ph.HEADER_DESCRIPTION: desc,
+                    }
+        return pgdata
+
+    def merge_features(self):
+        sql = """
+    SELECT bs.set_name, pgm.master_id, COUNT(DISTINCT ppg.psm_id), 
+    COUNT (DISTINCT ps.pep_id), COUNT(DISTINCT uni.pep_id), 
+    IFNULL(pf.fdr, 'NA'), ppq.quant, GROUP_CONCAT(pqc.channel_name), GROUP_CONCAT(piq.quantvalue),
+    GROUP_CONCAT(piq.amount_psms)
+        FROM psm_protein_groups AS ppg 
+        JOIN biosets AS bs 
+        INNER JOIN psms ON ppg.psm_id=psms.psm_id 
+        INNER JOIN peptide_sequences AS ps ON psms.pep_id=ps.pep_id
+        INNER JOIN protein_tables AS pt ON pt.set_id=bs.set_id
+        INNER JOIN protein_group_master AS pgm ON pgm.master_id=ppg.master_id
+        INNER JOIN proteins AS prots ON prots.protein_acc=pgm.protein_acc
+        LEFT OUTER JOIN protein_fdr AS pf ON pf.prottable_id=pt.prottable_id AND 
+            pf.pacc_id=prots.pacc_id
+        LEFT OUTER JOIN protein_precur_quanted AS ppq ON ppq.prottable_id=pt.prottable_id AND 
+            ppq.pacc_id=prots.pacc_id
+        LEFT OUTER JOIN protquant_channels AS pqc ON pqc.prottable_id=pt.prottable_id
+        LEFT OUTER JOIN protein_iso_quanted AS piq ON piq.channel_id=pqc.channel_id AND
+            piq.pacc_id=prots.pacc_id
+        LEFT OUTER JOIN (
+                SELECT ppg.pep_id AS pep_id FROM (
+                    SELECT psms.pep_id AS pep_id, COUNT (DISTINCT ppg.master_id) AS nrpep 
+                        FROM psm_protein_groups AS ppg INNER JOIN psms USING(psm_id)
+                        GROUP BY psms.pep_id
+                    ) AS ppg WHERE ppg.nrpep==1
+                ) AS uni ON uni.pep_id=ps.pep_id
+        GROUP BY pgm.master_id, bs.set_id
+        """
+        cursor = self.get_cursor()
+        print(sql)
+        cursor.execute(sql)
         return cursor
+
 
 
 class GeneTableDB(ProtPepTable):
@@ -46,44 +114,61 @@ class GeneTableDB(ProtPepTable):
                             'genequant_channels', 'gene_precur_quanted',
                             'gene_fdr'])
 
-    def get_protein_gene_symbol_for_map(self):
-        fields = ['p.gene_acc', 'pd.description',
-                  'aid.assoc_id', 'prot.protein_acc']
-        genetable = self.table_map[self.datatype]['feattable']
-        sql = (
-                'SELECT {} FROM {} AS p '
-                'LEFT OUTER JOIN prot_desc AS pd USING(protein_acc) '
-                'LEFT OUTER JOIN associated_ids AS aid USING(protein_acc) '
-                'LEFT OUTER JOIN proteins AS prot USING(protein_acc)')
+    def create_pdata_map(self):
+        """This runs only once, returns the data which is not dependent on sets,
+        in a dict with accessions as keys"""
+        sql = """
+SELECT g.gene_acc, GROUP_CONCAT(g.protein_acc, ';'), IFNULL(aid.assoc_id, 'NA'), 
+    IFNULL(pd.description, 'NA') 
+    FROM genes AS g
+    LEFT OUTER JOIN associated_ids AS aid ON aid.protein_acc=g.protein_acc
+    LEFT OUTER JOIN prot_desc AS pd ON pd.protein_acc=g.protein_acc
+    GROUP BY g.gene_acc
+    """
         cursor = self.get_cursor()
-        sql = sql.format(','.join(fields), genetable)
-        return cursor.execute(sql)
+        pgdata = {}
+        for gacc, pacc, aid, desc in cursor.execute(sql):
+            pgdata[gacc] = {
+                    ph.HEADER_PROTEINS: pacc,
+                    ph.HEADER_GENEID: gacc,
+                    ph.HEADER_GENENAME: aid,
+                    ph.HEADER_DESCRIPTION: desc,
+                    }
+        return pgdata
 
-    def get_proteins_psms_for_map(self):
-        """Gets gene-PSM combinations from DB and filters out uniques
-        on the fly. Filtering is done since PSM are stored per protein,
-        not per gene, so there may be a lot of *plicates"""
-        sql = (
-                'SELECT DISTINCT g.gene_acc, sets.set_name, pep.sequence, psms.psm_id '
-                'FROM genes AS g '
-                'JOIN protein_psm USING(protein_acc) '
-                'JOIN psms USING(psm_id) '
-                'JOIN peptide_sequences AS pep USING(pep_id) '
-                'JOIN mzml AS sp USING(spectra_id) '
-                'JOIN mzmlfiles AS mzfn USING(mzmlfile_id) '
-                'JOIN biosets AS sets USING(set_id)'
-                )
-        cursor = self.get_cursor()
-        return cursor.execute(sql)
-             
-    def get_unique_peptide_nrs(self):
-        return self.get_unique_peptide_nrs_base('gene_acc', 'JOIN genes AS acctable USING(protein_acc)')
+    def merge_features(self):
+  ### protein_acc on gene table is indexed??
+        sql = """
+    SELECT bs.set_name, g.gene_acc, COUNT(DISTINCT ppsm.psm_id), 
+    COUNT (DISTINCT ps.pep_id), COUNT(DISTINCT uniq.pep_id), 
+    IFNULL(gf.fdr, 'NA'), gpq.quant, GROUP_CONCAT(gqc.channel_name), GROUP_CONCAT(giq.quantvalue),
+    GROUP_CONCAT(giq.amount_psms)
+        FROM protein_psm AS ppsm
+        JOIN biosets AS bs
+        INNER JOIN psms ON ppsm.psm_id=psms.psm_id 
+        INNER JOIN peptide_sequences AS ps ON psms.pep_id=ps.pep_id
+        INNER JOIN gene_tables AS gt ON gt.set_id=bs.set_id
+        INNER JOIN genes AS g ON g.protein_acc=ppsm.protein_acc
+        LEFT OUTER JOIN gene_fdr AS gf ON gf.genetable_id=gt.genetable_id AND 
+            gf.gene_id=g.gene_id
+        LEFT OUTER JOIN gene_precur_quanted AS gpq ON gpq.genetable_id=gt.genetable_id AND 
+            gpq.gene_id=g.gene_id
+        LEFT OUTER JOIN genequant_channels AS gqc ON gqc.genetable_id=gt.genetable_id
+        LEFT OUTER JOIN gene_iso_quanted AS giq ON giq.channel_id=gqc.channel_id AND
+            giq.gene_id=g.gene_id
 
-    def get_precursorquant_headerfields(self):
+        LEFT OUTER JOIN (
+                SELECT psmg.pep_id AS pep_id FROM (
+                    SELECT psms.pep_id AS pep_id, COUNT (DISTINCT g.gene_acc) AS nrpep 
+                        FROM protein_psm AS ppsm INNER JOIN psms USING(psm_id)
+                        INNER JOIN genes AS g USING(protein_acc)
+                        GROUP BY psms.pep_id
+                    ) AS psmg WHERE psmg.nrpep==1
+                ) AS uniq ON uniq.pep_id=ps.pep_id
+        GROUP BY g.gene_acc, bs.set_id
+        """
         cursor = self.get_cursor()
-        cursor.execute(
-            'SELECT DISTINCT prottable_id '
-            'FROM {}'.format(self.table_map[self.datatype]['prectable']))
+        cursor.execute(sql)
         return cursor
 
 
@@ -104,35 +189,60 @@ class GeneTableAssocIDsDB(GeneTableDB):
                             'genequant_channels', 'assoc_precur_quanted',
                             'assoc_fdr'])
 
-    def get_unique_peptide_nrs(self):
-        return self.get_unique_peptide_nrs_base('assoc_id', 'JOIN associated_ids AS acctable USING(protein_acc)')
-
-    def get_protein_gene_symbol_for_map(self):
-        fields = ['p.assoc_id', 'pd.description',
-                  'gene.gene_acc', 'prot.protein_acc']
-        genetable = self.table_map[self.datatype]['feattable']
-        sql = (
-                'SELECT {} FROM {} AS p '
-                'LEFT OUTER JOIN prot_desc AS pd USING(protein_acc) '
-                'LEFT OUTER JOIN genes AS gene USING(protein_acc) '
-                'LEFT OUTER JOIN proteins AS prot USING(protein_acc)')
+    def create_pdata_map(self):
+        """This runs only once, returns the data which is not dependent on sets,
+        in a dict with accessions as keys"""
+        sql = """
+SELECT gn.assoc_id, GROUP_CONCAT(gn.protein_acc, ';'), IFNULL(g.gene_acc, 'NA'), 
+    IFNULL(pd.description, 'NA') 
+    FROM associated_ids AS gn
+    LEFT OUTER JOIN genes AS g ON gn.protein_acc=g.protein_acc
+    LEFT OUTER JOIN prot_desc AS pd ON pd.protein_acc=gn.protein_acc
+    GROUP BY gn.assoc_id
+    """
         cursor = self.get_cursor()
-        sql = sql.format(','.join(fields), genetable)
-        return cursor.execute(sql)
+        pgdata = {}
+        for aid, pacc, gacc, desc in cursor.execute(sql):
+            pgdata[aid] = {
+                    ph.HEADER_PROTEINS: pacc,
+                    ph.HEADER_GENEID: gacc,
+                    ph.HEADER_GENENAME: aid,
+                    ph.HEADER_DESCRIPTION: desc,
+                    }
+        return pgdata
 
-    def get_proteins_psms_for_map(self):
-        """Gets gene-PSM combinations from DB and filters out uniques
-        on the fly. Filtering is done since PSM are stored per protein,
-        not per gene, so there may be a lot of *plicates"""
-        sql = (
-                'SELECT DISTINCT aid.assoc_id, sets.set_name, pep.sequence, psms.psm_id '
-                'FROM associated_ids AS aid '
-                'JOIN protein_psm USING(protein_acc) '
-                'JOIN psms USING(psm_id) '
-                'JOIN peptide_sequences AS pep USING(pep_id) '
-                'JOIN mzml AS sp USING(spectra_id) '
-                'JOIN mzmlfiles AS mzfn USING(mzmlfile_id) '
-                'JOIN biosets AS sets USING(set_id)'
-                )
+    def merge_features(self):
+  ### protein_acc on gene table is indexed??
+  ### check distinct stuff, pgroups etc need it, matched with content numbers (which cnanot habe it)
+        sql = """
+    SELECT bs.set_name, gn.assoc_id, COUNT(DISTINCT ppsm.psm_id), 
+    COUNT (DISTINCT ps.pep_id), COUNT(DISTINCT uniq.pep_id), 
+    IFNULL(gf.fdr, 'NA'), gpq.quant, GROUP_CONCAT(gqc.channel_name), GROUP_CONCAT(giq.quantvalue),
+    GROUP_CONCAT(giq.amount_psms)
+        FROM protein_psm AS ppsm
+        JOIN biosets AS bs
+        INNER JOIN psms ON ppsm.psm_id=psms.psm_id 
+        INNER JOIN peptide_sequences AS ps ON psms.pep_id=ps.pep_id
+        INNER JOIN gene_tables AS gt ON gt.set_id=bs.set_id
+        INNER JOIN associated_ids AS gn ON gn.protein_acc=ppsm.protein_acc
+        LEFT OUTER JOIN assoc_fdr AS gf ON gf.genetable_id=gt.genetable_id AND 
+            gf.gene_id=gn.gene_id
+        LEFT OUTER JOIN assoc_precur_quanted AS gpq ON gpq.genetable_id=gt.genetable_id AND 
+            gpq.gene_id=gn.gene_id
+        LEFT OUTER JOIN genequant_channels AS gqc ON gqc.genetable_id=gt.genetable_id
+        LEFT OUTER JOIN assoc_iso_quanted AS giq ON giq.channel_id=gqc.channel_id AND
+            giq.gene_id=gn.gene_id
+
+        LEFT OUTER JOIN (
+                SELECT psmg.pep_id AS pep_id FROM (
+                    SELECT psms.pep_id AS pep_id, COUNT (DISTINCT gn.assoc_id) AS nrpep 
+                        FROM protein_psm AS ppsm INNER JOIN psms USING(psm_id)
+                        INNER JOIN associated_ids AS gn USING(protein_acc)
+                        GROUP BY psms.pep_id
+                    ) AS psmg WHERE psmg.nrpep==1
+                ) AS uniq ON uniq.pep_id=ps.pep_id
+        GROUP BY gn.assoc_id, bs.set_id
+        """
         cursor = self.get_cursor()
-        return cursor.execute(sql)
+        cursor.execute(sql)
+        return cursor

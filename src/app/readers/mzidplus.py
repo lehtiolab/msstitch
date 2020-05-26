@@ -90,11 +90,5 @@ def get_mzid_specfile_ids(mzidfn, namespace):
     return sid_fn
 
 
-def get_specresult_scan_nr(result):
-    """Returns scan nr of an mzIdentML PSM as a str. The PSM is given
-    as a SpectrumIdentificationResult element."""
-    return ml.get_scan_nr(result, 'spectrumID')
-
-
 def get_specresult_mzml_id(specresult):
     return specresult.attrib['spectraData_ref']

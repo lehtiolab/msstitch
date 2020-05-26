@@ -1,11 +1,29 @@
-from app.lookups.sqlite.biosets import BioSetDB
+from app.lookups.sqlite.base import ResultLookupInterface
 
 
-class SpectraDB(BioSetDB):
-    def add_tables(self):
-        super().add_tables()
+class SpectraDB(ResultLookupInterface):
+    def add_tables(self, tabletypes):
+        self.create_tables(['biosets', 'mzmlfiles'])
         self.create_tables(['mzml', 'ioninjtime', 'ionmob'])
 
+    def store_biosets(self, biosets):
+        self.store_many('INSERT INTO biosets(set_name) VALUES (?)', biosets)
+
+    def store_mzmlfiles(self, mzmlfiles):
+        self.store_many('INSERT INTO mzmlfiles(mzmlfilename, set_id) '
+                        'VALUES (?, ?)', mzmlfiles)
+
+    def index_biosets(self):
+        self.index_column('setname_index', 'biosets', 'set_name')
+        self.index_column('setid_index', 'biosets', 'set_id')
+        self.index_column('setid_mzmlfn_index', 'mzmlfiles', 'set_id')
+        self.index_column('mzmlfn_index', 'mzmlfiles', 'mzmlfilename')
+        self.index_column('mzmlfnid_index', 'mzmlfiles', 'mzmlfile_id')
+
+    def get_setnames(self):
+        cursor = self.get_cursor()
+        cursor.execute('SELECT set_name, set_id FROM biosets')
+        return {setname: set_id for setname, set_id in cursor.fetchall()}
     def store_mzmls(self, spectra, ioninj, ionmob):
         self.store_many(
             'INSERT INTO mzml(spectra_id, mzmlfile_id, scan_sid, charge, mz, '
@@ -24,16 +42,3 @@ class SpectraDB(BioSetDB):
         self.index_column('scan_index', 'mzml', 'scan_sid')
         self.index_column('specrt_index', 'mzml', 'retention_time')
         self.index_column('specmz_index', 'mzml', 'mz')
-
-    def get_exp_spectra_data_rows(self):
-        cursor = self.get_cursor()
-        return cursor.execute('SELECT pr.rownr, bs.set_name, sp.retention_time, '
-                              'iit.ion_injection_time, im.ion_mobility '
-                              'FROM psmrows AS pr '
-                              'JOIN psms AS p USING(psm_id) '
-                              'JOIN mzml AS sp USING(spectra_id) '
-                              'LEFT OUTER JOIN ioninjtime AS iit USING(spectra_id) '
-                              'LEFT OUTER JOIN ionmob AS im USING(spectra_id) '
-                              'JOIN mzmlfiles as mf USING(mzmlfile_id) '
-                              'JOIN biosets AS bs USING(set_id) '
-                              'ORDER BY pr.rownr')

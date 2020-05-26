@@ -1,7 +1,7 @@
 import os
 from argparse import ArgumentParser, RawTextHelpFormatter
 
-VERSION_NUMBER = '2.19'
+VERSION_NUMBER = '3.0'
 
 
 def parser_file_exists(currentparser, fn):
@@ -25,18 +25,24 @@ def populate_parser(drivers):
         subparsermap[cmd].set_defaults(func=driver.start)
         subparsermap[cmd].add_argument('--version', action='version',
                                        version=VERSION_NUMBER)
+        # copy options so we dont modify it for the drivers
         options = [{k: v for k, v in opt.items()}
-                   for opt in driver.get_options()]
+                   for opt in driver.options.values()]
         for argoptions in options:
+            # Wait, dest is specified here?? FIXME remove from options!
             argoptions['dest'] = argoptions.pop('driverattr')
             clarg = argoptions.pop('clarg')
             if 'type' in argoptions and argoptions['type'] == 'file':
                 argoptions['type'] = lambda x: parser_file_exists(parser, x)
+            # FIXME there is support for choices in argparse, use it instead of own pick
             elif 'type' in argoptions and argoptions['type'] == 'pick':
                 argoptions.pop('picks')
                 argoptions.pop('type')
             if not 'required' in argoptions:
                 argoptions['required'] = True
+            if 'conditional_required' in argoptions:
+                argoptions['required'] = False
+                del(argoptions['conditional_required'])
             if type(clarg) == list:
                 subparsermap[cmd].add_argument(*clarg, **argoptions)
             else:

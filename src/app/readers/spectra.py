@@ -20,6 +20,8 @@ def mzmlfn_ms2_spectra_generator(mzmlfiles):
         yield fn, {'specscanid': specscanid, 'ionmob': ionmob, 'rt': rt, 'iit': iit, 
                 'mz': mz, 'charge': charge}
         formatting.clear_el(spec)
+        # FIXME generator clears since 2.14 so this may be removed
+        # or we revert since it broke at least one external script 
 
 
 def mzmlfn_spectra_generator(mzmlfiles):

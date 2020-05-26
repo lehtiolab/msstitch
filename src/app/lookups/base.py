@@ -4,13 +4,10 @@ from app.lookups.sqlite import (proteingroups, quant, searchspace,
 
 
 def get_lookup(fn, lookuptype):
-    lookupmap = {'biosets': biosets.BioSetDB,
-                 'spectra': spectra.SpectraDB,
+    lookupmap = {'spectra': spectra.SpectraDB,
+                 'specquant': quant.QuantDB,
                  'psm': psms.PSMDB,
                  'proteingroups': proteingroups.ProteinGroupDB,
-                 'quant': quant.QuantDB,
-                 'isoquant': quant.IsobaricQuantDB,
-                 'ms1quant': quant.PrecursorQuantDB,
                  'searchspace': searchspace.SearchSpaceDB,
                  'peptidetable': peptable.PepTableProteinCentricDB,
                  'peptidegenecentrictable': peptable.PepTableGeneCentricDB,

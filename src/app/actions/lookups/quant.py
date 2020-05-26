@@ -45,6 +45,7 @@ def create_precursor_quant_lookup(quantdb, mzmlfn_feats, quanttype,
     """
     featparsermap = {'kronik': kronik_featparser,
                      'openms': openms_featparser,
+                     'dinosaur': dinosaur_featparser,
                      }
     features = []
     mzmlmap = quantdb.get_mzmlfile_map()
@@ -55,6 +56,8 @@ def create_precursor_quant_lookup(quantdb, mzmlfn_feats, quanttype,
                         )
         if len(features) == DB_STORE_CHUNK:
             quantdb.store_ms1_quants(features)
+            if quanttype == 'dinosaur':
+                quantdb.store_fwhm(features)
             features = []
     quantdb.store_ms1_quants(features)
     quantdb.index_precursor_quants()
@@ -130,6 +133,17 @@ def get_precursors_from_window(mzfeatmap, minmz):
 
 
 def kronik_featparser(feature):
+    charge = int(feature['Charge'])
+    mz = (float(feature['Monoisotopic Mass']) + charge * PROTON_MASS) / charge
+    return {'rt': round(float(feature['Best RTime']), 12),
+            'mz': mz,
+            'charge': charge,
+            'intensity': float(feature['Best Intensity']),
+            }
+
+
+def dinosaur_featparser(feature):
+    # FIXME is kronik, change, add FWHM
     charge = int(feature['Charge'])
     mz = (float(feature['Monoisotopic Mass']) + charge * PROTON_MASS) / charge
     return {'rt': round(float(feature['Best RTime']), 12),

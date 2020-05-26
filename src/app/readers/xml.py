@@ -53,7 +53,7 @@ def generate_xmltags(fn, returntag, ignore_tags, ns=None):
     """
     Base generator for percolator xml psm, peptide, protein output,
     as well as for mzML, mzIdentML.
-    ignore_tags are the ones that are cleared when met by parser.
+    ignore_tags are the ones that are cleared when met by parser
     """
     xmlns = create_namespace(ns)
     ns_ignore = ['{0}{1}'.format(xmlns, x) for x in ignore_tags]

@@ -33,10 +33,6 @@ shared_options = {
     'fasta': {'driverattr': 'fasta', 'dest': 'fasta',
               'type': 'file', 'help': 'FASTA sequence database',
               'required': False, 'default': False, 'clarg': '--fasta'},
-    'featuretype': {'driverattr': 'featuretype', 'dest': 'featuretype',
-                    'help': 'Feature type to use for qvality. Can either be '
-                    'psm or peptide.', 'clarg': '--feattype',
-                    'type': 'pick', 'picks': ['psm', 'peptide']},
     'unroll': {'driverattr': 'unroll', 'clarg': '--unroll', 'const': True,
                'action': 'store_const', 'default': False, 'help': 'PSM table '
                'from Mzid2TSV contains either one PSM per line with all '
@@ -45,8 +41,8 @@ shared_options = {
                'where each protein from that shared peptide gets its own '
                'line (unrolled).', 'required': False},
     'genecentric': {'driverattr': 'genecentric', 'dest': 'genecentric',
-                    'clarg': '--genecentric', 'type': 'pick',
-                    'picks': ['assoc', 'genes'], 'required': False,
+                    'clarg': '--genecentric', 'type': str,
+                    'choices': ['assoc', 'genes'], 'required': False,
                     'default': False, 'help': 'Do not include protein group '
                     'data in output. Should be one of [genes, assoc]. '
                     'With assoc, associated gene IDs are used from e.g. '
@@ -58,14 +54,14 @@ shared_options = {
                  'help': 'Specifies to add isobaric quant data from lookup DB '
                  'to output table', 'required': False,
                  },
-    'precursor': {'driverattr': 'precursor', 'clarg': '--precursor',
+    'precursor': {'driverattr': 'precursor', 'clarg': '--ms1quant',
                   'action': 'store_const', 'const': True, 'default': False,
                   'help': 'Specifies to add precursor quant data from lookup '
                   'DB to output table', 'required': False,
                   },
     'quantcolpattern': {'driverattr': 'quantcolpattern',
                         'clarg': '--isobquantcolpattern', 'type': str,
-                        'default': None, 'required': False,
+                        'default': False, 'required': False,
                         'help': 'Unique text pattern to identify '
                         'isobaric quant columns in input table.'},
     'precursorquantcolpattern': {'driverattr': 'precursorquantcolpattern',
@@ -79,15 +75,12 @@ shared_options = {
                            'clarg': '--qaccpattern', 'type': str,
                            'help': 'Unique text pattern to identify '
                            'accession column in table containing quant info.'},
-    'qvalityout': {'driverattr': 'qvalityout', 'dest': 'qvalityout',
-                   'help': 'Qvality output file to fetch q-values and PEP '
-                   'from', 'type': 'file', 'clarg': ['-q', '--qvality']},
-    'proteincol': {'driverattr': 'proteincol', 'clarg': '--protcol',
+    'featcol': {'driverattr': 'featcol', 'clarg': '--featcol',
                    'type': int, 'required': False, 'help': 'Column number in '
                    'table in which protein or gene accessions are. '
                    'stored. First column number is 1. Use in case of not '
                    'using standard {} column'},
-    'pcolpattern': {'driverattr': 'pcolpattern', 'clarg': '--protcolpattern',
+    'featcolpattern': {'driverattr': 'featcolpattern', 'clarg': '--featcolpattern',
                     'type': str, 'required': False, 'help': 'Text pattern to '
                     'identify column in table in which protein or gene '
                     'accessions are. Use in case of not using standard '
@@ -98,8 +91,8 @@ shared_options = {
                       'help': 'Unique text pattern to identify '
                       'FDR column in input table.'},
     'fastadelim': {'driverattr': 'fastadelim', 'clarg': '--fastadelim',
-                   'dest': 'fastadelim', 'required': False, 'type': 'pick',
-                   'picks': ['tab', 'pipe', 'semicolon'],
+                   'dest': 'fastadelim', 'required': False, 'type': str,
+                   'choices': ['tab', 'pipe', 'semicolon'],
                    'help': 'Delimiter in FASTA header, used to parse gene '
                    'names in case of non-ENSEMBL/Uniprot'},
     'genefield': {'driverattr': 'genefield', 'clarg': '--genefield',
@@ -118,13 +111,41 @@ shared_options = {
             'clarg': '--addmiscleav', 'required': False, 'action': 'store_const',
             'default': False, 'const': True, 'help': 'Add missed cleavages to PSM table',
                },
+    'fullprotein': {'driverattr': 'fullprotein', 'clarg': '--fullprotein',
+        'default': False, 'action': 'store_const', 'const': True, 'help':
+        'Store full protein sequences (at a minimum-match length) in the '
+        'SQLite file rather than tryptic sequences', 'required': False},
+    'minint': {'driverattr': 'minint', 'clarg': '--minint', 'type': float,
+               'help': 'Intensity threshold of PSMs when calculating '
+               'isobaric ratios. Values below threshold will be set to NA.',
+               'required': False, 'default': -1,
+               },
+    'denompatterns': {'driverattr': 'denompatterns', 'required': False,
+                      'clarg': '--denompatterns', 'type': str, 'nargs': '+',
+                      'help': 'Regex patterns to detect denominator channels '
+                      'when creating a PSM table with normalized ratios. If '
+                      'both patterns and column numbers are given then column '
+                      'numbers are used. Usage e.g. --denompattern _126 _131. '
+                      'Also possible: --denompattern _12[6-7] to detect '
+                      'multiple columns.'
+                      },
+    'denomcols': {'driverattr': 'denomcols', 'clarg': '--denomcols',
+                  'type': int, 'nargs': '+', 'required': False,
+                  'help': 'Column numbers of denominator channels when '
+                  'creating a PSM table with normalized ratios',
+                  },
+    'mediannormalize': {'driverattr': 'mediannormalize',
+        'clarg': '--median-normalize', 'default': False, 
+        'required': False, 'action': 'store_const', 'const': True,
+        'help': 'Normalization method for isobaric quant data on protein or '
+        'peptide level. Only median centering is provided.'},
 }
 
 sequence_options = {
     'scramble': {
         'driverattr': 'scramble', 'dest': 'scramble', 'clarg': '--scramble',
-        'help': 'Decoy scrambling method, use: "reverse": reverse peptides fully, '
-        '"tryp_rev": tryptic reverse, or "prot_rev": protein reverse.',
+        'help': 'Decoy scrambling method, use: '
+        '"tryp_rev": tryptic reverse, or "prot_rev": full (protein) reverse.',
         'required': False, 'default': 'tryp_rev'},
     'ignoretarget': {
         'driverattr': 'ignoretarget', 'dest': 'ignoretarget', 'clarg': '--ignore-target-hits',
@@ -143,12 +164,13 @@ sequence_options = {
                ' Used when using tryptic peptide reversal (not protein reversal)'},
     'miss_cleavage': {'driverattr': 'miss_cleavage', 'dest': 'miss_cleavage',
                'clarg': '--miscleav', 'required': False, 'type': int, 'default': 0,
-               'help': 'Amount of missed cleavages to allow when trypsinizing',
+               'help': 'Amount of missed cleavages to allow when trypsinizing, '
+               'default is 0',
                },
         }
 
 
-mslookup_options = {
+lookup_options = {
     'falloff': {'driverattr': 'falloff', 'dest': 'falloff',
                 'clarg': '--insourcefrag', 'default': False,
                 'action': 'store_const', 'const': True, 'help': 'Apply '
@@ -162,6 +184,7 @@ mslookup_options = {
                 'will be stored and looked up reversed', 'required': False
                 },
     'decoy': {'driverattr': 'decoy', 'dest': 'decoy', 'clarg': '--decoy',
+        # FIXME deprecate?
               'action': 'store_const', 'const': True,
               'default': False, 'help': 'Specifies lookup is '
               'for decoy PSMs, use with --map in case there '
@@ -174,29 +197,38 @@ mslookup_options = {
                    'with quant data, the order will be their input '
                    'order at the command line.', 'clarg': '--spectra',
                    'nargs': '+'},
-    'quantfiletype': {'driverattr': 'quantfiletype', 'dest': 'quanttype',
-                      'clarg': '--quanttype', 'type': 'pick', 'help':
-                      'Filetype of '
-                      'precursor quants to store. One of kronik or openms.',
-                      'picks': ['kronik', 'openms']},
+    'isobaric': {'driverattr': 'isobaricfns', 'dest': 'isobaricfns', 'clarg': '--isobaric', 
+        'type': str, 'nargs': '+', 'required': False,
+        'help': 'Isobaric quant output files from '
+        'OpenMS in consensusXML '
+        'format. Multiple files can be specified, '
+        'and matching order with spectra files is important.',
+        },
+    'kronik': {'driverattr': 'kronikfns', 'dest': 'kronik', 'clarg': '--kronik', 
+        'type': str, 'nargs': '+', 'required': False,
+        'help': 'MS1 quant output files from Kronik in text format.'
+        'Multiple files can be specified, '
+        'and matching order with spectra files is important.',
+        },
     'rttol': {'driverattr': 'rt_tol', 'dest': 'rttol', 'clarg': '--rttol',
-              'type': float, 'help': 'Specifies tolerance in seconds for '
-              'retention time when mapping MS1 feature quant info to '
-              'identifications in the PSM table.'},
+        'conditional_required': ['kronik'], 'type': float, 
+        'help': 'Specifies tolerance in seconds for '
+        'retention time when mapping MS1 feature quant info to '
+        'identifications in the PSM table.'},
     'mztol': {'driverattr': 'mz_tol', 'dest': 'mztol', 'clarg': '--mztol',
               'type': float, 'help': 'Specifies tolerance in mass-to-charge '
               'when mapping MS1 feature quant info to identifications in '
-              'the PSM table.'},
+              'the PSM table.', 'conditional_required': ['kronik']},
     'mztoltype': {'driverattr': 'mz_toltype', 'dest': 'mztoltype',
-                  'type': 'pick', 'picks': ['ppm', 'Da'],
-                  'clarg': '--mztoltype',
+                  'type': str, 'choices': ['ppm', 'Da'],
+                  'clarg': '--mztoltype', 'conditional_required': ['kronik'],
                   'help': 'Type of tolerance in mass-to-charge when mapping '
                   'MS1 feature quant info to identifications in the PSM table.'
                   ' One of ppm, Da.'},
     'peptidecol': {'driverattr': 'peptidecol', 'dest': 'peptidecol',
-                   'type': int, 'clarg': '--peptidecol', 'help':
-                   'Column nr of peptide table where peptide sequences are '
-                   'stored. First column is nr. 1'},
+        'type': int, 'clarg': '--peptidecol', 'default': 1, 'required': False,
+        'help': 'Column nr of peptide table where peptide sequences are '
+        'stored. First and default column is nr. 1'},
     'psmnrcolpattern': {'driverattr': 'psmnrcolpattern',
                         'dest': 'psmnrcolpattern',
                         'clarg': '--psmnrcolpattern',
@@ -204,17 +236,17 @@ mslookup_options = {
                         'help': 'Unique text pattern to identify '
                         'number-of-psms column in input table.'},
 }
-mslookup_options['proteincol'] = {k: v for k, v
-                                  in shared_options['proteincol'].items()}
-mslookup_options['proteincol'].update(
+lookup_options['featcol'] = {k: v for k, v
+                                  in shared_options['featcol'].items()}
+lookup_options['featcol'].update(
     {'default': 1, 'help':
-     mslookup_options['proteincol']['help'].format('first')})
-mslookup_options['fasta'] = {k: v for k, v in shared_options['fasta'].items()}
-mslookup_options['fasta']['help'] = ('FASTA sequence database to use when '
+     lookup_options['featcol']['help'].format('first')})
+lookup_options['fasta'] = {k: v for k, v in shared_options['fasta'].items()}
+lookup_options['fasta']['help'] = ('FASTA sequence database to use when '
                                      'extracting gene names to the PSM '
                                      'table from proteins')
 
-pycolator_options = {
+percolator_options = {
     'protheaders': {'driverattr': 'protheaders', 'clarg': '--protheaders',
                     'nargs': '+', 'type': str,
                     'help': 'Specify protein FASTA headers to split on. '
@@ -249,7 +281,21 @@ pycolator_options = {
                 },
 }
 
-mzidtsv_options = {
+psmtable_options = {
+    'genes': {'driverattr': 'genes', 'clarg': '--genes', 'action': 'store_const', 
+        'const': True, 'default': False, 'help': 'Specifies to add genes to PSM '
+        'table', 'required': False,
+        },
+    'proteingroup': {'driverattr': 'proteingroup', 'clarg': '--proteingroup',
+        'action': 'store_const', 'const': True, 'default': False, 
+        'help': 'Specifies to add protein groups to PSM table', 'required': False,
+        },
+    'filtpep': {'driverattr': 'filtpep', 'clarg': '--filtpep',
+                'help': 'Peptide q-value cutoff level as a floating point number',
+                'type': float, 'required': False},
+    'filtpsm': {'driverattr': 'filtpsm', 'clarg': '--filtpsm',
+                'help': 'PSM q-value cutoff level as a floating point number',
+                'type': float, 'required': False},
     'confcol': {'driverattr': 'confcol', 'clarg': '--confidence-col',
                 'help': 'Confidence column number or name in the tsv file. '
                 'First column has number 1.', 'type': int, 'required': False},
@@ -263,8 +309,8 @@ mzidtsv_options = {
                 'type': float},
     'conftype': {'driverattr': 'conftype', 'clarg': '--confidence-better',
                  'help': 'Confidence type to define if higher or lower score '
-                 'is better. One of [higher, lower]', 'type': 'pick',
-                 'picks': ['higher', 'lower']},
+                 'is better. One of [higher, lower]', 'type': str,
+                 'choices': ['higher', 'lower']},
     'medianpsms': {'driverattr': 'medianpsms', 'clarg': '--medianpsms',
                    'help': 'In case of using a separate PSM table with more '
                    'data to generate more robust medians (i.e. a superset of '
@@ -273,25 +319,11 @@ mzidtsv_options = {
                    'in the input will be adjusted using those factors rather '
                    'than factors derived from solely their own quantification '
                    'data', 'type': 'file', 'required': False},
-    'normalize': {'driverattr': 'normalize', 'clarg': '--normalize',
-                  'type': str, 'default': False, 'required': False,
-                  'help': 'Normalization method for isobaric '
-                  'quant data on protein or peptide level. Currently only '
-                  'median centering is used. Use "--normalize median"'},
-    'normalizeratios': {'driverattr': 'normalizeratios', 'type': 'file',
-                        'clarg': '--norm-ratios', 'required': False,
-                        'default': False, 'help': 'In case of using a '
-                        'separate table to generate channel medians for '
-                        'normalizing, specify that file here. The '
-                        'normalization factors will be calculated from this '
-                        'file, and the features in the input will be adjusted '
-                        'using those factors rather than factors derived from '
-                        'their own quantification data'},
     'targettable': {'driverattr': 'targettable', 'clarg': '--targettable',
                     'help': 'Table to output PSM or other feature quant data '
                     'to. Used when calculating PSM isobaric intenstity ratios '
                     'for proteins, peptides, genes. Leaving empty will output '
-                    'to a new table, or when no --protcol is specified, '
+                    'to a new table, or when no --featcol is specified, '
                     'pastes ratios to the PSM table they are fetched from.',
                     'type': 'file', 'required': False},
     'percofn': {'driverattr': 'percofn', 'clarg': '--perco', 'help': 'Percolator '
@@ -299,38 +331,16 @@ mzidtsv_options = {
     'mzidfns': {'driverattr': 'mzidfns', 'clarg': '--mzids', 'help': 'MzIdentML '
         ' output files belonging to PSM table TSV files, use same order as for TSVs', 
         'type': 'file', 'nargs': '+'},
-    'bioset': {'driverattr': 'bioset', 'clarg': '--bioset', 'const': True,
-               'action': 'store_const', 'default': False,
-               'help': 'this enables automatic splitting on '
-               'biological set names, for which a a column specifying '
-               'these must exist.', 'required': False},
-    'splitcol': {'driverattr': 'splitcol', 'clarg': '--splitcol', 'type': int,
-                 'help': 'Column number to split a PSM table on. First column '
-                 'is number 1', 'required': False, 'default': None,
+    'splitcol': {'driverattr': 'splitcol', 'clarg': '--splitcol',
+                 'help': 'Either a column number to split a PSM table on, or '
+                 '"TD", "bioset" for splitting on target/decoy or biological '
+                 'sample set columns (resulting from msstitch perco2psm or '
+                 'msstitch psmtable. First column is number 1.'
                  },
-    'denompatterns': {'driverattr': 'denompatterns', 'required': False,
-                      'clarg': '--denompatterns', 'type': str, 'nargs': '+',
-                      'help': 'Regex patterns to detect denominator channels '
-                      'when creating a PSM table with normalized ratios. If '
-                      'both patterns and column numbers are given then column '
-                      'numbers are used. Usage e.g. --denompattern _126 _131. '
-                      'Also possible: --denompattern _12[6-7] to detect '
-                      'multiple columns.'
-                      },
-    'denomcols': {'driverattr': 'denomcols', 'clarg': '--denomcols',
-                  'type': int, 'nargs': '+', 'required': False,
-                  'help': 'Column numbers of denominator channels when '
-                  'creating a PSM table with normalized ratios',
-                  },
-    'minint': {'driverattr': 'minint', 'clarg': '--minint', 'type': float,
-               'help': 'Intensity threshold of PSMs when calculating '
-               'isobaric ratios. Values below threshold will be set to NA.',
-               'required': False, 'default': -1,
-               },
 }
-mzidtsv_options['quantcolpattern'] = {
+psmtable_options['quantcolpattern'] = {
     k: v for k, v in shared_options['quantcolpattern'].items()}
-mzidtsv_options['quantcolpattern']['required'] = True
+psmtable_options['quantcolpattern']['required'] = True
 
 pepprottable_options = {
     # a mock infile to make sure we don't show or need an infile, e.g. in
@@ -352,19 +362,17 @@ pepprottable_options = {
 
 
 prottable_options = {k: v for k, v in pepprottable_options.items()}
-prottable_options['proteincol'] = {k: v for k, v
-                                   in shared_options['proteincol'].items()}
-prottable_options['proteincol'].update(
+prottable_options['featcol'] = {k: v for k, v
+                                   in shared_options['featcol'].items()}
+prottable_options['featcol'].update(
     {'default': False, 'help':
-     prottable_options['proteincol']['help'].format('Master protein')})
+     prottable_options['featcol']['help'].format('Master protein')})
 prottable_options.update({
     'psmfile': {'driverattr': 'psmfile', 'clarg': '--psmtable', 'type': 'file',
                 'help': 'PSM table file containing precursor quant data to '
-                'add to table.'},
-    'pepfile': {'driverattr': 'pepfile', 'clarg': '--peptable', 'type': 'file',
-                'help': 'Peptide table file'},
+                'add to table.', 'conditional_required': ['quantcolpattern']},
     'decoyfn': {'driverattr': 'decoyfn', 'dest': 'decoyfn',
-                'help': 'Decoy protein table input file',
+                'help': 'Decoy peptide table input file',
                 'type': 'file', 'clarg': '--decoyfn'},
     'minlogscore': {'driverattr': 'minlogscore', 'clarg': '--logscore',
                     'action': 'store_const', 'default': False, 'const': True,
@@ -373,15 +381,13 @@ prottable_options.update({
     't_fasta': {'driverattr': 't_fasta', 'clarg': '--targetfasta',
                 'type': 'file', 'help': 'FASTA file with target proteins '
                 'to determine best scoring proteins of target/decoy pairs '
-                'for pickqvality. In case using --picktype ensg/genename',
-                'required': False},
+                'for picked FDR. In case using --picktype ensg/genename',},
     'd_fasta': {'driverattr': 'd_fasta', 'clarg': '--decoyfasta',
                 'type': 'file', 'help': 'FASTA file with decoy proteins '
                 'to determine best scoring proteins of target/decoy pairs '
-                'for pickqvality. In case using --picktype ensg/genename',
-                'required': False},
-    'picktype': {'driverattr': 'picktype', 'clarg': '--picktype',
-                 'type': 'pick', 'picks': ['ensg', 'genename', 'result'],
+                'for picked FDR. In case using --picktype ensg/genename',},
+    'picktype': {'driverattr': 'picktype', 'clarg': '--picktype', 'required': False,
+                'type': str, 'choices': ['fasta', 'result'], 'default': 'fasta',
                  'help': 'Feature type to use for determining picked FDR. Can '
                  'be one of [ensg, genename, result]. "result" will infer T/D pairs '
                  'from the protein table and may not be as cleanly matched as '
@@ -417,6 +423,12 @@ peptable_options.update({
                     'data in output, but use gene names instead to count peptides '
                     'per feature, determine peptide-uniqueness.',
                     },
+    'modelqvals': {'driverattr': 'modelqvals',
+                    'clarg': '--modelqvals', 'action': 'store_const',
+                    'const': True, 'default': False, 'required': False,
+                    'help': 'Create linear-modeled q-vals for peptides, to avoid '
+                    'overlapping stepped low-qvalue data of peptides with '
+                    'different scores', },
     'qvalthreshold': {'driverattr': 'qvalthreshold', 'dest': 'qvalthreshold',
         'type': float, 'clarg': '--qvalthreshold', 'help': 'Specifies the '
         'inclusion threshold for q-values to fit a linear model to. Any scores/'

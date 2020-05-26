@@ -31,12 +31,8 @@ METADATA = {
     'copyright': 'Copyright (c) 2013 Jorrit Boekel',
 }
 
-CLI = {'console_scripts': ['msspercolator=app.pycolator:main',
-                           'msslookup=app.mslookup:main',
-                           'msspsmtable=app.mzidtsv:main',
-                           'msspeptable=app.peptable:main',
-                           'mssprottable=app.prottable:main',
-                           ]}
+CLI = {'console_scripts': ['msstitch=app.msstitch:main']}
+
 ###################################################################
 
 try:

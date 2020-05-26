@@ -7,7 +7,7 @@ from app.drivers.options import mslookup_options
 
 class SpectraLookupDriver(base.LookupDriver):
     lookuptype = 'spectra'
-    command = 'spectra'
+    command = 'storespectra'
     commandhelp = ('Create lookup of spectra in mzML '
                    'format. Requires passing mzML files to -i, but '
                    'neither --spectra nor --dbfile. Biological set names '

@@ -2,7 +2,7 @@ import os
 from app.readers import mzidplus as readers
 from app.readers import tsv as tsvreader
 from app.readers import xml
-from app.readers import pycolator as percoreader 
+from app.readers import percolator as percoreader 
 from app.dataformats import mzidtsv as psmheaders
 
 

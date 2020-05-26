@@ -1,7 +1,7 @@
 import re
 from itertools import product
 
-from app.readers import pycolator as reader
+from app.readers import percolator as reader
 from app.readers import fasta
 from app.readers import xmlformatting as formatting
 

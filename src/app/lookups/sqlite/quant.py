@@ -3,30 +3,11 @@ from app.lookups.sqlite.base import ResultLookupInterface
 
 class QuantDB(ResultLookupInterface):
 
-    def select_all_psm_quants(self, isobaric=False, precursor=False):
-        selects = ['pr.rownr']
-        joins = ['JOIN psms USING(psm_id)', 'JOIN mzml USING(spectra_id)']
-        sqlfields, fieldcount = {}, 1
-        if isobaric:
-            selects.extend(['ic.channel_name', 'iq.intensity'])
-            joins.extend(['JOIN isobaric_quant AS iq USING(spectra_id)',
-                          'JOIN isobaric_channels AS ic USING(channel_id)'])
-            sqlfields['isochan'] = fieldcount
-            sqlfields['isoquant'] = fieldcount + 1
-            fieldcount += 2
-        if precursor:
-            selects.extend(['pq.intensity'])
-            joins.extend(['LEFT OUTER JOIN ms1_align USING(spectra_id)',
-                          'LEFT OUTER JOIN ms1_quant AS pq USING(feature_id)'])
-            sqlfields['precursor'] = fieldcount
-        if not precursor and not isobaric:
-            raise RuntimeError('Cannot add quantification data, neither '
-                               'isobaric, nor precursor have been specified.')
-        sql = ('SELECT {} FROM psmrows as pr {} '
-               'ORDER BY pr.rownr'.format(', '.join(selects), ' '.join(joins)))
-        cursor = self.get_cursor()
-        return cursor.execute(sql), sqlfields
-
+    def add_tables(self, tabletypes):
+        if 'isobaric' in tabletypes:
+            self.create_tables(['isobaric_quant', 'isobaric_channels'])
+        if 'ms1' in tabletypes:
+            self.create_tables(['ms1_quant', 'ms1_align', 'ms1_fwhm'])
 
     def get_fnfeats(self, fn_id):
         cursor = self.get_cursor()
@@ -34,18 +15,6 @@ class QuantDB(ResultLookupInterface):
             'SELECT mz, feature_id, charge, retention_time '
             'FROM ms1_quant '
             'WHERE mzmlfile_id=?', (fn_id,))
-
-    def get_all_quantmaps(self):
-        """Returns all unique quant channels from lookup as list"""
-        cursor = self.get_cursor()
-        cursor.execute(
-            'SELECT channel_name FROM isobaric_channels')
-        return cursor.fetchall()
-
-
-class IsobaricQuantDB(QuantDB):
-    def add_tables(self):
-        self.create_tables(['isobaric_quant', 'isobaric_channels'])
 
     def store_channelmap(self, channels):
         self.store_many(
@@ -77,15 +46,16 @@ class IsobaricQuantDB(QuantDB):
         cursor.execute('SELECT channel_id, channel_name FROM isobaric_channels')
         return cursor
 
-
-class PrecursorQuantDB(QuantDB):
-    def add_tables(self):
-        self.create_tables(['ms1_quant', 'ms1_align'])
-
     def store_ms1_quants(self, quants):
         self.store_many(
             'INSERT INTO ms1_quant(mzmlfile_id, retention_time, mz, '
             'charge, intensity) VALUES (?, ?, ?, ?, ?)', quants)
+
+    def store_fwhm(self, quants):
+        # FIXME get feature_id for all passed quants, possibly directly when storing them
+        self.store_many(
+            'INSERT INTO ms1_fwhm(fwhm) '
+            'charge, intensity) VALUES (?)', quants)
 
     def store_ms1_alignments(self, aligns):
         self.store_many(

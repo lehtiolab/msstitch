@@ -4,26 +4,23 @@ from collections import OrderedDict
 
 from app.dataformats import prottable as prottabledata
 from app.readers import tsv as reader
-from app.actions import isonormalizing
 
 
 ISOQUANTRATIO_FEAT_ACC = '##isoquant_target_acc##'
 
 
 def get_isobaric_ratios(psmfn, psmheader, channels, denom_channels, min_int,
-                        targetfn, accessioncol, normalize, normratiofn):
+        targetfeats, target_acc_field, accessioncol, normalize):
     """Main function to calculate ratios for PSMs, peptides, proteins, genes.
     Can do simple ratios, median-of-ratios and median-centering
     normalization."""
+    # FIXME median normalize should normalize on features, NOT on PSMs
+    # TODO:
+    # - PSM ratios remove, normalize remove? if not, normalize on output, not PSMs
+    # - add func: Summarize intensity, not ratio to whatever specified column (stahl)
     psm_or_feat_ratios = get_psmratios(psmfn, psmheader, channels,
                                        denom_channels, min_int, accessioncol)
-    if normalize and normratiofn:
-        normheader = reader.get_tsv_header(normratiofn)
-        normratios = get_ratios_from_fn(normratiofn, normheader, channels)
-        ch_medians = get_medians(channels, normratios, report=True)
-        outratios = calculate_normalized_ratios(psm_or_feat_ratios, ch_medians,
-                                                channels)
-    elif normalize:
+    if normalize:
         flatratios = [[feat[ch] for ch in channels]
                       for feat in psm_or_feat_ratios]
         ch_medians = get_medians(channels, flatratios, report=True)
@@ -33,12 +30,12 @@ def get_isobaric_ratios(psmfn, psmheader, channels, denom_channels, min_int,
         outratios = psm_or_feat_ratios
     # at this point, outratios look like:
     # [{ch1: 123, ch2: 456, ISOQUANTRATIO_FEAT_ACC: ENSG1244}, ]
-    if accessioncol and targetfn:
-        outratios = {x[ISOQUANTRATIO_FEAT_ACC]: x for x in outratios}
-        return output_to_target_accession_table(targetfn, outratios, channels)
-    elif not accessioncol and not targetfn:
+    if accessioncol and targetfeats:
+        outratios = {x.pop(ISOQUANTRATIO_FEAT_ACC): x for x in outratios}
+        return output_to_targetfeats(targetfeats, target_acc_field, outratios, channels)
+    elif not accessioncol and not targetfeats:
         return paste_to_psmtable(psmfn, psmheader, outratios)
-    elif accessioncol and not targetfn:
+    elif accessioncol and not targetfeats:
         # generate new table with accessions
         return ({(k if not k == ISOQUANTRATIO_FEAT_ACC
                   else prottabledata.HEADER_PROTEIN): v
@@ -95,18 +92,14 @@ def paste_to_psmtable(psmfn, header, ratios):
         yield psm
 
 
-def output_to_target_accession_table(targetfn, featratios, channels):
+def output_to_targetfeats(targetfeats, acc_field, featratios, channels):
     #loop prottable, add ratios from dict, acc = key
-    theader = reader.get_tsv_header(targetfn)
-    acc_field = theader[0]
-    for feat in reader.generate_tsv_proteins(targetfn, theader):
+    for feat in targetfeats:
         try:
             quants = featratios[feat[acc_field]]
         except KeyError:
             quants = {ch: 'NA' for ch in channels}
             quants.update({get_no_psms_field(ch): 'NA' for ch in channels})
-        else:
-            quants.pop(ISOQUANTRATIO_FEAT_ACC)
         feat.update(quants)
         yield feat
 

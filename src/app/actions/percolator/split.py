@@ -2,7 +2,7 @@ from lxml import etree
 import re
 
 from app.readers import xmlformatting as formatting
-from app.readers import pycolator as reader
+from app.readers import percolator as reader
 
 
 def protein_header_split_generator(elements, ns, can_headers, headers):

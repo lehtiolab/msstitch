@@ -2,7 +2,7 @@ from app.lookups.sqlite.base import DatabaseConnection
 
 
 class SearchSpaceDB(DatabaseConnection):
-    def add_tables(self):
+    def add_tables(self, tabletypes):
         """Creates a searchspace lookup sqlite."""
         self.create_tables(['known_searchspace', 'protein_peptides'])
 
