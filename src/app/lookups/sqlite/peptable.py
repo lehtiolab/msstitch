@@ -4,9 +4,11 @@ from app.dataformats import peptable as ph
 
 class PepTableProteinCentricDB(ProtPepTable):
     datatype = 'peptide'
-    singlefields = [
+    stdheaderfields = [
             ph.HEADER_NO_PSM,
             ph.HEADER_QVAL,
+            ]
+    singlefields = stdheaderfields + [
             ph.HEADER_AREA,
             ]
     colmap = {'peptide_sequences': ['pep_id', 'sequence'],
@@ -19,7 +21,7 @@ class PepTableProteinCentricDB(ProtPepTable):
                                       'amount_psms'],
               }
 
-    def add_tables(self):
+    def add_tables(self, tabletypes=[]):
         self.create_tables(['peptide_tables', 'pepquant_channels',
                             'peptide_iso_quanted', 'peptide_precur_quanted',
                             'peptide_fdr'])
@@ -77,7 +79,7 @@ class PepTableProteinCentricDB(ProtPepTable):
 
     def merge_features(self):
         sql = """
-    SELECT bs.set_name, ps.pep_id, pf.fdr, ppq.quant, COUNT(DISTINCT psms.psm_id),
+    SELECT bs.set_name, ps.pep_id, COUNT(DISTINCT psms.psm_id), pf.fdr, ppq.quant,
             GROUP_CONCAT(pqc.channel_name), GROUP_CONCAT(piq.quantvalue),
             GROUP_CONCAT(piq.amount_psms)
         FROM peptide_sequences AS ps

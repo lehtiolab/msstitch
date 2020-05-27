@@ -225,4 +225,4 @@ class PercolatorDriver(BaseDriver):
 class PepProttableDriver(BaseDriver):
     def write(self):
         outfn = self.create_outfilepath(self.fn, self.outsuffix)
-        tsvwriter.write_tsv(self.header, self.features, outfn)
+        tsvwriter.write_table_with_na(self.header, self.features, outfn)

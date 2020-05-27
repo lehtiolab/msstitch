@@ -2,9 +2,9 @@ from app.drivers import base
 from app.readers import tsv as tsvreader
 from app.actions import merge
 
-from app.drivers.options import prottable_options, lookup_options
+from app.drivers.options import prottable_options, peptable_options, lookup_options
 from app.dataformats import prottable as ph 
-from app.dataformats import peptable as peptabledata 
+from app.dataformats import peptable as peph
 
 class MergeDriver(base.PepProttableDriver):
     outsuffix = ''
@@ -21,16 +21,26 @@ class MergeDriver(base.PepProttableDriver):
                                                  'fdrcolpattern',
                                                  'multifiles', 'featcol'],
                                                 lookup_options))
-        self.options.update(self.define_options(['lookupfn', 'genecentric',
-                                                 'mergecutoff'],
+        self.options.update(self.define_options(['lookupfn', 'mergecutoff'],
                                                 prottable_options))
+        self.options.update(self.define_options(['nogroup', 'genecentric'],
+                                                peptable_options))
 
     def parse_input(self, **kwargs):
         super().parse_input(**kwargs)
         header = tsvreader.get_tsv_header(self.fn[0])
         self.header = [header[0]]
-        if header[0] == peptabledata.HEADER_PEPTIDE:
-            self.lookuptype = 'peptide'
+        if header[0] == peph.HEADER_PEPTIDE:
+            if self.genecentric:
+                self.lookuptype = 'peptidegenecentrictable'
+                self.header.extend([peph.HEADER_GENES, peph.HEADER_ASSOCIATED])
+            elif self.nogroup:
+                self.lookuptype = 'peptidetableplain'
+            else:
+                self.header.extend([
+                    peph.HEADER_PROTEINS, peph.HEADER_NO_CONTENTPROTEINS, peph.HEADER_DESCRIPTIONS,
+                    peph.HEADER_COVERAGES, peph.HEADER_GENES, peph.HEADER_ASSOCIATED])
+                self.lookuptype = 'peptidetable'
         elif header[0] == ph.HEADER_PROTEIN:
             self.lookuptype = 'prottable'
             self.header.extend([
@@ -55,6 +65,8 @@ class MergeDriver(base.PepProttableDriver):
                 self.psmnrcolpattern, self.fdrcolpattern)
         for field in self.lookup.stdheaderfields:
             self.header.extend(['{}_{}'.format(x, field) for x in self.setnames])
+        if self.fdrcolpattern and not self.header[0] == peph.HEADER_PEPTIDE:
+            self.header.extend(['{}_{}'.format(x, ph.HEADER_QVAL) for x in self.setnames])
         if self.precursorquantcolpattern:
             self.header.extend(['{}_{}'.format(x, ph.HEADER_AREA) for x in self.setnames])
         if self.quantcolpattern:

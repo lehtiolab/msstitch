@@ -7,9 +7,8 @@ class ProtGeneTableBase(ProtPepTable):
             ph.HEADER_NO_PSM,
             ph.HEADER_NO_PEPTIDE,
             ph.HEADER_NO_UNIPEP,
-            ph.HEADER_QVAL,
             ]
-    singlefields = stdheaderfields + [ph.HEADER_AREA]
+    singlefields = stdheaderfields + [ph.HEADER_QVAL, ph.HEADER_AREA]
 
 
 class ProtTableDB(ProtGeneTableBase):
@@ -98,7 +97,7 @@ SELECT pgm.master_id, pgm.protein_acc, IFNULL(g.gene_acc, 'NA'),
 
 
 
-class GeneTableDB(ProtPepTable):
+class GeneTableDB(ProtGeneTableBase):
     datatype = 'gene'
     colmap = {'genes': ['gene_id', 'gene_acc', 'protein_acc'],
               'gene_precur_quanted': ['gene_id', 'genetable_id', 'quant'],
@@ -109,7 +108,7 @@ class GeneTableDB(ProtPepTable):
                                    'channel_id', 'quantvalue', 'amount_psms'],
               }
 
-    def add_tables(self):
+    def add_tables(self, tabletypes=[]):
         self.create_tables(['gene_tables', 'gene_iso_quanted',
                             'genequant_channels', 'gene_precur_quanted',
                             'gene_fdr'])
@@ -184,7 +183,7 @@ class GeneTableAssocIDsDB(GeneTableDB):
             'assocquant_channels')
         self.colmap['associated_ids'] = ['gene_id', 'assoc_id', 'protein_acc']
 
-    def add_tables(self):
+    def add_tables(self, tabletypes=[]):
         self.create_tables(['gene_tables', 'assoc_iso_quanted',
                             'genequant_channels', 'assoc_precur_quanted',
                             'assoc_fdr'])

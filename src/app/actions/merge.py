@@ -16,7 +16,6 @@ def create_lookup(fns, pqdb, poolnames, featcolnr, ms1_qcolpattern,
         if colmap:
             store_single_col_data(fns, tablefn_map, feat_map, storefun, colmap)
     if isobqcolpattern:
-        print(isobqcolpattern)
         isocolmap = get_colmap(fns, isobqcolpattern, antipattern=psmnrpattern)
         if psmnrpattern is not None:
             psmcolmap = get_colmap(fns, psmnrpattern)
@@ -78,7 +77,6 @@ def create_isobaric_quant_lookup(fns, tablefn_map, featmap, pqdb,
     quantmap = pqdb.get_quantchannel_map()
     to_store = []
     for fn, header, pquant in tsvreader.generate_tsv_pep_protein_quants(fns):
-        print(header, featcolnr, pquant)
         pqdata = get_isob_quant_data(pquant, header[featcolnr], tablefn_map[fn],
                                      featmap, quantmap)
         to_store.extend(pqdata)
@@ -130,22 +128,21 @@ def build_proteintable(pqdb, mergecutoff, isobaric=False):
             outfeat.update(pdmap[previousfeat])
             yield outfeat
             outfeat = {}
-        if not protein_pool_fdr_cutoff_ok(setfeatvals[fdrfieldnr], mergecutoff, feat_id, setname):
-            continue
-        for ix, field in enumerate(pqdb.singlefields):
-            fieldname = '{}_{}'.format(setname, field)
-            outfeat[fieldname] = setfeatvals[ix]
-        if isobaric:
-            channels = setfeatvals[len(pqdb.singlefields)].split(',')
-            quants = setfeatvals[len(pqdb.singlefields)+1].split(',')
-            try: 
-                ampsms = setfeatvals[len(pqdb.singlefields)+2].split(',')
-            except AttributeError:
-                ampsms = [0] * len(channels)
-            for ch, quant, ampsm in zip(channels, quants, ampsms):
-                outfeat['{}_{}'.format(setname, ch)] = quant
-                if ampsms:
-                    outfeat['{}_{}{}'.format(setname, ch, prottabledata.HEADER_NO_PSMS_SUFFIX)] = ampsm
+        if protein_pool_fdr_cutoff_ok(setfeatvals[fdrfieldnr], mergecutoff, feat_id, setname):
+            for ix, field in enumerate(pqdb.singlefields):
+                fieldname = '{}_{}'.format(setname, field)
+                outfeat[fieldname] = setfeatvals[ix]
+            if isobaric:
+                channels = setfeatvals[len(pqdb.singlefields)].split(',')
+                quants = setfeatvals[len(pqdb.singlefields)+1].split(',')
+                try: 
+                    ampsms = setfeatvals[len(pqdb.singlefields)+2].split(',')
+                except AttributeError:
+                    ampsms = [0] * len(channels)
+                for ch, quant, ampsm in zip(channels, quants, ampsms):
+                    outfeat['{}_{}'.format(setname, ch)] = quant
+                    if ampsms:
+                        outfeat['{}_{}{}'.format(setname, ch, prottabledata.HEADER_NO_PSMS_SUFFIX)] = ampsm
         previousfeat = feat_id
     if outfeat != {}:
         outfeat.update(pdmap[feat_id])

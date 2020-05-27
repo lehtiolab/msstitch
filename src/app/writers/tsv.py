@@ -42,6 +42,6 @@ def parse_NA(feature, header):
     return feature
 
 
-def write_prottable_with_na(header, psms, outfn):
-    na_psms = (tsv.parse_NA(x, header) for x in psms)
-    write_tsv(header, na_psms, outfn)
+def write_table_with_na(header, features, outfn):
+    na_feats = (parse_NA(x, header) for x in features)
+    write_tsv(header, na_feats, outfn)

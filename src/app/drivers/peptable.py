@@ -4,6 +4,7 @@ from app.drivers.options import peptable_options
 from app.readers import tsv as tsvreader
 
 from app.dataformats import mzidtsv as mzidtsvdata
+from app.dataformats import peptable as peptabledata 
 
 from app.actions.psmtable import isosummarize
 from app.actions import psmtopeptable
@@ -64,10 +65,8 @@ class CreatePeptableDriver(PepProttableDriver):
         self.header = [switch_map[field] if field in switch_map else field
                 for field in header]
         peptides = psmtopeptable.generate_peptides(self.fn, self.oldheader,
-                                               self.scorecol,
-                                               self.precurquantcol,
-                                               self.spectracol)
-        if self.quantcolpattern:
+                switch_map, self.scorecol, self.precurquantcol, self.spectracol)
+        if self.quantcolpattern and any([self.denomcols, self.denompatterns]):
             if self.denomcols is not None:
                 denomcols = [self.number_to_headerfield(col, self.oldheader)
                              for col in self.denomcols]
@@ -75,9 +74,6 @@ class CreatePeptableDriver(PepProttableDriver):
                 denomcolnrs = [tsvreader.get_columns_by_pattern(self.oldheader, pattern)
                                for pattern in self.denompatterns]
                 denomcols = set([col for cols in denomcolnrs for col in cols])
-            else:
-                raise RuntimeError('Must define either denominator column numbers '
-                                   'or regex pattterns to find them')
             quantcols = tsvreader.get_columns_by_pattern(self.oldheader,
                                                    self.quantcolpattern)
             nopsms = [isosummarize.get_no_psms_field(qf) for qf in quantcols]

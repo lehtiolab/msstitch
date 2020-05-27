@@ -40,15 +40,6 @@ shared_options = {
                ' unrolled, default), or one PSM/protein match per line '
                'where each protein from that shared peptide gets its own '
                'line (unrolled).', 'required': False},
-    'genecentric': {'driverattr': 'genecentric', 'dest': 'genecentric',
-                    'clarg': '--genecentric', 'type': str,
-                    'choices': ['assoc', 'genes'], 'required': False,
-                    'default': False, 'help': 'Do not include protein group '
-                    'data in output. Should be one of [genes, assoc]. '
-                    'With assoc, associated gene IDs are used from e.g. '
-                    'Biomart rather than the ones found in the FASTA db used '
-                    'for PSM search. These need to have been stored when '
-                    'creating a PSM lookup.'},
     'isobaric': {'driverattr': 'isobaric', 'clarg': '--isobaric',
                  'action': 'store_const', 'const': True, 'default': False,
                  'help': 'Specifies to add isobaric quant data from lookup DB '

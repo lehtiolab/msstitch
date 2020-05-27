@@ -6,6 +6,7 @@ from app.drivers.base import PSMDriver
 
 from app.readers import tsv as tsvreader
 from app.readers import mzidplus as mzidreader
+from app.dataformats import mzidtsv as psmhead
 
 from app.actions.psmtable import splitmerge as splitmerge
 from app.actions.psmtable import refine as refine
@@ -33,11 +34,12 @@ class TSVConcatenateDriver(PSMDriver):
     def prepare(self):
         # do not read PSMs, multiple files passed and they will be checked
         # if headers matched
-        pass
+        self.first_infile = self.fn[0]
+        self.oldheader = tsvreader.get_tsv_header(self.first_infile)
 
     def set_features(self):
         self.header = self.oldheader
-        self.psms = splitmerge.merge_mzidtsvs(self.fn, self.oldheader)
+        self.psms = splitmerge.merge_mzidtsvs(self.fn, self.header)
 
 
 class TSVSplitDriver(PSMDriver):
@@ -99,10 +101,13 @@ class Perco2PSMDriver(PSMDriver):
             psms = tsvreader.generate_tsv_psms(psmfn, oldheader)
             psms_perco = perco.add_fdr_to_mzidtsv(psms, mzidsr, mzns,
                     self.percopsms)
-            if self.filtpep or self.filtpsm:
-                writer.write_tsv(header, conffilt.filter_psms(psms_perco), outfn)
-            else:
-                writer.write_tsv(header, psms_perco, outfn)
+            if self.filtpsm:
+                psms_perco = filtconf.filter_psms(psms_perco, psmhead.HEADER_PSMQ,
+                        self.filtpsm, True)
+            if self.filtpep:
+                psms_perco = filtconf.filter_psms(psms_perco, psmhead.HEADER_PEPTIDE_Q,
+                        self.filtpep, True)
+            writer.write_tsv(header, psms_perco, outfn)
 
 
 class ConfidenceFilterDriver(PSMDriver):
