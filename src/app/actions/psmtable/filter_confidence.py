@@ -8,7 +8,10 @@ def filter_psms(psms, confkey, conflvl, lower_is_better):
 
 
 def passes_filter(psm, threshold, confkey, lower_is_better):
-    if psm[confkey] in ['NA', '', None, False]:
+    try:
+        confval = float(psm[confkey])
+    except (TypeError, ValueError):
         return False
-    lower = float(psm[confkey]) < float(threshold)
-    return lower == lower_is_better
+    else:
+        lower = confval < float(threshold)
+        return lower == lower_is_better
