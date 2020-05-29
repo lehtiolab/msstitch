@@ -33,7 +33,7 @@ class ProtTableDB(ProtGeneTableBase):
         """This runs only once, returns the data which is not dependent on sets,
         in a dict with accessions as keys"""
         sql = """
-SELECT pgm.master_id, pgm.protein_acc, IFNULL(g.gene_acc, 'NA'),
+SELECT pgm.master_id, p.protein_acc, IFNULL(g.gene_acc, 'NA'),
     IFNULL(aid.assoc_id, 'NA'), cov.coverage, sub.pgc, 
     sub.pgcnr, IFNULL(pd.description, 'NA') FROM protein_group_master AS pgm
     LEFT OUTER JOIN (
@@ -41,11 +41,14 @@ SELECT pgm.master_id, pgm.protein_acc, IFNULL(g.gene_acc, 'NA'),
             COUNT(protein_acc) AS pgcnr FROM protein_group_content 
             GROUP BY master_id
             ) AS sub ON sub.master_id=pgm.master_id 
+    INNER JOIN proteins AS p ON pgm.pacc_id=p.pacc_id
     LEFT OUTER JOIN protein_coverage AS cov ON 
-    pgm.protein_acc=cov.protein_acc 
-    LEFT OUTER JOIN genes AS g ON pgm.protein_acc=g.protein_acc
-    LEFT OUTER JOIN associated_ids AS aid ON aid.protein_acc=pgm.protein_acc
-    LEFT OUTER JOIN prot_desc AS pd ON pd.protein_acc=pgm.protein_acc
+    p.protein_acc=cov.protein_acc 
+    LEFT OUTER JOIN ensg_proteins AS egp ON pgm.pacc_id=egp.pacc_id
+    LEFT OUTER JOIN genes AS g ON egp.gene_id=g.gene_id
+    LEFT OUTER JOIN genename_proteins AS gnp ON pgm.pacc_id=gnp.pacc_id
+    LEFT OUTER JOIN associated_ids AS aid ON aid.gn_id=gnp.gn_id
+    LEFT OUTER JOIN prot_desc AS pd ON pd.protein_acc=p.protein_acc
     """
         cursor = self.get_cursor()
         pgdata = {}
@@ -73,7 +76,7 @@ SELECT pgm.master_id, pgm.protein_acc, IFNULL(g.gene_acc, 'NA'),
         INNER JOIN peptide_sequences AS ps ON psms.pep_id=ps.pep_id
         INNER JOIN protein_tables AS pt ON pt.set_id=bs.set_id
         INNER JOIN protein_group_master AS pgm ON pgm.master_id=ppg.master_id
-        INNER JOIN proteins AS prots ON prots.protein_acc=pgm.protein_acc
+        INNER JOIN proteins AS prots ON prots.pacc_id=pgm.pacc_id
         LEFT OUTER JOIN protein_fdr AS pf ON pf.prottable_id=pt.prottable_id AND 
             pf.pacc_id=prots.pacc_id
         LEFT OUTER JOIN protein_precur_quanted AS ppq ON ppq.prottable_id=pt.prottable_id AND 
@@ -99,7 +102,7 @@ SELECT pgm.master_id, pgm.protein_acc, IFNULL(g.gene_acc, 'NA'),
 
 class GeneTableDB(ProtGeneTableBase):
     datatype = 'gene'
-    colmap = {'genes': ['gene_id', 'gene_acc', 'protein_acc'],
+    colmap = {'genes': ['gene_id', 'gene_acc'],
               'gene_precur_quanted': ['gene_id', 'genetable_id', 'quant'],
               'gene_fdr': ['gene_id', 'genetable_id', 'fdr'],
               'genequant_channels': ['channel_id', 'genetable_id',
@@ -120,8 +123,8 @@ class GeneTableDB(ProtGeneTableBase):
 SELECT g.gene_acc, GROUP_CONCAT(g.protein_acc, ';'), IFNULL(aid.assoc_id, 'NA'), 
     IFNULL(pd.description, 'NA') 
     FROM genes AS g
-    LEFT OUTER JOIN associated_ids AS aid ON aid.protein_acc=g.protein_acc
-    LEFT OUTER JOIN prot_desc AS pd ON pd.protein_acc=g.protein_acc
+    LEFT OUTER JOIN associated_ids AS aid ON aid.pacc_id=g.pacc_id
+    LEFT OUTER JOIN prot_desc AS pd ON pd.pacc_id=g.pacc_id
     GROUP BY g.gene_acc
     """
         cursor = self.get_cursor()
@@ -147,7 +150,9 @@ SELECT g.gene_acc, GROUP_CONCAT(g.protein_acc, ';'), IFNULL(aid.assoc_id, 'NA'),
         INNER JOIN psms ON ppsm.psm_id=psms.psm_id 
         INNER JOIN peptide_sequences AS ps ON psms.pep_id=ps.pep_id
         INNER JOIN gene_tables AS gt ON gt.set_id=bs.set_id
-        INNER JOIN genes AS g ON g.protein_acc=ppsm.protein_acc
+        INNER JOIN proteins AS p ON p.protein_acc=ppsm.protein_acc
+        INNER JOIN ensg_proteins AS egp ON egp.pacc_id=p.pacc_id
+        INNER JOIN genes AS g ON g.gene_id=egp.gene_id
         LEFT OUTER JOIN gene_fdr AS gf ON gf.genetable_id=gt.genetable_id AND 
             gf.gene_id=g.gene_id
         LEFT OUTER JOIN gene_precur_quanted AS gpq ON gpq.genetable_id=gt.genetable_id AND 
@@ -160,11 +165,13 @@ SELECT g.gene_acc, GROUP_CONCAT(g.protein_acc, ';'), IFNULL(aid.assoc_id, 'NA'),
                 SELECT psmg.pep_id AS pep_id FROM (
                     SELECT psms.pep_id AS pep_id, COUNT (DISTINCT g.gene_acc) AS nrpep 
                         FROM protein_psm AS ppsm INNER JOIN psms USING(psm_id)
-                        INNER JOIN genes AS g USING(protein_acc)
+                        INNER JOIN proteins AS p ON p.protein_acc=ppsm.protein_acc
+                        INNER JOIN ensg_proteins AS egp ON egp.pacc_id=p.pacc_id
+                        INNER JOIN genes AS g ON g.gene_id=egp.gene_id
                         GROUP BY psms.pep_id
                     ) AS psmg WHERE psmg.nrpep==1
                 ) AS uniq ON uniq.pep_id=ps.pep_id
-        GROUP BY g.gene_acc, bs.set_id
+        GROUP BY g.gene_id, bs.set_id
         """
         cursor = self.get_cursor()
         cursor.execute(sql)
@@ -181,7 +188,7 @@ class GeneTableAssocIDsDB(GeneTableDB):
                        for table, cols in self.colmap.items()}
         self.colmap['genequant_channels'] = self.colmap.pop(
             'assocquant_channels')
-        self.colmap['associated_ids'] = ['gene_id', 'assoc_id', 'protein_acc']
+        self.colmap['associated_ids'] = ['gn_id', 'assoc_id']
 
     def add_tables(self, tabletypes=[]):
         self.create_tables(['gene_tables', 'assoc_iso_quanted',
@@ -195,9 +202,9 @@ class GeneTableAssocIDsDB(GeneTableDB):
 SELECT gn.assoc_id, GROUP_CONCAT(gn.protein_acc, ';'), IFNULL(g.gene_acc, 'NA'), 
     IFNULL(pd.description, 'NA') 
     FROM associated_ids AS gn
-    LEFT OUTER JOIN genes AS g ON gn.protein_acc=g.protein_acc
-    LEFT OUTER JOIN prot_desc AS pd ON pd.protein_acc=gn.protein_acc
-    GROUP BY gn.assoc_id
+    LEFT OUTER JOIN genes AS g ON gn.pacc_id=g.pacc_id
+    LEFT OUTER JOIN prot_desc AS pd ON pd.pacc_id=gn.pacc_id
+    GROUP BY gn.gn_id
     """
         cursor = self.get_cursor()
         pgdata = {}
@@ -223,24 +230,28 @@ SELECT gn.assoc_id, GROUP_CONCAT(gn.protein_acc, ';'), IFNULL(g.gene_acc, 'NA'),
         INNER JOIN psms ON ppsm.psm_id=psms.psm_id 
         INNER JOIN peptide_sequences AS ps ON psms.pep_id=ps.pep_id
         INNER JOIN gene_tables AS gt ON gt.set_id=bs.set_id
-        INNER JOIN associated_ids AS gn ON gn.protein_acc=ppsm.protein_acc
+        INNER JOIN proteins AS p ON p.protein_acc=ppsm.protein_acc
+        INNER JOIN genename_proteins AS gnp ON gnp.pacc_id=p.pacc_id
+        INNER JOIN associated_ids AS gn ON gn.gn_id=gnp.gn_id
         LEFT OUTER JOIN assoc_fdr AS gf ON gf.genetable_id=gt.genetable_id AND 
-            gf.gene_id=gn.gene_id
+            gf.gn_id=gn.gn_id
         LEFT OUTER JOIN assoc_precur_quanted AS gpq ON gpq.genetable_id=gt.genetable_id AND 
-            gpq.gene_id=gn.gene_id
+            gpq.gn_id=gn.gn_id
         LEFT OUTER JOIN genequant_channels AS gqc ON gqc.genetable_id=gt.genetable_id
         LEFT OUTER JOIN assoc_iso_quanted AS giq ON giq.channel_id=gqc.channel_id AND
-            giq.gene_id=gn.gene_id
+            giq.gn_id=gn.gn_id
 
         LEFT OUTER JOIN (
                 SELECT psmg.pep_id AS pep_id FROM (
                     SELECT psms.pep_id AS pep_id, COUNT (DISTINCT gn.assoc_id) AS nrpep 
                         FROM protein_psm AS ppsm INNER JOIN psms USING(psm_id)
-                        INNER JOIN associated_ids AS gn USING(protein_acc)
+                        INNER JOIN proteins AS p ON p.protein_acc=ppsm.protein_acc
+                        INNER JOIN genename_proteins AS gnp ON gnp.pacc_id=p.pacc_id
+                        INNER JOIN associated_ids AS gn ON gn.gn_id=gnp.gn_id
                         GROUP BY psms.pep_id
                     ) AS psmg WHERE psmg.nrpep==1
                 ) AS uniq ON uniq.pep_id=ps.pep_id
-        GROUP BY gn.assoc_id, bs.set_id
+        GROUP BY gn.gn_id, bs.set_id
         """
         cursor = self.get_cursor()
         cursor.execute(sql)

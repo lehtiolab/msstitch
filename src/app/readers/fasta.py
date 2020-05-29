@@ -13,8 +13,8 @@ def get_proteins_for_db(fastafn, fastadelim, genefield):
     desc = ((acc, get_description(rec, rtype)) for acc, (rec, rtype) in records.items() if rtype)
     evid = ((acc, get_uniprot_evidence_level(rec, rtype)) for acc, (rec, rtype) in 
         records.items())
-    ensgs = ((get_ensg(rec), acc) for acc, (rec, rtype) in records.items()
-            if rtype == 'ensembl')
+    ensgs = [(get_ensg(rec), acc) for acc, (rec, rtype) in records.items()
+            if rtype == 'ensembl']
     def sym_out():
         symbols = ((get_symbol(rec, rtype, fastadelim, genefield), acc) for 
                 acc, (rec, rtype) in records.items() if rtype)
@@ -22,7 +22,7 @@ def get_proteins_for_db(fastafn, fastadelim, genefield):
                 if not rtype and fastadelim and fastadelim in rec.description)
         yield from symbols
         yield from othergene
-    return proteins, sequences, desc, evid, ensgs, sym_out()
+    return proteins, sequences, desc, evid, ensgs, [x for x in sym_out()]
 
 
 def parse_fasta(fn):

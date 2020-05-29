@@ -262,10 +262,10 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                         'REFERENCES '
                                         'proteins(protein_acc)'],
                    'protein_group_master': ['master_id INTEGER PRIMARY KEY',
-                                            'protein_acc TEXT',
-                                            'FOREIGN KEY(protein_acc) '
+                                            'pacc_id INTEGER ',
+                                            'FOREIGN KEY(pacc_id) '
                                             'REFERENCES '
-                                            'proteins(protein_acc)'],
+                                            'proteins(pacc_id)'],
                    'protein_group_content': ['protein_acc TEXT',
                                              'master_id INTEGER',
                                              'peptide_count INTEGER',
@@ -286,19 +286,22 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                           'FOREIGN KEY(master_id) REFERENCES'
                                           ' protein_group_master(master_id)'],
                    'genes': ['gene_id INTEGER PRIMARY KEY',
-                             'gene_acc TEXT',
-                             'protein_acc TEXT',
-                             'FOREIGN KEY(protein_acc) '
-                             'REFERENCES proteins(protein_acc)'],
-                   'associated_ids': ['gene_id INTEGER PRIMARY KEY',
-                                      'assoc_id TEXT',
-                                      'protein_acc TEXT',
-                                      'FOREIGN KEY(protein_acc) '
-                                      'REFERENCES proteins(protein_acc)'],
-                   'prot_desc': ['protein_acc TEXT',
+                             'gene_acc TEXT'],
+                   'associated_ids': ['gn_id INTEGER PRIMARY KEY',
+                                      'assoc_id TEXT'],
+                   'ensg_proteins': ['gene_id INTEGER',
+                           'pacc_id INTEGER',
+                           'FOREIGN KEY(gene_id) REFERENCES genes(gene_id) '
+                           'FOREIGN KEY(pacc_id) REFERENCES proteins(pacc_id)'],
+                   'genename_proteins': ['gn_id INTEGER',
+                           'pacc_id INTEGER',
+                           'FOREIGN KEY(gn_id) REFERENCES genes(gene_id) '
+                           'FOREIGN KEY(pacc_id) REFERENCES proteins(pacc_id)'],
+                           
+                   'prot_desc': ['pacc_id INTEGER',
                                  'description TEXT',
-                                 'FOREIGN KEY(protein_acc) '
-                                 'REFERENCES proteins(protein_acc)'],
+                                 'FOREIGN KEY(pacc_id) '
+                                 'REFERENCES proteins(pacc_id)'],
                    'known_searchspace': ['seqs TEXT UNIQUE'],
                    'protein_peptides': ['seq TEXT', 'protid TEXT',
                                         'pos INTEGER'],

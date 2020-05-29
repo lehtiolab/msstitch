@@ -1,35 +1,64 @@
 from app.lookups.sqlite.base import ResultLookupInterface
 
 
+# Indices that belong to positions of these features in output from
+# function get_all_psms_proteingroups:
+MASTER_INDEX = 1
+PROTEIN_ACC_INDEX = 2
+PEPTIDE_COUNT_INDEX = 3
+PSM_COUNT_INDEX = 4
+PROTEIN_SCORE_INDEX = 5
+COVERAGE_INDEX = 6
+EVIDENCE_LVL_INDEX = 7
+
+
 class PSMDB(ResultLookupInterface):
     def add_tables(self, tabletypes):
         self.create_tables(['psms', 'psmrows', 'peptide_sequences',
                             'proteins', 'protein_evidence', 'protein_seq',
                             'prot_desc', 'protein_psm', 'genes',
-                            'associated_ids'])
+                            'associated_ids', 'ensg_proteins', 'genename_proteins'])
         if 'proteingroup' in tabletypes:
             self.create_tables(['protein_coverage', 'protein_group_master',
                                 'protein_group_content', 'psm_protein_groups'])
 
     def store_fasta(self, prot, evids, seq, desc, ensg, symbols):
         self.store_proteins(prot, evidence_lvls=evids, sequences=seq)
+        protids = self.get_protids()
         cursor = self.get_cursor()
         cursor.executemany(
-            'INSERT INTO prot_desc(protein_acc, description) '
-            'VALUES(?, ?)', desc)
+            'INSERT INTO prot_desc(pacc_id, description) '
+            'VALUES(?, ?)', ((protids[x[0]], x[1]) for x in desc))
         self.conn.commit()
-        self.index_column('protdesc_index', 'prot_desc', 'protein_acc')
+        self.index_column('protdesc_index', 'prot_desc', 'pacc_id')
+
         cursor = self.get_cursor()
         cursor.executemany(
-            'INSERT INTO genes(gene_acc, protein_acc) VALUES(?, ?)', ensg)
+            'INSERT INTO genes(gene_acc) VALUES(?)', set((x[0],) for x in ensg))
         self.conn.commit()
-        self.index_column('gene_index', 'genes', 'protein_acc')
-        cursor = self.get_cursor()
+        ensgids = {x[0]: x[1] for x in cursor.execute(
+            'SELECT g.gene_acc, g.gene_id FROM genes AS g')}
+        ensg = [(ensgids[x[0]], protids[x[1]]) for x in ensg]
         cursor.executemany(
-            'INSERT INTO associated_ids(assoc_id, protein_acc) VALUES(?, ?)',
+            'INSERT INTO ensg_proteins(gene_id, pacc_id) VALUES(?, ?)', ensg)
+        self.conn.commit()
+        self.index_column('ensg_p_ix', 'ensg_proteins', 'pacc_id')
+        self.index_column('ensg_ensg_ix', 'ensg_proteins', 'gn_id')
+
+        cursor = self.get_cursor()
+        # symbols is list of sym/prot id, so unique the symbol ids and save
+        cursor.executemany(
+            'INSERT INTO associated_ids(assoc_id) VALUES(?)',
+            set((x[0],) for x in symbols))
+        symids = {x[0]: x[1] for x in cursor.execute(
+            'SELECT s.assoc_id, s.gn_id FROM associated_ids AS s')}
+        symbols = [(symids[x[0]], protids[x[1]]) for x in symbols]
+        cursor.executemany(
+            'INSERT INTO genename_proteins(gn_id, pacc_id) VALUES(?, ?)',
             symbols)
         self.conn.commit()
-        self.index_column('associd_index', 'associated_ids', 'protein_acc')
+        self.index_column('gp_p_ix', 'genename_proteins', 'pacc_id')
+        self.index_column('gp_gn_ix', 'genename_proteins', 'gn_id')
 
     def store_proteins(self, proteins, evidence_lvls=False, sequences=False):
         cursor = self.get_cursor()
@@ -50,15 +79,21 @@ class PSMDB(ResultLookupInterface):
         self.index_column('proteins_index', 'proteins', 'protein_acc')
         self.index_column('evidence_index', 'protein_evidence', 'protein_acc')
 
+    def get_protids(self):
+        cur = self.get_cursor()
+        return {x[0]: x[1] for x in cur.execute(
+            'SELECT p.protein_acc, p.pacc_id FROM proteins AS p')}
+
     def get_protein_gene_map(self):
         cursor = self.get_cursor()
         cursor.execute(
             'SELECT p.protein_acc, g.gene_acc, aid.assoc_id, d.description '
             'FROM proteins AS p '
-            'LEFT OUTER JOIN genes AS g ON p.protein_acc=g.protein_acc '
-            'LEFT OUTER JOIN associated_ids AS aid '
-            'ON p.protein_acc=aid.protein_acc '
-            'LEFT OUTER JOIN prot_desc AS d ON p.protein_acc=d.protein_acc'
+            'LEFT OUTER JOIN ensg_proteins AS ep ON p.pacc_id=ep.pacc_id '
+            'LEFT OUTER JOIN genename_proteins AS gnp ON p.pacc_id=gnp.pacc_id '
+            'LEFT OUTER JOIN genes AS g ON ep.gene_id=g.gene_id '
+            'LEFT OUTER JOIN associated_ids AS aid ON gnp.gn_id=aid.gn_id '
+            'LEFT OUTER JOIN prot_desc AS d ON p.pacc_id=d.pacc_id'
         )
         gpmap = {p_acc: {'gene': gene, 'symbol': sym, 'desc': desc}
                  for p_acc, gene, sym, desc in cursor}
@@ -125,13 +160,14 @@ class PSMDB(ResultLookupInterface):
                               'ORDER BY pr.rownr')
 
     def store_masters(self, allmasters, psm_masters):
-        allmasters = ((x,) for x in allmasters)
+        protids = self.get_protids()
+        allmasters = ((protids[x],) for x in allmasters)
         cursor = self.get_cursor()
         cursor.executemany(
-            'INSERT INTO protein_group_master(protein_acc) VALUES(?)',
+            'INSERT INTO protein_group_master(pacc_id) VALUES(?)',
             allmasters)
         master_ids = self.get_master_ids()
-        psms = ((psm_id, master_ids[master])
+        psms = ((psm_id, master_ids[protids[master]])
                 for psm_id, masters in psm_masters.items()
                 for master in masters)
         cursor.executemany(
@@ -142,14 +178,16 @@ class PSMDB(ResultLookupInterface):
         self.index_column('psm_pg_psmid_index', 'psm_protein_groups', 'psm_id')
 
     def update_master_proteins(self, new_masters):
+        protids = self.get_protids()
+        new_masters = ((protids[x[0]], x[1]) for x in new_masters)
         cur = self.get_cursor()
-        sql = 'UPDATE protein_group_master SET protein_acc=? WHERE master_id=?'
+        sql = 'UPDATE protein_group_master SET pacc_id=? WHERE master_id=?'
         cur.executemany(sql, new_masters)
         self.conn.commit()
 
     def get_master_ids(self):
         cur = self.get_cursor()
-        cur.execute('SELECT protein_acc, master_id FROM protein_group_master')
+        cur.execute('SELECT pacc_id, master_id FROM protein_group_master')
         return {p_acc: master_id for (p_acc, master_id) in cur}
 
     def store_coverage(self, coverage):
@@ -174,12 +212,6 @@ class PSMDB(ResultLookupInterface):
 
     def get_all_psm_protein_relations(self):
         sql = 'SELECT psm_id, protein_acc FROM protein_psm'
-        cursor = self.get_cursor()
-        return cursor.execute(sql)
-
-    def get_allpsms_masters(self):
-        sql = ('SELECT pgm.protein_acc, pp.psm_id FROM protein_group_master '
-               'AS pgm JOIN protein_psm as pp USING(protein_acc)')
         cursor = self.get_cursor()
         return cursor.execute(sql)
 
@@ -252,26 +284,22 @@ class PSMDB(ResultLookupInterface):
         return False
 
     def get_all_psms_proteingroups(self, evidence):
-        fields = ['pr.rownr', 'pgm.protein_acc', 'pgc.protein_acc',
-                  'pgc.peptide_count', 'pgc.psm_count', 'pgc.protein_score',
-                  'pc.coverage']
-        joins = [('psm_protein_groups', 'ppg', 'psm_id'),
-                 ('protein_group_master', 'pgm', 'master_id'),
-                 ('protein_group_content', 'pgc', 'master_id'),
-                 ]
-        join_sql = '\n'.join(['JOIN {0} AS {1} USING({2})'.format(
-            j[0], j[1], j[2]) for j in joins])
-        specialjoin = []
+        fields = """
+        SELECT pr.rownr, p.protein_acc, pgc.protein_acc, pgc.peptide_count,
+        pgc.psm_count, pgc.protein_score, pc.coverage"""
+        sql = """
+        FROM psmrows AS pr
+        JOIN psm_protein_groups AS ppg USING(psm_id)
+        JOIN protein_group_master AS pgm USING(master_id)
+        JOIN proteins AS p USING(pacc_id)
+        JOIN protein_group_content AS pgc USING(master_id)
+        JOIN protein_coverage AS pc ON pgc.protein_acc=pc.protein_acc
+        """
         if evidence:
-            specialjoin = [('protein_evidence', 'pev')]
-            fields.append('pev.evidence_lvl')
-        specialjoin.append(('protein_coverage', 'pc'))
-        specialjoin = '\n'.join(['JOIN {0} AS {1} ON '
-                                 'pgc.protein_acc={1}.protein_acc'.format(
-                                     j[0], j[1]) for j in specialjoin])
-        join_sql = '{} {}'.format(join_sql, specialjoin)
-        sql = 'SELECT {0} FROM psmrows AS pr {1} ORDER BY pr.rownr'.format(
-            ', '.join(fields), join_sql)
+            sql = '{} {}'.format(sql, 
+                    'JOIN protein_evidence AS pev ON pgc.protein_acc=pev.protein_acc')
+            fields = '{}, pev.evidence_lvl '.format(fields)
+        sql = '{} {}'.format(fields, sql)
         cursor = self.get_cursor()
         return cursor.execute(sql)
 

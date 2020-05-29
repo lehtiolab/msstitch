@@ -5,7 +5,7 @@ from app.readers import tsv as tsvreader
 from app.readers import fasta as fastareader
 from app.dataformats import mzidtsv as mzidtsvdata
 
-from app.lookups.sqlite import proteingroups as lookups
+from app.lookups.sqlite import psms as lookups
 
 DB_STORE_CHUNK = 100000
 

@@ -3,7 +3,7 @@ from app.lookups.sqlite.base import ResultLookupInterface
 
 class ProtPepTable(ResultLookupInterface):
     table_map = {'protein': {'fntable': 'protein_tables',
-                             'feattable': 'protein_group_master',
+                             'feattable': 'proteins',
                              'isoqtable': 'protein_iso_quanted',
                              'isochtable': 'protquant_channels',
                              'prectable': 'protein_precur_quanted',
@@ -85,10 +85,7 @@ class ProtPepTable(ResultLookupInterface):
         return {fn: table_id for (table_id, setid, fn) in cursor}
 
     def get_feature_map(self):
-        if self.datatype == 'protein':
-            table = 'proteins'
-        else:
-            table = self.table_map[self.datatype]['feattable']
+        table = self.table_map[self.datatype]['feattable']
         columns = self.colmap[table][0:2]
         cursor = self.get_cursor()
         cursor.execute('SELECT {}, {} FROM {}'.format(columns[0], columns[1],
@@ -107,19 +104,6 @@ class ProtPepTable(ResultLookupInterface):
 
     def store_fdr(self, fdr):
         self.store_singlecol('fdrtable', fdr)
-
-    def update_selects(self, selectmap, fields, fieldcount):
-        selectmap.update({field: i + fieldcount
-                          for i, field in enumerate(fields)})
-        fieldcount = max(selectmap.values()) + 1
-        return selectmap, fieldcount
-
-    def get_proteingroup_content(self):
-        cursor = self.get_cursor()
-        sql = ('SELECT pgm.protein_acc, pgc.protein_acc FROM '
-               'protein_group_master AS pgm '
-               'JOIN protein_group_content AS pgc USING(master_id)')
-        return cursor.execute(sql)
 
     def get_isoquant_headernames(self):
         cursor = self.get_cursor()
