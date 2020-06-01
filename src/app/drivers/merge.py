@@ -27,10 +27,12 @@ class MergeDriver(base.PepProttableDriver):
                                                 peptable_options))
 
     def parse_input(self, **kwargs):
+        self.peptidetable = False
         super().parse_input(**kwargs)
         header = tsvreader.get_tsv_header(self.fn[0])
         self.header = [header[0]]
         if header[0] == peph.HEADER_PEPTIDE:
+            self.peptidetable = True
             if self.genecentric:
                 self.lookuptype = 'peptidegenecentrictable'
                 self.header.extend([peph.HEADER_GENES, peph.HEADER_ASSOCIATED])
@@ -68,7 +70,10 @@ class MergeDriver(base.PepProttableDriver):
         if self.fdrcolpattern and not self.header[0] == peph.HEADER_PEPTIDE:
             self.header.extend(['{}_{}'.format(x, ph.HEADER_QVAL) for x in self.setnames])
         if self.precursorquantcolpattern:
-            self.header.extend(['{}_{}'.format(x, ph.HEADER_AREA) for x in self.setnames])
+            if self.peptidetable:
+                self.header.extend(['{}_{}'.format(x, peph.HEADER_AREA) for x in self.setnames])
+            else:
+                self.header.extend(['{}_{}'.format(x, ph.HEADER_AREA) for x in self.setnames])
         if self.quantcolpattern:
             channels = [x for x in self.lookup.get_isoquant_headernames()]
             for setn in self.setnames:

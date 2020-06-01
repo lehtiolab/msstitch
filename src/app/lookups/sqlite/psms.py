@@ -299,7 +299,7 @@ class PSMDB(ResultLookupInterface):
             sql = '{} {}'.format(sql, 
                     'JOIN protein_evidence AS pev ON pgc.protein_acc=pev.protein_acc')
             fields = '{}, pev.evidence_lvl '.format(fields)
-        sql = '{} {}'.format(fields, sql)
+        sql = '{} {} ORDER BY pr.rownr'.format(fields, sql)
         cursor = self.get_cursor()
         return cursor.execute(sql)
 

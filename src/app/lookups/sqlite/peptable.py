@@ -37,10 +37,11 @@ class PepTableProteinCentricDB(ProtPepTable):
     GROUP_CONCAT(IFNULL(gsub.ensg, 'NA'), ';'), GROUP_CONCAT(IFNULL(gnsub.gn, 'NA'), ';')
     FROM (
         SELECT psms.pep_id AS pep_id, ps.sequence AS seq, pgm.master_id,
-            pgm.protein_acc AS pacc, COUNT(pgc.protein_acc) AS pgcnr
+            pgm.pacc_id AS pacc_id, p.protein_acc AS pacc, COUNT(pgc.protein_acc) AS pgcnr
         FROM psm_protein_groups AS pp
         INNER JOIN psms ON psms.psm_id=pp.psm_id
         INNER JOIN protein_group_master AS pgm ON pgm.master_id=pp.master_id
+        INNER JOIN proteins AS p ON p.pacc_id=pgm.pacc_id
         INNER JOIN protein_group_content AS pgc ON pgm.master_id=pgc.master_id
         INNER JOIN peptide_sequences AS ps ON psms.pep_id=ps.pep_id
         GROUP BY psms.pep_id, pgm.master_id
@@ -48,19 +49,23 @@ class PepTableProteinCentricDB(ProtPepTable):
     LEFT OUTER JOIN (
         SELECT DISTINCT psms.pep_id AS pid, g.gene_acc AS ensg
         FROM genes as g
-        INNER JOIN protein_group_master AS pgm ON pgm.protein_acc=g.protein_acc
+        INNER JOIN ensg_proteins AS egp ON egp.gene_id=g.gene_id
+        INNER JOIN proteins AS p ON p.pacc_id=egp.pacc_id
+        INNER JOIN protein_group_master AS pgm ON pgm.pacc_id=egp.pacc_id
         INNER JOIN psm_protein_groups AS ppg ON pgm.master_id=ppg.master_id
         INNER JOIN psms ON psms.psm_id=ppg.psm_id
         ) AS gsub ON gsub.pid=sub.pep_id
     LEFT OUTER JOIN (
         SELECT DISTINCT psms.pep_id AS pid, aid.assoc_id AS gn
         FROM associated_ids AS aid
-        INNER JOIN protein_group_master AS pgm ON pgm.protein_acc=aid.protein_acc
+        INNER JOIN genename_proteins AS gnp ON gnp.gn_id=aid.gn_id
+        INNER JOIN proteins AS p ON p.pacc_id=gnp.pacc_id
+        INNER JOIN protein_group_master AS pgm ON pgm.pacc_id=p.pacc_id
         INNER JOIN psm_protein_groups AS ppg ON pgm.master_id=ppg.master_id
         INNER JOIN psms ON psms.psm_id=ppg.psm_id
         ) AS gnsub ON gnsub.pid=sub.pep_id
     LEFT OUTER JOIN protein_coverage AS pc ON sub.pacc=pc.protein_acc
-    LEFT OUTER JOIN prot_desc AS pd ON sub.pacc=pd.protein_acc
+    LEFT OUTER JOIN prot_desc AS pd ON sub.pacc_id=pd.pacc_id
     GROUP BY sub.pep_id
     """
         cursor = self.get_cursor()
@@ -96,7 +101,6 @@ class PepTableProteinCentricDB(ProtPepTable):
         GROUP BY ps.pep_id, bs.set_id
         """
         cursor = self.get_cursor()
-        print(sql)
         cursor.execute(sql)
         return cursor
 
@@ -123,7 +127,8 @@ SELECT ps.pep_id, ps.sequence, GROUP_CONCAT(p.protein_acc, ';'),
         SELECT gss.pid AS pid, gss.ensg AS ensg FROM (
             SELECT DISTINCT psms.pep_id AS pid, g.gene_acc AS ensg
             FROM genes as g
-            INNER JOIN proteins AS p ON p.protein_acc=g.protein_acc
+            INNER JOIN ensg_proteins AS egp ON egp.gene_id=g.gene_id
+            INNER JOIN proteins AS p ON p.pacc_id=egp.pacc_id
             INNER JOIN protein_psm AS pp ON pp.protein_acc=p.protein_acc
             INNER JOIN psms ON psms.psm_id=pp.psm_id
             ) AS gss GROUP BY gss.pid
@@ -132,13 +137,14 @@ SELECT ps.pep_id, ps.sequence, GROUP_CONCAT(p.protein_acc, ';'),
         SELECT gnss.pid AS pid, GROUP_CONCAT(gnss.gn) AS gn FROM (
             SELECT DISTINCT psms.pep_id AS pid, aid.assoc_id AS gn
             FROM associated_ids AS aid
-            INNER JOIN proteins AS p ON p.protein_acc=aid.protein_acc
+            INNER JOIN genename_proteins AS gnp ON gnp.gn_id=aid.gn_id
+            INNER JOIN proteins AS p ON p.pacc_id=gnp.pacc_id
             INNER JOIN protein_psm AS pp ON pp.protein_acc=p.protein_acc
             INNER JOIN psms ON psms.psm_id=pp.psm_id
             ) AS gnss
             GROUP BY gnss.pid
         ) AS gnsub ON gnsub.pid=ps.pep_id
-    LEFT OUTER JOIN prot_desc AS pd ON p.protein_acc=pd.protein_acc
+    LEFT OUTER JOIN prot_desc AS pd ON p.pacc_id=pd.pacc_id
     LEFT OUTER JOIN protein_coverage AS pc ON p.protein_acc=pc.protein_acc
     GROUP BY ps.pep_id
     """
@@ -184,7 +190,6 @@ class PepTablePlainDB(PepTableProteinCentricDB):
         in a dict with accessions as keys. 
         In plain DB we only output peptides, not proteins etc
         """
-
         sql = 'SELECT ps.pep_id, ps.sequence FROM peptide_sequences AS ps'
         cursor = self.get_cursor()
         pgdata = {}

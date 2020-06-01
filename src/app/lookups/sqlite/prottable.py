@@ -48,7 +48,7 @@ SELECT pgm.master_id, p.protein_acc, IFNULL(g.gene_acc, 'NA'),
     LEFT OUTER JOIN genes AS g ON egp.gene_id=g.gene_id
     LEFT OUTER JOIN genename_proteins AS gnp ON pgm.pacc_id=gnp.pacc_id
     LEFT OUTER JOIN associated_ids AS aid ON aid.gn_id=gnp.gn_id
-    LEFT OUTER JOIN prot_desc AS pd ON pd.protein_acc=p.protein_acc
+    LEFT OUTER JOIN prot_desc AS pd ON pd.pacc_id=p.pacc_id
     """
         cursor = self.get_cursor()
         pgdata = {}
@@ -120,11 +120,14 @@ class GeneTableDB(ProtGeneTableBase):
         """This runs only once, returns the data which is not dependent on sets,
         in a dict with accessions as keys"""
         sql = """
-SELECT g.gene_acc, GROUP_CONCAT(g.protein_acc, ';'), IFNULL(aid.assoc_id, 'NA'), 
-    IFNULL(pd.description, 'NA') 
+SELECT g.gene_acc, GROUP_CONCAT(p.protein_acc, ';'), IFNULL(aid.assoc_id, 'NA'), 
+    IFNULL(pd.description, 'NA')
     FROM genes AS g
-    LEFT OUTER JOIN associated_ids AS aid ON aid.pacc_id=g.pacc_id
-    LEFT OUTER JOIN prot_desc AS pd ON pd.pacc_id=g.pacc_id
+    LEFT OUTER JOIN ensg_proteins AS egp ON egp.gene_id=g.gene_id
+    LEFT OUTER JOIN proteins AS p ON p.pacc_id=egp.pacc_id
+    LEFT OUTER JOIN genename_proteins AS gnp ON gnp.pacc_id=egp.pacc_id
+    LEFT OUTER JOIN associated_ids AS aid ON aid.gn_id=gnp.gn_id
+    LEFT OUTER JOIN prot_desc AS pd ON pd.pacc_id=p.pacc_id
     GROUP BY g.gene_acc
     """
         cursor = self.get_cursor()
@@ -180,15 +183,14 @@ SELECT g.gene_acc, GROUP_CONCAT(g.protein_acc, ';'), IFNULL(aid.assoc_id, 'NA'),
 
 class GeneTableAssocIDsDB(GeneTableDB):
     datatype = 'assoc'
-
-    def __init__(self, fn=None):
-        super().__init__(fn)
-        self.colmap.pop('genes')
-        self.colmap = {table.replace('gene', 'assoc'): cols
-                       for table, cols in self.colmap.items()}
-        self.colmap['genequant_channels'] = self.colmap.pop(
-            'assocquant_channels')
-        self.colmap['associated_ids'] = ['gn_id', 'assoc_id']
+    colmap = {'associated_ids': ['gn_id', 'assoc_id'],
+              'assoc_precur_quanted': ['gn_id', 'genetable_id', 'quant'],
+              'assoc_fdr': ['gn_id', 'genetable_id', 'fdr'],
+              'genequant_channels': ['channel_id', 'genetable_id',
+                                     'channel_name', 'amount_psms_name'],
+              'assoc_iso_quanted': ['genequant_id', 'gn_id',
+                                   'channel_id', 'quantvalue', 'amount_psms'],
+              }
 
     def add_tables(self, tabletypes=[]):
         self.create_tables(['gene_tables', 'assoc_iso_quanted',
@@ -199,11 +201,14 @@ class GeneTableAssocIDsDB(GeneTableDB):
         """This runs only once, returns the data which is not dependent on sets,
         in a dict with accessions as keys"""
         sql = """
-SELECT gn.assoc_id, GROUP_CONCAT(gn.protein_acc, ';'), IFNULL(g.gene_acc, 'NA'), 
-    IFNULL(pd.description, 'NA') 
+SELECT gn.assoc_id, GROUP_CONCAT(p.protein_acc, ';'), IFNULL(g.gene_acc, 'NA'), 
+    IFNULL(pd.description, 'NA')
     FROM associated_ids AS gn
-    LEFT OUTER JOIN genes AS g ON gn.pacc_id=g.pacc_id
-    LEFT OUTER JOIN prot_desc AS pd ON pd.pacc_id=gn.pacc_id
+    LEFT OUTER JOIN genename_proteins AS gnp ON gnp.gn_id=gn.gn_id
+    LEFT OUTER JOIN proteins AS p ON p.pacc_id=gnp.pacc_id
+    LEFT OUTER JOIN ensg_proteins AS egp ON egp.pacc_id=gnp.pacc_id
+    LEFT OUTER JOIN genes AS g ON gn.gn_id=egp.gene_id
+    LEFT OUTER JOIN prot_desc AS pd ON pd.pacc_id=p.pacc_id
     GROUP BY gn.gn_id
     """
         cursor = self.get_cursor()
