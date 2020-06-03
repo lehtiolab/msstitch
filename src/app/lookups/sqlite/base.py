@@ -295,7 +295,7 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                            'FOREIGN KEY(pacc_id) REFERENCES proteins(pacc_id)'],
                    'genename_proteins': ['gn_id INTEGER',
                            'pacc_id INTEGER',
-                           'FOREIGN KEY(gn_id) REFERENCES genes(gene_id) '
+                           'FOREIGN KEY(gn_id) REFERENCES associated_ids(gn_id) '
                            'FOREIGN KEY(pacc_id) REFERENCES proteins(pacc_id)'],
                            
                    'prot_desc': ['pacc_id INTEGER',
