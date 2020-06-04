@@ -10,6 +10,11 @@ from app.actions.psmtable import isosummarize
 from app.actions import psmtopeptable
 
 
+# TODO:
+# PSM table to pep/prot quant without ratios, so "median intensity" only
+# But, also retain a peptide table without quant, so DEqMS can fill in normalized
+
+
 class CreatePeptableDriver(PepProttableDriver):
     """Creates unique peptide table from MzidTSV table. Will not change
     q-values/PEP after filtration, so these should have been calculated

@@ -113,8 +113,9 @@ shared_options = {
     'denompatterns': {'driverattr': 'denompatterns', 'required': False,
                       'clarg': '--denompatterns', 'type': str, 'nargs': '+',
                       'help': 'Regex patterns to detect denominator channels '
-                      'when creating a PSM table with normalized ratios. If '
-                      'both patterns and column numbers are given then column '
+                      'in a PSM table, when creating a table with summarized '
+                      'feature isobaric ratios. '
+                      'If both --denompatterns and --denomcol are given then column '
                       'numbers are used. Usage e.g. --denompattern _126 _131. '
                       'Also possible: --denompattern _12[6-7] to detect '
                       'multiple columns.'
@@ -122,7 +123,8 @@ shared_options = {
     'denomcols': {'driverattr': 'denomcols', 'clarg': '--denomcols',
                   'type': int, 'nargs': '+', 'required': False,
                   'help': 'Column numbers of denominator channels when '
-                  'creating a PSM table with normalized ratios',
+                  'creating a summarized feature table with isobaric ratios '
+                  'from PSMs'
                   },
     'mediannormalize': {'driverattr': 'mediannormalize',
         'clarg': '--median-normalize', 'default': False, 
@@ -359,7 +361,7 @@ prottable_options['featcol'].update(
      prottable_options['featcol']['help'].format('Master protein')})
 prottable_options.update({
     'psmfile': {'driverattr': 'psmfile', 'clarg': '--psmtable', 'type': 'file',
-                'help': 'PSM table file containing precursor quant data to '
+                'help': 'PSM table file containing isobaric quant data to '
                 'add to table.', 'conditional_required': ['quantcolpattern']},
     'decoyfn': {'driverattr': 'decoyfn', 'dest': 'decoyfn',
                 'help': 'Decoy peptide table input file',
@@ -404,12 +406,12 @@ peptable_options.update({
     'nogroup': {'driverattr': 'nogroup',
                    'clarg': '--no-group-annotation', 'action': 'store_const',
                    'const': True, 'default': False, 'required': False,
-                   'help': 'Do not include protein group '
+                   'help': 'For peptide table merging. Do not include protein group '
                    'or gene data in output, just use accessions. '},
     'genecentric': {'driverattr': 'genecentric', 'dest': 'genecentric',
                     'clarg': '--genecentric', 'action': 'store_const',
                     'const': True, 'default': False, 'required': False,
-                    'help': 'Do not include protein group '
+                    'help': 'For peptide table merging. Do not include protein group '
                     'data in output, but use gene names instead to count peptides '
                     'per feature, determine peptide-uniqueness.',
                     },

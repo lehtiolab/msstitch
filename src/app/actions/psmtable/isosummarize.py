@@ -10,11 +10,11 @@ ISOQUANTRATIO_FEAT_ACC = '##isoquant_target_acc##'
 
 
 def get_isobaric_ratios(psmfn, psmheader, channels, denom_channels, min_int,
-        targetfeats, target_acc_field, accessioncol, normalize):
+        targetfeats, target_acc_field, accessioncol, normalize=False):
     """Main function to calculate ratios for PSMs, peptides, proteins, genes.
     Can do simple ratios, median-of-ratios and median-centering
     normalization."""
-    # FIXME median normalize should normalize on features, NOT on PSMs
+    # FIXME median normalize should normalize on features, now it is on PSMs -> wrong
     # TODO:
     # - PSM ratios remove, normalize remove? if not, normalize on output, not PSMs
     # - add func: Summarize intensity, not ratio to whatever specified column (stahl)

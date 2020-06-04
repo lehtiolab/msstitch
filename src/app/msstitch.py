@@ -29,7 +29,5 @@ def main():
                prottable.ENSGDriver(),
                
                merge.MergeDriver(),
-
-
                ]
     startup.start_msstitch(drivers, sys.argv)
