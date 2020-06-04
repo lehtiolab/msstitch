@@ -1,5 +1,32 @@
 # Changelog
 
+## [3.0] - 2020-06-04
+### Breaking
+- Completely new interface, one command (msstitch), some subcommands, merged several
+functionalities (e.g. SQLite creation/output) into fewer steps.
+
+### Added
+- Possible to add ion mobility value of scans to PSM table
+
+### Changed
+- Updated README
+- Output column name changes (esp Gene ID/ Gene name from symbols)
+- peptide sequence in first column of peptide table output
+- trypsinize adds peptide index to fasta output as to not create duplicate entries
+- PSM table creator does not longer take a mapfn from biomart, all info comes from fasta header
+- Consequently, picked FDR can now work on ENSG ID and gene names
+- SQLite creation for spectra has possiblity to specify output file 
+- Percolator output splitprotein different behaviour: can specify "known" prot headers which excludes all scans with those annotations,
+  when not specified it keeps any scan for a header (also if other headers are specified)
+
+### Fixed
+- msslookup quant no longer stores duplicates if >500.000 scans, those first 500.000 were stored twice
+
+### Removed
+- percolator split/merge/filter/qvality scoring, only kept protein identity splitting
+- Protein error probability output
+
+
 ## [2.19] - 2019-12-16
 ### Fixed
 - Protein FDR calculation for ENSG entries was correct but only if the fasta file contained a decoy_ prefix on the ENSG entries, which they did not
