@@ -18,7 +18,7 @@ def generate_bestpep_proteins(peptides, scorecol, minlog, outputaccfield,
         protcol = peptabledata.HEADER_MASTERPROTEINS
     for peptide in peptides:
         p_acc = peptide[protcol]
-        if ';' in p_acc:
+        if ';' in p_acc or p_acc == 'NA':
             continue
         protein_peptides = evaluate_peptide(protein_peptides, peptide, p_acc,
                 higherbetter, scorecol, fncol=False)
