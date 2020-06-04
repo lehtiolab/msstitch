@@ -160,7 +160,7 @@ SELECT ps.pep_id, ps.sequence, GROUP_CONCAT(p.protein_acc, ';'),
 
     def merge_features(self):
         sql = """
-    SELECT bs.set_name, ps.pep_id, pf.fdr, ppq.quant, COUNT(DISTINCT psms.psm_id),
+    SELECT bs.set_name, ps.pep_id, COUNT(DISTINCT psms.psm_id), pf.fdr, ppq.quant,
             GROUP_CONCAT(pqc.channel_name), GROUP_CONCAT(piq.quantvalue),
             GROUP_CONCAT(piq.amount_psms)
         FROM peptide_sequences AS ps
@@ -201,7 +201,7 @@ class PepTablePlainDB(PepTableProteinCentricDB):
 
     def merge_features(self):
         sql = """
-    SELECT bs.set_name, ps.pep_id, pf.fdr, ppq.quant, COUNT(DISTINCT psms.psm_id),
+    SELECT bs.set_name, ps.pep_id, COUNT(DISTINCT psms.psm_id), pf.fdr, ppq.quant,
             GROUP_CONCAT(pqc.channel_name), GROUP_CONCAT(piq.quantvalue),
             GROUP_CONCAT(piq.amount_psms)
         FROM peptide_sequences AS ps
