@@ -22,7 +22,6 @@ def main():
 
                percolator.FilterSequences(),
                percolator.SplitProteinDriver(),
-               #lookups.PSMLookupDriver(),
 
                peptable.CreatePeptableDriver(),
                prottable.ProteinsDriver(),

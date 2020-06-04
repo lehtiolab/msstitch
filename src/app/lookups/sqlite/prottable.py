@@ -77,7 +77,7 @@ SELECT pgm.master_id, p.protein_acc, IFNULL(g.gene_acc, 'NA'),
         INNER JOIN protein_tables AS pt ON pt.set_id=bs.set_id
         INNER JOIN protein_group_master AS pgm ON pgm.master_id=ppg.master_id
         INNER JOIN proteins AS prots ON prots.pacc_id=pgm.pacc_id
-        LEFT OUTER JOIN protein_fdr AS pf ON pf.prottable_id=pt.prottable_id AND 
+        INNER JOIN protein_fdr AS pf ON pf.prottable_id=pt.prottable_id AND 
             pf.pacc_id=prots.pacc_id
         LEFT OUTER JOIN protein_precur_quanted AS ppq ON ppq.prottable_id=pt.prottable_id AND 
             ppq.pacc_id=prots.pacc_id
@@ -94,7 +94,6 @@ SELECT pgm.master_id, p.protein_acc, IFNULL(g.gene_acc, 'NA'),
         GROUP BY pgm.master_id, bs.set_id
         """
         cursor = self.get_cursor()
-        print(sql)
         cursor.execute(sql)
         return cursor
 
@@ -156,7 +155,7 @@ SELECT g.gene_acc, GROUP_CONCAT(p.protein_acc, ';'), IFNULL(aid.assoc_id, 'NA'),
         INNER JOIN proteins AS p ON p.protein_acc=ppsm.protein_acc
         INNER JOIN ensg_proteins AS egp ON egp.pacc_id=p.pacc_id
         INNER JOIN genes AS g ON g.gene_id=egp.gene_id
-        LEFT OUTER JOIN gene_fdr AS gf ON gf.genetable_id=gt.genetable_id AND 
+        INNER JOIN gene_fdr AS gf ON gf.genetable_id=gt.genetable_id AND 
             gf.gene_id=g.gene_id
         LEFT OUTER JOIN gene_precur_quanted AS gpq ON gpq.genetable_id=gt.genetable_id AND 
             gpq.gene_id=g.gene_id
@@ -207,7 +206,7 @@ SELECT gn.assoc_id, GROUP_CONCAT(p.protein_acc, ';'), IFNULL(g.gene_acc, 'NA'),
     LEFT OUTER JOIN genename_proteins AS gnp ON gnp.gn_id=gn.gn_id
     LEFT OUTER JOIN proteins AS p ON p.pacc_id=gnp.pacc_id
     LEFT OUTER JOIN ensg_proteins AS egp ON egp.pacc_id=gnp.pacc_id
-    LEFT OUTER JOIN genes AS g ON gn.gn_id=egp.gene_id
+    LEFT OUTER JOIN genes AS g ON g.gene_id=egp.gene_id
     LEFT OUTER JOIN prot_desc AS pd ON pd.pacc_id=p.pacc_id
     GROUP BY gn.gn_id
     """
@@ -238,7 +237,7 @@ SELECT gn.assoc_id, GROUP_CONCAT(p.protein_acc, ';'), IFNULL(g.gene_acc, 'NA'),
         INNER JOIN proteins AS p ON p.protein_acc=ppsm.protein_acc
         INNER JOIN genename_proteins AS gnp ON gnp.pacc_id=p.pacc_id
         INNER JOIN associated_ids AS gn ON gn.gn_id=gnp.gn_id
-        LEFT OUTER JOIN assoc_fdr AS gf ON gf.genetable_id=gt.genetable_id AND 
+        INNER JOIN assoc_fdr AS gf ON gf.genetable_id=gt.genetable_id AND 
             gf.gn_id=gn.gn_id
         LEFT OUTER JOIN assoc_precur_quanted AS gpq ON gpq.genetable_id=gt.genetable_id AND 
             gpq.gn_id=gn.gn_id

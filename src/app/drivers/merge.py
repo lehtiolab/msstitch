@@ -80,5 +80,4 @@ class MergeDriver(base.PepProttableDriver):
                 self.header.extend(['{}_{}'.format(setn, chan[0]) for chan in channels])
                 if self.psmnrcolpattern:
                     self.header.extend(['{}_{}'.format(setn, chan[1]) for chan in channels])
-            print(self.header)
         self.features = merge.build_proteintable(self.lookup, self.mergecutoff, self.quantcolpattern)

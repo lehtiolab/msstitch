@@ -108,6 +108,3 @@ class ENSGDriver(GenesDriver):
     outsuffix = '_ensg.tsv'
     headeraccfield = prottabledata.HEADER_GENEID
     featcol = mzidtsvdata.HEADER_GENE
-
-
-# TODO create a result driver? For what?

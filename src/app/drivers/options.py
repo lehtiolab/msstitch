@@ -78,8 +78,7 @@ shared_options = {
                     '{} column', 'default': False},
     'fdrcolpattern': {'driverattr': 'fdrcolpattern', 'dest': 'fdrcolpattern',
                       'clarg': '--fdrcolpattern', 'type': str,
-                      'required': False, 'default': None,
-                      'help': 'Unique text pattern to identify '
+                      'default': None, 'help': 'Unique text pattern to identify '
                       'FDR column in input table.'},
     'fastadelim': {'driverattr': 'fastadelim', 'clarg': '--fastadelim',
                    'dest': 'fastadelim', 'required': False, 'type': str,
