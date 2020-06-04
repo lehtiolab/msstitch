@@ -32,7 +32,7 @@ class CreatePeptableDriver(PepProttableDriver):
         super().set_options()
         self.options.update(self.define_options(['spectracol', 'scorecolpattern', 
             'quantcolpattern', 'precursorquantcolpattern', 'minint', 'denomcols',
-            'denompatterns', 'mediannormalize', 'modelqvals', 'qvalthreshold',
+            'denompatterns', 'modelqvals', 'qvalthreshold',
             'minpeptidenr'], peptable_options))
 
     def prepare(self):

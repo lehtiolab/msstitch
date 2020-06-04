@@ -202,8 +202,7 @@ class IsoSummarizeDriver(PSMDriver):
         self.options.update(self.define_options(['quantcolpattern',
                                                  'denompatterns', 'denomcols',
                                                  'minint', 'targettable',
-                                                 'featcol', 'mediannormalize',
-                                                 ],
+                                                 'featcol', ],
                                                 psmtable_options))
 
     def set_features(self):
@@ -236,5 +235,4 @@ class IsoSummarizeDriver(PSMDriver):
             self.header = [prottabledata.HEADER_PROTEIN] + quantcols + nopsms
         self.psms = isosummarize.get_isobaric_ratios(self.fn, self.oldheader,
                                              quantcols, denomcols, self.minint,
-                                             targetfeats, theader[0], self.featcol,
-                                             self.mediannormalize)
+                                             targetfeats, theader[0], self.featcol)

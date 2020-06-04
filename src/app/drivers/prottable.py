@@ -11,7 +11,6 @@ from app.actions.psmtable import isosummarize
 
 
 class ProttableDriver(PepProttableDriver):
-    mediannormalize = False # FIXME remove when done
 
     def set_options(self):
         super().set_options()
