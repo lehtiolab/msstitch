@@ -1,12 +1,12 @@
 include *.md LICENSE
 recursive-include tests *.py
+recursive-include tests *.tsv
 recursive-include tests *.sqlite
-recursive-include tests *.consxml
+recursive-include tests *.consXML
+recursive-include tests *.kr
 recursive-include tests *.xml
 recursive-include tests *.txt
 recursive-include tests *.fasta
-recursive-include tests *.map
-recursive-include tests *.yml
 recursive-include tests *.mzML
 recursive-include tests *.mzid
 global-exclude *.py[co]
