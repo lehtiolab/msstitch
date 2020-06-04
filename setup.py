@@ -19,7 +19,7 @@ CLASSIFIERS = [
     'Programming Language :: Python :: Implementation :: CPython',
     'Topic :: Scientific/Engineering :: Bio-Informatics',
 ]
-INSTALL_REQUIRES = ['numpy', 'lxml', 'biopython', 'pyyaml']
+INSTALL_REQUIRES = ['numpy', 'lxml', 'biopython']
 METADATA = {
     'version': '3.0',
     'title': 'msstitch',
@@ -35,11 +35,9 @@ CLI = {'console_scripts': ['msstitch=app.msstitch:main']}
 
 ###################################################################
 
-try:
-    import pypandoc
-    long_description = pypandoc.convert('README.md', 'rst', format='md')
-except(IOError, ImportError):
-    long_description = open('README.md').read()
+from os import path
+with open(path.join(path.abspath(path.dirname(__file__)), 'README.md'), encoding='utf-8') as fp:
+    long_description = fp.read()
 
 
 if __name__ == '__main__':
@@ -57,6 +55,7 @@ if __name__ == '__main__':
         packages=PACKAGES,
         package_dir={'': 'src'},
         long_description=long_description,
+        long_description_content_type='text/markdown',
         classifiers=CLASSIFIERS,
         install_requires=INSTALL_REQUIRES,
         entry_points=CLI,
