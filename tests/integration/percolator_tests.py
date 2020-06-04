@@ -6,7 +6,7 @@ from tests.integration.basetests import BaseTestPycolator
 
 
 class TestSplitProteinHeader(BaseTestPycolator):
-    command = 'splitprotein'
+    command = 'splitperco'
     suffix = ''
 
     def setUp(self):
@@ -45,7 +45,7 @@ class TestSplitProteinHeader(BaseTestPycolator):
 
 
 class TestFilterKnown(BaseTestPycolator):
-    command = 'filterseq'
+    command = 'filterperco'
     suffix = '_filtseq.xml'
     dbfn = 'known_peptide_lookup.sqlite'
     reversed_dbfn = 'rev_known_peptide_lookup.sqlite'

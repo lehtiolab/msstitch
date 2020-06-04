@@ -10,7 +10,6 @@ from lxml import etree
 class SearchspaceLookup(basetests.BaseTest):
     suffix = ''
     infilename = 'proteins.fasta'
-    executable = 'msslookup'
 
     def setUp(self):
         super().setUp()
@@ -32,7 +31,7 @@ class TestTrypsinize(SearchspaceLookup):
         if miscleav:
             options.extend(['--miscleav', str(miscleav)])
             seqtype = 'miscleav'
-        cmd = self.run_command(options)
+        self.run_command(options)
         with open(os.path.join(self.basefixdir, 'peptides_trypsinized.json')) as fp:
             tryp_sequences = json.load(fp)
         for rec in SeqIO.parse(self.resultfn, 'fasta'):
@@ -141,7 +140,7 @@ class TestDecoyFaPretryp(SearchspaceLookup):
 
 
 class TestTrypticLookup(SearchspaceLookup):
-    command = 'seqspace'
+    command = 'storeseq'
 
     def all_seqs_in_db(self, dbfn, sequences, seqtype):
         db = sqlite3.connect(dbfn)
@@ -174,7 +173,7 @@ class TestTrypticLookup(SearchspaceLookup):
             options = []
         self.resultfn = os.path.join(self.workdir, 'seqspace.db')
         options.extend(['--dbfile', self.resultfn])
-        self.copy_db_to_workdir('target_psms.sqlite')
+        self.copy_db_to_workdir('spectra_lookup.sqlite')
         self.query_db_assert(options, seqtype)
 
     def test_cutproline_nodb(self):
@@ -197,7 +196,7 @@ class TestTrypticLookup(SearchspaceLookup):
 
 
 class TestWholeProteinSeqLookup(SearchspaceLookup):
-    command = 'protspace'
+    command = 'storeseq'
 
     def all_seqs_in_db(self, dbfn, sequences, seqtype):
         db = sqlite3.connect(dbfn)
@@ -212,7 +211,7 @@ class TestWholeProteinSeqLookup(SearchspaceLookup):
     def query_db_assert(self, options):
         with open(os.path.join(self.basefixdir, 'allpeptides_proteins.json')) as fp:
             sequences = [x.replace('L', 'I') for x in json.load(fp)]
-        options.extend(['--minlen', '6'])
+        options.extend(['--fullprotein', '--minlen', '6'])
         self.run_command(options)
         self.assertTrue(self.all_seqs_in_db(self.resultfn, sequences,
                                             seqtype=False))
@@ -225,16 +224,19 @@ class TestWholeProteinSeqLookup(SearchspaceLookup):
     def test_with_existing_db(self, seqtype=None):
         self.resultfn = os.path.join(self.workdir, 'seqspace.db')
         options = ['--dbfile', self.resultfn]
-        self.copy_db_to_workdir('target_psms.sqlite')
+        self.copy_db_to_workdir('spectra_lookup.sqlite')
         self.query_db_assert(options)
 
 
 class SpectraLookup(basetests.MSLookupTest):
-    command = 'spectra'
+    command = 'storespectra'
 
     def setUp(self):
         super().setUp()
         self.infile = os.path.join(self.basefixdir, self.infilename)
+
+    def get_std_options(self):
+        return [self.executable, self.command, '--spectra', self.infile]
 
     def check_spectra(self, bsets, ionmob=False):
         sql = ('SELECT mf.mzmlfilename, bs.set_name, s.scan_sid, s.charge, '
@@ -256,7 +258,7 @@ class SpectraLookup(basetests.MSLookupTest):
                                 'sid': rec[6],
                                 'ion_something': rec[7],
                                 }
-        for scannr, spec in self.get_spectra_mzml(self.infile, bsets, ionmob):
+        for scannr, spec in self.get_spectra_mzml([self.infile], bsets, ionmob):
             self.assertEqual(spec, specrecs[scannr])
 
     def get_spectra_mzml(self, infiles, bsets, ionmob):
@@ -328,117 +330,24 @@ class TestDDATIMSSpectraLookup(SpectraLookup):
         self.check_spectra(setnames, ionmob=True)
 
 
-class TestPSMLookup(basetests.MSLookupTest):
-    command = 'psms'
+class TestSpecQuantLookup(basetests.MSLookupTest):
+    command = 'storequant'
+    infilename = ''
+    isoinfilename = 'few_spectra.consXML'
+    krinfilename = 'few_spectra.kr'
     base_db_fn = 'spectra_lookup.sqlite'
-    infilename = 'target.tsv'
-    """DB and PSM table contain:
-    - ENSEMBL proteins
-    - a Uniprot swiss protein
-    - A self-annotated protein
-    - A non-annotated (only peptide) proteins
-    """
 
-    def check_db_fasta(self, fasta, exp_proteins=None, desc=True):
-        if exp_proteins is None:
-            exp_proteins = {}
-            for rec in SeqIO.parse(fasta, 'fasta'):
-                rd = rec.description
-                gene = 'NA'
-                if 'gene_symbol:' in rd:
-                    six = rd.index('gene_symbol:') + 12
-                    gix = rd.index('gene:') + 5 
-                    gene = rd[gix: rd.index(' ', gix)]
-                    desc = rd[rd.index('description:') + 12:]
-                elif 'GN=' in rd:
-                    six = rd.index('GN=') + 3
-                    desc = [x for x in rd.split() if '=' not in x][1:]
-                elif 'msstitch_fake_gene' in rd:
-                    # special case fake fasta record for non-standard gene 
-                    six, desc = False, 'NA'
-                    symbol = rd.split()[-1]
-                elif 'msstitch_fake_onlypeptide' in rd:
-                    # special fake fasta record for unannotated peptide
-                    six, symbol, desc = False, 'NA', 'NA'
-                exp_proteins[rec.id] = {
-                        'seq': rec.seq,
-                        'gene': gene,
-                        'desc': desc,
-                        'symbol': rd[six: rd.index(' ', six)] if six else 'NA',
-                        }
-        self.check_db_base(exp_proteins)
-        sql = ('SELECT ps.protein_acc, ps.sequence, g.gene_acc, aid.assoc_id, pd.description'
-               ' FROM genes AS g JOIN associated_ids AS aid USING(protein_acc)'
-               ' JOIN protein_seq AS ps USING(protein_acc)'
-               ' JOIN prot_desc AS pd USING(protein_acc)')
-        if not desc:
-            sql = ('SELECT ps.protein_acc, ps.sequence '
-                   'FROM protein_seq AS ps '
-                   'JOIN prot_desc AS pd USING(protein_acc)')
-        for prot, seq, gene, aid, desc in self.get_values_from_db(self.resultfn,
-                                                             sql):
-            self.assertEqual(exp_proteins[prot]['seq'], seq)
-            if desc:
-                self.assertEqual(exp_proteins[prot]['gene'], gene)
-                self.assertEqual(exp_proteins[prot]['symbol'], aid)
-                self.assertEqual(exp_proteins[prot]['desc'], desc)
+    def setUp(self):
+        super().setUp()
+        self.isoinfile = os.path.join(self.fixdir, self.isoinfilename)
+        self.krfile = os.path.join(self.fixdir, self.krinfilename)
 
-    def check_db_base(self, expected_proteins=None):
-        expected_psms = self.get_expected_psms()
-        if expected_proteins is None:
-            expected_proteins = {x for y in expected_psms.values()
-                                 for x in y['proteins']}
-        protsql = 'SELECT * FROM proteins'
-        for protein in self.get_values_from_db(self.resultfn, protsql):
-            self.assertIn(protein[1], expected_proteins)
-        psmsql = ('SELECT ps.sequence, p.score, pr.rownr '
-                  'FROM psmrows AS pr JOIN psms AS p USING(psm_id) '
-                  'JOIN peptide_sequences AS ps USING(pep_id)')
-        for psm in self.get_values_from_db(self.resultfn, psmsql):
-            expected_psm = (expected_psms[psm[2]]['seq'],
-                            expected_psms[psm[2]]['score'])
-            self.assertEqual((psm[0], psm[1]), expected_psm)
-        ppsql = ('SELECT pp.protein_acc, pr.rownr FROM psmrows AS pr '
-                 'JOIN protein_psm AS pp USING(psm_id)')
-        for protpsm in self.get_values_from_db(self.resultfn, ppsql):
-            self.assertIn(protpsm[0], expected_psms[protpsm[1]]['proteins'])
-
-    def get_expected_psms(self):
-        header = self.get_tsvheader(self.infile[0])
-        prot_ix = header.index('Protein')
-        seq_ix = header.index('Peptide')
-        score_ix = header.index('MSGFScore')
-        psms = {}
-        for row, line in enumerate(self.get_all_lines(self.infile[0])):
-            line = line.strip('\n').split('\t')
-            psms[row] = {'proteins': [x.split('(pre')[0] for x in
-                                      line[prot_ix].split(';')],
-                         'seq': line[seq_ix],
-                         'score': line[score_ix],
-                         }
-        return psms
-
-    def test_no_fasta(self):
-        options = ['--spectracol', '1']
-        self.run_command(options)
-        self.check_db_base()
-
-    def test_with_fasta(self):
-        fastafn = os.path.join(self.basefixdir, 'ens99_small.fasta')
-        options = ['--spectracol', '1', '--fasta', fastafn, 
-                   '--fastadelim', 'pipe', '--genefield', '2']
-        self.run_command(options)
-        self.check_db_fasta(fastafn)
-
-
-class TestIsoquantLookup(basetests.MSLookupTest):
-    command = 'isoquant'
-    infilename = 'few_spectra.consXML'
-    base_db_fn = 'spectra_lookup.sqlite'
+    def get_std_options(self):
+        return [self.executable, self.command]
 
     def get_quantch_map(self):
         qmap_xml = {}
-        for ac, map_el in etree.iterparse(self.infile[0], tag='map'):
+        for ac, map_el in etree.iterparse(self.isoinfile, tag='map'):
             channeldata = map_el.attrib
             qmap_xml[channeldata['id']] = channeldata['label']
         return qmap_xml
@@ -457,7 +366,7 @@ class TestIsoquantLookup(basetests.MSLookupTest):
                'AS iq JOIN isobaric_channels AS ic USING(channel_id)')
         qch_map = self.get_quantch_map()
         dbtmt = self.get_values_from_db(self.resultfn, sql)
-        for ac, xml_quant in etree.iterparse(self.infile[0],
+        for ac, xml_quant in etree.iterparse(self.isoinfile,
                                              tag='consensusElement'):
             for element in xml_quant.findall('.//element'):
                 qval, qchan = next(dbtmt)
@@ -466,25 +375,19 @@ class TestIsoquantLookup(basetests.MSLookupTest):
 
     def test_isoquant(self):
         fakespectra = os.path.join(self.workdir, 'few_spectra.mzML')
-        options = ['--spectra', fakespectra]
+        options = ['--isobaric', self.isoinfile, '--spectra', fakespectra]
         self.run_command(options)
         self.check_quantmap()
         self.check_quantification()
 
-
-class TestMS1KronikLookup(basetests.MSLookupTest):
-    command = 'ms1quant'
-    infilename = 'few_spectra.kr'
-    base_db_fn = 'spectra_lookup.sqlite'
-
     def test_kronik(self):
         self.fakespfn = os.path.join(self.workdir, 'few_spectra.mzML')
-        options = ['--quanttype', 'kronik', '--rttol', '5', '--mztol', '20',
+        options = ['--kronik', self.krfile, '--rttol', '5', '--mztol', '20',
                    '--mztoltype', 'ppm', '--spectra', self.fakespfn]
         self.run_command(options)
-        self.check_feats_stored()
+        self.check_kronik_feats_stored()
 
-    def check_feats_stored(self):
+    def check_kronik_feats_stored(self):
         PROTON_MASS = 1.0072
         sql = ('SELECT * FROM ms1_quant')
         feats = {1: {}}
@@ -497,7 +400,7 @@ class TestMS1KronikLookup(basetests.MSLookupTest):
                     feats[fnid][rt][mz] = {charge: val}
                 except KeyError:
                     feats[fnid][rt] = {mz: {charge: val}}
-        with open(self.infile[0]) as fp:
+        with open(self.krfile) as fp:
             next(fp).strip().split('\t')
             for line in fp:
                 line = line.strip('\n').split('\t')
@@ -505,137 +408,3 @@ class TestMS1KronikLookup(basetests.MSLookupTest):
                 mz = (float(line[4]) + charge * PROTON_MASS) / charge
                 resval = feats[1][float(line[10])][mz][charge]
                 self.assertEqual(float(line[6]), resval)
-
-
-class TestProtPepTableLookup(basetests.MSLookupTest):
-    def run_checks(self, options, sql, checkfeats):
-        self.run_command(options)
-        result = self.get_values_from_db(self.resultfn, sql)
-        with open(self.infile[0]) as fp:
-            header = next(fp).strip().split('\t')
-            for res, exp in zip(result, fp):
-                exp = {field: val for field, val in
-                       zip(header, exp.strip('\n').split('\t'))}
-                for i, key in enumerate(checkfeats):
-                    self.check_float(key, exp, res[i])
-
-    def check_float(self, key, exp, result):
-        expected = self.get_float_or_na(exp[key])
-        self.assertEqual(result, expected)
-
-    def check_isobaric(self, sql):
-        def do_check(result, expected, header):
-            expected = {k: v for k, v in
-                        zip(header, expected.strip('\n').split('\t'))}
-            [self.assertIn(key, expected) for key in result.keys()]
-            [self.check_float(key, expected, result[key]) for key in result]
-        protein_acc, resultquant = None, {}
-        with open(self.infile[0]) as fp:
-            header = next(fp).strip().split('\t')
-            for rec in self.get_values_from_db(self.resultfn, sql):
-                if rec[0] != protein_acc and protein_acc is not None:
-                    do_check(resultquant, next(fp), header)
-                    resultquant = {}
-                    protein_acc = rec[0]
-                elif protein_acc is None:
-                    protein_acc = rec[0]
-                resultquant[rec[1]] = rec[2]
-
-
-class TestPeptidetableLookup(TestProtPepTableLookup):
-    command = 'peptides'
-    infilename = 'target_pep_quant.tsv'
-    base_db_fn = 'target_psms.sqlite'
-
-    def run_peptable(self, opts=None):
-        options = ['--setnames', 'Set1',
-                   '--isobquantcolpattern', 'tmt10plex', '--fdrcolpattern',
-                   '^q-value', '--psmnrcolpattern',
-                   'quanted', '--ms1quantcolpattern', 'area']
-        if opts is not None:
-            options.extend(opts)
-        sql = ('SELECT ps.sequence, ppq.quant, pf.fdr '
-               'FROM peptide_precur_quanted AS ppq '
-               'JOIN peptide_sequences AS ps USING(pep_id) '
-               'JOIN peptide_fdr AS pf USING(pep_id)')
-        checkfeats = ['Peptide sequence', 'MS1 area (highest of all PSMs)',
-                      'q-value']
-        self.run_checks(options, sql, checkfeats)
-        iso_sql = ('SELECT p.sequence, pc.channel_name, piq.quantvalue '
-                   'FROM peptide_iso_quanted AS piq '
-                   'JOIN peptide_sequences AS p USING(pep_id) '
-                   'JOIN pepquant_channels AS pc USING(channel_id)')
-        self.check_isobaric(iso_sql)
-
-    def test_genecentric(self):
-        self.run_peptable(['--peptidecol', '1', '--genecentric'])
-
-    def test_proteincentric(self):
-        self.run_peptable()
-
-
-class TestProteinTableLookup(TestProtPepTableLookup):
-    command = 'proteins'
-    infilename = 'proteins_protfdr'
-    base_db_fn = 'target_psms_pg.sqlite'
-
-    def test_proteincentric(self):
-        options = ['--setnames', 'Set1',
-                   '--isobquantcolpattern', 'tmt10plex', '--fdrcolpattern',
-                   'q-value', '--psmnrcolpattern',
-                   'quanted', '--ms1quantcolpattern', 'area']
-        sql = ('SELECT p.protein_acc, ppq.quant, pf.fdr '
-               'FROM protein_precur_quanted AS ppq '
-               'JOIN proteins AS p USING(pacc_id) '
-               'JOIN protein_fdr AS pf USING(pacc_id)')
-        checkfeats = ['Protein ID', 'MS1 precursor area', 'q-value']
-        self.run_checks(options, sql, checkfeats)
-        iso_sql = ('SELECT p.protein_acc, pc.channel_name, piq.quantvalue '
-                   'FROM protein_iso_quanted AS piq '
-                   'JOIN proteins AS p USING(pacc_id) '
-                   'JOIN protquant_channels AS pc USING(channel_id)')
-        self.check_isobaric(iso_sql)
-
-class TestENSGTableLookup(TestProtPepTableLookup):
-    command = 'proteins'
-    infilename = 'genes_protfdr'
-    base_db_fn = 'target_psms_pg.sqlite'
-
-    def test_genecentric_no_psmnrs(self):
-        options = ['--setnames', 'Set1', '--genecentric', 'genes',
-                   '--isobquantcolpattern', 'tmt10plex', '--fdrcolpattern',
-                   'q-value', '--ms1quantcolpattern', 'area', '--protcol', '1']
-        sql = ('SELECT p.gene_acc, ppq.quant, pf.fdr '
-               'FROM gene_precur_quanted AS ppq '
-               'JOIN genes AS p USING(gene_id) '
-               'JOIN gene_fdr AS pf USING(gene_id)')
-        checkfeats = ['Protein ID', 'MS1 precursor area', 'q-value']
-        self.run_checks(options, sql, checkfeats)
-        iso_sql = ('SELECT p.gene_acc, pc.channel_name, piq.quantvalue '
-                   'FROM gene_iso_quanted AS piq '
-                   'JOIN genes AS p USING(gene_id) '
-                   'JOIN genequant_channels AS pc USING(channel_id)')
-        self.check_isobaric(iso_sql)
-
-
-class TestGenenameTableLookup(TestProtPepTableLookup):
-    command = 'proteins'
-    infilename = 'assoc_protfdr'
-    base_db_fn = 'target_psms_pg.sqlite'
-
-    def test_assoccentric(self):
-        options = ['--setnames', 'Set1', '--genecentric', 'assoc',
-                   '--isobquantcolpattern', 'tmt10plex', '--fdrcolpattern',
-                   'q-value', '--psmnrcolpattern', 'quanted', 
-                   '--ms1quantcolpattern', 'area', '--protcol', '1']
-        sql = ('SELECT p.assoc_id, ppq.quant, pf.fdr '
-               'FROM assoc_precur_quanted AS ppq '
-               'JOIN associated_ids AS p USING(gene_id) '
-               'JOIN assoc_fdr AS pf USING(gene_id)')
-        checkfeats = ['Protein ID', 'MS1 precursor area', 'q-value']
-        self.run_checks(options, sql, checkfeats)
-        iso_sql = ('SELECT p.assoc_id, pc.channel_name, piq.quantvalue '
-                   'FROM assoc_iso_quanted AS piq '
-                   'JOIN associated_ids AS p USING(gene_id) '
-                   'JOIN genequant_channels AS pc USING(channel_id)')
-        self.check_isobaric(iso_sql)

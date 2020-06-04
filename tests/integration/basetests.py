@@ -13,55 +13,44 @@ class BaseTest(unittest.TestCase):
     fixdir = os.path.join(os.getcwd(), testdir, 'fixtures')
     basefixdir = os.path.join(os.getcwd(), testdir, 'base_fixtures')
     outdir = os.path.join(os.getcwd(), testdir, 'test_output')
+    executable = 'msstitch'
 
     def setUp(self):
         self.infile = os.path.join(self.fixdir, self.infilename)
         os.makedirs(self.outdir, exist_ok=True)
         self.workdir = mkdtemp(dir=self.outdir)
         os.chdir(self.workdir)
-        self.resultfn = os.path.join(self.workdir,
-                                     self.infilename + self.suffix)
+        self.resultfn = os.path.join(self.workdir, self.infilename)
 
     def tearDown(self):
-        shutil.rmtree(self.workdir)
+        pass
+        #shutil.rmtree(self.workdir)
 
     def get_std_options(self):
         cmd = [self.executable, self.command, '-i']
         if type(self.infile) != list:
             self.infile = [self.infile]
         cmd.extend(self.infile)
-        if self.resultfn is not None and self.executable != 'msslookup':
+        if self.resultfn is not None:
             cmd.extend(['-o', self.resultfn])
         elif self.resultfn is None:
             cmd.extend(['-d', self.workdir])
         return cmd
 
-    def run_command(self, options=[]):
+    def run_command(self, options=[], return_error=False):
         cmd = self.get_std_options()
         cmd.extend(options)
+        check = not return_error
         try:
-            subprocess.check_call(cmd)
-        except subprocess.CalledProcessError:
-            print('Failed to run executable {}'.format(self.executable))
+            complete = subprocess.run(cmd, capture_output=True, text=True, check=check)
+        except subprocess.CalledProcessError as e:
+            print('Failed to run command: ', cmd)
+            print('Output of command:')
+            print(e.stdout)
+            print(e.stderr)
             raise
-        return cmd
-
-    def run_command_expect_error(self, options=[]):
-        try:
-            cmd = self.run_command(options)
-        except subprocess.CalledProcessError:
-            pass
         else:
-            self.fail('Command {} should throw an error'.format(cmd))
-
-    def run_command_stdout(self, options=[]):
-        cmd = self.get_std_options()
-        cmd.extend(options)
-        try:
-            return subprocess.check_output(cmd)
-        except subprocess.CalledProcessError:
-            print('Failed to run executable {}'.format(self.executable))
-            raise
+            return complete
 
     def get_values_from_db(self, dbfile, sql):
         db = sqlite3.connect(dbfile)
@@ -152,7 +141,6 @@ class BaseTest(unittest.TestCase):
 
 
 class BaseTestPycolator(BaseTest):
-    executable = 'msspercolator'
     infilename = 'perco.xml'
 
     def get_psm_pep_ids_from_file(self, fn):
@@ -184,18 +172,6 @@ class BaseTestPycolator(BaseTest):
         return [pepseq.attrib['seq'] for pepseq in
                 self.get_subelements(psms, 'peptide_seq', ns)]
 
-    def get_svms(self, elements, ns):
-        return [svm.text for svm in
-                self.get_subelements(elements, 'svm_score', ns)]
-
-    def get_qvals(self, elements, ns):
-        return [qval.text for qval in
-                self.get_subelements(elements, 'q_value', ns)]
-
-    def get_peps(self, elements, ns):
-        return [pep.text for pep in
-                self.get_subelements(elements, 'pep', ns)]
-
     def get_subelements(self, elements, subel, ns):
         return [element.find('{%s}%s' % (ns, subel)) for element in elements]
 
@@ -204,8 +180,7 @@ class BaseTestPycolator(BaseTest):
 
 
 class MzidTSVBaseTest(BaseTest):
-    executable = 'msspsmtable'
-    infilename = 'few_spectra.tsv'
+    infilename = 'target.tsv'
     dbfn = 'target_psms.sqlite'
 
     def setUp(self):
@@ -269,7 +244,6 @@ class MzidTSVBaseTest(BaseTest):
 
 
 class MSLookupTest(BaseTest):
-    executable = 'msslookup'
     base_db_fn = None
     suffix = ''
 
@@ -287,7 +261,78 @@ class MSLookupTest(BaseTest):
         super().run_command(options)
 
 
-class PepProtableTest(BaseTest):
+class ProttableTest(BaseTest):
+
+    def setUp(self):
+        super().setUp()
+        self.psmfile = os.path.join(
+            self.fixdir, 'target_pg.tsv')
+        self.decoyfn = os.path.join(self.fixdir, 'decoy_peptides.tsv')
+
+    def check_ms1(self, featkey, featout):
+        top_ms1 = self.get_top_peps(self.infile[0], featkey, 'Peptide sequence', 'MS1 area (highest of all PSMs)')
+        top_ms1 = {prot: sum(sorted(ms1s.values(), reverse=True)[:3]) /
+                   len(sorted(ms1s.values())[:3])
+                   for prot, ms1s in top_ms1.items()}
+        for protein in self.tsv_generator(self.resultfn):
+            try:
+                self.assertEqual(float(protein['MS1 precursor area']),
+                                 top_ms1[protein[featout]])
+            except ValueError:
+                self.assertNotIn(protein['Protein ID'], top_ms1)
+
+    def dotest_proteintable(self, scorecolpat, featkey, featout):
+        options = ['--scorecolpattern', scorecolpat,
+                '--logscore', '--decoyfn', self.decoyfn, '--ms1quant',
+                '--isobquantcolpattern', 'plex', '--denompatterns', '126',
+                '--psmtable', self.psmfile
+                ] + self.specialoptions
+        self.run_command(options)
+        self.check_ms1(featkey, featout)
+
+    def get_top_peps(self, fn, featkey, pepkey, valuekey, lowerbetter=False):
+        top_vals = {}
+        for pep in self.tsv_generator(fn):
+            prot = pep[featkey]
+            seq = pep[pepkey]
+            try:
+                value = float(pep[valuekey])
+            except ValueError:
+                continue
+            if prot in top_vals and seq in top_vals[prot]:
+                if lowerbetter and value > top_vals[prot][seq]:
+                    continue
+                elif not lowerbetter and value < top_vals[prot][seq]:
+                    continue
+            try:
+                top_vals[prot][seq] = value
+            except KeyError:
+                top_vals[prot] = {seq: value}
+        return top_vals
+
+
+class MergeTest(BaseTest):
+    infilename = ''
+    command = 'merge'
+    dbfn = 'target_psms.sqlite'
+
+    def run_command(self, options, nopsms=False):
+        self.infile = os.path.join(self.fixdir, self.infilename)
+        self.resultfn = os.path.join(self.workdir, self.infilename)
+        if not nopsms:
+            self.options.extend(['--psmnrcolpattern', 'quanted'])
+        super().run_command(options)
+
+    def setUp(self):
+        super().setUp()
+        self.dbfile = os.path.join(self.workdir, self.dbfn)
+        self.copy_db_to_workdir(self.dbfn, self.dbfile)
+        self.options = ['--setnames', 'Set1', 
+                '--fdrcolpattern', 'q-value', '--ms1quantcolpattern', 
+                'area', '--isobquantcolpattern', 'plex', 
+                '--dbfile', self.dbfile,
+                ]
+
     def check_build_values(self, sql, fields, accession, cutoff=False):
         expected = {}
         for rec in self.get_values_from_db(self.dbfile, sql):
@@ -312,7 +357,7 @@ class PepProtableTest(BaseTest):
         else:
             self.assertTrue(expected == {})
 
-    def check_built_isobaric(self, sql, accession, check_nr_psms=True, cutoff=False):
+    def check_built_isobaric(self, sql, accession, nopsms=False, cutoff=False):
         expected = {}
         for rec in self.get_values_from_db(self.dbfile, sql):
             am_psm = rec[4]
@@ -331,73 +376,16 @@ class PepProtableTest(BaseTest):
                     setfield = '{}_{}'.format(setname, field)
                     if cutoff and exp_val[2] > cutoff:
                         exp_val = ['NA', 'NA']
-                    self.assertEqual(line[setfield], str(exp_val[0]))
-                    if check_nr_psms:
+                    self.assertAlmostEqual(float(line[setfield]), exp_val[0])
+                    if not nopsms:
                         nr_psms = line['{} - # quanted PSMs'.format(setfield)]
                         self.assertEqual(nr_psms, str(exp_val[1]))
             expected.pop(line[accession])
         self.check_exp_empty(expected, cutoff)
 
-
-class PeptableTest(PepProtableTest):
-    executable = 'msspeptable'
-
-
-class ProttableTest(PepProtableTest):
-    executable = 'mssprottable'
-    infilename = 'target_proteins'
-
-    def get_top_psms(self, fn, pepkey, valuekey, lowerbetter=False):
-        top_vals = {}
-        for psm in self.tsv_generator(fn):
-            prot = psm['Master protein(s)']
-            seq = psm[pepkey]
-            try:
-                value = float(psm[valuekey])
-            except ValueError:
-                continue
-            if prot in top_vals and seq in top_vals[prot]:
-                if lowerbetter and value > top_vals[prot][seq]:
-                    continue
-                elif not lowerbetter and value < top_vals[prot][seq]:
-                    continue
-            try:
-                top_vals[prot][seq] = value
-            except KeyError:
-                top_vals[prot] = {seq: value}
-        return top_vals
-
-    def check_protein_data(self, centrictype):
+    def check_protein_data(self, centrictype, sql, psm_sql):
         centric = {'proteincentric': 'pc', 'genecentric': 'gc',
                    'assoccentric': 'ac'}[centrictype]
-        if centric == 'pc':
-            sql = (
-            'SELECT p.protein_acc,GROUP_CONCAT(g.gene_acc),GROUP_CONCAT(aid.assoc_id),pd.description,pcov.coverage '
-            'FROM protein_group_master AS p '
-            'LEFT OUTER JOIN associated_ids AS aid USING(protein_acc) '
-            'LEFT OUTER JOIN genes AS g USING(protein_acc) '
-            'LEFT OUTER JOIN prot_desc AS pd USING(protein_acc) '
-            'JOIN protein_coverage AS pcov USING(protein_acc) '
-            'GROUP BY p.protein_acc'
-            )
-        elif centric == 'gc':
-            sql = (
-            'SELECT g.gene_acc, GROUP_CONCAT(aid.assoc_id),GROUP_CONCAT(p.protein_acc),pd.description '
-            'FROM genes AS g '
-            'JOIN associated_ids AS aid USING(protein_acc) '
-            'JOIN proteins AS p USING(protein_acc) '
-            'JOIN prot_desc AS pd USING(protein_acc) '
-            'GROUP BY g.gene_acc'
-            )
-        elif centric == 'ac':
-            sql = (
-            'SELECT aid.assoc_id, GROUP_CONCAT(g.gene_acc),GROUP_CONCAT(p.protein_acc),pd.description '
-            'FROM associated_ids AS aid '
-            'LEFT OUTER JOIN genes AS g USING(protein_acc) '
-            'JOIN proteins AS p USING(protein_acc) '
-            'LEFT OUTER JOIN prot_desc AS pd USING(protein_acc) '
-            'GROUP BY aid.assoc_id'
-            )
         expected = {rec[0]: [x if x else 'NA' for x in rec[1:]] for rec in
                     self.get_values_from_db(self.dbfile, sql)}
         pdatalup = {
@@ -410,17 +398,6 @@ class ProttableTest(PepProtableTest):
             for (field, ix) in pdatalup[centric]['fields']:
                 self.assertEqual(set(str(row[field]).split(';')), set(str(expected[acc][ix]).split(',')))
             self.assertEqual(row['Description'], expected[acc][2])
-
-        psm_sql = ('SELECT {0}.{1}, pp.psm_id, ps.sequence '
-                   'FROM {2} AS {0} '
-                   'JOIN protein_psm AS pp USING(protein_acc) '
-                   'JOIN psms USING(psm_id) '
-                   'JOIN peptide_sequences AS ps USING(pep_id) '
-                   )
-        psm_sql_map = {'pc': ('pgm', 'protein_acc', 'protein_group_master'),
-                       'gc': ('g', 'gene_acc', 'genes'),
-                       'ac': ('aid', 'assoc_id', 'associated_ids')}[centric]
-        psm_sql = psm_sql.format(*psm_sql_map)
         expected, unipeps = {}, {}
         for rec in self.get_values_from_db(self.dbfile, psm_sql):
             pacc = rec[0]
@@ -447,3 +424,4 @@ class ProttableTest(PepProtableTest):
                              str(len(expected[pacc]['pep'])))
             self.assertEqual(protein['{}_# PSMs'.format(poolname)],
                              str(len(expected[pacc]['psms'])))
+
