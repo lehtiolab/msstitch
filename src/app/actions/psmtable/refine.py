@@ -60,7 +60,7 @@ def create_psm_lookup(fn, fastafn, header, pgdb, unroll, specfncol, fastadelim, 
                      })
     pgdb.store_psms(psms)
     pgdb.index_psms()
-    store_psm_protein_relations(fn, header, pgdb, proteins)
+    store_psm_protein_relations(fn, header, pgdb, proteins, specfncol)
 
 
 def store_proteins_descriptions(pgdb, fastafn, tsvfn, header, fastadelim, genefield):
@@ -78,7 +78,7 @@ def store_proteins_descriptions(pgdb, fastafn, tsvfn, header, fastadelim, genefi
     return set([x[0] for x in prots])
 
 
-def store_psm_protein_relations(fn, header, pgdb, proteins):
+def store_psm_protein_relations(fn, header, pgdb, proteins, specfncol):
     """Reads PSMs from file, extracts their proteins and peptides and passes
     them to a database backend in chunks.
     """
@@ -88,7 +88,7 @@ def store_psm_protein_relations(fn, header, pgdb, proteins):
     last_id, psmids_to_store = None, set()
     store_soon = False
     for psm in tsvreader.generate_tsv_psms(fn, header):
-        psm_id, prots = tsvreader.get_pepproteins(psm)
+        psm_id, prots = tsvreader.get_pepproteins(psm, specfncol)
         # TODO can this be removed permanently? 
         # Filter proteins to only include those that match the protein 
         # accessions in fasta so we get the correct names, filter out the badly annotated peptides
