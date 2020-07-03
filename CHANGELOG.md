@@ -1,5 +1,11 @@
 # Changelog
 
+## [3.1] - 2020-07-03
+### Fixed
+- Quant lookup on consensusXML stored channels in wrong order when >10 channels eg in TMT16
+- --spectracol argument in msstitch psmtable did not work
+
+
 ## [3.0] - 2020-06-04
 ### Breaking
 - Completely new interface, one command (msstitch), some subcommands, merged several
