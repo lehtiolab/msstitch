@@ -190,12 +190,20 @@ class PepTablePlainDB(PepTableProteinCentricDB):
         in a dict with accessions as keys. 
         In plain DB we only output peptides, not proteins etc
         """
-        sql = 'SELECT ps.pep_id, ps.sequence FROM peptide_sequences AS ps'
+        sql = """
+    SELECT ps.pep_id, ps.sequence, GROUP_CONCAT(p.protein_acc, ';')
+    FROM protein_psm AS pp
+    INNER JOIN psms ON psms.psm_id=pp.psm_id
+    INNER JOIN peptide_sequences AS ps ON psms.pep_id=ps.pep_id
+    INNER JOIN proteins AS p ON p.protein_acc=pp.protein_acc
+    GROUP BY ps.pep_id
+        """
         cursor = self.get_cursor()
         pgdata = {}
-        for pid, seq in cursor.execute(sql):
+        for pid, seq, prots in cursor.execute(sql):
             pgdata[pid] = {
                     ph.HEADER_PEPTIDE: seq,
+                    ph.HEADER_PROTEINS: prots,
                     }
         return pgdata
 

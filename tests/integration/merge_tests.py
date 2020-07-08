@@ -45,9 +45,15 @@ class TestPeptideMerge(basetests.MergeTest):
     def test_nogroups(self):
         self.options.append('--no-group-annotation')
         self.run_command(self.options)
-        self.check_iso_and_peptide_relations(sql=False)
+        sql = ('SELECT ps.sequence, p.psm_id, prot.protein_acc, "NA", "NA", "NA", "NA" '
+               'FROM peptide_sequences AS ps '
+               'JOIN psms AS p USING(pep_id) '
+               'JOIN protein_psm USING(psm_id) '
+               'JOIN proteins AS prot USING(protein_acc) '
+               )
+        self.check_iso_and_peptide_relations(sql, proteincentric=True, nogroup=True)
 
-    def check_iso_and_peptide_relations(self, sql, proteincentric=False):
+    def check_iso_and_peptide_relations(self, sql, proteincentric=False, nogroup=False):
         valsql = ('SELECT ps.sequence, bs.set_name, '
                'ppq.quant, pf.fdr '
                'FROM peptide_sequences AS ps '
@@ -88,19 +94,21 @@ class TestPeptideMerge(basetests.MergeTest):
                 if proteincentric:
                     self.assertEqual(set(line['Protein(s)'].split(';')),
                                      expected[line['Peptide sequence']]['pgroups'])
-                    self.assertEqual(
-                        set(line['Description(s)'].split(';')),
-                        set([y for x in
-                             expected[line['Peptide sequence']]['descriptions']
-                             for y in x.split(';')]))
-                    rescovs = sorted(line['Coverage(s)'].split(';'))
-                    expcovs = sorted(expected[line['Peptide sequence']]['cover'])
-                    for rescov, expcov in zip(rescovs, expcovs):
-                        self.assertAlmostEqual(float(rescov), expcov)
-                self.assertEqual(set(line['Gene ID(s)'].split(';')),
-                                 expected[line['Peptide sequence']]['genes'])
-                self.assertEqual(set(line['Gene name(s)'].split(';')),
-                                 expected[line['Peptide sequence']]['assoc'])
+                    if not nogroup:
+                        self.assertEqual(
+                            set(line['Description(s)'].split(';')),
+                            set([y for x in
+                                 expected[line['Peptide sequence']]['descriptions']
+                                 for y in x.split(';')]))
+                        rescovs = sorted(line['Coverage(s)'].split(';'))
+                        expcovs = sorted(expected[line['Peptide sequence']]['cover'])
+                        for rescov, expcov in zip(rescovs, expcovs):
+                            self.assertAlmostEqual(float(rescov), expcov)
+                if not nogroup:
+                    self.assertEqual(set(line['Gene ID(s)'].split(';')),
+                                     expected[line['Peptide sequence']]['genes'])
+                    self.assertEqual(set(line['Gene name(s)'].split(';')),
+                                     expected[line['Peptide sequence']]['assoc'])
 
 
 class TestProteinMerge(basetests.MergeTest):

@@ -38,6 +38,7 @@ class MergeDriver(base.PepProttableDriver):
                 self.header.extend([peph.HEADER_GENES, peph.HEADER_ASSOCIATED])
             elif self.nogroup:
                 self.lookuptype = 'peptidetableplain'
+                self.header.extend([peph.HEADER_PROTEINS])
             else:
                 self.header.extend([
                     peph.HEADER_PROTEINS, peph.HEADER_NO_CONTENTPROTEINS, peph.HEADER_DESCRIPTIONS,
