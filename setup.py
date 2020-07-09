@@ -21,7 +21,7 @@ CLASSIFIERS = [
 ]
 INSTALL_REQUIRES = ['numpy', 'lxml', 'biopython']
 METADATA = {
-    'version': '3.1',
+    'version': '3.2',
     'title': 'msstitch',
     'description': 'MS proteomics post processing utilities',
     'uri': 'https://github.com/glormph/msstitch',

@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.2] - 2020-07-09
+### Changed
+- `msstitch merge --no-group-annotation` does output a protein(s) column for whatever accession is in the DB
+
+### Fixed
+- Corrected typo in column to index on for ensg_proteins table (gene_id), which made merging ENSG very slow
+
+
 ## [3.1] - 2020-07-03
 ### Fixed
 - Quant lookup on consensusXML stored channels in wrong order when >10 channels eg in TMT16
