@@ -43,7 +43,7 @@ class PSMDB(ResultLookupInterface):
             'INSERT INTO ensg_proteins(gene_id, pacc_id) VALUES(?, ?)', ensg)
         self.conn.commit()
         self.index_column('ensg_p_ix', 'ensg_proteins', 'pacc_id')
-        self.index_column('ensg_ensg_ix', 'ensg_proteins', 'gn_id')
+        self.index_column('ensg_ensg_ix', 'ensg_proteins', 'gene_id')
 
         cursor = self.get_cursor()
         # symbols is list of sym/prot id, so unique the symbol ids and save
