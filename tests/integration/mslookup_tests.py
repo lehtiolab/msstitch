@@ -408,3 +408,9 @@ class TestSpecQuantLookup(basetests.MSLookupTest):
                 mz = (float(line[4]) + charge * PROTON_MASS) / charge
                 resval = feats[1][float(line[10])][mz][charge]
                 self.assertEqual(float(line[6]), resval)
+        # Now check we have a feature for all scans
+        sql = """SELECT m.scan_sid, ma.feature_id FROM mzml AS m
+        LEFT OUTER JOIN ms1_align AS ma USING(spectra_id)"""
+        for scan, featid in self.get_values_from_db(self.resultfn, sql):
+            print(scan, featid)
+            self.assertFalse(featid == None)
