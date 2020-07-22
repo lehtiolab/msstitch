@@ -21,7 +21,7 @@ def create_header(oldheader, genes, proteingroup, precursor, isob_header, bioset
     if proteingroup:
         header = header[:p_ix] + mzidtsvdata.HEADER_PG + header[p_ix:]
     if precursor:
-        header += [mzidtsvdata.HEADER_PRECURSOR_QUANT]
+        header += [mzidtsvdata.HEADER_PRECURSOR_QUANT, mzidtsvdata.HEADER_PRECURSOR_FWHM]
     if isob_header:
         header += isob_header
     psmdatafields = mzidtsvdata.MOREDATA_HEADER
@@ -490,10 +490,12 @@ def generate_psms_quanted(quantdb, psms, isob_header, isobaric=False, precursor=
     for rownr, psm in enumerate(psms):
         outpsm = {x: y for x, y in psm.items()}
         if precursor:
-            pquant = quant[sqlfields['precursor']]
-            if pquant is None:
-                pquant = 'NA'
-            outpsm.update({mzidtsvdata.HEADER_PRECURSOR_QUANT: str(pquant)})
+            pquant = [quant[sqlfields['precursor']], quant[sqlfields['fwhm']]]
+            pquant = ['NA' if x is None else x for x in pquant]
+            outpsm.update({
+                mzidtsvdata.HEADER_PRECURSOR_QUANT: str(pquant[0]),
+                mzidtsvdata.HEADER_PRECURSOR_FWHM: str(pquant[1]),
+                })
         if isobaric:
             isoquants = {}
             while quant[0] == rownr:

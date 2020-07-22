@@ -315,10 +315,13 @@ class PSMDB(ResultLookupInterface):
             sqlfields['isoquant'] = fieldcount + 1
             fieldcount += 2
         if precursor:
-            selects.extend(['pq.intensity'])
+            selects.extend(['pq.intensity', 'pfw.fwhm'])
             joins.extend(['LEFT OUTER JOIN ms1_align USING(spectra_id)',
-                          'LEFT OUTER JOIN ms1_quant AS pq USING(feature_id)'])
+                          'LEFT OUTER JOIN ms1_quant AS pq USING(feature_id)',
+                          'LEFT OUTER JOIN ms1_fwhm AS pfw USING(feature_id)',
+                          ])
             sqlfields['precursor'] = fieldcount
+            sqlfields['fwhm'] = fieldcount + 1
         if not precursor and not isobaric:
             raise RuntimeError('Cannot add quantification data, neither '
                                'isobaric, nor precursor have been specified.')
