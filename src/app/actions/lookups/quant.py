@@ -47,19 +47,22 @@ def create_precursor_quant_lookup(quantdb, mzmlfn_feats, quanttype,
                      'openms': openms_featparser,
                      'dinosaur': dinosaur_featparser,
                      }
-    features = []
+    features, fwhms = [], []
     mzmlmap = quantdb.get_mzmlfile_map()
     for specfn, feat_element in mzmlfn_feats:
         feat = featparsermap[quanttype](feat_element)
         features.append((mzmlmap[specfn], feat['rt'], feat['mz'],
                          feat['charge'], feat['intensity'])
                         )
+        fwhms.append(feat['fwhm'])
         if len(features) == DB_STORE_CHUNK:
-            quantdb.store_ms1_quants(features)
+            id_feats = quantdb.store_ms1_quants(features)
             if quanttype == 'dinosaur':
-                quantdb.store_fwhm(features)
-            features = []
-    quantdb.store_ms1_quants(features)
+                quantdb.store_fwhm(zip([x[0] for x in id_feats], fwhms))
+            features, fwhms = [], []
+    id_feats = quantdb.store_ms1_quants(features)
+    if quanttype == 'dinosaur':
+        quantdb.store_fwhm(zip([x[0] for x in id_feats], fwhms))
     quantdb.index_precursor_quants()
     align_quants_psms(quantdb, rttol, mztol, mztoltype)
 
@@ -139,17 +142,18 @@ def kronik_featparser(feature):
             'mz': mz,
             'charge': charge,
             'intensity': float(feature['Best Intensity']),
+            'fwhm': False,
             }
 
 
 def dinosaur_featparser(feature):
     # FIXME is kronik, change, add FWHM
-    charge = int(feature['Charge'])
-    mz = (float(feature['Monoisotopic Mass']) + charge * PROTON_MASS) / charge
-    return {'rt': round(float(feature['Best RTime']), 12),
-            'mz': mz,
-            'charge': charge,
-            'intensity': float(feature['Best Intensity']),
+    #mz = (float(feature['mz']) + charge * PROTON_MASS) / charge
+    return {'rt': round(float(feature['rtApex']), 12),
+            'mz': float(feature['mz']),
+            'charge': int(feature['charge']),
+            'intensity': float(feature['intensitySum']),
+            'fwhm': float(feature['fwhm']),
             }
 
 

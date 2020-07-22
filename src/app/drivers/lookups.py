@@ -65,7 +65,7 @@ class QuantLookupDriver(base.LookupDriver):
     def set_options(self):
         super().set_options()
         self.options.update(self.define_options([
-            'spectrafns', 'kronik', 'isobaric',
+            'spectrafns', 'kronik', 'dinosaur', 'isobaric',
             'rttol', 'mztol', 'mztoltype'], lookup_options))
 
     def parse_input(self, **kwargs):
@@ -74,11 +74,15 @@ class QuantLookupDriver(base.LookupDriver):
             self.tabletypes.append('isobaric')
         else:
             self.isobaricfns = False
-        if getattr(self, 'kronikfns') and len(self.kronikfns) > 0:
+        self.ms1type = False
+        if getattr(self, 'dinosaurfns') and len(self.dinosaurfns) > 0:
             self.tabletypes.append('ms1')
-        else:
-            self.kronikfns = False
-
+            self.ms1type = 'dinosaur'
+            self.ms1fns = self.dinosaurfns[:]
+        elif getattr(self, 'kronikfns') and len(self.kronikfns) > 0:
+            self.tabletypes.append('ms1')
+            self.ms1type = 'kronik'
+            self.ms1fns = self.kronikfns[:]
 
     def create_lookup(self):
         if self.isobaricfns:
@@ -87,11 +91,10 @@ class QuantLookupDriver(base.LookupDriver):
                     self.isobaricfns)
             quantlookups.create_isobaric_quant_lookup(self.lookup, mzmlfn_consxml, 
                     quantmap),
-        if self.kronikfns:
-            kronikfeats = tsvreader.mzmlfn_kronikfeature_generator(
-                self.spectrafns, self.kronikfns)
-            quantlookups.create_precursor_quant_lookup(self.lookup, kronikfeats,
-                'kronik', self.rt_tol, self.mz_tol, self.mz_toltype)
+        if self.ms1type:
+            ms1feats = tsvreader.mzmlfn_tsvfeature_generator(self.spectrafns, self.ms1fns)
+            quantlookups.create_precursor_quant_lookup(self.lookup, ms1feats,
+                    self.ms1type, self.rt_tol, self.mz_tol, self.mz_toltype)
 
 
 class SequenceLookupDriver(base.LookupDriver):

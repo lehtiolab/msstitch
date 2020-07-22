@@ -416,6 +416,17 @@ class DatabaseConnection(object):
         cursor.executemany(sql, values)
         self.conn.commit()
 
+    def store_many_return_id(self, sql, values):
+        """Abstraction over executemany method"""
+        id_values = []
+        cursor = self.get_cursor()
+        for rec in values:
+            cursor.execute(sql, rec)
+            recid = cursor.execute('SELECT last_insert_rowid()').fetchone()[0]
+            id_values.append([recid, *rec])
+        self.conn.commit()
+        return id_values
+
     def execute_sql(self, sql):
         """Executes SQL and returns cursor for it"""
         cursor = self.get_cursor()

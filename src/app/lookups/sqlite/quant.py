@@ -47,15 +47,15 @@ class QuantDB(ResultLookupInterface):
         return cursor
 
     def store_ms1_quants(self, quants):
-        self.store_many(
+        # Return feat IDs?
+        quants = self.store_many_return_id(
             'INSERT INTO ms1_quant(mzmlfile_id, retention_time, mz, '
             'charge, intensity) VALUES (?, ?, ?, ?, ?)', quants)
+        return quants
 
     def store_fwhm(self, quants):
         # FIXME get feature_id for all passed quants, possibly directly when storing them
-        self.store_many(
-            'INSERT INTO ms1_fwhm(fwhm) '
-            'charge, intensity) VALUES (?)', quants)
+        self.store_many('INSERT INTO ms1_fwhm(feature_id, fwhm) VALUES (?, ?)', quants)
 
     def store_ms1_alignments(self, aligns):
         self.store_many(

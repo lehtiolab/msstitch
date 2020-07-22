@@ -202,6 +202,12 @@ lookup_options = {
         'Multiple files can be specified, '
         'and matching order with spectra files is important.',
         },
+    'dinosaur': {'driverattr': 'dinosaurfns', 'clarg': '--dinosaur', 
+        'type': str, 'nargs': '+', 'required': False,
+        'help': 'MS1 quant output files from Kronik in text format.'
+        'Multiple files can be specified, '
+        'and matching order with spectra files is important.',
+        },
     'rttol': {'driverattr': 'rt_tol', 'dest': 'rttol', 'clarg': '--rttol',
         'conditional_required': ['kronik'], 'type': float, 
         'help': 'Specifies tolerance in seconds for '

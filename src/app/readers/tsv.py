@@ -29,17 +29,17 @@ def generate_tsv_pep_protein_quants(fns):
             yield os.path.basename(fn), header, pquant
 
 
-def generate_kronik_feats(fn):
+def generate_ms1_feats(fn):
     """Generates features from a Kronik output file"""
     header = get_tsv_header(fn)
     return generate_split_tsv_lines(fn, header)
 
 
-def mzmlfn_kronikfeature_generator(mzmlfns, kronikfns):
+def mzmlfn_tsvfeature_generator(mzmlfns, ms1fns):
     """Generates tuples of spectra filename and corresponding output
-    features from kronik"""
-    for mzmlfn, kronikfn in zip(mzmlfns, kronikfns):
-        for quant_el in generate_kronik_feats(kronikfn):
+    features from dinosaur/kronik"""
+    for mzmlfn, ms1fn in zip(mzmlfns, ms1fns):
+        for quant_el in generate_ms1_feats(ms1fn):
             yield os.path.basename(mzmlfn), quant_el
 
 
