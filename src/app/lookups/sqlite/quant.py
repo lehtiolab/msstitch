@@ -14,7 +14,7 @@ class QuantDB(ResultLookupInterface):
         return cursor.execute(
             'SELECT mz, feature_id, charge, retention_time '
             'FROM ms1_quant '
-            'WHERE mzmlfile_id=?', (fn_id,))
+            'WHERE mzmlfile_id=? ORDER BY mz', (fn_id,))
 
     def store_channelmap(self, channels):
         self.store_many(
