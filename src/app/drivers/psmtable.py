@@ -199,13 +199,12 @@ class IsoSummarizeDriver(PSMDriver):
 
     def set_options(self):
         super().set_options()
-        self.options.update(self.define_options(['quantcolpattern',
-                                                 'denompatterns', 'denomcols',
-                                                 'minint', 'targettable',
-                                                 'featcol', ],
+        self.options.update(self.define_options(['quantcolpattern', 'denompatterns',
+            'denomcols', 'mediansweep', 'medianintensity', 'minint', 'targettable', 'featcol', ],
                                                 psmtable_options))
 
     def set_features(self):
+        denomcols = False
         if self.denomcols is not None:
             denomcols = [self.number_to_headerfield(col, self.oldheader)
                          for col in self.denomcols]
@@ -213,7 +212,7 @@ class IsoSummarizeDriver(PSMDriver):
             denomcolnrs = [tsvreader.get_columns_by_pattern(self.oldheader, pattern)
                            for pattern in self.denompatterns]
             denomcols = set([col for cols in denomcolnrs for col in cols])
-        else:
+        elif not self.mediansweep and not self.medianintensity:
             raise RuntimeError('Must define either denominator column numbers '
                                'or regex pattterns to find them')
         quantcols = tsvreader.get_columns_by_pattern(self.oldheader,
@@ -234,5 +233,5 @@ class IsoSummarizeDriver(PSMDriver):
         elif self.featcol and not self.targettable:
             self.header = [prottabledata.HEADER_PROTEIN] + quantcols + nopsms
         self.psms = isosummarize.get_isobaric_ratios(self.fn, self.oldheader,
-                                             quantcols, denomcols, self.minint,
-                                             targetfeats, theader[0], self.featcol)
+                quantcols, denomcols, self.mediansweep, self.medianintensity,
+                self.minint, targetfeats, theader[0], self.featcol)

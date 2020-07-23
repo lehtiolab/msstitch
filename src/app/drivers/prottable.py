@@ -15,8 +15,8 @@ class ProttableDriver(PepProttableDriver):
     def set_options(self):
         super().set_options()
         options = self.define_options(['decoyfn', 'scorecolpattern', 'minlogscore',
-            'quantcolpattern', 'minint', 'denomcols', 'denompatterns', 
-            'precursor', 'psmfile'], prottable_options)
+            'quantcolpattern', 'minint', 'denomcols', 'denompatterns', 'mediansweep',
+            'medianintensity', 'precursor', 'psmfile'], prottable_options)
         self.options.update(options)
 
     def get_td_proteins_bestpep(self, theader, dheader):
@@ -39,6 +39,7 @@ class ProttableDriver(PepProttableDriver):
                     tpeps, self.headeraccfield, self.featcol)
         if self.quantcolpattern:
             psmheader = tsvreader.get_tsv_header(self.psmfile)
+            denomcols = False
             if self.denomcols is not None:
                 denomcols = [self.number_to_headerfield(col, psmheader)
                              for col in self.denomcols]
@@ -46,16 +47,16 @@ class ProttableDriver(PepProttableDriver):
                 denomcolnrs = [tsvreader.get_columns_by_pattern(psmheader, pattern)
                                for pattern in self.denompatterns]
                 denomcols = set([col for cols in denomcolnrs for col in cols])
-            else:
+            elif not self.mediansweep and not self.medianintensity:
                 raise RuntimeError('Must define either denominator column numbers '
-                                   'or regex pattterns to find them')
+                        'or regex pattterns to find them, or use median sweep, or '
+                        'report median intensities.')
             quantcols = tsvreader.get_columns_by_pattern(psmheader, self.quantcolpattern)
             nopsms = [isosummarize.get_no_psms_field(qf) for qf in quantcols]
             self.header = self.header + quantcols + nopsms
             features = isosummarize.get_isobaric_ratios(self.psmfile, psmheader,
-                                                 quantcols, denomcols, self.minint,
-                                                 features, self.headeraccfield,
-                                                 self.featcol, self.mediannormalize)
+                    quantcols, denomcols, self.mediansweep, self.medianintensity,
+                    self.minint, features, self.headeraccfield, self.featcol, self.mediannormalize)
         return features
 
 

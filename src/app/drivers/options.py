@@ -107,7 +107,8 @@ shared_options = {
         'SQLite file rather than tryptic sequences', 'required': False},
     'minint': {'driverattr': 'minint', 'clarg': '--minint', 'type': float,
                'help': 'Intensity threshold of PSMs when calculating '
-               'isobaric ratios. Values below threshold will be set to NA.',
+               'isobaric ratios. Values below threshold will be set to NA. '
+               'Defaults to no threshold.',
                'required': False, 'default': -1,
                },
     'denompatterns': {'driverattr': 'denompatterns', 'required': False,
@@ -126,6 +127,17 @@ shared_options = {
                   'creating a summarized feature table with isobaric ratios '
                   'from PSMs'
                   },
+    'mediansweep': {'driverattr': 'mediansweep', 'clarg': '--mediansweep',
+            'action': 'store_const', 'const': True, 'default': False,
+            'help': 'Instead of choosing a denominator channel, use the median intensity of each '
+            'PSM as its denominator.', 'required': False,
+            },
+    'medianintensity': {'driverattr': 'medianintensity', 'clarg': '--medianintensity',
+            'action': 'store_const', 'const': True, 'default': False,
+            'help': 'Instead of choosing a denominator channel or median-sweeping, '
+            'report the the median intensity of each summarized feat per channel. This '
+            'results in reported intensities rather than ratios.', 'required': False,
+            },
     'mediannormalize': {'driverattr': 'mediannormalize',
         'clarg': '--median-normalize', 'default': False, 
         'required': False, 'action': 'store_const', 'const': True,

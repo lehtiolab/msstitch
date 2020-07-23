@@ -9,17 +9,17 @@ from app.readers import tsv as reader
 ISOQUANTRATIO_FEAT_ACC = '##isoquant_target_acc##'
 
 
-def get_isobaric_ratios(psmfn, psmheader, channels, denom_channels, min_int,
-        targetfeats, target_acc_field, accessioncol, normalize=False):
+def get_isobaric_ratios(psmfn, psmheader, channels, denom_channels, sweep,
+        report_intensity, min_int, targetfeats, target_acc_field, accessioncol,
+        normalize=False):
     """Main function to calculate ratios for PSMs, peptides, proteins, genes.
     Can do simple ratios, median-of-ratios and median-centering
     normalization."""
     # FIXME median normalize should normalize on features, now it is on PSMs -> wrong
     # TODO:
     # - PSM ratios remove, normalize remove? if not, normalize on output, not PSMs
-    # - add func: Summarize intensity, not ratio to whatever specified column (stahl)
-    psm_or_feat_ratios = get_psmratios(psmfn, psmheader, channels,
-                                       denom_channels, min_int, accessioncol)
+    psm_or_feat_ratios = get_psmratios(psmfn, psmheader, channels, denom_channels,
+            sweep, report_intensity, min_int, accessioncol)
     if normalize:
         flatratios = [[feat[ch] for ch in channels]
                       for feat in psm_or_feat_ratios]
@@ -42,10 +42,10 @@ def get_isobaric_ratios(psmfn, psmheader, channels, denom_channels, min_int,
                  for k, v in ratio.items()} for ratio in outratios)
 
 
-def get_psmratios(psmfn, header, channels, denom_channels, min_int, acc_col):
+def get_psmratios(psmfn, header, channels, denom_channels, sweep, report_intensity, min_int, acc_col):
     allfeats, feat_order, psmratios = {}, OrderedDict(), []
     for psm in reader.generate_tsv_psms(psmfn, header):
-        ratios = calc_psm_ratios(psm, channels, denom_channels, min_int)
+        ratios = calc_psm_ratios_or_int(psm, channels, denom_channels, sweep, report_intensity, min_int)
         # remove uninformative psms when adding to features
         if acc_col and (psm[acc_col] == '' or ';' in psm[acc_col] or
                         not {psm[q] for q in channels}.difference(
@@ -104,15 +104,22 @@ def output_to_targetfeats(targetfeats, acc_field, featratios, channels):
         yield feat
 
 
-def calc_psm_ratios(psm, channels, denom_channels, min_intensity):
+def calc_psm_ratios_or_int(psm, channels, denom_channels, sweep, report_intensity, min_intensity):
     # set values below min_intensity to NA
     psm_intensity = {ch: float(psm[ch])
                      if psm[ch] != 'NA' and float(psm[ch]) > min_intensity
                      else 'NA' for ch in channels}
-    denomvalues = [psm_intensity[ch] for ch in denom_channels
-                   if psm_intensity[ch] != 'NA']
+    if denom_channels:
+        denomvalues = [psm_intensity[ch] for ch in denom_channels
+                       if psm_intensity[ch] != 'NA']
+    elif sweep:
+        denomvalues = [median([x for x in psm_intensity.values() if x != 'NA'])]
+    elif report_intensity:
+        # Just report intensity
+        return [psm_intensity[ch] if psm_intensity[ch] != 'NA' else 'NA' for ch in channels]
     if sum(denomvalues) == 0 or len(denomvalues) == 0:
         return ['NA'] * len(channels)
+    # TODO add median instead of average
     denom = sum(denomvalues) / len(denomvalues)
     return [psm_intensity[ch] / denom
             if psm_intensity[ch] != 'NA' else 'NA' for ch in channels]
