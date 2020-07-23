@@ -68,9 +68,9 @@ shared_options = {
                            'accession column in table containing quant info.'},
     'featcol': {'driverattr': 'featcol', 'clarg': '--featcol',
                    'type': int, 'required': False, 'help': 'Column number in '
-                   'table in which protein or gene accessions are. '
+                   'table in which desired accessions are. '
                    'stored. First column number is 1. Use in case of not '
-                   'using standard {} column'},
+                   'using default column {}'},
     'featcolpattern': {'driverattr': 'featcolpattern', 'clarg': '--featcolpattern',
                     'type': str, 'required': False, 'help': 'Text pattern to '
                     'identify column in table in which protein or gene '
@@ -246,11 +246,11 @@ lookup_options = {
                         'help': 'Unique text pattern to identify '
                         'number-of-psms column in input table.'},
 }
-lookup_options['featcol'] = {k: v for k, v
-                                  in shared_options['featcol'].items()}
+lookup_options['featcol'] = {k: v for k, v 
+        in shared_options['featcol'].items()}
 lookup_options['featcol'].update(
-    {'default': 1, 'help':
-     lookup_options['featcol']['help'].format('first')})
+        {'default': 1, 'help': lookup_options['featcol']['help'].format('1')})
+
 lookup_options['fasta'] = {k: v for k, v in shared_options['fasta'].items()}
 lookup_options['fasta']['help'] = ('FASTA sequence database to use when '
                                      'extracting gene names to the PSM '
@@ -329,13 +329,6 @@ psmtable_options = {
                    'in the input will be adjusted using those factors rather '
                    'than factors derived from solely their own quantification '
                    'data', 'type': 'file', 'required': False},
-    'targettable': {'driverattr': 'targettable', 'clarg': '--targettable',
-                    'help': 'Table to output PSM or other feature quant data '
-                    'to. Used when calculating PSM isobaric intenstity ratios '
-                    'for proteins, peptides, genes. Leaving empty will output '
-                    'to a new table, or when no --featcol is specified, '
-                    'pastes ratios to the PSM table they are fetched from.',
-                    'type': 'file', 'required': False},
     'percofn': {'driverattr': 'percofn', 'clarg': '--perco', 'help': 'Percolator '
         'XML output file', 'type': 'file'},
     'mzidfns': {'driverattr': 'mzidfns', 'clarg': '--mzids', 'help': 'MzIdentML '
@@ -351,6 +344,13 @@ psmtable_options = {
 psmtable_options['quantcolpattern'] = {
     k: v for k, v in shared_options['quantcolpattern'].items()}
 psmtable_options['quantcolpattern']['required'] = True
+psmtable_options['featcol'] = {k: v for k, v 
+        in shared_options['featcol'].items()}
+psmtable_options['featcol'].update(
+        {'help': 'Column number in table in which desired '
+        'accessions to summarize are stored. First column number is 1. If not '
+        'specified this will summarize to PSMs themselves, i.e. only calculate '
+        'the ratios and add those to the PSM table.'})
 
 pepprottable_options = {
     # a mock infile to make sure we don't show or need an infile, e.g. in

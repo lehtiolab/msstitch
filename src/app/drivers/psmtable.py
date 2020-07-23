@@ -200,7 +200,7 @@ class IsoSummarizeDriver(PSMDriver):
     def set_options(self):
         super().set_options()
         self.options.update(self.define_options(['quantcolpattern', 'denompatterns',
-            'denomcols', 'mediansweep', 'medianintensity', 'minint', 'targettable', 'featcol', ],
+            'denomcols', 'mediansweep', 'medianintensity', 'minint', 'featcol'],
                                                 psmtable_options))
 
     def set_features(self):
@@ -221,17 +221,10 @@ class IsoSummarizeDriver(PSMDriver):
         targetfeats, theader = False, [False]
         if self.featcol:
             self.get_column_header_for_number(['featcol'], self.oldheader)
-        if self.featcol and self.targettable:
-            # FIXME deprecate this. use only for developing targetfeats instead of targettable
-            # because test already in place
-            theader = tsvreader.get_tsv_header(self.targettable)
-            targetfeats = tsvreader.generate_tsv_proteins(self.targettable, theader)
-            self.header = theader + quantcols + nopsms
-        elif not self.featcol and not self.targettable:
+            self.header = [self.featcol] + quantcols + nopsms
+        else:
             self.header = (self.oldheader +
                            ['ratio_{}'.format(x) for x in quantcols])
-        elif self.featcol and not self.targettable:
-            self.header = [prottabledata.HEADER_PROTEIN] + quantcols + nopsms
         self.psms = isosummarize.get_isobaric_ratios(self.fn, self.oldheader,
                 quantcols, denomcols, self.mediansweep, self.medianintensity,
                 self.minint, targetfeats, theader[0], self.featcol)

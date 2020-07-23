@@ -37,8 +37,7 @@ def get_isobaric_ratios(psmfn, psmheader, channels, denom_channels, sweep,
         return paste_to_psmtable(psmfn, psmheader, outratios)
     elif accessioncol and not targetfeats:
         # generate new table with accessions
-        return ({(k if not k == ISOQUANTRATIO_FEAT_ACC
-                  else prottabledata.HEADER_PROTEIN): v
+        return ({(k if not k == ISOQUANTRATIO_FEAT_ACC else accessioncol): v
                  for k, v in ratio.items()} for ratio in outratios)
 
 
