@@ -434,9 +434,12 @@ class TestConffiltTSV(basetests.MzidTSVBaseTest):
 
 class TestIso(basetests.MzidTSVBaseTest):
 
-    def get_denominator(self, line, denom_ch):
-        denomvals = [float(line[ch]) for ch in denom_ch if line[ch] != 'NA']
-        return sum(denomvals) / len(denomvals)
+    def get_denominator(self, line, method, denom_ch):
+        if method == 'denoms':
+            denomvals = [float(line[ch]) for ch in denom_ch if line[ch] != 'NA']
+            return sum(denomvals) / len(denomvals)
+        elif method == 'sweep':
+            return median([float(line[ch]) for ch in line.keys() if line[ch] != 'NA'])
 
     def get_infile_lines(self, infile=None):
         if infile is None:
@@ -472,7 +475,7 @@ class TestIso(basetests.MzidTSVBaseTest):
         return ch_medians
 
     def do_check(self, minint, stdout, normalize=False, medianpsms=None,
-                 resultch=False):
+                 ratiomethod='denoms', resultch=False):
         channels = ['tmt10plex_126'] + [x.format('tmt10plex_1', y+27) for x in ['{}{}C', '{}{}N'] for y in range(4)] + ['tmt10plex_131']
         resultch = ['ratio_{}'.format(x) for x in channels]
         denom_ch = [channels[0], channels[-1]]
@@ -487,7 +490,7 @@ class TestIso(basetests.MzidTSVBaseTest):
                             float(in_line[ch]) > minint else 'NA'
                             for ch in channels})
             resultline = [x[2] for x in resultline]
-            denom = self.get_denominator(in_line, denom_ch)
+            denom = self.get_denominator({ch: in_line[ch] for ch in channels}, ratiomethod, denom_ch)
             if denom == 0:
                 exp_line = ['NA'] * len(channels)
             elif normalize:
@@ -502,12 +505,14 @@ class TestIso(basetests.MzidTSVBaseTest):
 
 
 class TestIsoSummarize(TestIso):
-    # FIXME no targettable,  Isosum tests should be redone
-    # isosummarizing is currently part of the msstitch proteins/genes/peptides
-    # functionality
     suffix = '_ratio_isobaric.txt'
     command = 'isosummarize'
     infilename = 'target_pg.tsv'
+
+    def test_mediansweep(self):
+        result = self.run_command(['--isobquantcolpattern', 'plex',
+            '--mediansweep'])
+        self.do_check(0, result.stdout, ratiomethod='sweep')
 
     def test_denomcolpattern(self):
         result = self.run_command(['--isobquantcolpattern', 'plex',
@@ -522,7 +527,7 @@ class TestIsoSummarize(TestIso):
 
 class TestIsoFeatSummarize(TestIso):
     # FIXME normalizing should be changed to normalize on features columns, 
-    # not on PSM columns! This test is currenyly broken
+    # not on PSM columns! The normalization test is currenyly broken
     suffix = '_ratio_isobaric.txt'
     command = 'isosummarize'
     infilename = 'target_pg.tsv'
@@ -532,18 +537,16 @@ class TestIsoFeatSummarize(TestIso):
                                                    '131']]
     nopsms = ['{} - # quanted PSMs'.format(ch) for ch in channels]
 
+    def test_isoquant(self):
+        options = ['--featcol', '14', '--isobquantcolpattern', 'tmt10plex',
+                   '--denompatterns', '_126']
+        self.run_command(options)
+        self.isoquant_check(os.path.join(self.fixdir, 'proteins_quantonly.txt'),
+            'Master protein(s)', self.channels, self.nopsms)
+
     def test_normalized_isoquant(self):
         options = ['--featcol', '11', '--isobquantcolpattern', 'tmt10plex',
                    '--denompatterns', '_126', '--median-normalize']
         self.run_command(options)
         self.isoquant_check(os.path.join(self.fixdir, 'proteins_normquant'),
             'Protein ID', self.channels, self.nopsms)
-
-    def test_normalized_targettable_isoquant(self):
-        prottable_targettable = os.path.join(self.fixdir, 'target_proteins')
-        options = ['--featcol', '11', '--isobquantcolpattern', 'tmt10plex',
-                   '--denompatterns', '_126', '--median-normalize',
-                   '--targettable', prottable_targettable]
-        self.run_command(options)
-        self.isoquant_check(os.path.join(self.fixdir, 'proteins_normquant'),
-                'Protein ID', self.channels, self.nopsms)

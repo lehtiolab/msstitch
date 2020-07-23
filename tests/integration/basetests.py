@@ -281,11 +281,17 @@ class ProttableTest(BaseTest):
             except ValueError:
                 self.assertNotIn(protein['Protein ID'], top_ms1)
 
-    def dotest_proteintable(self, scorecolpat, featkey, featout):
+    def dotest_proteintable(self, scorecolpat, featkey, featout, summarize_method='denoms'):
+        if summarize_method == 'denoms':
+            summ = ['--denompatterns', '126']
+        elif summarize_method == 'sweep':
+            summ = ['--mediansweep']
+        elif summarize_method == 'intensity':
+            summ = ['--medianintensity']
         options = ['--scorecolpattern', scorecolpat,
                 '--logscore', '--decoyfn', self.decoyfn, '--ms1quant',
-                '--isobquantcolpattern', 'plex', '--denompatterns', '126',
-                '--psmtable', self.psmfile
+                '--isobquantcolpattern', 'plex',
+                *summ, '--psmtable', self.psmfile
                 ] + self.specialoptions
         self.run_command(options)
         self.check_ms1(featkey, featout)

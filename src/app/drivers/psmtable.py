@@ -218,7 +218,6 @@ class IsoSummarizeDriver(PSMDriver):
         quantcols = tsvreader.get_columns_by_pattern(self.oldheader,
                                                self.quantcolpattern)
         nopsms = [isosummarize.get_no_psms_field(qf) for qf in quantcols]
-        targetfeats, theader = False, [False]
         if self.featcol:
             self.get_column_header_for_number(['featcol'], self.oldheader)
             self.header = [self.featcol] + quantcols + nopsms
@@ -227,4 +226,4 @@ class IsoSummarizeDriver(PSMDriver):
                            ['ratio_{}'.format(x) for x in quantcols])
         self.psms = isosummarize.get_isobaric_ratios(self.fn, self.oldheader,
                 quantcols, denomcols, self.mediansweep, self.medianintensity,
-                self.minint, targetfeats, theader[0], self.featcol)
+                self.minint, False, False, self.featcol)
