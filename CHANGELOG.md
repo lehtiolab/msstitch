@@ -1,5 +1,17 @@
 # Changelog
 
+
+## [3.3] - 2020-07-24
+### Changed
+- Added `--dinosaur` to store results from MS1 quant using dinosaur, include FWHM data
+- Added median-intensity (i.e. not ratio) summarization to `isosummarize` and `proteins` etc
+- Choose between MS1 apex and MS1 sum for quantification
+- Choose between median and average when summarizing isobaric PSM data
+
+### Fixed
+- Bug in MS1 feat to PSM scan aligment, `ORDER BY` had been removed in `9717325837853de159ede5e77191b0c7de032820`
+
+
 ## [3.2] - 2020-07-09
 ### Changed
 - `msstitch merge --no-group-annotation` does output a protein(s) column for whatever accession is in the DB

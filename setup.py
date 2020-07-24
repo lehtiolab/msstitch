@@ -13,18 +13,17 @@ CLASSIFIERS = [
     'Operating System :: OS Independent',
     'Programming Language :: Python',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.3',
-    'Programming Language :: Python :: 3.4',
-    'Programming Language :: Python :: 3.5',
+    'Programming Language :: Python :: 3.7',
+    'Programming Language :: Python :: 3.8',
     'Programming Language :: Python :: Implementation :: CPython',
     'Topic :: Scientific/Engineering :: Bio-Informatics',
 ]
 INSTALL_REQUIRES = ['numpy', 'lxml', 'biopython']
 METADATA = {
-    'version': '3.2',
+    'version': '3.3',
     'title': 'msstitch',
     'description': 'MS proteomics post processing utilities',
-    'uri': 'https://github.com/glormph/msstitch',
+    'uri': 'https://github.com/lehtiolab/msstitch',
     'author': 'Jorrit Boekel',
     'email': 'jorrit.boekel@scilifelab.se',
     'license': 'MIT',
