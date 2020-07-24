@@ -16,7 +16,7 @@ class ProttableDriver(PepProttableDriver):
         super().set_options()
         options = self.define_options(['decoyfn', 'scorecolpattern', 'minlogscore',
             'quantcolpattern', 'minint', 'denomcols', 'denompatterns', 'mediansweep',
-            'medianintensity', 'precursor', 'psmfile'], prottable_options)
+            'medianintensity', 'median_or_avg', 'precursor', 'psmfile'], prottable_options)
         self.options.update(options)
 
     def get_td_proteins_bestpep(self, theader, dheader):
@@ -56,7 +56,8 @@ class ProttableDriver(PepProttableDriver):
             self.header = self.header + quantcols + nopsms
             features = isosummarize.get_isobaric_ratios(self.psmfile, psmheader,
                     quantcols, denomcols, self.mediansweep, self.medianintensity,
-                    self.minint, features, self.headeraccfield, self.featcol, self.mediannormalize)
+                    self.median_or_avg, self.minint, features, self.headeraccfield,
+                    self.featcol, self.mediannormalize)
         return features
 
 

@@ -101,6 +101,20 @@ class TestPSM2Peptable(basetests.BaseTest):
         self.isoquant_check(os.path.join(self.fixdir, 'target_peptides.tsv'),
                 'Peptide sequence', self.channels, self.nopsms)
 
+    def test_average_summarizing(self):
+        options = ['--isobquantcolpattern', 'tmt10plex',
+                '--scorecolpattern', 'svm',
+                   '--denompatterns', '126',
+                   '--summarize-average',
+                   '--ms1quantcolpattern', 'MS1', 
+                   '--modelqvals', '--qvalthreshold', '1e-5',
+                   '--minpepnr', str(4),
+                   ]
+        self.run_command(options)
+        self.check(1)
+        self.isoquant_check(os.path.join(self.fixdir, 'target_peptides.tsv'),
+                'Peptide sequence', self.channels, self.nopsms)
+
     def test_no_spectracol_mediansweep(self):
         options = ['--isobquantcolpattern', 'tmt10plex',
                 '--scorecolpattern', 'svm',
@@ -129,6 +143,12 @@ class TestProteinTable(basetests.ProttableTest):
         self.specialoptions = []
         self.dotest_proteintable('^q-value', 'Master protein(s)', 'Protein ID', summarize_method='sweep')
         expectedfn = os.path.join(self.fixdir, 'proteins_sweep.txt')
+        self.check_lines(expectedfn, self.resultfn)
+
+    def test_average_summarizing(self):
+        self.specialoptions = ['--summarize-average']
+        self.dotest_proteintable('^q-value', 'Master protein(s)', 'Protein ID')
+        expectedfn = os.path.join(self.fixdir, 'proteins.txt')
         self.check_lines(expectedfn, self.resultfn)
 
     def test_no_denom_but_intensity(self):

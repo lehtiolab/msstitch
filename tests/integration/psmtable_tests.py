@@ -519,6 +519,11 @@ class TestIsoSummarize(TestIso):
             '--denompatterns', '_126', '_131'])
         self.do_check(0, result.stdout)
 
+    def test_summarize_avg(self):
+        result = self.run_command(['--isobquantcolpattern', 'plex',
+            '--denompatterns', '_126', '_131', '--summarize-average'])
+        self.do_check(0, result.stdout)
+
     def test_denomcolpattern_regex(self):
         result = self.run_command(['--isobquantcolpattern', 'plex', 
             '--denompatterns', '_1[23][61]'])

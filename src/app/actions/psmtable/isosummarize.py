@@ -10,7 +10,7 @@ ISOQUANTRATIO_FEAT_ACC = '##isoquant_target_acc##'
 
 
 def get_isobaric_ratios(psmfn, psmheader, channels, denom_channels, sweep,
-        report_intensity, min_int, targetfeats, target_acc_field, accessioncol,
+        report_intensity, summarize_by, min_int, targetfeats, target_acc_field, accessioncol,
         normalize=False):
     """Main function to calculate ratios for PSMs, peptides, proteins, genes.
     Can do simple ratios, median-of-ratios and median-centering
@@ -19,7 +19,7 @@ def get_isobaric_ratios(psmfn, psmheader, channels, denom_channels, sweep,
     # TODO:
     # - PSM ratios remove, normalize remove? if not, normalize on output, not PSMs
     psm_or_feat_ratios = get_psmratios(psmfn, psmheader, channels, denom_channels,
-            sweep, report_intensity, min_int, accessioncol)
+            sweep, report_intensity, summarize_by, min_int, accessioncol)
     if normalize:
         flatratios = [[feat[ch] for ch in channels]
                       for feat in psm_or_feat_ratios]
@@ -41,7 +41,8 @@ def get_isobaric_ratios(psmfn, psmheader, channels, denom_channels, sweep,
                  for k, v in ratio.items()} for ratio in outratios)
 
 
-def get_psmratios(psmfn, header, channels, denom_channels, sweep, report_intensity, min_int, acc_col):
+def get_psmratios(psmfn, header, channels, denom_channels, sweep,
+        report_intensity, summarize_by, min_int, acc_col):
     allfeats, feat_order, psmratios = {}, OrderedDict(), []
     for psm in reader.generate_tsv_psms(psmfn, header):
         ratios = calc_psm_ratios_or_int(psm, channels, denom_channels, sweep, report_intensity, min_int)
@@ -68,7 +69,10 @@ def get_psmratios(psmfn, header, channels, denom_channels, sweep, report_intensi
         for feat in feat_order.keys():
             quants = allfeats[feat]
             outfeature = {ISOQUANTRATIO_FEAT_ACC: feat}
-            outfeature.update(get_medians(channels, quants))
+            if summarize_by == 'median':
+                outfeature.update(get_medians(channels, quants))
+            elif summarize_by == 'average':
+                outfeature.update(summarize_by_averages(channels, quants))
             outfeature.update(get_no_psms(channels, quants))
             outfeatures.append(outfeature)
     return outfeatures
@@ -122,6 +126,18 @@ def calc_psm_ratios_or_int(psm, channels, denom_channels, sweep, report_intensit
     denom = sum(denomvalues) / len(denomvalues)
     return [psm_intensity[ch] / denom
             if psm_intensity[ch] != 'NA' else 'NA' for ch in channels]
+
+
+def summarize_by_averages(channels, ratios):
+    ch_avgs = {}
+    for ix, channel in enumerate(channels):
+        vals = [x[ix] for x in ratios if x[ix] != 'NA']
+        try:
+            ch_avgs[channel] = sum(vals) / len(vals)
+        except ZeroDivisionError:
+            # channel is empty
+            ch_avgs[channel] = 'NA'
+    return ch_avgs
 
 
 def get_medians(channels, ratios, report=False):

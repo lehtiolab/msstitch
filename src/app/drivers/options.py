@@ -138,6 +138,10 @@ shared_options = {
             'report the the median intensity of each summarized feat per channel. This '
             'results in reported intensities rather than ratios.', 'required': False,
             },
+    'median_or_avg': {'driverattr': 'median_or_avg', 'clarg': '--summarize-average',
+            'action': 'store_const', 'const': 'average', 'default': 'median',
+            'required': False, 'help': 'Use average isobaric quantification values for summarizing '
+            'quant from PSMs, instead of PSM median values'},
     'mediannormalize': {'driverattr': 'mediannormalize',
         'clarg': '--median-normalize', 'default': False, 
         'required': False, 'action': 'store_const', 'const': True,
