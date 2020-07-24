@@ -335,12 +335,14 @@ class TestSpecQuantLookup(basetests.MSLookupTest):
     infilename = ''
     isoinfilename = 'few_spectra.consXML'
     krinfilename = 'few_spectra.kr'
+    dinoinfilename = 'few_spectra.dino'
     base_db_fn = 'spectra_lookup.sqlite'
 
     def setUp(self):
         super().setUp()
         self.isoinfile = os.path.join(self.fixdir, self.isoinfilename)
         self.krfile = os.path.join(self.fixdir, self.krinfilename)
+        self.dinofile = os.path.join(self.fixdir, self.dinoinfilename)
 
     def get_std_options(self):
         return [self.executable, self.command]
@@ -380,37 +382,78 @@ class TestSpecQuantLookup(basetests.MSLookupTest):
         self.check_quantmap()
         self.check_quantification()
 
+    def test_dinosaur(self):
+        self.fakespfn = os.path.join(self.workdir, 'few_spectra.mzML')
+        options = ['--dinosaur', self.dinofile, '--rttol', '5', '--mztol', '20',
+                   '--mztoltype', 'ppm', '--spectra', self.fakespfn]
+        self.run_command(options)
+        self.check_ms1_feats_stored(self.dinofile, 'dino', 'sum')
+
+    def test_dinosaur_apex(self):
+        self.fakespfn = os.path.join(self.workdir, 'few_spectra.mzML')
+        options = ['--dinosaur', self.dinofile, '--rttol', '5', '--mztol', '20',
+                   '--apex', '--mztoltype', 'ppm', '--spectra', self.fakespfn]
+        self.run_command(options)
+        self.check_ms1_feats_stored(self.dinofile, 'dino', 'apex')
+
     def test_kronik(self):
         self.fakespfn = os.path.join(self.workdir, 'few_spectra.mzML')
         options = ['--kronik', self.krfile, '--rttol', '5', '--mztol', '20',
                    '--mztoltype', 'ppm', '--spectra', self.fakespfn]
         self.run_command(options)
-        self.check_kronik_feats_stored()
+        self.check_ms1_feats_stored(self.krfile, 'kr', 'sum')
 
-    def check_kronik_feats_stored(self):
+    def test_kronik_apex(self):
+        self.fakespfn = os.path.join(self.workdir, 'few_spectra.mzML')
+        options = ['--kronik', self.krfile, '--rttol', '5', '--mztol', '20',
+                   '--apex', '--mztoltype', 'ppm', '--spectra', self.fakespfn]
+        self.run_command(options)
+        self.check_ms1_feats_stored(self.krfile, 'kr', 'apex')
+
+    def check_ms1_feats_stored(self, ms1file, feattype, intkey):
         PROTON_MASS = 1.0072
-        sql = ('SELECT * FROM ms1_quant')
+        sql = ('SELECT count(*) FROM ms1_quant LEFT OUTER JOIN ms1_fwhm USING(feature_id)')
+        recs = self.get_values_from_db(self.resultfn, sql)
+        sql = ('SELECT * FROM ms1_quant LEFT OUTER JOIN ms1_fwhm USING(feature_id)')
         feats = {1: {}}
-        for recid, fnid, rt, mz, charge, val in self.get_values_from_db(
+        for recid, fnid, rt, mz, charge, val, fwhm in self.get_values_from_db(
                 self.resultfn, sql):
             try:
-                feats[fnid][rt][mz][charge] = val
+                feats[fnid][rt][mz][charge] = (val, fwhm)
             except KeyError:
                 try:
-                    feats[fnid][rt][mz] = {charge: val}
+                    feats[fnid][rt][mz] = {charge: (val, fwhm)}
                 except KeyError:
-                    feats[fnid][rt] = {mz: {charge: val}}
-        with open(self.krfile) as fp:
-            next(fp).strip().split('\t')
+                    feats[fnid][rt] = {mz: {charge: (val, fwhm)}}
+        fields = {
+                'dino': {
+                    'charge': 'charge',
+                    'rt': 'rtApex',
+                    'intensity': {'sum': 'intensitySum', 
+                        'apex': 'intensityApex'}[intkey]
+                    },
+                'kr': {
+                    'charge': 'Charge',
+                    'rt': 'Best RTime',
+                    'intensity': {'sum': 'Summed Intensity', 
+                        'apex': 'Best Intensity'}[intkey]
+                    },
+                }[feattype]
+        with open(ms1file) as fp:
+            header = next(fp).strip().split('\t')
             for line in fp:
-                line = line.strip('\n').split('\t')
-                charge = float(line[3])
-                mz = (float(line[4]) + charge * PROTON_MASS) / charge
-                resval = feats[1][float(line[10])][mz][charge]
-                self.assertEqual(float(line[6]), resval)
+                line = {k: v for k, v in zip(header, line.strip('\n').split('\t'))}
+                charge = float(line[fields['charge']])
+                if feattype == 'kr':
+                    line['fwhm'] = None
+                    mz = (float(line['Monoisotopic Mass']) + charge * PROTON_MASS) / charge
+                else:
+                    mz = float(line['mz'])
+                resval = feats[1][round(float(line[fields['rt']]), 12)][mz][charge]
+                fwhm = float(line['fwhm']) if line['fwhm'] else None
+                self.assertEqual((float(line[fields['intensity']]), fwhm), resval)
         # Now check we have a feature for all scans
         sql = """SELECT m.scan_sid, ma.feature_id FROM mzml AS m
         LEFT OUTER JOIN ms1_align AS ma USING(spectra_id)"""
         for scan, featid in self.get_values_from_db(self.resultfn, sql):
-            print(scan, featid)
             self.assertFalse(featid == None)
