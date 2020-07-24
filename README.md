@@ -1,14 +1,14 @@
 # msstitch - MS proteomics post-processing utilities
 
 Shotgun proteomics has a number of bioinformatic tools available for identification 
-and quantification of peptides, and the subsequent protein inference. These are a
-collection of scripts to integrate a number of these tools, generating
-ready to use result files.
+and quantification of peptides, and the subsequent protein inference. `msstitch` is a 
+tool to integrate a number of these tools, generating ready to use result files.
 
-If you need support for a specific tool, there is limited time but infinite gratitude :)
+If you need support for a specific program, there is limited time but infinite gratitude :)
 
 ## Usage
 
+### Storing data
 An example command flow would first store mzML spectra data in an SQLite file:
 
 ```
@@ -16,15 +16,23 @@ msstitch storespectra --spectra file1.mzML file2.mzML \
   --setnames sampleset1 sampleset2 -o db.sqlite
 ```
 
-Or, in case the lookup with some other spectra already exists:
+Or, to add spectra to an existing SQLite lookup:
 
 ```
-msstitch storespectra --dbfile lookup.sqlite --spectra file1.mzML file2.mzML \
-  --setnames sampleset1 sampleset2
+msstitch storespectra --dbfile lookup.sqlite --spectra file3.mzML file4.mzML \
+  --setnames sampleset2 sampleset3
 ```
 
-Then store quantification data from kronik (MS1 precursor quant) and isobaric 
+Then store quantification data from dinosaur (MS1 precursor quant) and isobaric 
 quantification from OpenMS together with the spectra:
+
+```
+msstitch storequant --dbfile db.sqlite --spectra file1.mzML file2.mzML \
+  --dinosaur file1.dinosaur file2.dinosaur \
+  --isobaric file1.consensusXML file2.consensusXML
+```
+
+When using Hardklor/Kronik instead of Dinosaur, you can instead use:
 
 ```
 msstitch storequant --dbfile db.sqlite --spectra file1.mzML file2.mzML \
@@ -32,6 +40,12 @@ msstitch storequant --dbfile db.sqlite --spectra file1.mzML file2.mzML \
   --isobaric file1.consensusXML file2.consensusXML
 ```
 
+For both Dinosaur and Kronik, the MS1 peak sum is used which theoretically would be more correct
+when having differently shaped envelopes. If you'd rather use the envelope apex, pass `--apex`
+in the above command.
+
+
+### Handling MS search engines
 Create a decoy database where peptides are reversed between tryptic residues:
 
 ```
@@ -81,6 +95,7 @@ protein/peptide tables:
 msstitch split -i target_psmtable.txt --splitcol bioset
 ```
 
+### Summarizing PSMs
 Create a peptide table, with summarized median isobaric quant ratios,
 highest MS1 intensity PSM as the peptide MS1 quant intensity, and an additional
 linear-modeled q-value column:
@@ -91,35 +106,60 @@ msstitch peptides -i set1_target_psms.txt -o set1_target_peptides.txt \
   --isobquantcolpattern tmt10plex --denompatterns _126 _127C 
 ```
 
+The same peptide table can also be made using median sweeping, which takes the median
+intensity channel for each PSM as a denominator:
+
+```
+msstitch peptides -i set1_target_psms.txt -o set1_target_peptides.txt \
+  --scorecolpattern svm --modelqvals --ms1quant \
+  --isobquantcolpattern tmt10plex --mediansweep
+```
+
+Or, if you only want the median PSM intensity per peptide summarized, use `--medianintensity`
+
+```
+msstitch peptides -i set1_target_psms.txt -o set1_target_peptides.txt \
+  --scorecolpattern svm --modelqvals --ms1quant \
+  --isobquantcolpattern tmt10plex --medianintensity
+```
+
+
 Create a protein table, with isobaric quantification as for peptides, the
 average of the top-3 highest intensity peptides for MS1 quantification:
+For all of these, summarizing isobaric PSM data to peptide, protein, gene features 
+is done using median PSM quantification values per feature (e.g. a protein). If you'd
+rather use averages, use `--summarize-average` as below:
 
 ```
 msstitch proteins -i set1_target_peptides.txt --decoyfn set1_decoy_peptides \
+  --psmtable set1_target_psms.txt \
   -o set1_proteins.txt \
   --scorecolpattern '^q-value' --logscore \
   --ms1quant \
-  --isobquantcolpattern tmt10plex --denompatterns _126 _127C 
+  --isobquantcolpattern tmt10plex --denompatterns _126 _127C \
+  --summarize-average
 ```
 
-Or the analogous process for genes
+Or the analogous process for genes, using median sweeping to get intensity ratios instead of denominators:
 
 ```
 msstitch genes -i set1_target_peptides.txt --decoyfn set1_decoy_peptides \
+  --psmtable set1_target_psms.txt \
   -o set1_genes.txt \
   --scorecolpattern '^q-value' --logscore \
   --ms1quant \
-  --isobquantcolpattern tmt10plex --denompatterns _126 _127C 
+  --isobquantcolpattern tmt10plex --mediansweep
 ```
 
-Or when there are ENSEMBL entries in the fasta search database, even for ENSG:
+Or when there are ENSEMBL entries in the fasta search database, even for ENSG, here with summarized median PSM intensity per ENSG:
 
 ```
 msstitch ensg -i set1_target_peptides.txt --decoyfn set1_decoy_peptides \
+  --psmtable set1_target_psms.txt \
   -o set1_ensg.txt \
   --scorecolpattern '^q-value' --logscore \
   --ms1quant \
-  --isobquantcolpattern tmt10plex --denompatterns _126 _127C 
+  --isobquantcolpattern tmt10plex --medianintensity
 ```
 
 Finally, merge multiple sets of proteins (or genes/ENSG) into a single output.
@@ -135,11 +175,12 @@ msstitch merge -i set1_proteins.txt set2_proteins.txt \
 ```
 
 
-## Some other useful commands are:
+### Some other useful commands
 Trypsinize a fasta file (minimum retained peptide length, do cut K/RP, allow 1 missed cleavage)
 
 ```
-msstitch trypsinize -i uniprot.fasta -o tryp_up.fasta --minlen 7 --cutproline --miscleav 1
+msstitch trypsinize -i uniprot.fasta -o tryp_up.fasta --minlen 7 \
+  --cutproline --miscleav 1
 ```
 
 Create an SQLite file with tryptic sequences for filtering out e.g. known-sequence data.
@@ -147,7 +188,8 @@ Options as for trypsinization, --insourcefrag builds lookup with support for
 in-source fragmented peptides that have lost some N-terminal residues:
 
 ```
-msstitch storeseq -i canonical.fa --cutproline --minlen 7 --miscleav 1 --insourcefrag
+msstitch storeseq -i canonical.fa --cutproline --minlen 7 \
+  --miscleav 1 --insourcefrag
 ```
 
 Filter a percolator output file using the created SQLite, removing sequences
@@ -157,7 +199,8 @@ sample which are deamidated (i.e. D -> N), and sequences that have lost at most
 built with support for that).
 
 ```
-msstitch filterperco -i perco.xml --dbfile tryptic.sqlite --insourcefrag 2 --deamidate -o filtered.xml
+msstitch filterperco -i perco.xml --dbfile tryptic.sqlite \
+  --insourcefrag 2 --deamidate -o filtered.xml
 ```
 
 Create an SQLite file with full-protein sequences for filtering any peptide of 
@@ -174,7 +217,8 @@ deamidated, and minimum length parameter must match the one the database is
 built with.
 
 ```
-msstitch filterperco -i perco.xml --dbfile proteins.sqlite --fullprotein --deamidate --minlen 7 -o filtered.xml
+msstitch filterperco -i perco.xml --dbfile proteins.sqlite \
+  --fullprotein --deamidate --minlen 7 -o filtered.xml
 ```
 
 
@@ -184,5 +228,6 @@ uses average of two channels as denominator, outputs a new table with first colu
 the features found in column nr.20 of the PSM table:
 
 ```
-msstitch isosummarize -i psm_table.txt --featcol 20 --isobquantcolpattern tmt10plex --denompatterns 126 127C
+msstitch isosummarize -i psm_table.txt --featcol 20 \
+  --isobquantcolpattern tmt10plex --denompatterns 126 127C
 ```

@@ -141,7 +141,7 @@ shared_options = {
     'median_or_avg': {'driverattr': 'median_or_avg', 'clarg': '--summarize-average',
             'action': 'store_const', 'const': 'average', 'default': 'median',
             'required': False, 'help': 'Use average isobaric quantification values for summarizing '
-            'quant from PSMs, instead of PSM median values'},
+            'quant from PSMs, instead of default PSM median values'},
     'mediannormalize': {'driverattr': 'mediannormalize',
         'clarg': '--median-normalize', 'default': False, 
         'required': False, 'action': 'store_const', 'const': True,
@@ -191,13 +191,6 @@ lookup_options = {
                 'flag in order for the lookup to work, since sequences '
                 'will be stored and looked up reversed', 'required': False
                 },
-    'decoy': {'driverattr': 'decoy', 'dest': 'decoy', 'clarg': '--decoy',
-        # FIXME deprecate?
-              'action': 'store_const', 'const': True,
-              'default': False, 'help': 'Specifies lookup is '
-              'for decoy PSMs, use with --map in case there '
-              'are no decoy symbols in the FASTA used to '
-              'search.', 'required': False},
     'spectrafns': {'driverattr': 'spectrafns', 'dest': 'spectra',
                    'type': str, 'help': 'Spectra files in mzML '
                    'format. Multiple files can be specified, if '
@@ -205,14 +198,14 @@ lookup_options = {
                    'with quant data, the order will be their input '
                    'order at the command line.', 'clarg': '--spectra',
                    'nargs': '+'},
-    'isobaric': {'driverattr': 'isobaricfns', 'dest': 'isobaricfns', 'clarg': '--isobaric', 
+    'isobaric': {'driverattr': 'isobaricfns', 'clarg': '--isobaric', 
         'type': str, 'nargs': '+', 'required': False,
         'help': 'Isobaric quant output files from '
         'OpenMS in consensusXML '
         'format. Multiple files can be specified, '
         'and matching order with spectra files is important.',
         },
-    'kronik': {'driverattr': 'kronikfns', 'dest': 'kronik', 'clarg': '--kronik', 
+    'kronik': {'driverattr': 'kronikfns', 'clarg': '--kronik', 
         'type': str, 'nargs': '+', 'required': False,
         'help': 'MS1 quant output files from Kronik in text format.'
         'Multiple files can be specified, '
@@ -380,11 +373,6 @@ pepprottable_options = {
 
 
 prottable_options = {k: v for k, v in pepprottable_options.items()}
-prottable_options['featcol'] = {k: v for k, v
-                                   in shared_options['featcol'].items()}
-prottable_options['featcol'].update(
-    {'default': False, 'help':
-     prottable_options['featcol']['help'].format('Master protein')})
 prottable_options.update({
     'psmfile': {'driverattr': 'psmfile', 'clarg': '--psmtable', 'type': 'file',
                 'help': 'PSM table file containing isobaric quant data to '

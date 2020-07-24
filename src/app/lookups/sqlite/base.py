@@ -308,41 +308,6 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                    }
 
 
-
-"""
-PGM:
-master, gene, assoc, pgc, nrpgc, cov (all not pooled), put it in a dict lookup?
-
-SELECT pgm.protein_acc, g.gene_acc, aid.assoc_id, cov.coverage, sub.pgc, sub.pgcnr from protein_group_master as pgm left outer join (select master_id, group_concat(protein_acc) as pgc, count(protein_acc) as pgcnr  from protein_group_content group by master_id) as sub on sub.master_id=pgm.master_id left outer join protein_coverage as cov on pgm.protein_acc=cov.protein_acc left outer join genes as g on pgm.protein_acc=g.protein_acc left outer join associated_ids as aid on aid.protein_acc=pgm.protein_acc;
-
-nr_psm, nrpep nrunipep: (FIXME add FDR, quant
-    -----
-    SELECT master_id, bs.set_id, COUNT(DISTINCT ppg.psm_id), COUNT (DISTINCT ps.pep_id), COUNT(DISTINCT uni.pep_id), 
-        FROM psm_protein_groups AS ppg 
-        INNER JOIN psms ON ppg.psm_id=psms.psm_id 
-        INNER JOIN peptide_sequences AS ps ON psms.pep_id=ps.pep_id
-        INNER JOIN mzml ON mzml.spectra_id=psms.spectra_id
-        INNER JOIN mzmlfiles AS mzf ON mzf.mzmlfile_id=mzml.mzmlfile_id
-        INNER JOIN biosets AS bs ON bs.set_id=mzf.set_id 
-        LEFT OUTER JOIN (
-                SELECT ppg.pep_id AS pep_id from (
-                    SELECT psms.pep_id AS pep_id, COUNT (DISTINCT ppg.master_id) AS nrpep 
-                        FROM psm_protein_groups AS ppg INNER JOIN psms USING(psm_id)
-                        GROUP BY psms.pep_id
-                    ) AS ppg WHERE ppg.nrpep==1
-                ) AS uni ON uni.pep_id=ps.pep_id
-        GROUP BY master_id, bs.set_id
-
-
-    select * from (select master_id, bs.set_id, count(ppg.psm_id) as nrpsm, COUNT(distinct ps.pep_id) AS nrpep from psm_protein_groups AS ppg inner join psms ON ppg.psm_id=psms.psm_id inner join peptide_sequences AS ps on psms.pep_id=ps.pep_id inner join mzml on mzml.spectra_id=psms.spectra_id inner join mzmlfiles as mzf on mzf.mzmlfile_id=mzml.mzmlfile_id inner join biosets as bs on bs.set_id=mzf.set_id group by master_id, bs.set_id) as sub where sub.nrpsm>2 ;
-
-
-nr_unipep, fdr, ms1, iso
-
-
-select pgm.protein_acc from protein_group_master as pgm inner join (select psm_id from group_concat(protein_psm) group_by protein_acc) as pp on pgm.protein_acc=pp.protein_acc;
-
-"""
 class DatabaseConnection(object):
     def __init__(self, fn=None):
         """SQLite connecting when given filename"""
