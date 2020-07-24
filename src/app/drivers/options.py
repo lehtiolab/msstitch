@@ -224,16 +224,20 @@ lookup_options = {
         'Multiple files can be specified, '
         'and matching order with spectra files is important.',
         },
-    'rttol': {'driverattr': 'rt_tol', 'dest': 'rttol', 'clarg': '--rttol',
+    'sum_or_apex': {'driverattr': 'sum_or_apex', 'clarg': '--apex',
+        'action': 'store_const', 'const': 'apex', 'default': 'sum',
+        'required': False, 'help': 'Use MS1 peak envelope apex instead of '
+        'peak sum when storing quant data.'},
+    'rttol': {'driverattr': 'rt_tol', 'clarg': '--rttol',
         'conditional_required': ['kronik'], 'type': float, 
         'help': 'Specifies tolerance in seconds for '
         'retention time when mapping MS1 feature quant info to '
         'identifications in the PSM table.'},
-    'mztol': {'driverattr': 'mz_tol', 'dest': 'mztol', 'clarg': '--mztol',
+    'mztol': {'driverattr': 'mz_tol', 'clarg': '--mztol',
               'type': float, 'help': 'Specifies tolerance in mass-to-charge '
               'when mapping MS1 feature quant info to identifications in '
               'the PSM table.', 'conditional_required': ['kronik']},
-    'mztoltype': {'driverattr': 'mz_toltype', 'dest': 'mztoltype',
+    'mztoltype': {'driverattr': 'mz_toltype', 
                   'type': str, 'choices': ['ppm', 'Da'],
                   'clarg': '--mztoltype', 'conditional_required': ['kronik'],
                   'help': 'Type of tolerance in mass-to-charge when mapping '

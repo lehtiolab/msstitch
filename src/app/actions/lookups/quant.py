@@ -38,8 +38,8 @@ def create_isobaric_quant_lookup(quantdb, specfn_consensus_els, channelmap):
     quantdb.index_isobaric_quants()
 
 
-def create_precursor_quant_lookup(quantdb, mzmlfn_feats, quanttype,
-                                  rttol, mztol, mztoltype):
+def create_precursor_quant_lookup(quantdb, mzmlfn_feats, sum_or_apex, quanttype,
+        rttol, mztol, mztoltype):
     """Fills quant sqlite with precursor quant from:
         features - generator of xml features from openms
     """
@@ -50,7 +50,7 @@ def create_precursor_quant_lookup(quantdb, mzmlfn_feats, quanttype,
     features, fwhms = [], []
     mzmlmap = quantdb.get_mzmlfile_map()
     for specfn, feat_element in mzmlfn_feats:
-        feat = featparsermap[quanttype](feat_element)
+        feat = featparsermap[quanttype](feat_element, sum_or_apex)
         features.append((mzmlmap[specfn], feat['rt'], feat['mz'],
                          feat['charge'], feat['intensity'])
                         )
@@ -135,24 +135,26 @@ def get_precursors_from_window(mzfeatmap, minmz):
     return chargemap, mz
 
 
-def kronik_featparser(feature):
+def kronik_featparser(feature, sum_or_apex):
     charge = int(feature['Charge'])
     mz = (float(feature['Monoisotopic Mass']) + charge * PROTON_MASS) / charge
+    intkey = {'sum': 'Summed Intensity', 'apex': 'Best Intensity'}[sum_or_apex]
     return {'rt': round(float(feature['Best RTime']), 12),
             'mz': mz,
             'charge': charge,
-            'intensity': float(feature['Best Intensity']),
+            'intensity': float(feature[intkey]),
             'fwhm': False,
             }
 
 
-def dinosaur_featparser(feature):
+def dinosaur_featparser(feature, sum_or_apex):
     # FIXME is kronik, change, add FWHM
     #mz = (float(feature['mz']) + charge * PROTON_MASS) / charge
+    intkey = {'sum': 'intensitySum', 'apex': 'intensityApex'}[sum_or_apex]
     return {'rt': round(float(feature['rtApex']), 12),
             'mz': float(feature['mz']),
             'charge': int(feature['charge']),
-            'intensity': float(feature['intensitySum']),
+            'intensity': float(feature[intkey]),
             'fwhm': float(feature['fwhm']),
             }
 

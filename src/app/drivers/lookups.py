@@ -66,7 +66,7 @@ class QuantLookupDriver(base.LookupDriver):
         super().set_options()
         self.options.update(self.define_options([
             'spectrafns', 'kronik', 'dinosaur', 'isobaric',
-            'rttol', 'mztol', 'mztoltype'], lookup_options))
+            'sum_or_apex', 'rttol', 'mztol', 'mztoltype'], lookup_options))
 
     def parse_input(self, **kwargs):
         super().parse_input(**kwargs)
@@ -94,7 +94,7 @@ class QuantLookupDriver(base.LookupDriver):
         if self.ms1type:
             ms1feats = tsvreader.mzmlfn_tsvfeature_generator(self.spectrafns, self.ms1fns)
             quantlookups.create_precursor_quant_lookup(self.lookup, ms1feats,
-                    self.ms1type, self.rt_tol, self.mz_tol, self.mz_toltype)
+                    self.sum_or_apex, self.ms1type, self.rt_tol, self.mz_tol, self.mz_toltype)
 
 
 class SequenceLookupDriver(base.LookupDriver):
