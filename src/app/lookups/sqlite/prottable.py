@@ -71,8 +71,10 @@ SELECT pgm.master_id, p.protein_acc, IFNULL(g.gene_acc, 'NA'),
     IFNULL(pf.fdr, 'NA'), ppq.quant, GROUP_CONCAT(pqc.channel_name), GROUP_CONCAT(piq.quantvalue),
     GROUP_CONCAT(piq.amount_psms)
         FROM psm_protein_groups AS ppg 
-        JOIN biosets AS bs 
         INNER JOIN psms ON ppg.psm_id=psms.psm_id 
+        INNER JOIN mzml ON psms.spectra_id=mzml.spectra_id
+        INNER JOIN mzmlfiles ON mzml.mzmlfile_id=mzmlfiles.mzmlfile_id
+        INNER JOIN biosets AS bs ON mzmlfiles.set_id=bs.set_id
         INNER JOIN peptide_sequences AS ps ON psms.pep_id=ps.pep_id
         INNER JOIN protein_tables AS pt ON pt.set_id=bs.set_id
         INNER JOIN protein_group_master AS pgm ON pgm.master_id=ppg.master_id
@@ -148,8 +150,10 @@ SELECT g.gene_acc, GROUP_CONCAT(p.protein_acc, ';'), IFNULL(aid.assoc_id, 'NA'),
     IFNULL(gf.fdr, 'NA'), gpq.quant, GROUP_CONCAT(gqc.channel_name), GROUP_CONCAT(giq.quantvalue),
     GROUP_CONCAT(giq.amount_psms)
         FROM protein_psm AS ppsm
-        JOIN biosets AS bs
         INNER JOIN psms ON ppsm.psm_id=psms.psm_id 
+        INNER JOIN mzml ON psms.spectra_id=mzml.spectra_id
+        INNER JOIN mzmlfiles ON mzml.mzmlfile_id=mzmlfiles.mzmlfile_id
+        INNER JOIN biosets AS bs ON mzmlfiles.set_id=bs.set_id
         INNER JOIN peptide_sequences AS ps ON psms.pep_id=ps.pep_id
         INNER JOIN gene_tables AS gt ON gt.set_id=bs.set_id
         INNER JOIN proteins AS p ON p.protein_acc=ppsm.protein_acc
@@ -230,8 +234,10 @@ SELECT gn.assoc_id, GROUP_CONCAT(p.protein_acc, ';'), IFNULL(g.gene_acc, 'NA'),
     IFNULL(gf.fdr, 'NA'), gpq.quant, GROUP_CONCAT(gqc.channel_name), GROUP_CONCAT(giq.quantvalue),
     GROUP_CONCAT(giq.amount_psms)
         FROM protein_psm AS ppsm
-        JOIN biosets AS bs
         INNER JOIN psms ON ppsm.psm_id=psms.psm_id 
+        INNER JOIN mzml ON psms.spectra_id=mzml.spectra_id
+        INNER JOIN mzmlfiles ON mzml.mzmlfile_id=mzmlfiles.mzmlfile_id
+        INNER JOIN biosets AS bs ON mzmlfiles.set_id=bs.set_id
         INNER JOIN peptide_sequences AS ps ON psms.pep_id=ps.pep_id
         INNER JOIN gene_tables AS gt ON gt.set_id=bs.set_id
         INNER JOIN proteins AS p ON p.protein_acc=ppsm.protein_acc

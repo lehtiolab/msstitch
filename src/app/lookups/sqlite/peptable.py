@@ -88,8 +88,10 @@ class PepTableProteinCentricDB(ProtPepTable):
             GROUP_CONCAT(pqc.channel_name), GROUP_CONCAT(piq.quantvalue),
             GROUP_CONCAT(piq.amount_psms)
         FROM peptide_sequences AS ps
-        JOIN biosets AS bs 
         INNER JOIN psms ON ps.pep_id=psms.pep_id 
+        INNER JOIN mzml ON psms.spectra_id=mzml.spectra_id
+        INNER JOIN mzmlfiles ON mzml.mzmlfile_id=mzmlfiles.mzmlfile_id
+        INNER JOIN biosets AS bs ON mzmlfiles.set_id=bs.set_id
         INNER JOIN peptide_tables AS pt ON pt.set_id=bs.set_id
         INNER JOIN peptide_fdr AS pf ON pf.peptable_id=pt.peptable_id AND 
             pf.pep_id=ps.pep_id
