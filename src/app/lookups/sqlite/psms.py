@@ -175,6 +175,7 @@ class PSMDB(ResultLookupInterface):
             'VALUES(?, ?)', psms)
         self.conn.commit()
         self.index_column('psm_pg_index', 'psm_protein_groups', 'master_id')
+        self.index_column('master_pacc_ix', 'protein_group_master', 'pacc_id')
         self.index_column('psm_pg_psmid_index', 'psm_protein_groups', 'psm_id')
 
     def update_master_proteins(self, new_masters):

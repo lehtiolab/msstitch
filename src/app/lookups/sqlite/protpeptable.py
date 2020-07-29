@@ -32,6 +32,10 @@ class ProtPepTable(ResultLookupInterface):
                              }
                  }
 
+    def __init__(self, fn=None):
+        super().__init__(fn)
+        self.singlecols_to_index = []
+
     def get_all_poolnames(self):
         cursor = self.get_cursor()
         cursor.execute(
@@ -39,10 +43,10 @@ class ProtPepTable(ResultLookupInterface):
         return cursor
 
     def store_table_files(self, tables):
+        table = self.table_map[self.datatype]['fntable']
         self.store_many(
-            'INSERT INTO {}(set_id, filename) VALUES(?, ?)'.format(
-                self.table_map[self.datatype]['fntable']),
-            tables)
+                'INSERT INTO {}(set_id, filename) VALUES(?, ?)'.format(table), tables)
+        self.index_column('table_set_ix', table, 'set_id')
 
     def store_quant_channels(self, quantchannels, psmnrcols):
         table = self.table_map[self.datatype]['isochtable']
@@ -78,6 +82,15 @@ class ProtPepTable(ResultLookupInterface):
                    'VALUES ' '(?, ?, ?)'.format(table, self.colmap[table][1]))
         self.store_many(sql, quants)
 
+    def index_iso(self):
+        table = self.table_map[self.datatype]['isoqtable']
+        self.index_column('isoq_acc_ix', table, self.colmap[table][1])
+        self.index_column('isoq_ch_ix', table, self.colmap[table][2])
+
+    def index_singlecol_data(self):
+        for ixname, table, col in self.singlecols_to_index:
+            self.index_column(ixname, table, col)
+
     def get_tablefn_map(self):
         table = self.table_map[self.datatype]['fntable']
         cursor = self.get_cursor()
@@ -101,9 +114,15 @@ class ProtPepTable(ResultLookupInterface):
 
     def store_precursor_quants(self, quants):
         self.store_singlecol('prectable', quants)
+        table = self.table_map[self.datatype]['prectable']
+        self.singlecols_to_index.append(('precursor_acc_ix', table, self.colmap[table][0]))
+        self.singlecols_to_index.append(('precursor_table_ix', table, self.colmap[table][1]))
 
     def store_fdr(self, fdr):
         self.store_singlecol('fdrtable', fdr)
+        table = self.table_map[self.datatype]['fdrtable']
+        self.singlecols_to_index.append(('fdr_acc_ix', table, self.colmap[table][0]))
+        self.singlecols_to_index.append(('fdr_table_ix', table, self.colmap[table][1]))
 
     def get_isoquant_headernames(self):
         cursor = self.get_cursor()
