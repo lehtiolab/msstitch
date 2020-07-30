@@ -129,7 +129,11 @@ def calc_psm_ratios_or_int(psm, channels, denom_channels, sweep, report_intensit
         denomvalues = [psm_intensity[ch] for ch in denom_channels
                        if psm_intensity[ch] != 'NA']
     elif sweep:
-        denomvalues = [median([x for x in psm_intensity.values() if x != 'NA'])]
+        try:
+            denomvalues = [median([x for x in psm_intensity.values() if x != 'NA'])]
+        except StatisticsError:
+            # Empty PSM errors on median call
+            denomvalues = []
     elif report_intensity:
         # Just report intensity
         return [psm_intensity[ch] if psm_intensity[ch] != 'NA' else 'NA' for ch in channels]
