@@ -16,7 +16,8 @@ class ProttableDriver(PepProttableDriver):
         super().set_options()
         options = self.define_options(['decoyfn', 'scorecolpattern', 'minlogscore',
             'quantcolpattern', 'minint', 'denomcols', 'denompatterns', 'mediansweep',
-            'medianintensity', 'median_or_avg', 'precursor', 'psmfile'], prottable_options)
+            'medianintensity', 'median_or_avg', 'logisoquant', 'mediannormalize',
+            'precursor', 'psmfile'], prottable_options)
         self.options.update(options)
 
     def get_td_proteins_bestpep(self, theader, dheader):
@@ -26,9 +27,9 @@ class ProttableDriver(PepProttableDriver):
         tpeps = tsvreader.generate_tsv_psms(self.fn, theader)
         dpeps = tsvreader.generate_tsv_psms(self.decoyfn, dheader)
         targets = proteins.generate_bestpep_proteins(tpeps, tscorecol, 
-                self.minlogscore, self.headeraccfield, self.featcol)
+                self.minlogscore, self.headeraccfield, self.fixedfeatcol)
         decoys = proteins.generate_bestpep_proteins(dpeps, dscorecol,
-                self.minlogscore, self.headeraccfield, self.featcol)
+                self.minlogscore, self.headeraccfield, self.fixedfeatcol)
         return targets, decoys
 
     def get_quant(self, theader, features):
@@ -36,7 +37,7 @@ class ProttableDriver(PepProttableDriver):
             tpeps = tsvreader.generate_tsv_psms(self.fn, theader)
             self.header.append(prottabledata.HEADER_AREA)
             features = proteins.add_ms1_quant_from_top3_mzidtsv(features, 
-                    tpeps, self.headeraccfield, self.featcol)
+                    tpeps, self.headeraccfield, self.fixedfeatcol)
         if self.quantcolpattern:
             psmheader = tsvreader.get_tsv_header(self.psmfile)
             denomcols = False
@@ -57,7 +58,7 @@ class ProttableDriver(PepProttableDriver):
             features = isosummarize.get_isobaric_ratios(self.psmfile, psmheader,
                     quantcols, denomcols, self.mediansweep, self.medianintensity,
                     self.median_or_avg, self.minint, features, self.headeraccfield,
-                    self.featcol, self.mediannormalize)
+                    self.fixedfeatcol, self.logisoquant, self.mediannormalize)
         return features
 
 
@@ -68,7 +69,7 @@ class ProteinsDriver(ProttableDriver):
     commandhelp = 'Create a protein table from peptides'
     outsuffix = '_proteins.tsv'
     headeraccfield = prottabledata.HEADER_PROTEIN
-    featcol = peptabledata.HEADER_MASTERPROTEINS
+    fixedfeatcol = peptabledata.HEADER_MASTERPROTEINS
 
     def set_features(self):
         theader = tsvreader.get_tsv_header(self.fn)
@@ -83,7 +84,7 @@ class GenesDriver(ProttableDriver):
     commandhelp = 'Create a gene table from peptides'
     outsuffix = '_genes.tsv'
     headeraccfield = prottabledata.HEADER_GENENAME
-    featcol = mzidtsvdata.HEADER_SYMBOL
+    fixedfeatcol = mzidtsvdata.HEADER_SYMBOL
 
     def set_options(self):
         super().set_options()
@@ -108,4 +109,4 @@ class ENSGDriver(GenesDriver):
     commandhelp = 'Create an ENSG table from peptides'
     outsuffix = '_ensg.tsv'
     headeraccfield = prottabledata.HEADER_GENEID
-    featcol = mzidtsvdata.HEADER_GENE
+    fixedfeatcol = mzidtsvdata.HEADER_GENE

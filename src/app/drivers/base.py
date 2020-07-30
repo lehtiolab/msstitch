@@ -223,7 +223,6 @@ class PercolatorDriver(BaseDriver):
 
 
 class PepProttableDriver(BaseDriver):
-    mediannormalize = False # FIXME remove when normalization works on features
 
     def write(self):
         outfn = self.create_outfilepath(self.fn, self.outsuffix)

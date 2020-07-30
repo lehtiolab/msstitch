@@ -142,11 +142,24 @@ shared_options = {
             'action': 'store_const', 'const': 'average', 'default': 'median',
             'required': False, 'help': 'Use average isobaric quantification values for summarizing '
             'quant from PSMs, instead of default PSM median values'},
+    'logisoquant': {'driverattr': 'logisoquant', 'clarg': '--logquantratios',
+        'required': False, 'action': 'store_const', 'const': True, 'help':
+        'Output log2 values for isoquant ratios. This log2-transforms input PSM data '
+        'prior to ratio quantification and optional normalization. Ratios will '
+        'be calculated subtracted rather than divided, obviously.'},
     'mediannormalize': {'driverattr': 'mediannormalize',
         'clarg': '--median-normalize', 'default': False, 
         'required': False, 'action': 'store_const', 'const': True,
-        'help': 'Normalization method for isobaric quant data on protein or '
-        'peptide level. Only median centering is provided.'},
+        'help': 'Median-centering normalization for isobaric quant data on protein or '
+        'peptide level. This median-centers the data for each channel by '
+        'dividing with the median channel value (or subtracting in case of '
+        'log data), for each channel in output features, e.g. proteins.'},
+    'ms1mediannormalize': {'driverattr': 'ms1mediannormalize',
+        'clarg': '--median-normalize-ms1', 'default': False, 
+        'required': False, 'action': 'store_const', 'const': True,
+        'help': 'Median-centering normalization for MS1 quant data on protein or '
+        'peptide level. This median-centers the data by dividing output MS1 quant '
+        'values with the median output MS1 quant value '},
 }
 
 sequence_options = {
