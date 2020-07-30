@@ -5,6 +5,7 @@ from app.readers import tsv as tsvreader
 
 from app.dataformats import mzidtsv as mzidtsvdata
 from app.dataformats import peptable as peptabledata 
+from app.dataformats.prottable import HEADER_MIN_NO_PSMS
 
 from app.actions.psmtable import isosummarize
 from app.actions import psmtopeptable
@@ -86,7 +87,7 @@ class CreatePeptableDriver(PepProttableDriver):
             quantcols = tsvreader.get_columns_by_pattern(self.oldheader,
                                                    self.quantcolpattern)
             nopsms = [isosummarize.get_no_psms_field(qf) for qf in quantcols]
-            self.header = self.header + quantcols + nopsms
+            self.header = self.header + quantcols + nopsms + [HEADER_MIN_NO_PSMS]
             peptides = isosummarize.get_isobaric_ratios(self.fn, self.oldheader, 
                     quantcols, denomcols, self.mediansweep, self.medianintensity,
                     self.median_or_avg, self.minint, peptides, self.header[0],

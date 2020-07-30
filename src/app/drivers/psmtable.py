@@ -7,6 +7,7 @@ from app.drivers.base import PSMDriver
 from app.readers import tsv as tsvreader
 from app.readers import mzidplus as mzidreader
 from app.dataformats import mzidtsv as psmhead
+from app.dataformats.prottable import HEADER_MIN_NO_PSMS
 
 from app.actions.psmtable import splitmerge as splitmerge
 from app.actions.psmtable import refine as refine
@@ -220,7 +221,7 @@ class IsoSummarizeDriver(PSMDriver):
         nopsms = [isosummarize.get_no_psms_field(qf) for qf in quantcols]
         if self.featcol:
             self.get_column_header_for_number(['featcol'], self.oldheader)
-            self.header = [self.featcol] + quantcols + nopsms
+            self.header = [self.featcol] + quantcols + nopsms + [HEADER_MIN_NO_PSMS]
         else:
             self.header = (self.oldheader +
                            ['ratio_{}'.format(x) for x in quantcols])

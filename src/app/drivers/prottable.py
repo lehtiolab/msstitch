@@ -54,7 +54,7 @@ class ProttableDriver(PepProttableDriver):
                         'report median intensities.')
             quantcols = tsvreader.get_columns_by_pattern(psmheader, self.quantcolpattern)
             nopsms = [isosummarize.get_no_psms_field(qf) for qf in quantcols]
-            self.header = self.header + quantcols + nopsms
+            self.header = self.header + quantcols + nopsms + [prottabledata.HEADER_MIN_NO_PSMS]
             features = isosummarize.get_isobaric_ratios(self.psmfile, psmheader,
                     quantcols, denomcols, self.mediansweep, self.medianintensity,
                     self.median_or_avg, self.minint, features, self.headeraccfield,

@@ -188,4 +188,5 @@ def get_no_psms(channels, ratios):
     for ix, channel in enumerate(channels):
         fieldname = get_no_psms_field(channel)
         ch_nopsms[fieldname] = len([x[ix] for x in ratios if x[ix] != 'NA'])
+    ch_nopsms[prottabledata.HEADER_MIN_NO_PSMS] = len([x for x in ratios if 'NA' not in x])
     return ch_nopsms
