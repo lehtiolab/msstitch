@@ -112,6 +112,16 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                            'REFERENCES '
                                            'pepquant_channels(channel_id)'
                                            ],
+                   'peptide_iso_fullpsms': ['pepq_full_id INTEGER PRIMARY KEY',
+                                           'pep_id INTEGER',
+                                           'peptable_id INTEGER',
+                                           'amount_psms INTEGER',
+                                           'FOREIGN KEY(peptable_id) '
+                                           'REFERENCES '
+                                           'peptide_tables(peptable_id)'
+                                           'FOREIGN KEY(pep_id) '
+                                           'REFERENCES peptide_sequences(pep_id) '
+                                           ],
                    'peptide_precur_quanted':
                    ['pep_precquant_id INTEGER PRIMARY KEY',
                     'pep_id INTEGER',
@@ -213,6 +223,36 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                           'REFERENCES '
                                           'protein_tables(prottable_id)'
                                           ],
+                   'protein_iso_fullpsms': ['pq_full_id INTEGER PRIMARY KEY',
+                                           'pacc_id INTEGER',
+                                           'prottable_id INTEGER',
+                                           'amount_psms INTEGER',
+                                           'FOREIGN KEY(prottable_id) '
+                                           'REFERENCES '
+                                           'protein_tables(prottable_id) '
+                                           'FOREIGN KEY(pacc_id) '
+                                           'REFERENCES proteins(pacc_id) '
+                                           ],
+                   'gene_iso_fullpsms': ['ensgq_full_id INTEGER PRIMARY KEY',
+                                        'gene_id INTEGER',
+                                        'genetable_id INTEGER',
+                                        'amount_psms INTEGER',
+                                        'FOREIGN KEY(genetable_id) '
+                                        'REFERENCES '
+                                        'gene_tables(genetable_id) '
+                                        'FOREIGN KEY(gene_id) '
+                                        'REFERENCES genes(gene_id) '
+                                        ],
+                   'assoc_iso_fullpsms': ['geneq_full_id INTEGER PRIMARY KEY',
+                                         'gn_id INTEGER',
+                                         'genetable_id INTEGER',
+                                         'amount_psms INTEGER',
+                                         'FOREIGN KEY(genetable_id) '
+                                         'REFERENCES '
+                                         'gene_tables(genetable_id) '
+                                         'FOREIGN KEY(gn_id) '
+                                         'REFERENCES associated_ids(gn_id) '
+                                         ],
                    'gene_fdr': ['gene_id INTEGER',
                                 'genetable_id INTEGER',
                                 'fdr DOUBLE',

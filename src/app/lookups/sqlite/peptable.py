@@ -14,17 +14,13 @@ class PepTableProteinCentricDB(ProtPepTable):
     colmap = {'peptide_sequences': ['pep_id', 'sequence'],
               'peptide_precur_quanted': ['pep_id', 'peptable_id', 'quant'],
               'peptide_fdr': ['pep_id', 'peptable_id', 'fdr'],
+              'peptide_iso_fullpsms': ['pep_id', 'peptable_id', 'amount_psms'],
               'pepquant_channels': ['channel_id', 'peptable_id',
                                     'channel_name', 'amount_psms_name'],
               'peptide_iso_quanted': ['peptidequant_id', 'pep_id',
                                       'channel_id', 'quantvalue',
                                       'amount_psms'],
               }
-
-    def add_tables(self, tabletypes=[]):
-        self.create_tables(['peptide_tables', 'pepquant_channels',
-                            'peptide_iso_quanted', 'peptide_precur_quanted',
-                            'peptide_fdr'])
 
     def create_pdata_map(self):
         """This runs only once, returns the data which is not dependent on sets,

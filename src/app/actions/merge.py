@@ -4,9 +4,11 @@ from app.dataformats import prottable as prottabledata
 
 
 def create_lookup(fns, pqdb, poolnames, featcolnr, ms1_qcolpattern,
-        isobqcolpattern, psmnrpattern, fdrcolpattern):
-    patterns = [ms1_qcolpattern, fdrcolpattern]
-    storefuns = [pqdb.store_precursor_quants, pqdb.store_fdr]
+        isobqcolpattern, fdrcolpattern):
+    psmnrpattern = prottabledata.HEADER_NO_PSMS_SUFFIX
+    fullpsmpattern = prottabledata.HEADER_NO_FULLQ_PSMS
+    patterns = [ms1_qcolpattern, fdrcolpattern, fullpsmpattern]
+    storefuns = [pqdb.store_precursor_quants, pqdb.store_fdr, pqdb.store_fullq_psms]
     tablefn_map = create_tablefn_map(fns, pqdb, poolnames)
     feat_map = pqdb.get_feature_map()
     for pattern, storefun in zip(patterns, storefuns):
@@ -17,10 +19,8 @@ def create_lookup(fns, pqdb, poolnames, featcolnr, ms1_qcolpattern,
             store_single_col_data(fns, tablefn_map, feat_map, storefun, colmap)
     if isobqcolpattern:
         isocolmap = get_colmap(fns, isobqcolpattern, antipattern=psmnrpattern)
-        if psmnrpattern is not None:
-            psmcolmap = get_colmap(fns, psmnrpattern)
-        else:
-            psmcolmap = False
+        psmcolmap = get_colmap(fns, psmnrpattern)
+        fullpsmcolmap = get_colmap(fns, fullpsmpattern)
         create_isobaric_quant_lookup(fns, tablefn_map, feat_map, pqdb, featcolnr,
                 isocolmap, psmcolmap)
 
@@ -42,13 +42,23 @@ def get_colmap(fns, pattern, single_col=False, antipattern=False):
     for fn in fns:
         header = tsvreader.get_tsv_header(fn)
         basefn = os.path.basename(fn)
-        cols = tsvreader.get_cols_in_file(pattern, header, single_col)
+        try:
+            cols = tsvreader.get_cols_in_file(pattern, header, single_col)
+        except RuntimeError:
+            # Columns are not in this file
+            cols = []
         if antipattern:
-            anticols = tsvreader.get_cols_in_file(antipattern, header,
-                                                  single_col)
+            try:
+                anticols = tsvreader.get_cols_in_file(antipattern, header,
+                                                      single_col)
+            except RuntimeError:
+                # The filtering "anti"-columns are not in the file, 
+                anticols = []
             cols = [col for col in cols if col not in anticols]
         if cols:
             colmap[basefn] = cols
+        else:
+            return False
     return colmap
 
 

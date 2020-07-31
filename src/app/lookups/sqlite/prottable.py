@@ -8,8 +8,8 @@ class ProtGeneTableBase(ProtPepTable):
             ph.HEADER_NO_PEPTIDE,
             ph.HEADER_NO_UNIPEP,
             ]
-    singlefields = stdheaderfields + [ph.HEADER_QVAL, ph.HEADER_AREA]
-
+    singlefields = stdheaderfields + [ph.HEADER_QVAL, ph.HEADER_AREA, ph.HEADER_NO_FULLQ_PSMS]
+    
 
 class ProtTableDB(ProtGeneTableBase):
     datatype = 'protein'
@@ -17,17 +17,13 @@ class ProtTableDB(ProtGeneTableBase):
               'proteins': ['pacc_id', 'protein_acc'],
               'protein_precur_quanted': ['pacc_id', 'prottable_id', 'quant'],
               'protein_fdr': ['pacc_id', 'prottable_id', 'fdr'],
+              'protein_iso_fullpsms': ['pacc_id', 'prottable_id', 'amount_psms'],
               'protquant_channels': ['channel_id', 'prottable_id',
                                      'channel_name', 'amount_psms_name'],
               'protein_iso_quanted': ['proteinquant_id', 'pacc_id',
                                       'channel_id', 'quantvalue',
                                       'amount_psms'],
               }
-
-    def add_tables(self, tabletypes=[]):
-        self.create_tables(['protein_tables', 'protein_iso_quanted',
-                            'protquant_channels', 'protein_precur_quanted',
-                            'protein_fdr'])
 
     def create_pdata_map(self):
         """This runs only once, returns the data which is not dependent on sets,
@@ -68,7 +64,7 @@ SELECT pgm.master_id, p.protein_acc, IFNULL(g.gene_acc, 'NA'),
         sql = """
     SELECT bs.set_name, pgm.master_id, COUNT(DISTINCT ppg.psm_id), 
     COUNT (DISTINCT ps.pep_id), COUNT(DISTINCT uni.pep_id), 
-    IFNULL(pf.fdr, 'NA'), ppq.quant, GROUP_CONCAT(pqc.channel_name), GROUP_CONCAT(piq.quantvalue),
+    IFNULL(pf.fdr, 'NA'), ppq.quant, fqpsm.amount_psms, GROUP_CONCAT(pqc.channel_name), GROUP_CONCAT(piq.quantvalue),
     GROUP_CONCAT(piq.amount_psms)
         FROM psm_protein_groups AS ppg 
         INNER JOIN psms ON ppg.psm_id=psms.psm_id 
@@ -83,6 +79,8 @@ SELECT pgm.master_id, p.protein_acc, IFNULL(g.gene_acc, 'NA'),
             pf.pacc_id=prots.pacc_id
         LEFT OUTER JOIN protein_precur_quanted AS ppq ON ppq.prottable_id=pt.prottable_id AND 
             ppq.pacc_id=prots.pacc_id
+        LEFT OUTER JOIN protein_iso_fullpsms AS fqpsm ON fqpsm.prottable_id=pt.prottable_id AND 
+            fqpsm.pacc_id=prots.pacc_id
         LEFT OUTER JOIN protquant_channels AS pqc ON pqc.prottable_id=pt.prottable_id
         LEFT OUTER JOIN protein_iso_quanted AS piq ON piq.channel_id=pqc.channel_id AND
             piq.pacc_id=prots.pacc_id
@@ -106,16 +104,12 @@ class GeneTableDB(ProtGeneTableBase):
     colmap = {'genes': ['gene_id', 'gene_acc'],
               'gene_precur_quanted': ['gene_id', 'genetable_id', 'quant'],
               'gene_fdr': ['gene_id', 'genetable_id', 'fdr'],
+              'gene_iso_fullpsms': ['gene_id', 'genetable_id', 'amount_psms'],
               'genequant_channels': ['channel_id', 'genetable_id',
                                      'channel_name', 'amount_psms_name'],
               'gene_iso_quanted': ['genequant_id', 'gene_id',
                                    'channel_id', 'quantvalue', 'amount_psms'],
               }
-
-    def add_tables(self, tabletypes=[]):
-        self.create_tables(['gene_tables', 'gene_iso_quanted',
-                            'genequant_channels', 'gene_precur_quanted',
-                            'gene_fdr'])
 
     def create_pdata_map(self):
         """This runs only once, returns the data which is not dependent on sets,
@@ -147,7 +141,8 @@ SELECT g.gene_acc, GROUP_CONCAT(p.protein_acc, ';'), IFNULL(aid.assoc_id, 'NA'),
         sql = """
     SELECT bs.set_name, g.gene_acc, COUNT(DISTINCT ppsm.psm_id), 
     COUNT (DISTINCT ps.pep_id), COUNT(DISTINCT uniq.pep_id), 
-    IFNULL(gf.fdr, 'NA'), gpq.quant, GROUP_CONCAT(gqc.channel_name), GROUP_CONCAT(giq.quantvalue),
+    IFNULL(gf.fdr, 'NA'), gpq.quant, fqpsm.amount_psms,
+    GROUP_CONCAT(gqc.channel_name), GROUP_CONCAT(giq.quantvalue),
     GROUP_CONCAT(giq.amount_psms)
         FROM protein_psm AS ppsm
         INNER JOIN psms ON ppsm.psm_id=psms.psm_id 
@@ -163,6 +158,8 @@ SELECT g.gene_acc, GROUP_CONCAT(p.protein_acc, ';'), IFNULL(aid.assoc_id, 'NA'),
             gf.gene_id=g.gene_id
         LEFT OUTER JOIN gene_precur_quanted AS gpq ON gpq.genetable_id=gt.genetable_id AND 
             gpq.gene_id=g.gene_id
+        LEFT OUTER JOIN gene_iso_fullpsms AS fqpsm ON fqpsm.genetable_id=gt.genetable_id AND 
+            fqpsm.gene_id=g.gene_id
         LEFT OUTER JOIN genequant_channels AS gqc ON gqc.genetable_id=gt.genetable_id
         LEFT OUTER JOIN gene_iso_quanted AS giq ON giq.channel_id=gqc.channel_id AND
             giq.gene_id=g.gene_id
@@ -189,16 +186,12 @@ class GeneTableAssocIDsDB(GeneTableDB):
     colmap = {'associated_ids': ['gn_id', 'assoc_id'],
               'assoc_precur_quanted': ['gn_id', 'genetable_id', 'quant'],
               'assoc_fdr': ['gn_id', 'genetable_id', 'fdr'],
+              'assoc_iso_fullpsms': ['gn_id', 'genetable_id', 'amount_psms'],
               'genequant_channels': ['channel_id', 'genetable_id',
                                      'channel_name', 'amount_psms_name'],
               'assoc_iso_quanted': ['genequant_id', 'gn_id',
                                    'channel_id', 'quantvalue', 'amount_psms'],
               }
-
-    def add_tables(self, tabletypes=[]):
-        self.create_tables(['gene_tables', 'assoc_iso_quanted',
-                            'genequant_channels', 'assoc_precur_quanted',
-                            'assoc_fdr'])
 
     def create_pdata_map(self):
         """This runs only once, returns the data which is not dependent on sets,
@@ -231,7 +224,8 @@ SELECT gn.assoc_id, GROUP_CONCAT(p.protein_acc, ';'), IFNULL(g.gene_acc, 'NA'),
         sql = """
     SELECT bs.set_name, gn.assoc_id, COUNT(DISTINCT ppsm.psm_id), 
     COUNT (DISTINCT ps.pep_id), COUNT(DISTINCT uniq.pep_id), 
-    IFNULL(gf.fdr, 'NA'), gpq.quant, GROUP_CONCAT(gqc.channel_name), GROUP_CONCAT(giq.quantvalue),
+    IFNULL(gf.fdr, 'NA'), gpq.quant, fqpsm.amount_psms,
+    GROUP_CONCAT(gqc.channel_name), GROUP_CONCAT(giq.quantvalue),
     GROUP_CONCAT(giq.amount_psms)
         FROM protein_psm AS ppsm
         INNER JOIN psms ON ppsm.psm_id=psms.psm_id 
@@ -247,6 +241,8 @@ SELECT gn.assoc_id, GROUP_CONCAT(p.protein_acc, ';'), IFNULL(g.gene_acc, 'NA'),
             gf.gn_id=gn.gn_id
         LEFT OUTER JOIN assoc_precur_quanted AS gpq ON gpq.genetable_id=gt.genetable_id AND 
             gpq.gn_id=gn.gn_id
+        LEFT OUTER JOIN assoc_iso_fullpsms AS fqpsm ON fqpsm.genetable_id=gt.genetable_id AND 
+            fqpsm.gn_id=gn.gn_id
         LEFT OUTER JOIN genequant_channels AS gqc ON gqc.genetable_id=gt.genetable_id
         LEFT OUTER JOIN assoc_iso_quanted AS giq ON giq.channel_id=gqc.channel_id AND
             giq.gn_id=gn.gn_id

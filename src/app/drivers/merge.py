@@ -65,7 +65,7 @@ class MergeDriver(base.PepProttableDriver):
         self.setnames = [x.replace('"', '') for x in self.setnames]
         merge.create_lookup(self.fn, self.lookup, self.setnames, self.featcol,
                 self.precursorquantcolpattern, self.quantcolpattern,
-                self.psmnrcolpattern, self.fdrcolpattern)
+                self.fdrcolpattern)
         for field in self.lookup.stdheaderfields:
             self.header.extend(['{}_{}'.format(x, field) for x in self.setnames])
         if self.fdrcolpattern and not self.header[0] == peph.HEADER_PEPTIDE:
@@ -79,6 +79,6 @@ class MergeDriver(base.PepProttableDriver):
             channels = [x for x in self.lookup.get_isoquant_headernames()]
             for setn in self.setnames:
                 self.header.extend(['{}_{}'.format(setn, chan[0]) for chan in channels])
-                if self.psmnrcolpattern:
-                    self.header.extend(['{}_{}'.format(setn, chan[1]) for chan in channels])
+                #if self.psmnrcolpattern:
+                self.header.extend(['{}_{}'.format(setn, chan[1]) for chan in channels])
         self.features = merge.build_proteintable(self.lookup, self.mergecutoff, self.quantcolpattern)

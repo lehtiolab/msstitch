@@ -8,6 +8,7 @@ class ProtPepTable(ResultLookupInterface):
                              'isochtable': 'protquant_channels',
                              'prectable': 'protein_precur_quanted',
                              'fdrtable': 'protein_fdr',
+                             'fullqpsmtable': 'protein_iso_fullpsms',
                              },
                  'gene': {'fntable': 'gene_tables',
                           'feattable': 'genes',
@@ -15,6 +16,7 @@ class ProtPepTable(ResultLookupInterface):
                           'isochtable': 'genequant_channels',
                           'prectable': 'gene_precur_quanted',
                           'fdrtable': 'gene_fdr',
+                          'fullqpsmtable': 'gene_iso_fullpsms',
                           },
                  'assoc': {'fntable': 'gene_tables',
                            'feattable': 'associated_ids',
@@ -22,6 +24,7 @@ class ProtPepTable(ResultLookupInterface):
                            'isochtable': 'genequant_channels',
                            'prectable': 'assoc_precur_quanted',
                            'fdrtable': 'assoc_fdr',
+                           'fullqpsmtable': 'assoc_iso_fullpsms',
                            },
                  'peptide': {'fntable': 'peptide_tables',
                              'feattable': 'peptide_sequences',
@@ -29,12 +32,19 @@ class ProtPepTable(ResultLookupInterface):
                              'isochtable': 'pepquant_channels',
                              'prectable': 'peptide_precur_quanted',
                              'fdrtable': 'peptide_fdr',
+                             'fullqpsmtable': 'peptide_iso_fullpsms',
                              }
                  }
 
     def __init__(self, fn=None):
         super().__init__(fn)
         self.singlecols_to_index = []
+
+    def add_tables(self, tabletypes=[]):
+        ttypes = ['fntable', 'isoqtable', 'isochtable', 'prectable', 'fdrtable',
+                'fullqpsmtable']
+        self.create_tables([self.table_map[self.datatype][x] for x in ttypes])
+        print([self.table_map[self.datatype][x] for x in ttypes])
 
     def get_all_poolnames(self):
         cursor = self.get_cursor()
@@ -123,6 +133,12 @@ class ProtPepTable(ResultLookupInterface):
         table = self.table_map[self.datatype]['fdrtable']
         self.singlecols_to_index.append(('fdr_acc_ix', table, self.colmap[table][0]))
         self.singlecols_to_index.append(('fdr_table_ix', table, self.colmap[table][1]))
+
+    def store_fullq_psms(self, fullqpsms):
+        self.store_singlecol('fullqpsmtable', fullqpsms)
+        table = self.table_map[self.datatype]['fullqpsmtable']
+        self.singlecols_to_index.append(('fullq_acc_ix', table, self.colmap[table][0]))
+        self.singlecols_to_index.append(('fullq_table_ix', table, self.colmap[table][1]))
 
     def get_isoquant_headernames(self):
         cursor = self.get_cursor()
