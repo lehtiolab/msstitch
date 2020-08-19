@@ -39,10 +39,10 @@ def mediancenter_ratios(ratios, channels, logratios):
     ch_medians = get_medians(channels, flatratios, report=True)
     for quant in ratios:
         if logratios:
-            quant.update({ch: str(quant[ch] / ch_medians[ch])
+            quant.update({ch: str(quant[ch] - ch_medians[ch])
                 if quant[ch] != 'NA' else 'NA' for ch in channels})
         else:
-            quant.update({ch: str(quant[ch] - ch_medians[ch])
+            quant.update({ch: str(quant[ch] / ch_medians[ch])
                 if quant[ch] != 'NA' else 'NA' for ch in channels})
         yield quant
 
@@ -137,7 +137,7 @@ def calc_psm_ratios_or_int(psm, channels, denom_channels, sweep, report_intensit
     elif report_intensity:
         # Just report intensity
         return [psm_intensity[ch] if psm_intensity[ch] != 'NA' else 'NA' for ch in channels]
-    if sum(denomvalues) == 0 or len(denomvalues) == 0:
+    if (not logintensities and sum(denomvalues) == 0) or len(denomvalues) == 0:
         return ['NA'] * len(channels)
     # TODO add median instead of average?
     # TODO can we use means of logged values or is that not correct? DEqMS does use it
