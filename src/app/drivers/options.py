@@ -253,12 +253,6 @@ lookup_options = {
         'type': int, 'clarg': '--peptidecol', 'default': 1, 'required': False,
         'help': 'Column nr of peptide table where peptide sequences are '
         'stored. First and default column is nr. 1'},
-    'psmnrcolpattern': {'driverattr': 'psmnrcolpattern',
-                        'dest': 'psmnrcolpattern',
-                        'clarg': '--psmnrcolpattern',
-                        'type': str, 'default': None, 'required': False,
-                        'help': 'Unique text pattern to identify '
-                        'number-of-psms column in input table.'},
 }
 lookup_options['featcol'] = {k: v for k, v 
         in shared_options['featcol'].items()}

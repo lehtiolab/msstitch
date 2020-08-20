@@ -171,7 +171,7 @@ msstitch merge -i set1_proteins.txt set2_proteins.txt \
   --setnames sampleset1 sampleset2 \
   --dbfile db.sqlite \
   --fdrcolpattern 'q-value' --mergecutoff 0.01 \
-   --ms1quantcolpattern area --isobquantcolpattern plex --psmnrcolpattern quanted
+   --ms1quantcolpattern area --isobquantcolpattern plex
 ```
 
 

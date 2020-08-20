@@ -20,7 +20,6 @@ def create_lookup(fns, pqdb, poolnames, featcolnr, ms1_qcolpattern,
     if isobqcolpattern:
         isocolmap = get_colmap(fns, isobqcolpattern, antipattern=psmnrpattern)
         psmcolmap = get_colmap(fns, psmnrpattern)
-        fullpsmcolmap = get_colmap(fns, fullpsmpattern)
         create_isobaric_quant_lookup(fns, tablefn_map, feat_map, pqdb, featcolnr,
                 isocolmap, psmcolmap)
 

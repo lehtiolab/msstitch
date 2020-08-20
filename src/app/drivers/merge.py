@@ -16,7 +16,6 @@ class MergeDriver(base.PepProttableDriver):
         super().set_options()
         self.options.update(self.define_options(['setnames',
                                                  'quantcolpattern',
-                                                 'psmnrcolpattern',
                                                  'precursorquantcolpattern',
                                                  'fdrcolpattern',
                                                  'multifiles', 'featcol'],
@@ -80,6 +79,5 @@ class MergeDriver(base.PepProttableDriver):
             for setn in self.setnames:
                 self.header.extend(['{}_{}'.format(setn, chan[0]) for chan in channels])
                 self.header.append('{}_{}'.format(setn, ph.HEADER_NO_FULLQ_PSMS))
-                #if self.psmnrcolpattern:
                 self.header.extend(['{}_{}'.format(setn, chan[1]) for chan in channels])
         self.features = merge.build_proteintable(self.lookup, self.mergecutoff, self.quantcolpattern)
