@@ -1,5 +1,6 @@
 from app.lookups.sqlite.protpeptable import ProtPepTable
 from app.dataformats import peptable as ph
+from app.dataformats import prottable as proth
 
 
 class PepTableProteinCentricDB(ProtPepTable):
@@ -10,6 +11,7 @@ class PepTableProteinCentricDB(ProtPepTable):
             ]
     singlefields = stdheaderfields + [
             ph.HEADER_AREA,
+            proth.HEADER_NO_FULLQ_PSMS,
             ]
     colmap = {'peptide_sequences': ['pep_id', 'sequence'],
               'peptide_precur_quanted': ['pep_id', 'peptable_id', 'quant'],
@@ -81,7 +83,7 @@ class PepTableProteinCentricDB(ProtPepTable):
     def merge_features(self):
         sql = """
     SELECT bs.set_name, ps.pep_id, COUNT(DISTINCT psms.psm_id), pf.fdr, ppq.quant,
-            GROUP_CONCAT(pqc.channel_name), GROUP_CONCAT(piq.quantvalue),
+            fqpsm.amount_psms, GROUP_CONCAT(pqc.channel_name), GROUP_CONCAT(piq.quantvalue),
             GROUP_CONCAT(piq.amount_psms)
         FROM peptide_sequences AS ps
         INNER JOIN psms ON ps.pep_id=psms.pep_id 
@@ -91,8 +93,10 @@ class PepTableProteinCentricDB(ProtPepTable):
         INNER JOIN peptide_tables AS pt ON pt.set_id=bs.set_id
         INNER JOIN peptide_fdr AS pf ON pf.peptable_id=pt.peptable_id AND 
             pf.pep_id=ps.pep_id
-        LEFT OUTER JOIN peptide_precur_quanted AS ppq ON ppq.peptable_id=pt.peptable_id AND 
+        LEFT OUTER JOIN peptide_precur_quanted AS ppq ON ppq.peptable_id=pt.peptable_id AND
             ppq.pep_id=ps.pep_id
+        LEFT OUTER JOIN peptide_iso_fullpsms AS fqpsm ON fqpsm.peptable_id=pt.peptable_id AND
+            fqpsm.pep_id=ps.pep_id
         LEFT OUTER JOIN pepquant_channels AS pqc ON pqc.peptable_id=pt.peptable_id
         LEFT OUTER JOIN peptide_iso_quanted AS piq ON piq.channel_id=pqc.channel_id AND
             piq.pep_id=ps.pep_id
@@ -159,7 +163,7 @@ SELECT ps.pep_id, ps.sequence, GROUP_CONCAT(p.protein_acc, ';'),
     def merge_features(self):
         sql = """
     SELECT bs.set_name, ps.pep_id, COUNT(DISTINCT psms.psm_id), pf.fdr, ppq.quant,
-            GROUP_CONCAT(pqc.channel_name), GROUP_CONCAT(piq.quantvalue),
+            fqpsm.amount_psms, GROUP_CONCAT(pqc.channel_name), GROUP_CONCAT(piq.quantvalue),
             GROUP_CONCAT(piq.amount_psms)
         FROM peptide_sequences AS ps
         JOIN biosets AS bs 
@@ -167,10 +171,12 @@ SELECT ps.pep_id, ps.sequence, GROUP_CONCAT(p.protein_acc, ';'),
         INNER JOIN peptide_tables AS pt ON pt.set_id=bs.set_id
         INNER JOIN peptide_fdr AS pf ON pf.peptable_id=pt.peptable_id AND 
             pf.pep_id=ps.pep_id
-        INNER JOIN peptide_precur_quanted AS ppq ON ppq.peptable_id=pt.peptable_id AND 
+        LEFT OUTER JOIN peptide_precur_quanted AS ppq ON ppq.peptable_id=pt.peptable_id AND
             ppq.pep_id=ps.pep_id
-        INNER JOIN pepquant_channels AS pqc ON pqc.peptable_id=pt.peptable_id
-        INNER JOIN peptide_iso_quanted AS piq ON piq.channel_id=pqc.channel_id AND
+        LEFT OUTER JOIN peptide_iso_fullpsms AS fqpsm ON fqpsm.peptable_id=pt.peptable_id AND
+            fqpsm.pep_id=ps.pep_id
+        LEFT OUTER JOIN pepquant_channels AS pqc ON pqc.peptable_id=pt.peptable_id
+        LEFT OUTER JOIN peptide_iso_quanted AS piq ON piq.channel_id=pqc.channel_id AND
             piq.pep_id=ps.pep_id
         GROUP BY ps.pep_id, bs.set_id
         """
@@ -208,7 +214,7 @@ class PepTablePlainDB(PepTableProteinCentricDB):
     def merge_features(self):
         sql = """
     SELECT bs.set_name, ps.pep_id, COUNT(DISTINCT psms.psm_id), pf.fdr, ppq.quant,
-            GROUP_CONCAT(pqc.channel_name), GROUP_CONCAT(piq.quantvalue),
+            fqpsm.amount_psms, GROUP_CONCAT(pqc.channel_name), GROUP_CONCAT(piq.quantvalue),
             GROUP_CONCAT(piq.amount_psms)
         FROM peptide_sequences AS ps
         JOIN biosets AS bs 
@@ -216,10 +222,12 @@ class PepTablePlainDB(PepTableProteinCentricDB):
         INNER JOIN peptide_tables AS pt ON pt.set_id=bs.set_id
         INNER JOIN peptide_fdr AS pf ON pf.peptable_id=pt.peptable_id AND 
             pf.pep_id=ps.pep_id
-        INNER JOIN peptide_precur_quanted AS ppq ON ppq.peptable_id=pt.peptable_id AND 
+        LEFT OUTER JOIN peptide_precur_quanted AS ppq ON ppq.peptable_id=pt.peptable_id AND
             ppq.pep_id=ps.pep_id
-        INNER JOIN pepquant_channels AS pqc ON pqc.peptable_id=pt.peptable_id
-        INNER JOIN peptide_iso_quanted AS piq ON piq.channel_id=pqc.channel_id AND
+        LEFT OUTER JOIN peptide_iso_fullpsms AS fqpsm ON fqpsm.peptable_id=pt.peptable_id AND
+            fqpsm.pep_id=ps.pep_id
+        LEFT OUTER JOIN pepquant_channels AS pqc ON pqc.peptable_id=pt.peptable_id
+        LEFT OUTER JOIN peptide_iso_quanted AS piq ON piq.channel_id=pqc.channel_id AND
             piq.pep_id=ps.pep_id
         GROUP BY ps.pep_id, bs.set_id
         """
