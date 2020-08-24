@@ -364,26 +364,32 @@ class MergeTest(BaseTest):
     def check_built_isobaric(self, sql, accession, nopsms=False, cutoff=False):
         expected = {}
         for rec in self.get_values_from_db(self.dbfile, sql):
-            am_psm = rec[4]
+            if nopsms:
+                am_psm, fqpsm = False, False
+            else:
+                am_psm, fqpsm  = rec[4], rec[5]
             try:
-                expected[rec[0]][rec[1]][rec[2]] = [rec[3], am_psm]
+                expected[rec[0]][rec[1]][rec[2]] = [rec[3], am_psm, fqpsm]
             except KeyError:
                 try:
-                    expected[rec[0]][rec[1]] = {rec[2]: [rec[3], am_psm]}
+                    expected[rec[0]][rec[1]] = {rec[2]: [rec[3], am_psm, fqpsm]}
                 except KeyError:
-                    expected[rec[0]] = {rec[1]: {rec[2]: [rec[3], am_psm]}}
+                    expected[rec[0]] = {rec[1]: {rec[2]: [rec[3], am_psm, fqpsm]}}
             if cutoff:
-                expected[rec[0]][rec[1]][rec[2]] = [rec[3], am_psm, rec[5]]
+                expected[rec[0]][rec[1]][rec[2]] = [rec[3], am_psm, fqpsm, rec[6]]
         for line in self.tsv_generator(self.resultfn):
             for setname, fields in expected[line[accession]].items():
                 for field, exp_val in fields.items():
                     setfield = '{}_{}'.format(setname, field)
-                    if cutoff and exp_val[2] > cutoff:
+                    if cutoff and exp_val[3] > cutoff:
                         exp_val = ['NA', 'NA']
                     self.assertAlmostEqual(float(line[setfield]), exp_val[0])
                     if not nopsms:
                         nr_psms = line['{} - # quanted PSMs'.format(setfield)]
                         self.assertEqual(nr_psms, str(exp_val[1]))
+                if not nopsms:
+                    nr_fqpsms = line['{}_Amount fully quanted PSMs'.format(setname)]
+                    self.assertEqual(nr_fqpsms, str(exp_val[2]))
             expected.pop(line[accession])
         self.check_exp_empty(expected, cutoff)
 

@@ -63,11 +63,12 @@ class TestPeptideMerge(basetests.MergeTest):
         self.check_build_values(valsql, ['MS1 area (highest of all PSMs)', 'q-value', ],
                 'Peptide sequence')
         isosql = ('SELECT ps.sequence, bs.set_name, ch.channel_name, '
-               'iq.quantvalue, iq.amount_psms '
+               'iq.quantvalue, iq.amount_psms, fqp.amount_psms '
                'FROM peptide_sequences AS ps '
                'JOIN biosets AS bs '
                'JOIN peptide_iso_quanted AS iq USING(pep_id) '
                'JOIN pepquant_channels AS ch USING(channel_id) '
+               'JOIN peptide_iso_fullpsms AS fqp USING(pep_id) '
                )
         self.check_built_isobaric(isosql, 'Peptide sequence')
         if sql:
@@ -126,9 +127,11 @@ class TestProteinMerge(basetests.MergeTest):
         self.check_build_values(sql, ['q-value', 'MS1 precursor area'],
                 'Protein ID', cutoff)
         sql = ('SELECT p.protein_acc, bs.set_name, pc.channel_name, '
-               'pi.quantvalue, pi.amount_psms, pf.fdr FROM proteins AS p '
+               'pi.quantvalue, pi.amount_psms, fqp.amount_psms, pf.fdr '
+               'FROM proteins AS p '
                'JOIN biosets AS bs '
                'JOIN protein_iso_quanted AS pi USING(pacc_id) '
+               'JOIN protein_iso_fullpsms AS fqp USING(pacc_id) '
                'JOIN protquant_channels AS pc USING(channel_id) '
                'JOIN protein_fdr AS pf WHERE pf.prottable_id=pc.prottable_id '
                'AND pf.pacc_id=p.pacc_id'
@@ -177,9 +180,10 @@ class TestProteinMerge(basetests.MergeTest):
     def test_ensgcentric(self):
         isosql = """
         SELECT g.gene_acc, bs.set_name, pc.channel_name,
-        pi.quantvalue, pi.amount_psms FROM genes AS g
+        pi.quantvalue, pi.amount_psms, fqp.amount_psms FROM genes AS g
         JOIN biosets AS bs
         JOIN gene_iso_quanted AS pi USING(gene_id)
+        JOIN gene_iso_fullpsms AS fqp USING(gene_id)
         JOIN genequant_channels AS pc USING(channel_id)
         """
         self.ensgcentric('ensg.txt', isosql)
@@ -229,10 +233,11 @@ class TestProteinMerge(basetests.MergeTest):
         self.check_build_values(sql, ['q-value', 'MS1 precursor area'], 
                 'Gene Name')
         sql = ('SELECT ai.assoc_id, bs.set_name, pc.channel_name, '
-               'pi.quantvalue, pi.amount_psms '
+               'pi.quantvalue, pi.amount_psms, fqp.amount_psms '
                'FROM associated_ids AS ai '
                'JOIN biosets AS bs '
                'JOIN assoc_iso_quanted AS pi USING(gn_id) '
+               'JOIN assoc_iso_fullpsms AS fqp USING(gn_id) '
                'JOIN genequant_channels AS pc USING(channel_id) '
                )
         self.check_built_isobaric(sql, 'Gene Name')
