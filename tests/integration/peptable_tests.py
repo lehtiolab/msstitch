@@ -25,7 +25,8 @@ class TestPSM2Peptable(basetests.BaseTest):
                 psms[psm['Peptide']] = {score: psm}
         wildcardstrip = 'tmt10plex_'
         striplist = ['#SpecFile', 'Files/scans for peptide', 'MS1 area', 
-                'MS1 area (highest of all PSMs)', 'q-value (linear modeled)']
+                'MS1 area (highest of all PSMs)', 'q-value (linear modeled)',
+                'Amount fully quanted PSMs']
         for peptide in self.tsv_generator(self.resultfn):
             for newkey, oldkey in zip(['Peptide', 'peptide q-value', 'Protein'],
                                       ['Peptide sequence', 'q-value', 'Protein(s)']):
