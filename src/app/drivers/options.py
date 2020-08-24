@@ -142,10 +142,10 @@ shared_options = {
             'action': 'store_const', 'const': 'average', 'default': 'median',
             'required': False, 'help': 'Use average isobaric quantification values for summarizing '
             'quant from PSMs, instead of default PSM median values'},
-    'logisoquant': {'driverattr': 'logisoquant', 'clarg': '--logquantratios',
+    'logisoquant': {'driverattr': 'logisoquant', 'clarg': '--logisoquant',
         'required': False, 'action': 'store_const', 'const': True, 'help':
         'Output log2 values for isoquant ratios. This log2-transforms input PSM data '
-        'prior to ratio quantification and optional normalization. Ratios will '
+        'prior to summarizing and optional normalization. Ratios will '
         'be calculated subtracted rather than divided, obviously.'},
     'mediannormalize': {'driverattr': 'mediannormalize',
         'clarg': '--median-normalize', 'default': False, 
