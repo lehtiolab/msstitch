@@ -73,20 +73,17 @@ class TestPSM2Peptable(basetests.BaseTest):
         for line in self.tsv_generator(self.resultfn):
             self.assertEqual(line[fdr[1:] + ' (linear modeled)'], 'NA')
 
-#    def test_psm2peptable_normalized(self):
-#        # FIXME fix the normalization, until then this test is broken
-#        print('fix the normalization, until then this test is broken')
-#        options = ['--spectracol', '1', '--isobquantcolpattern',
-#                   'tmt10plex', '--scorecolpattern', 'svm',
-#                   '--denompatterns', '126', '--median-normalize',
-#                   '--ms1quantcolpattern', 'MS1', 
-#                   '--modelqvals', '--qvalthreshold', '1e-5',
-#                   '--minpepnr', str(4),
-#                   ]
-#        self.run_command(options)
-#        self.check(1)
-#        self.isoquant_check(os.path.join(self.fixdir, 'target_pep_quant_norm.tsv'),
-#                'Peptide sequence', self.channels, self.nopsms)
+    def test_psm2peptable_normalized(self):
+        options = ['--spectracol', '1', '--isobquantcolpattern',
+                   'tmt10plex', '--scorecolpattern', 'svm',
+                   '--ms1quantcolpattern', 'MS1', 
+                   '--modelqvals', '--qvalthreshold', '1e-5',
+                   '--denompatterns', '126', '--median-normalize',
+                   ]
+        self.run_command(options)
+        self.check(1)
+        self.isoquant_check(os.path.join(self.fixdir, 'target_pep_quant_norm.tsv'),
+                'Peptide sequence', self.channels, self.nopsms)
 
     def test_psm2peptable(self):
         fncol = 1
@@ -152,15 +149,33 @@ class TestProteinTable(basetests.ProttableTest):
         expectedfn = os.path.join(self.fixdir, 'proteins.txt')
         self.check_lines(expectedfn, self.resultfn)
 
+    def test_isonormalize_log(self):
+        self.specialoptions = ['--logisoquant', '--median-normalize']
+        self.dotest_proteintable('^q-value', 'Master protein(s)', 'Protein ID')
+        expectedfn = os.path.join(self.fixdir, 'proteins_isonorm_log.txt')
+        self.check_lines(expectedfn, self.resultfn)
+
+    def test_isonormalize_nolog_sweep(self):
+        self.specialoptions = ['--median-normalize']
+        self.dotest_proteintable('^q-value', 'Master protein(s)', 'Protein ID', summarize_method='sweep')
+        expectedfn = os.path.join(self.fixdir, 'proteins_isonorm_nolog.txt')
+        self.check_lines(expectedfn, self.resultfn)
+
     def test_no_denom_but_intensity(self):
         self.specialoptions = []
         self.dotest_proteintable('^q-value', 'Master protein(s)', 'Protein ID', summarize_method='intensity')
         expectedfn = os.path.join(self.fixdir, 'proteins_intensities.txt')
         self.check_lines(expectedfn, self.resultfn)
 
-    def test_with_isobaric_normalize(self):
-        # FIXME create test
-        pass
+    def test_intensity_normalize(self):
+        self.specialoptions = ['--median-normalize']
+        res = self.dotest_proteintable('^q-value', 'Master protein(s)', 'Protein ID', summarize_method='intensity', should_error=True)
+        if res.returncode != 0:
+            self.assertEqual(res.stdout.strip(), 
+                    'Cannot do median-centering on intensity values, exiting')
+        else:
+            self.fail('This test should error due to an invalid combination of '
+                    '--median-normalize and --medianintensity')
 
 
 class TestGenenameTable(basetests.ProttableTest):

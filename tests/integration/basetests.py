@@ -281,7 +281,8 @@ class ProttableTest(BaseTest):
             except ValueError:
                 self.assertNotIn(protein['Protein ID'], top_ms1)
 
-    def dotest_proteintable(self, scorecolpat, featkey, featout, summarize_method='denoms'):
+    def dotest_proteintable(self, scorecolpat, featkey, featout,
+            summarize_method='denoms', should_error=False):
         if summarize_method == 'denoms':
             summ = ['--denompatterns', '126']
         elif summarize_method == 'sweep':
@@ -293,8 +294,10 @@ class ProttableTest(BaseTest):
                 '--isobquantcolpattern', 'plex',
                 *summ, '--psmtable', self.psmfile
                 ] + self.specialoptions
-        self.run_command(options)
-        self.check_ms1(featkey, featout)
+        res = self.run_command(options, return_error=should_error)
+        if not should_error:
+            self.check_ms1(featkey, featout)
+        return res
 
     def get_top_peps(self, fn, featkey, pepkey, valuekey, lowerbetter=False):
         top_vals = {}

@@ -531,8 +531,6 @@ class TestIsoSummarize(TestIso):
 
 
 class TestIsoFeatSummarize(TestIso):
-    # FIXME normalizing should be changed to normalize on features columns, 
-    # not on PSM columns! The normalization test is currenyly broken
     suffix = '_ratio_isobaric.txt'
     command = 'isosummarize'
     infilename = 'target_pg.tsv'
@@ -551,7 +549,7 @@ class TestIsoFeatSummarize(TestIso):
 
     def test_normalized_isoquant(self):
         options = ['--featcol', '11', '--isobquantcolpattern', 'tmt10plex',
-                   '--denompatterns', '_126', '--median-normalize']
+                   '--denompatterns', '_126']
         self.run_command(options)
-        self.isoquant_check(os.path.join(self.fixdir, 'proteins_normquant'),
-            'Protein ID', self.channels, self.nopsms)
+        self.isoquant_check(os.path.join(self.fixdir, 'isosum_charge_column.txt'), # 'proteins_isosum_column.txt'),
+            'Charge', self.channels, self.nopsms)

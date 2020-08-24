@@ -1,3 +1,5 @@
+import sys
+
 from app.drivers.base import PepProttableDriver
 
 from app.drivers.options import prottable_options
@@ -49,9 +51,13 @@ class ProttableDriver(PepProttableDriver):
                                for pattern in self.denompatterns]
                 denomcols = set([col for cols in denomcolnrs for col in cols])
             elif not self.mediansweep and not self.medianintensity:
-                raise RuntimeError('Must define either denominator column numbers '
+                print('Must define either denominator column numbers '
                         'or regex pattterns to find them, or use median sweep, or '
                         'report median intensities.')
+                sys.exit(1)
+            elif self.medianintensity and self.mediannormalize:
+                print('Cannot do median-centering on intensity values, exiting')
+                sys.exit(1)
             quantcols = tsvreader.get_columns_by_pattern(psmheader, self.quantcolpattern)
             nopsms = [isosummarize.get_no_psms_field(qf) for qf in quantcols]
             self.header = self.header + quantcols + nopsms + [prottabledata.HEADER_NO_FULLQ_PSMS]
