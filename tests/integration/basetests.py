@@ -322,11 +322,9 @@ class MergeTest(BaseTest):
     command = 'merge'
     dbfn = 'target_psms.sqlite'
 
-    def run_command(self, options, nopsms=False):
+    def run_command(self, options):
         self.infile = os.path.join(self.fixdir, self.infilename)
         self.resultfn = os.path.join(self.workdir, self.infilename)
-        if not nopsms:
-            self.options.extend(['--psmnrcolpattern', 'quanted'])
         super().run_command(options)
 
     def setUp(self):

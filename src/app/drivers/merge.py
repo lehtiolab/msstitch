@@ -75,9 +75,11 @@ class MergeDriver(base.PepProttableDriver):
             else:
                 self.header.extend(['{}_{}'.format(x, ph.HEADER_AREA) for x in self.setnames])
         if self.quantcolpattern:
-            channels = [x for x in self.lookup.get_isoquant_headernames()]
+            stored_psmnrs = self.lookup.check_isoquant_psmnrs()
+            channels = [x for x in self.lookup.get_isoquant_headernames(stored_psmnrs)]
             for setn in self.setnames:
                 self.header.extend(['{}_{}'.format(setn, chan[0]) for chan in channels])
-                self.header.append('{}_{}'.format(setn, ph.HEADER_NO_FULLQ_PSMS))
-                self.header.extend(['{}_{}'.format(setn, chan[1]) for chan in channels])
+                if stored_psmnrs:
+                    self.header.append('{}_{}'.format(setn, ph.HEADER_NO_FULLQ_PSMS))
+                    self.header.extend(['{}_{}'.format(setn, chan[1]) for chan in channels])
         self.features = merge.build_proteintable(self.lookup, self.mergecutoff, self.quantcolpattern)

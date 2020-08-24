@@ -140,9 +140,21 @@ class ProtPepTable(ResultLookupInterface):
         self.singlecols_to_index.append(('fullq_acc_ix', table, self.colmap[table][0]))
         self.singlecols_to_index.append(('fullq_table_ix', table, self.colmap[table][1]))
 
-    def get_isoquant_headernames(self):
+    def check_isoquant_psmnrs(self):
         cursor = self.get_cursor()
-        cursor.execute(
-            'SELECT DISTINCT channel_name, amount_psms_name '
-            'FROM {}'.format(self.table_map[self.datatype]['isochtable']))
+        tables = self.table_map[self.datatype]
+        psmschecksql = """SELECT EXISTS(SELECT amount_psms FROM {} 
+                WHERE amount_psms IS NOT NULL)""".format(tables['isoqtable'])
+        return cursor.execute(psmschecksql).fetchone()[0]
+
+    def get_isoquant_headernames(self, stored_psmnrs):
+        cursor = self.get_cursor()
+        tables = self.table_map[self.datatype]
+        if stored_psmnrs:
+            cursor.execute(
+                'SELECT DISTINCT channel_name, amount_psms_name '
+                'FROM {}'.format(tables['isochtable']))
+        else:
+            cursor.execute(
+                'SELECT DISTINCT channel_name FROM {}'.format(tables['isochtable']))
         return cursor

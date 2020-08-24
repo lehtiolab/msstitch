@@ -186,7 +186,7 @@ class TestProteinMerge(basetests.MergeTest):
 
     def ensgcentric(self, infile, isosql, nopsms=False):
         self.infilename = infile
-        self.run_command(self.options, nopsms)
+        self.run_command(self.options)
         sql = ('SELECT g.gene_acc, bs.set_name, gf.fdr, gp.quant '
                'FROM genes AS g '
                'JOIN biosets AS bs '
