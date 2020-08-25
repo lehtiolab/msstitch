@@ -7,7 +7,7 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                  'mzmlfilename TEXT',
                                  'set_id INTEGER',
                                  'FOREIGN KEY(set_id)'
-                                 'REFERENCES biosets'
+                                 'REFERENCES biosets ON DELETE CASCADE'
                                  ],
                    'mzml': ['spectra_id TEXT PRIMARY KEY',
                             'mzmlfile_id INTEGER',
@@ -17,16 +17,16 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                             'retention_time DOUBLE',
                             'ion_injection_time DOUBLE',
                             'FOREIGN KEY(mzmlfile_id)'
-                            'REFERENCES mzmlfiles'],
+                            'REFERENCES mzmlfiles ON DELETE CASCADE'],
                    'ioninjtime': ['spectra_id TEXT',
                                   'ion_injection_time DOUBLE',
                                   'FOREIGN KEY(spectra_id)'
-                                  'REFERENCES mzml',
+                                  'REFERENCES mzml ON DELETE CASCADE',
                                   ],
                    'ionmob': ['spectra_id TEXT',
                                   'ion_mobility DOUBLE',
                                   'FOREIGN KEY(spectra_id)'
-                                  'REFERENCES mzml',
+                                  'REFERENCES mzml ON DELETE CASCADE',
                                   ],
                    'isobaric_channels': ['channel_id INTEGER PRIMARY KEY',
                                          'channel_name TEXT'],
@@ -34,7 +34,7 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                       'channel_id INTEGER',
                                       'intensity REAL',
                                       'FOREIGN KEY(spectra_id)'
-                                      'REFERENCES mzml',
+                                      'REFERENCES mzml ON DELETE CASCADE ',
                                       'FOREIGN KEY(channel_id)'
                                       'REFERENCES isobaric_channels'
                                       ],
@@ -46,15 +46,15 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                  'retention_time REAL', 'mz REAL',
                                  'charge INTEGER', 'intensity REAL',
                                  'FOREIGN KEY(mzmlfile_id)'
-                                 'REFERENCES mzmlfiles'],
+                                 'REFERENCES mzmlfiles ON DELETE CASCADE'],
                    'ms1_fwhm': ['feature_id INTEGER PRIMARY KEY',
                                 'fwhm REAL',
                                 'FOREIGN KEY(feature_id)'
-                                'REFERENCES ms1_quant'],
+                                'REFERENCES ms1_quant ON DELETE CASCADE'],
                    'ms1_align': ['spectra_id TEXT',
                                  'feature_id INTEGER',
                                  'FOREIGN KEY(spectra_id) '
-                                 'REFERENCES mzml '
+                                 'REFERENCES mzml ON DELETE CASCADE '
                                  'FOREIGN KEY(feature_id) '
                                  'REFERENCES ms1_quant',
                                  ],
@@ -68,36 +68,36 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                             'FOREIGN KEY(pep_id)'
                             'REFERENCES peptide_sequences '
                             'FOREIGN KEY(spectra_id)'
-                            'REFERENCES mzml'
+                            'REFERENCES mzml ON DELETE CASCADE'
                             ],
                    'psmrows': ['psm_id TEXT',
                                'rownr INTEGER',
                                'FOREIGN KEY(psm_id) '
-                               'REFERENCES psms(psm_id)'],
+                               'REFERENCES psms(psm_id) ON DELETE CASCADE'],
                    'proteins': ['pacc_id INTEGER PRIMARY KEY',
                                 'protein_acc TEXT UNIQUE'],
                    'gene_tables': ['genetable_id INTEGER PRIMARY KEY',
                                    'set_id INTEGER',
                                    'filename TEXT',
                                    'FOREIGN KEY(set_id)'
-                                   'REFERENCES biosets'],
+                                   'REFERENCES biosets ON DELETE CASCADE'],
                    'protein_tables': ['prottable_id INTEGER PRIMARY KEY',
                                       'set_id INTEGER',
                                       'filename TEXT',
                                       'FOREIGN KEY(set_id)'
-                                      'REFERENCES biosets'],
+                                      'REFERENCES biosets ON DELETE CASCADE'],
                    'peptide_tables': ['peptable_id INTEGER PRIMARY KEY',
                                       'set_id INTEGER',
                                       'filename TEXT',
                                       'FOREIGN KEY(set_id)'
-                                      'REFERENCES biosets'],
+                                      'REFERENCES biosets ON DELETE CASCADE'],
                    'pepquant_channels': ['channel_id INTEGER PRIMARY KEY',
                                          'peptable_id INTEGER',
                                          'channel_name TEXT',
                                          'amount_psms_name TEXT',
                                          'FOREIGN KEY(peptable_id) '
                                          'REFERENCES '
-                                         'peptide_tables(peptable_id)'
+                                         'peptide_tables(peptable_id) ON DELETE CASCADE'
                                          ],
                    'peptide_iso_quanted': ['peptidequant_id'
                                            'INTEGER PRIMARY KEY',
@@ -110,7 +110,7 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                            'peptide_sequences(pep_id) '
                                            'FOREIGN KEY(channel_id) '
                                            'REFERENCES '
-                                           'pepquant_channels(channel_id)'
+                                           'pepquant_channels(channel_id) ON DELETE CASCADE'
                                            ],
                    'peptide_iso_fullpsms': ['pepq_full_id INTEGER PRIMARY KEY',
                                            'pep_id INTEGER',
@@ -118,7 +118,7 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                            'amount_psms INTEGER',
                                            'FOREIGN KEY(peptable_id) '
                                            'REFERENCES '
-                                           'peptide_tables(peptable_id)'
+                                           'peptide_tables(peptable_id) ON DELETE CASCADE '
                                            'FOREIGN KEY(pep_id) '
                                            'REFERENCES peptide_sequences(pep_id) '
                                            ],
@@ -130,7 +130,7 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                     'FOREIGN KEY(pep_id) '
                     'REFERENCES peptide_sequences(pep_id) '
                     'FOREIGN KEY(peptable_id) '
-                    'REFERENCES peptide_tables(peptable_id)'
+                    'REFERENCES peptide_tables(peptable_id) ON DELETE CASCADE'
                     ],
                    'peptide_fdr': ['pep_id INTEGER',
                                    'peptable_id INTEGER',
@@ -139,7 +139,7 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                    'REFERENCES peptide_sequences(pep_id) '
                                    'FOREIGN KEY(peptable_id) '
                                    'REFERENCES '
-                                   'peptide_tables(peptable_id)'
+                                   'peptide_tables(peptable_id) ON DELETE CASCADE'
                                    ],
                    'protein_precur_quanted':
                    ['prot_precquant_id INTEGER PRIMARY KEY',
@@ -149,7 +149,7 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                     'FOREIGN KEY(pacc_id) '
                     'REFERENCES proteins(pacc_id) '
                     'FOREIGN KEY(prottable_id) '
-                    'REFERENCES protein_tables(prottable_id)'
+                    'REFERENCES protein_tables(prottable_id) ON DELETE CASCADE'
                     ],
                    'gene_precur_quanted':
                    ['gene_precquant_id INTEGER PRIMARY KEY',
@@ -159,7 +159,7 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                     'FOREIGN KEY(gene_id) '
                     'REFERENCES genes(gene_id) '
                     'FOREIGN KEY(genetable_id) '
-                    'REFERENCES gene_tables(genetable_id)'
+                    'REFERENCES gene_tables(genetable_id) ON DELETE CASCADE'
                     ],
                    'assoc_precur_quanted':
                    ['gene_precquant_id INTEGER PRIMARY KEY',
@@ -169,7 +169,7 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                     'FOREIGN KEY(gn_id) '
                     'REFERENCES associated_ids(gn_id) '
                     'FOREIGN KEY(genetable_id) '
-                    'REFERENCES gene_tables(genetable_id)'
+                    'REFERENCES gene_tables(genetable_id) ON DELETE CASCADE'
                     ],
                    'protein_iso_quanted': ['proteinquant_id '
                                            'INTEGER PRIMARY KEY',
@@ -181,7 +181,7 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                            'REFERENCES proteins(pacc_id) '
                                            'FOREIGN KEY(channel_id) '
                                            'REFERENCES '
-                                           'protquant_channels(channel_id)'
+                                           'protquant_channels(channel_id) ON DELETE CASCADE'
                                            ],
                    'gene_iso_quanted': ['genequant_id '
                                         'INTEGER PRIMARY KEY',
@@ -193,7 +193,7 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                         'REFERENCES genes(gene_id) '
                                         'FOREIGN KEY(channel_id) '
                                         'REFERENCES '
-                                        'genequant_channels(channel_id)'
+                                        'genequant_channels(channel_id) ON DELETE CASCADE'
                                         ],
                    'assoc_iso_quanted': ['genequant_id '
                                          'INTEGER PRIMARY KEY',
@@ -205,7 +205,7 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                          'REFERENCES associated_ids(gn_id) '
                                          'FOREIGN KEY(channel_id) '
                                          'REFERENCES '
-                                         'genequant_channels(channel_id)'
+                                         'genequant_channels(channel_id) ON DELETE CASCADE'
                                          ],
                    'genequant_channels': ['channel_id INTEGER PRIMARY KEY',
                                           'genetable_id INTEGER',
@@ -213,7 +213,7 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                           'amount_psms_name TEXT',
                                           'FOREIGN KEY(genetable_id) '
                                           'REFERENCES '
-                                          'gene_tables(genetable_id)'
+                                          'gene_tables(genetable_id) ON DELETE CASCADE'
                                           ],
                    'protquant_channels': ['channel_id INTEGER PRIMARY KEY',
                                           'prottable_id INTEGER',
@@ -221,7 +221,7 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                           'amount_psms_name TEXT',
                                           'FOREIGN KEY(prottable_id) '
                                           'REFERENCES '
-                                          'protein_tables(prottable_id)'
+                                          'protein_tables(prottable_id) ON DELETE CASCADE'
                                           ],
                    'protein_iso_fullpsms': ['pq_full_id INTEGER PRIMARY KEY',
                                            'pacc_id INTEGER',
@@ -229,7 +229,7 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                            'amount_psms INTEGER',
                                            'FOREIGN KEY(prottable_id) '
                                            'REFERENCES '
-                                           'protein_tables(prottable_id) '
+                                           'protein_tables(prottable_id)  ON DELETE CASCADE '
                                            'FOREIGN KEY(pacc_id) '
                                            'REFERENCES proteins(pacc_id) '
                                            ],
@@ -239,7 +239,7 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                         'amount_psms INTEGER',
                                         'FOREIGN KEY(genetable_id) '
                                         'REFERENCES '
-                                        'gene_tables(genetable_id) '
+                                        'gene_tables(genetable_id)  ON DELETE CASCADE '
                                         'FOREIGN KEY(gene_id) '
                                         'REFERENCES genes(gene_id) '
                                         ],
@@ -249,7 +249,7 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                          'amount_psms INTEGER',
                                          'FOREIGN KEY(genetable_id) '
                                          'REFERENCES '
-                                         'gene_tables(genetable_id) '
+                                         'gene_tables(genetable_id)  ON DELETE CASCADE '
                                          'FOREIGN KEY(gn_id) '
                                          'REFERENCES associated_ids(gn_id) '
                                          ],
@@ -260,7 +260,7 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                 'REFERENCES genes(gene_id) '
                                 'FOREIGN KEY(genetable_id) '
                                 'REFERENCES '
-                                'gene_tables(genetable_id)'
+                                'gene_tables(genetable_id) ON DELETE CASCADE'
                                 ],
                    'assoc_fdr': ['gn_id INTEGER',
                                  'genetable_id INTEGER',
@@ -269,7 +269,7 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                  'REFERENCES associated_ids(gn_id) '
                                  'FOREIGN KEY(genetable_id) '
                                  'REFERENCES '
-                                 'gene_tables(genetable_id)'
+                                 'gene_tables(genetable_id) ON DELETE CASCADE'
                                  ],
                    'protein_fdr': ['pacc_id INTEGER',
                                    'prottable_id INTEGER',
@@ -278,14 +278,14 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                    'REFERENCES proteins(pacc_id) '
                                    'FOREIGN KEY(prottable_id) '
                                    'REFERENCES '
-                                   'protein_tables(prottable_id)'
+                                   'protein_tables(prottable_id) ON DELETE CASCADE'
                                    ],
                    'protein_psm': ['protein_acc TEXT',
                                    'psm_id TEXT',
                                    'FOREIGN KEY(protein_acc) '
                                    'REFERENCES proteins(protein_acc) '
                                    'FOREIGN KEY(psm_id) '
-                                   'REFERENCES psms(psm_id)'],
+                                   'REFERENCES psms(psm_id) ON DELETE CASCADE'],
                    'protein_evidence': ['protein_acc TEXT',
                                         'evidence_lvl REAL',
                                         'FOREIGN KEY(protein_acc) '
@@ -322,7 +322,7 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                    'psm_protein_groups': ['psm_id TEXT',
                                           'master_id INTEGER',
                                           'FOREIGN KEY(psm_id) REFERENCES'
-                                          ' psms(psm_id)',
+                                          ' psms(psm_id) ON DELETE CASCADE ',
                                           'FOREIGN KEY(master_id) REFERENCES'
                                           ' protein_group_master(master_id)'],
                    'genes': ['gene_id INTEGER PRIMARY KEY',
