@@ -19,6 +19,7 @@ def main():
                psmtable.ConfidenceFilterDriver(),
                psmtable.PSMTableRefineDriver(),
                psmtable.IsoSummarizeDriver(),
+               psmtable.DeleteSetDriver(),
 
                percolator.FilterSequences(),
                percolator.SplitProteinDriver(),

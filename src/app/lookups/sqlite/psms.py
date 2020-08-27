@@ -350,3 +350,15 @@ class PSMDB(ResultLookupInterface):
         cursor.execute(
             'SELECT channel_name FROM isobaric_channels')
         return cursor.fetchall()
+
+    def delete_sample_set_shift_rows(self, setnames):
+        cursor = self.get_cursor()
+        cursor.executemany('DELETE FROM biosets WHERE set_name=?', ((x,) for x in setnames))
+        # Now all the rows will be gone where this set was, so we re-number:
+        # Vacuuming updates the internal rowid column of the tables, which is
+        # a count, when they are not INTEGER PRIMARY KEY
+        self.conn.commit()
+        cursor = self.get_cursor()
+        cursor.execute('VACUUM')
+        cursor.execute('UPDATE psmrows SET rownr=rowid-1') # -1 since we start at 0
+        self.conn.commit()

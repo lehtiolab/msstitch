@@ -258,3 +258,21 @@ class IsoSummarizeDriver(PSMDriver):
                 quantcols, denomcols, self.mediansweep, self.medianintensity,
                 self.median_or_avg, self.minint, False, False, self.featcol,
                 self.logisoquant, self.mediannormalize)
+
+
+class DeleteSetDriver(PSMDriver):
+    outsuffix = '_deletedset.txt'
+    command = 'deletesets'
+    lookuptype = 'psm'
+    commandhelp = """
+    Remove sample sets from an existing PSM table and its lookup file
+    """
+
+    def set_options(self):
+        super().set_options()
+        self.options.update(self.define_options(['lookupfn', 'setnames'], psmtable_options))
+
+    def set_features(self):
+        self.lookup.delete_sample_set_shift_rows(self.setnames)
+        self.header = self.oldheader
+        self.psms = filtering.filter_psms_remove_set(self.oldpsms, self.setnames)
