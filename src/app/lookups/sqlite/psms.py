@@ -156,7 +156,7 @@ class PSMDB(ResultLookupInterface):
         self.index_column('psmspepid_index', 'psms', 'pep_id')
 
     def index_protein_peptides(self):
-        self.index_column('protein_index', 'protein_psm', 'protein_acc')
+        self.index_column('proteinpsm_index', 'protein_psm', 'protein_acc')
         self.index_column('protpsmid_index', 'protein_psm', 'psm_id')
 
     def get_exp_spectra_data_rows(self, shiftrows):

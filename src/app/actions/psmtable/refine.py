@@ -161,14 +161,14 @@ def get_all_proteins_from_unrolled_psm(rownr, pgdb):
 
 
 # FIXME tsv
-def generate_psms_with_proteingroups(psms, pgdb, unroll=False):
+def generate_psms_with_proteingroups(psms, pgdb, specfncol, unroll):
     rownr = 0
     use_evi = pgdb.check_evidence_tables()
     all_protein_group_content = pgdb.get_all_psms_proteingroups(use_evi)
     protein = next(all_protein_group_content)
     for psm in psms:
         if unroll:
-            psm_id = tsvreader.get_psm_id(psm)
+            psm_id = tsvreader.get_psm_id(psm, specfncol)
             lineproteins = get_all_proteins_from_unrolled_psm(psm_id, pgdb)
         else:
             lineproteins = tsvreader.get_proteins_from_psm(psm)
