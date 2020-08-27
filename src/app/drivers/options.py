@@ -308,6 +308,9 @@ psmtable_options = {
         'action': 'store_const', 'const': True, 'default': False, 
         'help': 'Specifies to add protein groups to PSM table', 'required': False,
         },
+    'oldpsmfile': {'driverattr': 'oldpsmfile', 'clarg': '--oldpsms', 'type': 'file',
+                'help': 'PSM table file containing previously analysed PSMs to '
+                'append new PSM table to.', 'required': False},
     'filtpep': {'driverattr': 'filtpep', 'clarg': '--filtpep',
                 'help': 'Peptide q-value cutoff level as a floating point number',
                 'type': float, 'required': False},

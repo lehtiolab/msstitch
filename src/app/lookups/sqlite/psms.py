@@ -124,6 +124,11 @@ class PSMDB(ResultLookupInterface):
             'INSERT INTO psmrows(psm_id, rownr) VALUES(?, ?)',
             ((psm['psm_id'], psm['rownr']) for psm in psms))
         self.conn.commit()
+    
+    def get_highest_rownr(self):
+        cursor = self.get_cursor()
+        cursor.execute('SELECT MAX(rownr) FROM psmrows')
+        return int(cursor.fetchone()[0])
 
     def store_peptides_proteins(self, allpepprot, psmids_to_store):
         ppmap = {psm_id: allpepprot[psm_id] for psm_id in psmids_to_store}
@@ -154,8 +159,9 @@ class PSMDB(ResultLookupInterface):
         self.index_column('protein_index', 'protein_psm', 'protein_acc')
         self.index_column('protpsmid_index', 'protein_psm', 'psm_id')
 
-    def get_exp_spectra_data_rows(self):
+    def get_exp_spectra_data_rows(self, shiftrows):
         cursor = self.get_cursor()
+        rowlim = 'WHERE pr.rownr>{} '.format(shiftrows - 1) if shiftrows else ''
         return cursor.execute('SELECT pr.rownr, bs.set_name, sp.retention_time, '
                               'iit.ion_injection_time, im.ion_mobility '
                               'FROM psmrows AS pr '
@@ -164,7 +170,7 @@ class PSMDB(ResultLookupInterface):
                               'LEFT OUTER JOIN ioninjtime AS iit USING(spectra_id) '
                               'LEFT OUTER JOIN ionmob AS im USING(spectra_id) '
                               'JOIN mzmlfiles as mf USING(mzmlfile_id) '
-                              'JOIN biosets AS bs USING(set_id) '
+                              'JOIN biosets AS bs USING(set_id) ' + rowlim +
                               'ORDER BY pr.rownr')
 
     def store_masters(self, allmasters, psm_masters):
@@ -312,7 +318,7 @@ class PSMDB(ResultLookupInterface):
         cursor = self.get_cursor()
         return cursor.execute(sql)
 
-    def select_all_psm_quants(self, isobaric=False, precursor=False):
+    def select_all_psm_quants(self, shiftrows, isobaric=False, precursor=False):
         selects = ['pr.rownr']
         joins = ['JOIN psms USING(psm_id)', 'JOIN mzml USING(spectra_id)']
         sqlfields, fieldcount = {}, 1
@@ -331,11 +337,10 @@ class PSMDB(ResultLookupInterface):
                           ])
             sqlfields['precursor'] = fieldcount
             sqlfields['fwhm'] = fieldcount + 1
-        if not precursor and not isobaric:
-            raise RuntimeError('Cannot add quantification data, neither '
-                               'isobaric, nor precursor have been specified.')
-        sql = ('SELECT {} FROM psmrows as pr {} '
-               'ORDER BY pr.rownr'.format(', '.join(selects), ' '.join(joins)))
+
+        rowlim = 'WHERE pr.rownr>{} '.format(shiftrows - 1) if shiftrows else ''
+        sql = ('SELECT {} FROM psmrows as pr {} {} '
+               'ORDER BY pr.rownr'.format(', '.join(selects), ' '.join(joins), rowlim))
         cursor = self.get_cursor()
         return cursor.execute(sql), sqlfields
 

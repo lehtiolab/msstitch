@@ -34,20 +34,20 @@ def create_header(oldheader, genes, proteingroup, precursor, isob_header, bioset
     return header
 
 
-def create_psm_lookup(fn, fastafn, header, pgdb, unroll, specfncol, fastadelim, genefield):
+def create_psm_lookup(fn, header, proteins, pgdb, shiftrows, unroll, specfncol, fastadelim, genefield):
     """Reads PSMs from file, stores them to a database backend in chunked PSMs.
     """
-    proteins = store_proteins_descriptions(pgdb, fastafn, fn, header,
-                                           fastadelim, genefield)
     mzmlmap = pgdb.get_mzmlfile_map()
     sequences = {}
     for psm in tsvreader.generate_tsv_psms(fn, header):
         seq = tsvreader.get_psm_sequence(psm, unroll)
         sequences[seq] = 1
-    pgdb.store_pepseqs(((seq,) for seq in sequences))
+    pepseqmap = pgdb.get_peptide_seq_map()
+    pgdb.store_pepseqs(((seq,) for seq in sequences if seq not in pepseqmap))
     pepseqmap = pgdb.get_peptide_seq_map()
     psms = []
     for row, psm in enumerate(tsvreader.generate_tsv_psms(fn, header)):
+        row += shiftrows
         specfn, psm_id, specscanid, seq, score = tsvreader.get_psm(psm, unroll, specfncol)
         if len(psms) % DB_STORE_CHUNK == 0:
             pgdb.store_psms(psms)
@@ -491,12 +491,13 @@ def get_protein_group_content(pgmap, master):
     return pg_content
 
 
-def generate_psms_quanted(quantdb, psms, isob_header, isobaric=False, precursor=False):
+def generate_psms_quanted(quantdb, shiftrows, psms, isob_header, isobaric=False, precursor=False):
     """Takes dbfn and connects, gets quants for each line in tsvfn, sorts
     them in line by using keys in quantheader list."""
-    allquants, sqlfields = quantdb.select_all_psm_quants(isobaric, precursor)
+    allquants, sqlfields = quantdb.select_all_psm_quants(shiftrows, isobaric, precursor)
     quant = next(allquants)
     for rownr, psm in enumerate(psms):
+        rownr += shiftrows
         outpsm = {x: y for x, y in psm.items()}
         if precursor:
             pquant = [quant[sqlfields['precursor']], quant[sqlfields['fwhm']]]
@@ -548,9 +549,10 @@ def count_missed_cleavage(full_pepseq, count=0):
         return count
 
 
-def generate_psms_spectradata(lookup, psms, bioset, miscleav):
-    psm_specdata = zip(enumerate(psms), lookup.get_exp_spectra_data_rows())
+def generate_psms_spectradata(lookup, shiftrows, psms, bioset, miscleav):
+    psm_specdata = zip(enumerate(psms), lookup.get_exp_spectra_data_rows(shiftrows))
     for (row, psm), specdata in psm_specdata:
+        row += shiftrows
         outpsm = {x: y for x, y in psm.items()}
         if row == int(specdata[0]):
             inj = str(specdata[3])

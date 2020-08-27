@@ -1,6 +1,7 @@
 import os
 import sys
 from hashlib import md5
+from itertools import chain
 
 from app.drivers.options import psmtable_options
 from app.drivers.base import PSMDriver
@@ -148,12 +149,12 @@ class PSMTableRefineDriver(PSMDriver):
     outsuffix = '_refined.txt'
     lookuptype = 'psm'
     command = 'psmtable'
-    commandhelp = ('Add column to mzidtsv with gene names or symbols, '
-                   'which are stored in a lookup specified with --dbfile')
+    commandhelp = ('Add columns to mzidtsv with genes, quantification, protein groups, '
+                   'etc. which are stored in a lookup specified with --dbfile')
 
     def set_options(self):
         super().set_options()
-        options = self.define_options(['lookupfn', 'precursor', 'isobaric',
+        options = self.define_options(['oldpsmfile', 'lookupfn', 'precursor', 'isobaric',
             'unroll', 'spectracol', 'addbioset', 'addmiscleav', 'genes',
             'proteingroup', 'fasta', 'genefield', 'fastadelim'], psmtable_options)
         self.options.update(options)
@@ -173,8 +174,29 @@ class PSMTableRefineDriver(PSMDriver):
         elif self.proteingroup:
             self.tabletypes.append('proteingroup')
         self.lookup.add_tables(self.tabletypes)
-        refine.create_psm_lookup(self.fn, self.fasta, self.oldheader, self.lookup, 
-                self.unroll, specfncol, fastadelim, genefield)
+
+        # If appending to previously refined PSM table, reuse DB and shift rows
+        if self.fasta:
+            fasta_md5 = refine.get_fasta_md5(self.fasta)
+        else:
+            fasta_md5 = False
+        if self.oldpsmfile:
+            oldfasta_md5 = self.lookup.get_fasta_md5()
+            if fasta_md5 != oldfasta_md5:
+                print('WARNING, FASTA database used in old PSM table differs '
+                        'from the passed database (or this cannot be determined '
+                        'due to version differences), this may cause problems, as '
+                        'msstitch will use the old database for PSM annotation.')
+            shiftrows = self.lookup.get_highest_rownr() + 1
+            proteins = set([x for x in self.lookup.get_protids()])
+            self.lookup.drop_pgroup_tables_indices()
+        else:
+            shiftrows = 0
+            proteins = refine.store_proteins_descriptions(self.lookup, self.fasta,
+                    fasta_md5, self.fn, self.oldheader, fastadelim, genefield)
+
+        refine.create_psm_lookup(self.fn, self.oldheader, proteins, self.lookup, 
+                shiftrows, self.unroll, specfncol, fastadelim, genefield)
         isob_header = [x[0] for x in self.lookup.get_all_quantmaps()] if self.isobaric else False
         self.header = refine.create_header(self.oldheader, self.genes, 
                 self.proteingroup, self.precursor, isob_header, self.addbioset, 
@@ -185,12 +207,18 @@ class PSMTableRefineDriver(PSMDriver):
             psms = refine.add_genes_to_psm_table(psms, self.lookup)
         if self.proteingroup:
             refine.build_proteingroup_db(self.lookup)
-            psms = refine.generate_psms_with_proteingroups(psms, self.lookup, self.unroll)
+            psms = refine.generate_psms_with_proteingroups(psms, self.lookup, specfncol, self.unroll)
         if self.isobaric or self.precursor:
-            psms = refine.generate_psms_quanted(self.lookup, psms, isob_header, 
-                    self.isobaric, self.precursor)
-        self.psms = refine.generate_psms_spectradata(self.lookup, psms, 
-                self.addbioset, self.addmiscleav)
+            psms = refine.generate_psms_quanted(self.lookup, shiftrows, psms,
+                    isob_header, self.isobaric, self.precursor)
+        psms = refine.generate_psms_spectradata(self.lookup, shiftrows, 
+                psms, self.addbioset, self.addmiscleav)
+        if self.oldpsmfile:
+            prevheader = tsvreader.get_tsv_header(self.oldpsmfile)
+            previouspsms = tsvreader.generate_tsv_psms(self.oldpsmfile, prevheader)
+            self.psms = chain(previouspsms, psms)
+        else:
+            self.psms = psms
         
 
 class IsoSummarizeDriver(PSMDriver):
