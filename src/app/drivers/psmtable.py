@@ -12,7 +12,7 @@ from app.dataformats.prottable import HEADER_NO_FULLQ_PSMS
 from app.actions.psmtable import splitmerge as splitmerge
 from app.actions.psmtable import refine as refine
 from app.actions.psmtable import percolator as perco
-from app.actions.psmtable import filter_confidence as filtconf
+from app.actions.psmtable import filtering
 from app.actions.psmtable import isosummarize
 
 from app.dataformats import prottable as prottabledata
@@ -103,10 +103,10 @@ class Perco2PSMDriver(PSMDriver):
             psms_perco = perco.add_fdr_to_mzidtsv(psms, mzidsr, mzns,
                     self.percopsms)
             if self.filtpsm:
-                psms_perco = filtconf.filter_psms(psms_perco, psmhead.HEADER_PSMQ,
+                psms_perco = filtering.filter_psms_conf(psms_perco, psmhead.HEADER_PSMQ,
                         self.filtpsm, True)
             if self.filtpep:
-                psms_perco = filtconf.filter_psms(psms_perco, psmhead.HEADER_PEPTIDE_Q,
+                psms_perco = filtering.filter_psms_conf(psms_perco, psmhead.HEADER_PEPTIDE_Q,
                         self.filtpep, True)
             writer.write_tsv(header, psms_perco, outfn)
 
@@ -136,7 +136,7 @@ class ConfidenceFilterDriver(PSMDriver):
         else:
             print('Must define either --confcol or --confcolpattern')
             sys.exit(1)
-        self.psms = filtconf.filter_psms(self.oldpsms,
+        self.psms = filtering.filter_psms_conf(self.oldpsms,
                                        confkey,
                                        self.conflvl,
                                        self.lowerbetter)
