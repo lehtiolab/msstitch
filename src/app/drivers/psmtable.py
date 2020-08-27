@@ -1,5 +1,6 @@
 import os
 import sys
+from hashlib import md5
 
 from app.drivers.options import psmtable_options
 from app.drivers.base import PSMDriver

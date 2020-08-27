@@ -14,7 +14,7 @@ EVIDENCE_LVL_INDEX = 7
 
 class PSMDB(ResultLookupInterface):
     def add_tables(self, tabletypes):
-        self.create_tables(['psms', 'psmrows', 'peptide_sequences',
+        self.create_tables(['psms', 'psmrows', 'peptide_sequences', 'fastafn',
                             'proteins', 'protein_evidence', 'protein_seq',
                             'prot_desc', 'protein_psm', 'genes',
                             'associated_ids', 'ensg_proteins', 'genename_proteins'])
@@ -22,7 +22,15 @@ class PSMDB(ResultLookupInterface):
             self.create_tables(['protein_coverage', 'protein_group_master',
                                 'protein_group_content', 'psm_protein_groups'])
 
-    def store_fasta(self, prot, evids, seq, desc, ensg, symbols):
+    def get_fasta_md5(self):
+        cursor = self.get_cursor()
+        cursor.execute('SELECT md5 FROM fastafn LIMIT 1')
+        cursor.fetchone()
+
+    def store_fasta(self, fn, md5, prot, evids, seq, desc, ensg, symbols):
+        cursor = self.get_cursor()
+        cursor.execute('INSERT INTO fastafn(filename, md5) VALUES(?, ?)',
+                (fn, md5))
         self.store_proteins(prot, evidence_lvls=evids, sequences=seq)
         protids = self.get_protids()
         cursor = self.get_cursor()

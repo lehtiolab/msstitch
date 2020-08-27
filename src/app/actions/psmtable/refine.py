@@ -1,4 +1,5 @@
 import re
+from hashlib import md5
 from collections import OrderedDict
 
 from app.readers import tsv as tsvreader
@@ -63,7 +64,15 @@ def create_psm_lookup(fn, fastafn, header, pgdb, unroll, specfncol, fastadelim, 
     store_psm_protein_relations(fn, header, pgdb, proteins, specfncol)
 
 
-def store_proteins_descriptions(pgdb, fastafn, tsvfn, header, fastadelim, genefield):
+def get_fasta_md5(fastafn):
+    fasta_md5 = md5()
+    with open(fastafn, 'rb') as fp:
+        for chunk in iter(lambda: fp.read(4096), b''):
+            fasta_md5.update(chunk)
+    return fasta_md5.hexdigest()
+
+
+def store_proteins_descriptions(pgdb, fastafn, fastamd5, tsvfn, header, fastadelim, genefield):
     if not fastafn:
         prots = {}
         for psm in tsvreader.generate_tsv_psms(tsvfn, header):
@@ -74,7 +83,7 @@ def store_proteins_descriptions(pgdb, fastafn, tsvfn, header, fastadelim, genefi
     else:
         prots, seqs, desc, evids, ensgs, symbols = fastareader.get_proteins_for_db(
             fastafn, fastadelim, genefield)
-        pgdb.store_fasta(prots, evids, seqs, desc, ensgs, symbols)
+        pgdb.store_fasta(fastafn, fastamd5, prots, evids, seqs, desc, ensgs, symbols)
     return set([x[0] for x in prots])
 
 

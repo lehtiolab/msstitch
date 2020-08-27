@@ -325,6 +325,7 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                           ' psms(psm_id) ON DELETE CASCADE ',
                                           'FOREIGN KEY(master_id) REFERENCES'
                                           ' protein_group_master(master_id)'],
+                   'fastafn': ['filename TEXT', 'md5 TEXT'],
                    'genes': ['gene_id INTEGER PRIMARY KEY',
                              'gene_acc TEXT'],
                    'associated_ids': ['gn_id INTEGER PRIMARY KEY',
