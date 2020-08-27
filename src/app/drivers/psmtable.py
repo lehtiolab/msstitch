@@ -189,7 +189,7 @@ class PSMTableRefineDriver(PSMDriver):
                         'msstitch will use the old database for PSM annotation.')
             shiftrows = self.lookup.get_highest_rownr() + 1
             proteins = set([x for x in self.lookup.get_protids()])
-            self.lookup.drop_pgroup_tables_indices()
+            self.lookup.drop_psm_indices()
         else:
             shiftrows = 0
             proteins = refine.store_proteins_descriptions(self.lookup, self.fasta,
@@ -206,6 +206,7 @@ class PSMTableRefineDriver(PSMDriver):
         if self.genes:
             psms = refine.add_genes_to_psm_table(psms, self.lookup)
         if self.proteingroup:
+            self.lookup.drop_pgroup_tables()
             refine.build_proteingroup_db(self.lookup)
             psms = refine.generate_psms_with_proteingroups(psms, self.lookup, specfncol, self.unroll)
         if self.isobaric or self.precursor:

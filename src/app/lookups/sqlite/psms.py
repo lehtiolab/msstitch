@@ -173,6 +173,22 @@ class PSMDB(ResultLookupInterface):
                               'JOIN biosets AS bs USING(set_id) ' + rowlim +
                               'ORDER BY pr.rownr')
 
+    def drop_psm_indices(self):
+        cursor = self.get_cursor()
+        for index in ['psmid_index', 'psmspecid_index', 'psmrowid_index',
+                'psmrow_index', 'pepseq_index', 'pepid_index', 'psmspepid_index',
+                'proteinpsm_index', 'protpsmid_index']:
+            cursor.execute('DROP INDEX IF EXISTS {}'.format(index))
+        self.conn.commit()
+
+    def drop_pgroup_tables(self):
+        for table in ['protein_coverage',
+                'protein_group_content',
+                'psm_protein_groups',
+                'protein_group_master']:
+            cursor.execute('DROP TABLE IF EXISTS {}'.format(table))
+        self.conn.commit()
+
     def store_masters(self, allmasters, psm_masters):
         protids = self.get_protids()
         allmasters = ((protids[x],) for x in allmasters)
