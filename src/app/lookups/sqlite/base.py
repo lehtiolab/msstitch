@@ -15,7 +15,6 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                             'charge INTEGER',
                             'mz DOUBLE',
                             'retention_time DOUBLE',
-                            'ion_injection_time DOUBLE',
                             'FOREIGN KEY(mzmlfile_id)'
                             'REFERENCES mzmlfiles ON DELETE CASCADE'],
                    'ioninjtime': ['spectra_id TEXT',
