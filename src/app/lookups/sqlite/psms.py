@@ -186,7 +186,7 @@ class PSMDB(ResultLookupInterface):
                 'protein_group_content',
                 'psm_protein_groups',
                 'protein_group_master']:
-            cursor.execute('DROP TABLE IF EXISTS {}'.format(table))
+            self.conn.execute('DROP TABLE IF EXISTS {}'.format(table))
         self.conn.commit()
 
     def store_masters(self, allmasters, psm_masters):

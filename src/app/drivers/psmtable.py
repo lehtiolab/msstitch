@@ -173,6 +173,7 @@ class PSMTableRefineDriver(PSMDriver):
             sys.exit(1)
         elif self.proteingroup:
             self.tabletypes.append('proteingroup')
+            self.lookup.drop_pgroup_tables()
         self.lookup.add_tables(self.tabletypes)
 
         # If appending to previously refined PSM table, reuse DB and shift rows
@@ -206,7 +207,6 @@ class PSMTableRefineDriver(PSMDriver):
         if self.genes:
             psms = refine.add_genes_to_psm_table(psms, self.lookup)
         if self.proteingroup:
-            self.lookup.drop_pgroup_tables()
             refine.build_proteingroup_db(self.lookup)
             psms = refine.generate_psms_with_proteingroups(psms, self.lookup, specfncol, self.unroll)
         if self.isobaric or self.precursor:
