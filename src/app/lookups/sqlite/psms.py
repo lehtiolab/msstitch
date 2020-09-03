@@ -25,7 +25,8 @@ class PSMDB(ResultLookupInterface):
     def get_fasta_md5(self):
         cursor = self.get_cursor()
         cursor.execute('SELECT md5 FROM fastafn LIMIT 1')
-        cursor.fetchone()
+        md5 = cursor.fetchone()
+        return md5 if md5 is not None else False
 
     def store_fasta(self, fn, md5, prot, evids, seq, desc, ensg, symbols):
         cursor = self.get_cursor()

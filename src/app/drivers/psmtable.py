@@ -167,20 +167,13 @@ class PSMTableRefineDriver(PSMDriver):
         specfncol = self.oldheader[specfncolnr]
         fastadelim, genefield = self.get_fastadelim_genefield(self.fastadelim,
                                                               self.genefield)
-        if self.proteingroup and not self.fasta:
-            print('Cannot create protein group without supplying FASTA search '
-                    'database file')
-            sys.exit(1)
-        elif self.proteingroup:
-            self.tabletypes.append('proteingroup')
-            self.lookup.drop_pgroup_tables()
-        self.lookup.add_tables(self.tabletypes)
 
-        # If appending to previously refined PSM table, reuse DB and shift rows
         if self.fasta:
             fasta_md5 = refine.get_fasta_md5(self.fasta)
         else:
             fasta_md5 = False
+
+        # If appending to previously refined PSM table, reuse DB and shift rows
         if self.oldpsmfile:
             oldfasta_md5 = self.lookup.get_fasta_md5()
             if fasta_md5 != oldfasta_md5:
@@ -193,6 +186,21 @@ class PSMTableRefineDriver(PSMDriver):
             self.lookup.drop_psm_indices()
         else:
             shiftrows = 0
+
+        if self.proteingroup:
+            if not fasta_md5 and not oldfasta_md5:
+                # In case of old Fasta already stored it will be fine to protein group
+                print('Cannot create protein group without supplying FASTA search '
+                        'database file')
+                sys.exit(1)
+            self.tabletypes.append('proteingroup')
+            self.lookup.drop_pgroup_tables()
+        self.lookup.add_tables(self.tabletypes)
+
+        # Need to place this here since we cannot store before having done add tables, but that
+        # has to be done after getting proteingroup knowledge, which depends on knowledge of 
+        # having passed an oldpsmfile (because of oldfasta_md5):
+        if not self.oldpsmfile:
             proteins = refine.store_proteins_descriptions(self.lookup, self.fasta,
                     fasta_md5, self.fn, self.oldheader, fastadelim, genefield)
 
@@ -206,9 +214,6 @@ class PSMTableRefineDriver(PSMDriver):
         # Now pass PSMs through multiple generators to add info
         if self.genes:
             psms = refine.add_genes_to_psm_table(psms, self.lookup)
-        if self.proteingroup:
-            refine.build_proteingroup_db(self.lookup)
-            psms = refine.generate_psms_with_proteingroups(psms, self.lookup, specfncol, self.unroll)
         if self.isobaric or self.precursor:
             psms = refine.generate_psms_quanted(self.lookup, shiftrows, psms,
                     isob_header, self.isobaric, self.precursor)
@@ -217,9 +222,15 @@ class PSMTableRefineDriver(PSMDriver):
         if self.oldpsmfile:
             prevheader = tsvreader.get_tsv_header(self.oldpsmfile)
             previouspsms = tsvreader.generate_tsv_psms(self.oldpsmfile, prevheader)
-            self.psms = chain(previouspsms, psms)
-        else:
-            self.psms = psms
+            psms = chain(previouspsms, psms)
+        # Enforce proteingroup last, since it has to come AFTER the chaining of old + new PSMs
+        # In theory you could do it before, but that makes no sense since in a big experiment you
+        # also do not map PSMs to genes differently? If that is needed, you have to run multiple
+        # experiments.
+        if self.proteingroup:
+            refine.build_proteingroup_db(self.lookup)
+            psms = refine.generate_psms_with_proteingroups(psms, self.lookup, specfncol, self.unroll)
+        self.psms = psms
         
 
 class IsoSummarizeDriver(PSMDriver):
