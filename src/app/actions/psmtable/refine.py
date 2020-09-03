@@ -190,7 +190,7 @@ def generate_psms_with_proteingroups(psms, pgdb, specfncol, unroll):
             psm_masters.append(master)
             psm_pg_proteins.append([protein[lookups.PROTEIN_ACC_INDEX]
                                     for protein in group])
-        outpsm = {mzidtsvdata.HEADER_MASTER_PROT: ';'.join(psm_masters),
+        outpsm = {mzidtsvdata.HEADER_MASTER_PROT: ';'.join(sorted(psm_masters)),
                   mzidtsvdata.HEADER_PG_CONTENT: ';'.join(
                       [','.join([y for y in x]) for x in psm_pg_proteins]),
                   mzidtsvdata.HEADER_PG_AMOUNT_PROTEIN_HITS: ';'.join(
