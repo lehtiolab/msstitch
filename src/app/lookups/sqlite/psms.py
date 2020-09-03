@@ -375,7 +375,11 @@ class PSMDB(ResultLookupInterface):
         # Vacuuming updates the internal rowid column of the tables, which is
         # a count, when they are not INTEGER PRIMARY KEY
         self.conn.commit()
-        cursor = self.get_cursor()
-        cursor.execute('VACUUM')
-        cursor.execute('UPDATE psmrows SET rownr=rowid-1') # -1 since we start at 0
+        self.conn.execute('DROP INDEX psmrowid_index')
+        self.conn.execute('DROP INDEX psmrow_index')
+        self.conn.execute('VACUUM')
+        self.conn.execute('UPDATE psmrows SET rownr=rowid-1') # -1 since we start at 0
         self.conn.commit()
+        # Put index back
+        self.index_column('psmrowid_index', 'psmrows', 'psm_id')
+        self.index_column('psmrow_index', 'psmrows', 'rownr')
