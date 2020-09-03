@@ -63,8 +63,15 @@ class QuantDB(ResultLookupInterface):
             'VALUES (?, ?)', aligns)
 
     def index_precursor_quants(self):
+        self.index_column('ms1_feat_ix', 'ms1_quant', 'feature_id')
         self.index_column('charge_index', 'ms1_quant', 'charge')
         self.index_column('feat_mz_index', 'ms1_quant', 'mz')
+        self.index_column('ms1_mzfn_index', 'ms1_quant', 'mzmlfile_id')
+        self.index_column('fwhm_feat_index', 'ms1_fwhm', 'feature_id')
+
+    def index_aligned_quants(self):
+        self.index_column('ms1al_feat_ix', 'ms1_align', 'feature_id')
+        self.index_column('ms1al_spec_ix', 'ms1_align', 'spectra_id')
 
     def get_spectra_mz_sorted(self):
         return self.get_cursor().execute(

@@ -65,6 +65,7 @@ def create_precursor_quant_lookup(quantdb, mzmlfn_feats, sum_or_apex, quanttype,
         quantdb.store_fwhm(zip([x[0] for x in id_feats], fwhms))
     quantdb.index_precursor_quants()
     align_quants_psms(quantdb, rttol, mztol, mztoltype)
+    quantdb.index_aligned_quants()
 
 
 def get_minmax(center, tolerance, toltype=None):

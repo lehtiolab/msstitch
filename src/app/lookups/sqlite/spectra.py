@@ -42,3 +42,5 @@ class SpectraDB(ResultLookupInterface):
         self.index_column('scan_index', 'mzml', 'scan_sid')
         self.index_column('specrt_index', 'mzml', 'retention_time')
         self.index_column('specmz_index', 'mzml', 'mz')
+        self.index_column('ionm_sp_ix', 'ionmob', 'spectra_id')
+        self.index_column('ionin_sp_ix', 'ioninjtime', 'spectra_id')
