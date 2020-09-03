@@ -283,8 +283,12 @@ class DeleteSetDriver(PSMDriver):
     def set_options(self):
         super().set_options()
         self.options.update(self.define_options(['lookupfn', 'setnames'], psmtable_options))
+        self.options['lookupfn'].update({'required': False, 'default': None})
 
     def set_features(self):
-        self.lookup.delete_sample_set_shift_rows(self.setnames)
+        # In rare cases, a lookup is not used and we just filter the PSM table. I.e when
+        # making a new lookup from a new+old PSM table.
+        if self.lookup:
+            self.lookup.delete_sample_set_shift_rows(self.setnames)
         self.header = self.oldheader
         self.psms = filtering.filter_psms_remove_set(self.oldpsms, self.setnames)
