@@ -186,11 +186,11 @@ def generate_psms_with_proteingroups(psms, pgdb, specfncol, unroll):
         sorted_pgs = sort_protein_groups(proteins_in_groups, use_evi)
         psm_masters = []
         psm_pg_proteins = []
-        for master, group in sorted_pgs.items():
+        for master, group in sorted(sorted_pgs.items()):
             psm_masters.append(master)
             psm_pg_proteins.append([protein[lookups.PROTEIN_ACC_INDEX]
                                     for protein in group])
-        outpsm = {mzidtsvdata.HEADER_MASTER_PROT: ';'.join(sorted(psm_masters)),
+        outpsm = {mzidtsvdata.HEADER_MASTER_PROT: ';'.join(psm_masters),
                   mzidtsvdata.HEADER_PG_CONTENT: ';'.join(
                       [','.join([y for y in x]) for x in psm_pg_proteins]),
                   mzidtsvdata.HEADER_PG_AMOUNT_PROTEIN_HITS: ';'.join(
@@ -308,25 +308,83 @@ def build_proteingroup_db(pgdb):
 def build_master_db(pgdb):
     psm_masters = OrderedDict()
     allmasters = {}
-    allpsms = {}
+    allpsms, protpsms = {}, {}
+    print('Loading protein-PSMs')
     for psmid, protein in pgdb.get_all_psm_protein_relations():
         try:
-            allpsms[psmid].append(protein)
+            allpsms[psmid].add(protein)
         except KeyError:
-            allpsms[psmid] = [protein]
+            allpsms[psmid] = {protein}
+        try:
+            protpsms[protein].add(psmid)
+        except KeyError:
+            protpsms[protein] = {psmid}
+    # PSMs with only one protein automatically make that protein a master
+    # first extract all of them and their PSMs
+    unipsms = {psm: list(prots)[0] for psm, prots in allpsms.items() if len(prots) == 1}
+    for psm_id, master in unipsms.items():
+        allmasters[master] = 1
+        for grouppsm in protpsms[master]:
+            try:
+                psm_masters[grouppsm].add(master)
+            except KeyError:
+                psm_masters[grouppsm] = {master}
+    # Now remove all explained PSMs from the graph (not during the 
+    # master-assigning since also the masters from unique-PSMs can yield 
+    # shared-master PSMs
+    for psm in psm_masters:
+        for prot in allpsms.pop(psm):
+            if prot in protpsms:
+                protpsms.pop(prot)
+    
+    def get_pp_graph(proteins, allpsms, protpsms):
+        """When passed some proteins and lookups, this works out a graph of
+        all protein/PSM connections"""
+        graph = {x: set() for x in proteins}
+        while True:
+            nrprots, nrpsms = len(graph), sum([len(x) for x in graph.values()])
+            for prot in list(graph.keys()): # list to avoid changing dict while iterating it
+                if prot in protpsms:
+                    graph[prot] = protpsms[prot]
+                    for psm in graph[prot]:
+                        if psm in allpsms:
+                            graph.update({pr: set() for pr in allpsms[psm] if pr not in graph})
+            if len(graph) == nrprots and sum([len(x) for x in graph.values()]) == nrpsms:
+                break
+        return graph
+
+    # Use only PSMs that are not unique for the rest of the explaining
+    allpsms = {psm: prots for psm, prots in allpsms.items() if len(prots) > 1}
     while len(allpsms) > 0:
+        # Pop and then put PSM/prots back, it is needed in graph which we will
+        # get (all connections) and select master proteins in
         psm_id, proteins = allpsms.popitem()
-        pepprotmap = pgdb.get_protpepmap_from_proteins(proteins)
-        masters = get_masters(pepprotmap)
-        for psm, master in [(p, m) for p, pmasters in masters.items()
-                            for m in pmasters]:
+        allpsms[psm_id] = proteins
+        ppmap = get_pp_graph(proteins, allpsms, protpsms)
+        if sum([len(x) for x in ppmap.values()]) == 0:
+            # Empty graphs happen when a protein has no PSMs left in the protpsms
+            # This happens when a protein is removed because it shares a PSM
+            # with a protein which has a unique PSM and is therefore a master
+            allpsms.pop(psm_id)
+            continue
+        masters = get_masters(ppmap)
+        masterprots = {}
+        for psm, psmmasters in masters.items():
+            for master in psmmasters:
+                masterprots[master] = 1
+        allmasters.update(masterprots)
+        for master, psm in pgdb.get_psms_for_proteins(list(masterprots.keys())):
             try:
                 psm_masters[psm].add(master)
             except KeyError:
-                psm_masters[psm] = set([master])
-            allmasters[master] = 1
-            if psm in allpsms:
-                del(allpsms[psm])
+                psm_masters[psm] = {master}
+        # Cleanup proteins in graph from allpsm/protpsms
+        for protein, psms in ppmap.items():
+            #if protein in protpsms:
+                #protpsms.pop(protein)
+            for psm in psms:
+                if psm in allpsms:
+                    allpsms.pop(psm)
     print('Collected {0} masters, {1} PSM-master mappings'.format(
         len(allmasters), len(psm_masters)))
     pgdb.store_masters(allmasters, psm_masters)
@@ -336,10 +394,17 @@ def process_pgroup_candidates(candidates, protein_psm_map):
     prepgroup = {}
     for candidate in candidates:
         master, psm_id, prot_id, seq, score, evid, cov = candidate
-        prepgroup = add_protein_psm_to_pre_proteingroup(prepgroup, prot_id,
-                                                        seq, psm_id, score,
-                                                        evid, cov)
+        protpsm_unit = (psm_id, float(score), evid, cov)
+        try:
+            prepgroup[prot_id][seq].add(protpsm_unit)
+        except KeyError:
+            try:
+                prepgroup[prot_id][seq] = {protpsm_unit}
+            except KeyError:
+                prepgroup[prot_id] = {seq: {protpsm_unit}}
     pgroup = filter_proteins_with_missing_psms(prepgroup, protein_psm_map)
+    if len(pgroup) == 0:
+        print(prepgroup)
     return get_protein_group_content(pgroup, master)
 
 
@@ -349,7 +414,7 @@ def build_content_db(pgdb):
         try:
             protein_psms[prot].add(psm)
         except KeyError:
-            protein_psms[prot] = set([psm])
+            protein_psms[prot] = {psm}
     use_evi = pgdb.check_evidence_tables()
     pg_candidates = pgdb.get_protein_group_candidates()
     pre_protein_group = [next(pg_candidates)]
@@ -421,7 +486,6 @@ def get_masters(ppgraph):
     masters = {}
     for protein, peps in ppgraph.items():
         ismaster = True
-        peps = set(peps)
         multimaster = set()
         for subprotein, subpeps in ppgraph.items():
             if protein == subprotein:

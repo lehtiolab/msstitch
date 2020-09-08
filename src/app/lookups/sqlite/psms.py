@@ -255,21 +255,10 @@ class PSMDB(ResultLookupInterface):
         proteins = cursor.execute(protsql, psm_id).fetchall()
         return [x[0] for x in proteins]
 
-    def get_protpepmap_from_proteins(self, proteins):
-        pepsql = self.get_sql_select(['protein_acc', 'psm_id'],
-                                     'protein_psm',
-                                     distinct=True)
-        pepsql = '{0} WHERE protein_acc {1}'.format(
-            pepsql, self.get_inclause(proteins))
-        cursor = self.get_cursor()
-        protpeps = cursor.execute(pepsql, proteins).fetchall()
-        outmap = {}
-        for protein, peptide in protpeps:
-            try:
-                outmap[protein].append(peptide)
-            except KeyError:
-                outmap[protein] = [peptide]
-        return outmap
+    def get_psms_for_proteins(self, proteins):
+        sql = """SELECT protein_acc, psm_id FROM protein_psm 
+        WHERE protein_acc IN ({})""".format(','.join('?' * len(proteins)))
+        return self.conn.execute(sql, proteins)
 
     def get_all_proteins_psms_seq(self):
         sql = ('SELECT p.protein_acc, ps.sequence, pp.psm_id, peps.sequence '
