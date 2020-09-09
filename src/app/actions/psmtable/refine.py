@@ -309,7 +309,6 @@ def build_master_db(pgdb):
     psm_masters = OrderedDict()
     allmasters = {}
     allpsms, protpsms = {}, {}
-    print('Loading protein-PSMs')
     for psmid, protein in pgdb.get_all_psm_protein_relations():
         try:
             allpsms[psmid].add(protein)
@@ -329,14 +328,10 @@ def build_master_db(pgdb):
                 psm_masters[grouppsm].add(master)
             except KeyError:
                 psm_masters[grouppsm] = {master}
-    # Now remove all explained PSMs from the graph (not during the 
-    # master-assigning since also the masters from unique-PSMs can yield 
-    # shared-master PSMs
-    for psm in psm_masters:
-        for prot in allpsms.pop(psm):
-            if prot in protpsms:
-                protpsms.pop(prot)
-    
+    # Add all explained PSMs to the filter so we dont explain them again,
+    # They however are still in the graph (allpsms) and can get additional masters
+    explained_psms = {x for x in psm_masters}
+
     def get_pp_graph(proteins, allpsms, protpsms):
         """When passed some proteins and lookups, this works out a graph of
         all protein/PSM connections"""
@@ -354,19 +349,13 @@ def build_master_db(pgdb):
         return graph
 
     # Use only PSMs that are not unique for the rest of the explaining
+    # For each unexplained PSM, get the complete connection graph, fetch masters
     allpsms = {psm: prots for psm, prots in allpsms.items() if len(prots) > 1}
-    while len(allpsms) > 0:
-        # Pop and then put PSM/prots back, it is needed in graph which we will
-        # get (all connections) and select master proteins in
-        psm_id, proteins = allpsms.popitem()
-        allpsms[psm_id] = proteins
-        ppmap = get_pp_graph(proteins, allpsms, protpsms)
-        if sum([len(x) for x in ppmap.values()]) == 0:
-            # Empty graphs happen when a protein has no PSMs left in the protpsms
-            # This happens when a protein is removed because it shares a PSM
-            # with a protein which has a unique PSM and is therefore a master
-            allpsms.pop(psm_id)
+    for psm_id, proteins in allpsms.items():
+        if psm_id in explained_psms:
             continue
+        ppmap = get_pp_graph(proteins, allpsms, protpsms)
+        explained_psms.update({y for x in ppmap.values() for y in x})
         masters = get_masters(ppmap)
         masterprots = {}
         for psm, psmmasters in masters.items():
@@ -378,13 +367,6 @@ def build_master_db(pgdb):
                 psm_masters[psm].add(master)
             except KeyError:
                 psm_masters[psm] = {master}
-        # Cleanup proteins in graph from allpsm/protpsms
-        for protein, psms in ppmap.items():
-            #if protein in protpsms:
-                #protpsms.pop(protein)
-            for psm in psms:
-                if psm in allpsms:
-                    allpsms.pop(psm)
     print('Collected {0} masters, {1} PSM-master mappings'.format(
         len(allmasters), len(psm_masters)))
     pgdb.store_masters(allmasters, psm_masters)
@@ -403,8 +385,6 @@ def process_pgroup_candidates(candidates, protein_psm_map):
             except KeyError:
                 prepgroup[prot_id] = {seq: {protpsm_unit}}
     pgroup = filter_proteins_with_missing_psms(prepgroup, protein_psm_map)
-    if len(pgroup) == 0:
-        print(prepgroup)
     return get_protein_group_content(pgroup, master)
 
 
