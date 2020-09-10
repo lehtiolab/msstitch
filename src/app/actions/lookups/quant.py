@@ -85,6 +85,7 @@ def align_quants_psms(quantdb, rt_tolerance, mz_tolerance, mz_toltype):
     for spec_id, fn_id, charge, mz, rt in allspectra:
         if fn_id != active_fn:
             active_fn = fn_id
+            featwindow_max_mz = -1
             fnfeats = quantdb.get_fnfeats(fn_id)
         minmz, maxmz = get_minmax(mz, mz_tolerance, mz_toltype)
         if maxmz > featwindow_max_mz:
