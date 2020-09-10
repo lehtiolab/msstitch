@@ -343,6 +343,8 @@ class TestSpecQuantLookup(basetests.MSLookupTest):
         self.isoinfile = os.path.join(self.fixdir, self.isoinfilename)
         self.krfile = os.path.join(self.fixdir, self.krinfilename)
         self.dinofile = os.path.join(self.fixdir, self.dinoinfilename)
+        self.fakespfn = os.path.join(self.workdir, 'few_spectra.mzML')
+        self.fakespfn2 = os.path.join(self.workdir, 'set2.mzML')
 
     def get_std_options(self):
         return [self.executable, self.command]
@@ -376,37 +378,36 @@ class TestSpecQuantLookup(basetests.MSLookupTest):
                 self.assertEqual(float(element.attrib['it']), qval)
 
     def test_isoquant(self):
-        fakespectra = os.path.join(self.workdir, 'few_spectra.mzML')
-        options = ['--isobaric', self.isoinfile, '--spectra', fakespectra]
+        options = ['--isobaric', self.isoinfile, '--spectra', self.fakespfn]
         self.run_command(options)
         self.check_quantmap()
         self.check_quantification()
 
     def test_dinosaur(self):
-        self.fakespfn = os.path.join(self.workdir, 'few_spectra.mzML')
-        options = ['--dinosaur', self.dinofile, '--rttol', '5', '--mztol', '20',
-                   '--mztoltype', 'ppm', '--spectra', self.fakespfn]
+        options = ['--dinosaur', self.dinofile, self.dinofile, '--rttol', '5', 
+                '--mztol', '20', '--mztoltype', 'ppm', '--spectra', self.fakespfn, 
+                self.fakespfn2]
         self.run_command(options)
         self.check_ms1_feats_stored(self.dinofile, 'dino', 'sum')
 
     def test_dinosaur_apex(self):
-        self.fakespfn = os.path.join(self.workdir, 'few_spectra.mzML')
-        options = ['--dinosaur', self.dinofile, '--rttol', '5', '--mztol', '20',
-                   '--apex', '--mztoltype', 'ppm', '--spectra', self.fakespfn]
+        options = ['--dinosaur', self.dinofile, self.dinofile, '--rttol', '5',
+                '--mztol', '20', '--apex', '--mztoltype', 'ppm', '--spectra', self.fakespfn,
+                self.fakespfn2]
         self.run_command(options)
         self.check_ms1_feats_stored(self.dinofile, 'dino', 'apex')
 
     def test_kronik(self):
-        self.fakespfn = os.path.join(self.workdir, 'few_spectra.mzML')
-        options = ['--kronik', self.krfile, '--rttol', '5', '--mztol', '20',
-                   '--mztoltype', 'ppm', '--spectra', self.fakespfn]
+        options = ['--kronik', self.krfile, self.krfile, '--rttol', '5',
+                '--mztol', '20', '--mztoltype', 'ppm', '--spectra',
+                self.fakespfn, self.fakespfn2]
         self.run_command(options)
         self.check_ms1_feats_stored(self.krfile, 'kr', 'sum')
 
     def test_kronik_apex(self):
-        self.fakespfn = os.path.join(self.workdir, 'few_spectra.mzML')
-        options = ['--kronik', self.krfile, '--rttol', '5', '--mztol', '20',
-                   '--apex', '--mztoltype', 'ppm', '--spectra', self.fakespfn]
+        options = ['--kronik', self.krfile, self.krfile, '--rttol', '5',
+                '--mztol', '20', '--apex', '--mztoltype', 'ppm', '--spectra',
+                self.fakespfn, self.fakespfn2]
         self.run_command(options)
         self.check_ms1_feats_stored(self.krfile, 'kr', 'apex')
 
@@ -415,7 +416,7 @@ class TestSpecQuantLookup(basetests.MSLookupTest):
         sql = ('SELECT count(*) FROM ms1_quant LEFT OUTER JOIN ms1_fwhm USING(feature_id)')
         recs = self.get_values_from_db(self.resultfn, sql)
         sql = ('SELECT * FROM ms1_quant LEFT OUTER JOIN ms1_fwhm USING(feature_id)')
-        feats = {1: {}}
+        feats = {1: {}, 2: {}}
         for recid, fnid, rt, mz, charge, val, fwhm in self.get_values_from_db(
                 self.resultfn, sql):
             try:

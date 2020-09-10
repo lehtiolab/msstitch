@@ -8,7 +8,7 @@ from tests.integration import basetests
 class TestPSM2Peptable(basetests.BaseTest):
     command = 'peptides'
     suffix = '_peptable.tsv'
-    infilename = 'target_pg.tsv'
+    infilename = 'set1_target_pg.tsv'
     channels = ['tmt10plex_{}'.format(x) for x in ['126', '127N', '127C',
                                                '128N', '128C', '129N',
                                                '129C', '130N', '130C',

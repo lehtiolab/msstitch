@@ -266,7 +266,7 @@ class ProttableTest(BaseTest):
     def setUp(self):
         super().setUp()
         self.psmfile = os.path.join(
-            self.fixdir, 'target_pg.tsv')
+            self.fixdir, 'set1_target_pg.tsv')
         self.decoyfn = os.path.join(self.fixdir, 'decoy_peptides.tsv')
 
     def check_ms1(self, featkey, featout):
@@ -342,6 +342,7 @@ class MergeTest(BaseTest):
 
     def check_build_values(self, sql, fields, accession, cutoff=False):
         expected = {}
+        sql = sql + ' WHERE bs.set_name="Set1"'
         for rec in self.get_values_from_db(self.dbfile, sql):
             # skip multiple entries of e.g protein group per peptide
             # or gene per protein
@@ -366,6 +367,10 @@ class MergeTest(BaseTest):
 
     def check_built_isobaric(self, sql, accession, nopsms=False, cutoff=False):
         expected = {}
+        if 'WHERE' in sql:
+            sql = sql + ' AND bs.set_name="Set1"'
+        else:
+            sql = sql + ' WHERE bs.set_name="Set1"'
         for rec in self.get_values_from_db(self.dbfile, sql):
             if nopsms:
                 am_psm, fqpsm = False, False

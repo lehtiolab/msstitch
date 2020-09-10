@@ -90,7 +90,7 @@ class TestPeptideMerge(basetests.MergeTest):
                     expected[rec[0]]['descriptions'].add(rec[3])
                     expected[rec[0]]['genes'].add(rec[4])
                     expected[rec[0]]['assoc'].add(rec[5])
-                    expected[rec[0]]['cover'].add(str(rec[6]))
+                    expected[rec[0]]['cover'].add(rec[6])
             for line in self.tsv_generator(self.resultfn):
                 if proteincentric:
                     self.assertEqual(set(line['Protein(s)'].split(';')),
@@ -155,7 +155,11 @@ class TestProteinMerge(basetests.MergeTest):
         INNER JOIN proteins AS x ON x.pacc_id=pgm.pacc_id
         JOIN protein_psm AS pp ON pp.protein_acc=x.protein_acc
         JOIN psms USING(psm_id)
+        JOIN mzml USING(spectra_id)
+        JOIN mzmlfiles USING(mzmlfile_id)
+        JOIN biosets AS bs USING(set_id)
         JOIN peptide_sequences AS ps USING(pep_id)
+        WHERE bs.set_name='Set1'
         """
         self.check_protein_data('proteincentric', sql, psm_sql)
 
@@ -217,7 +221,11 @@ class TestProteinMerge(basetests.MergeTest):
         INNER JOIN proteins AS p ON p.pacc_id=egp.pacc_id
         JOIN protein_psm AS pp ON pp.protein_acc=p.protein_acc
         JOIN psms USING(psm_id)
+        JOIN mzml USING(spectra_id)
+        JOIN mzmlfiles USING(mzmlfile_id)
+        JOIN biosets AS bs USING(set_id)
         JOIN peptide_sequences AS ps USING(pep_id)
+        WHERE bs.set_name='Set1'
         """
         self.check_protein_data('genecentric', sql, psm_sql)
 
@@ -258,7 +266,11 @@ class TestProteinMerge(basetests.MergeTest):
         INNER JOIN proteins AS p ON p.pacc_id=gnp.pacc_id
         JOIN protein_psm AS pp ON pp.protein_acc=p.protein_acc
         JOIN psms USING(psm_id)
+        JOIN mzml USING(spectra_id)
+        JOIN mzmlfiles USING(mzmlfile_id)
+        JOIN biosets AS bs USING(set_id)
         JOIN peptide_sequences AS ps USING(pep_id)
+        WHERE bs.set_name='Set1'
         """
         self.check_protein_data('assoccentric', sql, psm_sql) 
 

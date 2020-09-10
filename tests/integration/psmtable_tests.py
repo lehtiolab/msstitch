@@ -340,7 +340,7 @@ class TestConcatTSV(basetests.MzidTSVBaseTest):
 
 
 class TestSplitTSV(basetests.MzidTSVBaseTest):
-    infilename = 'few_spectra.tsv'
+    infilename = 'target_pg.tsv'
     command = 'split'
     suffix = '_split.tsv'
 
@@ -351,7 +351,7 @@ class TestSplitTSV(basetests.MzidTSVBaseTest):
 
     def test_splitcol_bioset(self):
         self.run_command(['--splitcol', 'bioset'])
-        for resultfn in [os.path.join(self.workdir, '{}.tsv'.format(x)) for x in [2, 3]]:
+        for resultfn in [os.path.join(self.workdir, '{}.tsv'.format(x)) for x in ['Set1', 'Set2']]:
             for line in self.get_all_lines(resultfn):
                 self.assertIn(line, self.expectlines)
 
@@ -364,10 +364,9 @@ class TestSplitTSV(basetests.MzidTSVBaseTest):
         else:
             self.fail('This test should error')
 
-
     def test_splitcol(self):
-        setnames = ['2', '3']
-        options = ['--splitcol', '8']
+        setnames = ['Set1', 'Set2']
+        options = ['--splitcol', '28']
         self.run_command(options)
         resultfiles = [os.path.join(self.workdir, '{}.tsv'.format(setname))
                        for setname in setnames]
@@ -504,10 +503,43 @@ class TestIso(basetests.MzidTSVBaseTest):
             self.assertEqual(resultline, exp_line)
 
 
+class DeleteSet(MzidWithDB):
+    command = 'deletesets'
+    infilename = 'target_pg.tsv'
+    dbfn = 'target_psms.sqlite'
+
+    def test_deleteset(self):
+        set_to_del = 'Set1'
+        sql = """SELECT MIN(rownr), MAX(rownr) FROM psmrows"""
+        minrow, maxrow = self.get_values_from_db(self.workdb, sql).fetchone()
+        exprownr = 0
+        with open(self.infile) as fp:
+            head = next(fp).strip('\n').split('\t')
+            for line in fp:
+                line = {h: l for h, l in zip(head, line.strip('\n').split('\t'))}
+                if line['Biological set'] != set_to_del:
+                    exprownr += 1
+        self.run_command(['--dbfile', self.workdb, '--setnames', 'Set1'])
+        newrownr = 0
+        with open(self.resultfn) as fp:
+            head = next(fp).strip('\n').split('\t')
+            for line in fp:
+                line = {h: l for h, l in zip(head, line.strip('\n').split('\t'))}
+                self.assertNotEqual(line['Biological set'], set_to_del)
+                newrownr += 1
+        self.assertEqual(newrownr, exprownr)
+        newmin, newmax = self.get_values_from_db(self.workdb, sql).fetchone()
+        self.assertEqual(minrow, newmin)
+        self.assertGreater(maxrow, newmax)
+        self.assertEqual(exprownr, newmax + 1)
+        sql = """SELECT COUNT(set_name) FROM biosets WHERE set_name='Set1'"""
+        self.assertFalse(self.get_values_from_db(self.workdb, sql).fetchone()[0])
+
+
 class TestIsoSummarize(TestIso):
     suffix = '_ratio_isobaric.txt'
     command = 'isosummarize'
-    infilename = 'target_pg.tsv'
+    infilename = 'set1_target_pg.tsv'
 
     def test_mediansweep(self):
         result = self.run_command(['--isobquantcolpattern', 'plex',
@@ -533,7 +565,7 @@ class TestIsoSummarize(TestIso):
 class TestIsoFeatSummarize(TestIso):
     suffix = '_ratio_isobaric.txt'
     command = 'isosummarize'
-    infilename = 'target_pg.tsv'
+    infilename = 'set1_target_pg.tsv'
     channels = ['tmt10plex_{}'.format(x) for x in ['126', '127N', '127C',
                                                    '128N', '128C', '129N',
                                                    '129C', '130N', '130C',
