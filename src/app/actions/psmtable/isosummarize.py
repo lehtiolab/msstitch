@@ -1,3 +1,4 @@
+import os
 import sys
 from math import log
 from statistics import median, StatisticsError
@@ -22,7 +23,7 @@ def get_isobaric_ratios(psmfn, psmheader, channels, denom_channels, sweep,
     # [{ch1: 123, ch2: 456, ISOQUANTRATIO_FEAT_ACC: ENSG1244}, ]
     if accessioncol:
         if normalize:
-            outratios = mediancenter_ratios(outratios, channels, logintensities)
+            outratios = mediancenter_ratios(outratios, channels, logintensities, psmfn)
         if targetfeats:
             outratios = {x.pop(ISOQUANTRATIO_FEAT_ACC): x for x in outratios}
             return output_to_targetfeats(targetfeats, target_acc_field, outratios, channels)
@@ -34,9 +35,9 @@ def get_isobaric_ratios(psmfn, psmheader, channels, denom_channels, sweep,
         return paste_to_psmtable(psmfn, psmheader, outratios)
 
 
-def mediancenter_ratios(ratios, channels, logratios):
+def mediancenter_ratios(ratios, channels, logratios, psmfn):
     flatratios = [[feat[ch] for ch in channels] for feat in ratios]
-    ch_medians = get_medians(channels, flatratios, report=True)
+    ch_medians = get_medians(channels, flatratios, basename_report=os.path.basename(psmfn))
     for quant in ratios:
         if logratios:
             quant.update({ch: str(quant[ch] - ch_medians[ch])
@@ -162,7 +163,7 @@ def summarize_by_averages(channels, ratios):
     return ch_avgs
 
 
-def get_medians(channels, ratios, report=False):
+def get_medians(channels, ratios, basename_report=False):
     ch_medians = {}
     for ix, channel in enumerate(channels):
         try:
@@ -171,11 +172,10 @@ def get_medians(channels, ratios, report=False):
         except StatisticsError:
             # channel is empty, common in protein quant but not in normalizing
             ch_medians[channel] = 'NA'
-    if report:
-        report = ('Channel intensity medians used for normalization:\n'
-                  '{}'.format('\n'.join(['{} - {}'.format(ch, ch_medians[ch])
-                                         for ch in channels])))
-        sys.stdout.write(report)
+    if basename_report:
+        reporttext = '{}\n'.format('\n'.join(['{}\t{}'.format(ch, ch_medians[ch]) for ch in channels]))
+        with open('normalization_factors_{}'.format(basename_report), 'w') as fp:
+            fp.write(reporttext)
     return ch_medians
 
 
