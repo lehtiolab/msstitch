@@ -243,7 +243,8 @@ class IsoSummarizeDriver(PSMDriver):
         super().set_options()
         self.options.update(self.define_options(['quantcolpattern', 'denompatterns',
             'denomcols', 'mediansweep', 'medianintensity', 'median_or_avg',
-            'minint', 'featcol', 'logisoquant', 'mediannormalize'], psmtable_options))
+            'keep_psms_na', 'minint', 'featcol', 'logisoquant', 
+            'mediannormalize'], psmtable_options))
 
     def set_features(self):
         denomcols = False
@@ -269,7 +270,7 @@ class IsoSummarizeDriver(PSMDriver):
         self.psms = isosummarize.get_isobaric_ratios(self.fn, self.oldheader,
                 quantcols, denomcols, self.mediansweep, self.medianintensity,
                 self.median_or_avg, self.minint, False, False, self.featcol,
-                self.logisoquant, self.mediannormalize)
+                self.logisoquant, self.mediannormalize, self.keepnapsms)
 
 
 class DeleteSetDriver(PSMDriver):
