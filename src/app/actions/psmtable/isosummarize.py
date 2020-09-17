@@ -13,12 +13,13 @@ ISOQUANTRATIO_FEAT_ACC = '##isoquant_target_acc##'
 
 def get_isobaric_ratios(psmfn, psmheader, channels, denom_channels, sweep,
         report_intensity, summarize_by, min_int, targetfeats, target_acc_field, accessioncol,
-        logintensities=False, normalize=False):
+        logintensities, normalize, keep_na_psms):
     """Main function to calculate ratios for PSMs, peptides, proteins, genes.
     Can do simple ratios, median-of-ratios, median-centering, log2, etc
     """
     outratios = get_psmratios(psmfn, psmheader, channels, denom_channels,
-            sweep, report_intensity, summarize_by, min_int, accessioncol, logintensities)
+            sweep, report_intensity, summarize_by, min_int, accessioncol, logintensities,
+            keep_na_psms)
     # at this point, outratios look like:
     # [{ch1: 123, ch2: 456, ISOQUANTRATIO_FEAT_ACC: ENSG1244}, ]
     if accessioncol:
@@ -49,7 +50,7 @@ def mediancenter_ratios(ratios, channels, logratios, psmfn):
 
 
 def get_psmratios(psmfn, header, channels, denom_channels, sweep, report_intensity, 
-        summarize_by, min_int, acc_col, logintensities):
+        summarize_by, min_int, acc_col, logintensities, keep_na_psms):
     allfeats, feat_order, psmratios = {}, OrderedDict(), []
     for psm in reader.generate_tsv_psms(psmfn, header):
         ratios = calc_psm_ratios_or_int(psm, channels, denom_channels, sweep, 
@@ -58,6 +59,8 @@ def get_psmratios(psmfn, header, channels, denom_channels, sweep, report_intensi
         if acc_col and (psm[acc_col] == '' or ';' in psm[acc_col] or
                         not {psm[q] for q in channels}.difference(
                             {'NA', None, False, ''})):
+            continue
+        elif not keep_na_psms and any((psm[q] == 'NA' for q in channels)):
             continue
         elif acc_col:
             try:

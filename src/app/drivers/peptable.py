@@ -35,7 +35,7 @@ class CreatePeptableDriver(PepProttableDriver):
             'quantcolpattern', 'precursorquantcolpattern', 'minint', 'denomcols',
             'denompatterns', 'mediansweep', 'medianintensity', 'median_or_avg',
             'logisoquant', 'mediannormalize', 'modelqvals', 'qvalthreshold',
-            'minpeptidenr'], peptable_options))
+            'keep_psms_na', 'minpeptidenr'], peptable_options))
 
     def prepare(self):
         self.oldheader = tsvreader.get_tsv_header(self.fn)
