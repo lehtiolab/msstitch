@@ -368,7 +368,8 @@ class DatabaseConnection(object):
                 cursor.execute('CREATE TABLE {0}({1})'.format(
                     table, ', '.join(columns)))
             except sqlite3.OperationalError as error:
-                print('WARNING: Table {} already exists in database, will '
+                print(error)
+                print('WARNING: Error encountered, assuming table {} already exists in database, will '
                       'add to existing tables instead of creating '
                       'new.'.format(table))
             else:

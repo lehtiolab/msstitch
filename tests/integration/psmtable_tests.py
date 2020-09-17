@@ -9,7 +9,15 @@ from app.dataformats import mzidtsv as constants
 from tests.integration import basetests
 
 
-class TestPSMTable(basetests.MzidTSVBaseTest):
+class MzidWithDB(basetests.MzidTSVBaseTest):
+    def setUp(self):
+        super().setUp()
+        self.dbfile = os.path.join(self.fixdir, self.dbfn)
+        self.workdb = os.path.join(self.workdir, self.dbfn)
+        self.copy_db_to_workdir(self.dbfn, self.workdb)
+
+
+class TestPSMTable(MzidWithDB):
     command = 'psmtable'
     infilename = 'target.tsv'
     dbfn = 'quant_lookup.sqlite'
@@ -19,11 +27,6 @@ class TestPSMTable(basetests.MzidTSVBaseTest):
     - A self-annotated protein
     - A non-annotated (only peptide) proteins
     """
-
-    def setUp(self):
-        super().setUp()
-        self.workdb = os.path.join(self.workdir, self.dbfn)
-        self.copy_db_to_workdir(self.dbfn, self.workdb)
 
     def test_build_full_psmtable(self):
         fastafn = os.path.join(self.basefixdir, 'ens99_small.fasta')

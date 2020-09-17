@@ -1,7 +1,7 @@
 import os
 from argparse import ArgumentParser, RawTextHelpFormatter
 
-VERSION_NUMBER = '3.3'
+VERSION_NUMBER = '3.4'
 
 
 def parser_file_exists(currentparser, fn):
@@ -29,7 +29,6 @@ def populate_parser(drivers):
         options = [{k: v for k, v in opt.items()}
                    for opt in driver.options.values()]
         for argoptions in options:
-            # Wait, dest is specified here?? FIXME remove from options!
             argoptions['dest'] = argoptions.pop('driverattr')
             clarg = argoptions.pop('clarg')
             if 'type' in argoptions and argoptions['type'] == 'file':

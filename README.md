@@ -107,12 +107,14 @@ msstitch peptides -i set1_target_psms.txt -o set1_target_peptides.txt \
 ```
 
 The same peptide table can also be made using median sweeping, which takes the median
-intensity channel for each PSM as a denominator:
+intensity channel for each PSM as a denominator. Here is also exemplified how
+to do channel-median centering of the ratios to normalize and use log2 intensity
+values before calculating ratios:
 
 ```
 msstitch peptides -i set1_target_psms.txt -o set1_target_peptides.txt \
   --scorecolpattern svm --modelqvals --ms1quant \
-  --isobquantcolpattern tmt10plex --mediansweep
+  --isobquantcolpattern tmt10plex --mediansweep --logisoquant --median-normalize
 ```
 
 Or, if you only want the median PSM intensity per peptide summarized, use `--medianintensity`
@@ -127,8 +129,9 @@ msstitch peptides -i set1_target_psms.txt -o set1_target_peptides.txt \
 Create a protein table, with isobaric quantification as for peptides, the
 average of the top-3 highest intensity peptides for MS1 quantification:
 For all of these, summarizing isobaric PSM data to peptide, protein, gene features 
-is done using median PSM quantification values per feature (e.g. a protein). If you'd
-rather use averages, use `--summarize-average` as below:
+is done using medians of log2 PSM quantification values per feature (e.g. a protein). If you'd
+rather use averages, use `--summarize-average` as below, where we also show log2
+transformation of intensities before summarizing and subsequent median-centering:
 
 ```
 msstitch proteins -i set1_target_peptides.txt --decoyfn set1_decoy_peptides \
@@ -137,7 +140,7 @@ msstitch proteins -i set1_target_peptides.txt --decoyfn set1_decoy_peptides \
   --scorecolpattern '^q-value' --logscore \
   --ms1quant \
   --isobquantcolpattern tmt10plex --denompatterns _126 _127C \
-  --summarize-average
+  --summarize-average --logisoquant --median-normalize
 ```
 
 Or the analogous process for genes, using median sweeping to get intensity ratios instead of denominators:
@@ -159,7 +162,8 @@ msstitch ensg -i set1_target_peptides.txt --decoyfn set1_decoy_peptides \
   -o set1_ensg.txt \
   --scorecolpattern '^q-value' --logscore \
   --ms1quant \
-  --isobquantcolpattern tmt10plex --medianintensity
+  --isobquantcolpattern tmt10plex --medianintensity \
+  --median-normalize
 ```
 
 Finally, merge multiple sets of proteins (or genes/ENSG) into a single output.
@@ -230,4 +234,35 @@ the features found in column nr.20 of the PSM table:
 ```
 msstitch isosummarize -i psm_table.txt --featcol 20 \
   --isobquantcolpattern tmt10plex --denompatterns 126 127C
+```
+
+
+Re-use an earlier PSM table and add PSMs from searched spectra files of a new or
+re-searched sample. Saves time so you won't have to re-search all the spectra 
+in case of a big analysis. In the example below, new PSMs are the result of a 
+sample set that has been re-searched, (e.g. when MS reruns are done in case of 
+bad spectra), so we delete the existing sample set before continuing. 
+Protein grouping is done after regenerating the PSM table, to illustrate you 
+can do protein grouping on the entire table
+instead of only on the sample set. Since the new table is the one which supplies
+the header, the columns not supplied in the command (here protein groups) will
+be removed from the final result. This function assumes all PSMs presented are
+in the same order in the table, so they should not have been inserted in parallel,
+safest is to not generate the lookup table by hand.
+
+```
+msstitch deletesets -i old_psmtable.txt -o cleaned_psmtable.txt \
+    --dbfile db.sqlite --setnames bad_set
+msstitch psmtable -i rerun_target.tsv --oldpsms cleaned_psmtable.txt \
+   -o new_almost_done_psmtable.txt --fasta uniprot.fasta \
+  --dbfile db.sqlite --addmiscleav --addbioset --ms1quant --isobaric
+msstitch psmtable -i new_almost_done_psmtable.txt -o new_target_psms.txt \
+  --proteingroup
+```
+
+It is also possible to only pass a PSM table to `deletesets`:
+
+```
+msstitch deletesets -i old_psmtable.txt -o cleaned_psmtable.txt \
+  --setnames bad_set
 ```

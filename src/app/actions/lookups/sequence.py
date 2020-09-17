@@ -48,6 +48,3 @@ def create_searchspace(lookup, infile, minlen, proline_cut=False, reverse_seqs=T
             records = (x.strip('\n') for x in fp)
         lookup.write_peps((pep for x in records for pep in treat_pep(x, do_trypsinize, proline_cut, miss_cleavage, minlen)), reverse_seqs)
     lookup.index_peps(reverse_seqs)
-    #lookup.close_connection()
-
-

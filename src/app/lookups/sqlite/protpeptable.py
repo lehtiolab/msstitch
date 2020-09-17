@@ -44,7 +44,6 @@ class ProtPepTable(ResultLookupInterface):
         ttypes = ['fntable', 'isoqtable', 'isochtable', 'prectable', 'fdrtable',
                 'fullqpsmtable']
         self.create_tables([self.table_map[self.datatype][x] for x in ttypes])
-        print([self.table_map[self.datatype][x] for x in ttypes])
 
     def get_all_poolnames(self):
         cursor = self.get_cursor()

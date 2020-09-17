@@ -180,12 +180,6 @@ class BaseTestPycolator(BaseTest):
 
 
 class MzidTSVBaseTest(BaseTest):
-    infilename = 'target.tsv'
-    dbfn = 'target_psms.sqlite'
-
-    def setUp(self):
-        super().setUp()
-        self.dbfile = os.path.join(self.fixdir, self.dbfn)
 
     def rowify(self, records):
         row, rownr = [], 0

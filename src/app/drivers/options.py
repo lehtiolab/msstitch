@@ -1,36 +1,36 @@
 import argparse
 
 shared_options = {
-    'fn': {'driverattr': 'fn', 'dest': 'infile', 'type': 'file', 'clarg': '-i',
+    'fn': {'driverattr': 'fn', 'type': 'file', 'clarg': '-i',
            'help': 'Input file of {} format'},
-    'outfile': {'driverattr': 'outfile', 'dest': 'outfile', 'type': str,
+    'outfile': {'driverattr': 'outfile', 'type': str,
                 'clarg': '-o', 'help': 'Output file', 'required': False},
-    'outdir': {'driverattr': 'outdir', 'dest': 'outdir', 'clarg': '-d',
+    'outdir': {'driverattr': 'outdir', 'clarg': '-d',
                'help': 'Directory to output in', 'type': 'file',
                'required': False},
-    'multifiles': {'driverattr': 'fn', 'dest': 'infile', 'clarg': '-i',
+    'multifiles': {'driverattr': 'fn', 'clarg': '-i',
                    'help': 'Multiple input files of {} format',
                    'type': 'file', 'nargs': '+'},
     'lookupfn': {'driverattr': 'lookupfn', 'clarg': '--dbfile',
                  'type': 'file', 'help': 'Database lookup file'},
-    'setnames': {'driverattr': 'setnames', 'dest': 'setnames',
+    'setnames': {'driverattr': 'setnames',
                  'type': str, 'nargs': '+', 'clarg': '--setnames',
                  'help': 'Names of biological sets. Can be '
                  'specified with quotation marks if spaces are '
                  'used'},
-    'spectracol': {'driverattr': 'spectracol', 'dest': 'spectracol',
+    'spectracol': {'driverattr': 'spectracol',
                    'type': int, 'clarg': '--spectracol', 'help':
                    'Column number in which spectra file names are, '
                    'in case some framework has changed the file '
                    'names. First column number is 1.', 'required': False,
                    'default': 1},
-    'proline': {'driverattr': 'proline', 'dest': 'proline', 'required': False,
+    'proline': {'driverattr': 'proline', 'required': False,
                 'clarg': '--cutproline', 'action': 'store_const',
                 'const': True, 'default': False, 'help': 'Flag to make '
                 'trypsin before a proline residue. Then filtering will be '
                 'done against both cut and non-cut peptides.',
                 },
-    'fasta': {'driverattr': 'fasta', 'dest': 'fasta',
+    'fasta': {'driverattr': 'fasta',
               'type': 'file', 'help': 'FASTA sequence database',
               'required': False, 'default': False, 'clarg': '--fasta'},
     'unroll': {'driverattr': 'unroll', 'clarg': '--unroll', 'const': True,
@@ -57,7 +57,6 @@ shared_options = {
                         'isobaric quant columns in input table.'},
     'precursorquantcolpattern': {'driverattr': 'precursorquantcolpattern',
                                  'type': str, 'required': False,
-                                 'dest': 'precursorquantcolpattern',
                                  'clarg': '--ms1quantcolpattern',
                                  'default': None,
                                  'help': 'Unique text pattern to identify '
@@ -76,28 +75,28 @@ shared_options = {
                     'identify column in table in which protein or gene '
                     'accessions are. Use in case of not using standard '
                     '{} column', 'default': False},
-    'fdrcolpattern': {'driverattr': 'fdrcolpattern', 'dest': 'fdrcolpattern',
+    'fdrcolpattern': {'driverattr': 'fdrcolpattern',
                       'clarg': '--fdrcolpattern', 'type': str,
                       'default': None, 'help': 'Unique text pattern to identify '
                       'FDR column in input table.'},
     'fastadelim': {'driverattr': 'fastadelim', 'clarg': '--fastadelim',
-                   'dest': 'fastadelim', 'required': False, 'type': str,
+                   'required': False, 'type': str,
                    'choices': ['tab', 'pipe', 'semicolon'],
                    'help': 'Delimiter in FASTA header, used to parse gene '
                    'names in case of non-ENSEMBL/Uniprot'},
     'genefield': {'driverattr': 'genefield', 'clarg': '--genefield',
-                  'dest': 'genefield', 'required': False, 'type': int,
+                  'required': False, 'type': int,
                   'help': 'Field nr (first=1) in FASTA that contains gene '
                   'name when using --fastadelim to parse the gene names'},
-    'minlength': {'driverattr': 'minlength', 'dest': 'minlength', 'default': 0,
+    'minlength': {'driverattr': 'minlength', 'default': 0,
                   'help': 'Minimum length of peptide to be included',
                   'type': int, 'clarg': '--minlen', 'required': False},
-    'addbioset': {'driverattr': 'addbioset', 'dest': 'addbioset',
+    'addbioset': {'driverattr': 'addbioset',
             'clarg': '--addbioset', 'required': False, 'action': 'store_const',
             'default': False, 'const': True,
             'help': 'Add biological setname from DB lookup to PSM table',
                },
-    'addmiscleav': {'driverattr': 'addmiscleav', 'dest': 'addmiscleav',
+    'addmiscleav': {'driverattr': 'addmiscleav',
             'clarg': '--addmiscleav', 'required': False, 'action': 'store_const',
             'default': False, 'const': True, 'help': 'Add missed cleavages to PSM table',
                },
@@ -164,26 +163,26 @@ shared_options = {
 
 sequence_options = {
     'scramble': {
-        'driverattr': 'scramble', 'dest': 'scramble', 'clarg': '--scramble',
+        'driverattr': 'scramble', 'clarg': '--scramble',
         'help': 'Decoy scrambling method, use: '
         '"tryp_rev": tryptic reverse, or "prot_rev": full (protein) reverse.',
         'required': False, 'default': 'tryp_rev'},
     'ignoretarget': {
-        'driverattr': 'ignoretarget', 'dest': 'ignoretarget', 'clarg': '--ignore-target-hits',
+        'driverattr': 'ignoretarget', 'clarg': '--ignore-target-hits',
         'help': 'Do not remove tryptic peptides from sequence where they match target DB',
         'required': False, 'action': 'store_const', 'const': True, 'default': False},
-    'trypsinize': {'driverattr': 'trypsinize', 'dest': 'trypsinize',
+    'trypsinize': {'driverattr': 'trypsinize',
                'clarg': '--notrypsin', 'required': False,
                'action': 'store_const', 'const': False, 'default': True,
                'help': 'Do not trypsinize. User is expected to deliver a'
                'pretrypsinized FASTA file'
                },
-    'max_shuffle': {'driverattr': 'max_shuffle', 'dest': 'max_shuffle',
+    'max_shuffle': {'driverattr': 'max_shuffle',
                'clarg': '--maxshuffle', 'required': False, 'type': int, 'default': 10,
                'help': 'Amount of times to attempt to shuffle a decoy reversed peptide '
                'to make it not match target peptides, before discarding it.'
                ' Used when using tryptic peptide reversal (not protein reversal)'},
-    'miss_cleavage': {'driverattr': 'miss_cleavage', 'dest': 'miss_cleavage',
+    'miss_cleavage': {'driverattr': 'miss_cleavage',
                'clarg': '--miscleav', 'required': False, 'type': int, 'default': 0,
                'help': 'Amount of missed cleavages to allow when trypsinizing, '
                'default is 0',
@@ -192,7 +191,7 @@ sequence_options = {
 
 
 lookup_options = {
-    'falloff': {'driverattr': 'falloff', 'dest': 'falloff',
+    'falloff': {'driverattr': 'falloff',
                 'clarg': '--insourcefrag', 'default': False,
                 'action': 'store_const', 'const': True, 'help': 'Apply '
                 'filter against both intact peptides and those '
@@ -204,7 +203,7 @@ lookup_options = {
                 'flag in order for the lookup to work, since sequences '
                 'will be stored and looked up reversed', 'required': False
                 },
-    'spectrafns': {'driverattr': 'spectrafns', 'dest': 'spectra',
+    'spectrafns': {'driverattr': 'spectrafns',
                    'type': str, 'help': 'Spectra files in mzML '
                    'format. Multiple files can be specified, if '
                    'order is important, e.g. when matching them '
@@ -249,7 +248,7 @@ lookup_options = {
                   'help': 'Type of tolerance in mass-to-charge when mapping '
                   'MS1 feature quant info to identifications in the PSM table.'
                   ' One of ppm, Da.'},
-    'peptidecol': {'driverattr': 'peptidecol', 'dest': 'peptidecol',
+    'peptidecol': {'driverattr': 'peptidecol',
         'type': int, 'clarg': '--peptidecol', 'default': 1, 'required': False,
         'help': 'Column nr of peptide table where peptide sequences are '
         'stored. First and default column is nr. 1'},
@@ -285,7 +284,7 @@ percolator_options = {
                   'position upstream of the peptide, and the peptide '
                   'C-terminal should also be K,R. Useful when discerning '
                   'from pseudogenes', 'required': False},
-    'falloff': {'driverattr': 'falloff', 'dest': 'falloff',
+    'falloff': {'driverattr': 'falloff',
                 'clarg': '--insourcefrag',
                 'type': int, 'default': 0, 'help': 'Apply '
                 'filter against both intact peptides and those '
@@ -387,7 +386,7 @@ prottable_options.update({
     'psmfile': {'driverattr': 'psmfile', 'clarg': '--psmtable', 'type': 'file',
                 'help': 'PSM table file containing isobaric quant data to '
                 'add to table.', 'conditional_required': ['quantcolpattern']},
-    'decoyfn': {'driverattr': 'decoyfn', 'dest': 'decoyfn',
+    'decoyfn': {'driverattr': 'decoyfn',
                 'help': 'Decoy peptide table input file',
                 'type': 'file', 'clarg': '--decoyfn'},
     'minlogscore': {'driverattr': 'minlogscore', 'clarg': '--logscore',
@@ -421,7 +420,7 @@ prottable_options.update({
 
 peptable_options = {k: v for k, v in pepprottable_options.items()}
 peptable_options.update({
-    'spectracol': {'driverattr': 'spectracol', 'dest': 'spectracol',
+    'spectracol': {'driverattr': 'spectracol',
                    'type': int, 'clarg': '--spectracol', 'help':
                    'Specify this column number (first col. is 1) '
                    'containing PSM table spectrafiles (e.g. mzML) '
@@ -432,7 +431,7 @@ peptable_options.update({
                    'const': True, 'default': False, 'required': False,
                    'help': 'For peptide table merging. Do not include protein group '
                    'or gene data in output, just use accessions. '},
-    'genecentric': {'driverattr': 'genecentric', 'dest': 'genecentric',
+    'genecentric': {'driverattr': 'genecentric',
                     'clarg': '--genecentric', 'action': 'store_const',
                     'const': True, 'default': False, 'required': False,
                     'help': 'For peptide table merging. Do not include protein group '
@@ -445,12 +444,12 @@ peptable_options.update({
                     'help': 'Create linear-modeled q-vals for peptides, to avoid '
                     'overlapping stepped low-qvalue data of peptides with '
                     'different scores', },
-    'qvalthreshold': {'driverattr': 'qvalthreshold', 'dest': 'qvalthreshold',
+    'qvalthreshold': {'driverattr': 'qvalthreshold',
         'type': float, 'clarg': '--qvalthreshold', 'help': 'Specifies the '
         'inclusion threshold for q-values to fit a linear model to. Any scores/'
         'q-values below this threshold will not be used.', 'default': 10e-4,
         'required': False},
-    'minpeptidenr': {'driverattr': 'minpeptidenr', 'dest': 'minpeptidenr',
+    'minpeptidenr': {'driverattr': 'minpeptidenr',
         'type': int, 'clarg': '--minpepnr', 'default': 10, 'help': 'Specifies '
         'the minimal amount of peptides (passing the --qvalthreshold) needed '
         'to fit a linear model, default is 10.', 'required': False}

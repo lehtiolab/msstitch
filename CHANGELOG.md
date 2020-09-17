@@ -1,10 +1,25 @@
 # Changelog
 
 
+## [3.4] - 2020-09-17
+### Added
+- Isobaric quant summarizing using denominators OR sweep OR median intensity
+- Median normalization possible for isobaric quant
+- Column in results "number of fully quanted PSMs", i.e. without missing values
+- `msstitch deleteset` can delete a sample set from PSM tables and sqlite lookups
+- `msstitch psmtable` can take `--oldpsms` to append new PSMs to an existing table (with identical search etc)
+
+### Fixed
+- Bug (and free speed increase) where merged tables the following fields would be all wrong and all the same for each set: amount PSMs, amount peptides, amount unique peptides
+- MS1 quant bug where sometimes wrong features where fetched to align to a scan
+
+
 ## [3.3] - 2020-07-24
-### Changed
+### Added
 - Added `--dinosaur` to store results from MS1 quant using dinosaur, include FWHM data
 - Added median-intensity (i.e. not ratio) summarization to `isosummarize` and `proteins` etc
+
+### Changed
 - Choose between MS1 apex and MS1 sum for quantification
 - Choose between median and average when summarizing isobaric PSM data
 
