@@ -86,7 +86,8 @@ class CreatePeptableDriver(PepProttableDriver):
             peptides = isosummarize.get_isobaric_ratios(self.fn, self.oldheader, 
                     quantcols, denomcols, self.mediansweep, self.medianintensity,
                     self.median_or_avg, self.minint, peptides, self.header[0],
-                    mzidtsvdata.HEADER_PEPTIDE, self.logisoquant, self.mediannormalize)
+                    mzidtsvdata.HEADER_PEPTIDE, self.logisoquant, self.mediannormalize,
+                    self.keepnapsms)
         if self.modelqvals:
             qix = self.header.index(peptabledata.HEADER_QVAL) + 1
             self.header = self.header[:qix] + [peptabledata.HEADER_QVAL_MODELED] + self.header[qix:]

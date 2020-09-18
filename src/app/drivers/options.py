@@ -142,7 +142,7 @@ shared_options = {
             'required': False, 'help': 'Use average isobaric quantification values for summarizing '
             'quant from PSMs, instead of default PSM median values'},
     'keep_psms_na': {'driverattr': 'keepnapsms', 'clarg': '--keep-psms-na-quant',
-            'action': 'store_const', 'const': True, 'default': False,
+            'action': 'store_const', 'const': True, 'default': False, 'required': False,
             'help': 'When summarizing isobaric quantification data, also use '
             'the PSMs that have an NA in any channel, even if these may contain '
             'overly noisy quant data in the other channels. Normally these PSMs '
