@@ -53,14 +53,14 @@ def get_psmratios(psmfn, header, channels, denom_channels, sweep, report_intensi
         summarize_by, min_int, acc_col, logintensities, keep_na_psms):
     allfeats, feat_order, psmratios = {}, OrderedDict(), []
     for psm in reader.generate_tsv_psms(psmfn, header):
-        ratios = calc_psm_ratios_or_int(psm, channels, denom_channels, sweep, 
-                report_intensity, min_int, logintensities)
         # remove uninformative psms when adding to features
         if acc_col and (psm[acc_col] == '' or ';' in psm[acc_col] or
                         not {psm[q] for q in channels}.difference(
                             {'NA', None, False, ''})):
             continue
-        elif not keep_na_psms and any((psm[q] == 'NA' for q in channels)):
+        ratios = calc_psm_ratios_or_int(psm, channels, denom_channels, sweep, 
+                report_intensity, min_int, logintensities)
+        if not keep_na_psms and any((ratios[ix] == 'NA' for ix, q in enumerate(channels))):
             continue
         elif acc_col:
             try:
