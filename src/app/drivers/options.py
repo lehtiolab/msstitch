@@ -107,8 +107,7 @@ shared_options = {
     'minint': {'driverattr': 'minint', 'clarg': '--minint', 'type': float,
                'help': 'Intensity threshold of PSMs when calculating '
                'isobaric ratios. Values below threshold will be set to NA. '
-               'Defaults to no threshold.',
-               'required': False, 'default': -1,
+               'Defaults to no threshold.', 'required': False, 'default': 0,
                },
     'denompatterns': {'driverattr': 'denompatterns', 'required': False,
                       'clarg': '--denompatterns', 'type': str, 'nargs': '+',
