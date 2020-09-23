@@ -434,7 +434,64 @@ class TestConffiltTSV(basetests.MzidTSVBaseTest):
             self.fail('This test should error')
 
 
-class TestIso(basetests.MzidTSVBaseTest):
+class DeleteSet(MzidWithDB):
+    command = 'deletesets'
+    infilename = 'target_pg.tsv'
+    dbfn = 'target_psms.sqlite'
+
+    def test_deleteset(self):
+        set_to_del = 'Set1'
+        sql = """SELECT MIN(rownr), MAX(rownr) FROM psmrows"""
+        minrow, maxrow = self.get_values_from_db(self.workdb, sql).fetchone()
+        exprownr = 0
+        with open(self.infile) as fp:
+            head = next(fp).strip('\n').split('\t')
+            for line in fp:
+                line = {h: l for h, l in zip(head, line.strip('\n').split('\t'))}
+                if line['Biological set'] != set_to_del:
+                    exprownr += 1
+        self.run_command(['--dbfile', self.workdb, '--setnames', 'Set1'])
+        newrownr = 0
+        with open(self.resultfn) as fp:
+            head = next(fp).strip('\n').split('\t')
+            for line in fp:
+                line = {h: l for h, l in zip(head, line.strip('\n').split('\t'))}
+                self.assertNotEqual(line['Biological set'], set_to_del)
+                newrownr += 1
+        self.assertEqual(newrownr, exprownr)
+        newmin, newmax = self.get_values_from_db(self.workdb, sql).fetchone()
+        self.assertEqual(minrow, newmin)
+        self.assertGreater(maxrow, newmax)
+        self.assertEqual(exprownr, newmax + 1)
+        sql = """SELECT COUNT(set_name) FROM biosets WHERE set_name='Set1'"""
+        self.assertFalse(self.get_values_from_db(self.workdb, sql).fetchone()[0])
+
+
+class TestIsoSummarize(basetests.MzidTSVBaseTest):
+    """Test producing PSM ratios, not actually summarizing"""
+    suffix = '_ratio_isobaric.txt'
+    command = 'isosummarize'
+    infilename = 'set1_target_pg.tsv'
+
+    def test_mediansweep(self):
+        result = self.run_command(['--isobquantcolpattern', 'plex',
+            '--mediansweep'])
+        self.do_check(0, result.stdout, ratiomethod='sweep')
+
+    def test_keep_zero_NA_psms_denomcolpattern(self):
+        result = self.run_command(['--isobquantcolpattern', 'plex',
+            '--denompatterns', '_126', '_131', '--keep-psms-na-quant'])
+        self.do_check(0, result.stdout, keep_na_quant=True)
+
+    def test_summarize_avg(self):
+        result = self.run_command(['--isobquantcolpattern', 'plex',
+            '--denompatterns', '_126', '_131', '--summarize-average'])
+        self.do_check(0, result.stdout)
+
+    def test_denomcolpattern_regex(self):
+        result = self.run_command(['--isobquantcolpattern', 'plex', 
+            '--denompatterns', '_1[23][61]'])
+        self.do_check(0, result.stdout)
 
     def get_denominator(self, line, method, denom_ch):
         if method == 'denoms':
@@ -477,7 +534,7 @@ class TestIso(basetests.MzidTSVBaseTest):
         return ch_medians
 
     def do_check(self, minint, stdout, normalize=False, medianpsms=None,
-                 ratiomethod='denoms', resultch=False):
+                 ratiomethod='denoms', resultch=False, keep_na_quant=False):
         channels = ['tmt10plex_126'] + [x.format('tmt10plex_1', y+27) for x in ['{}{}C', '{}{}N'] for y in range(4)] + ['tmt10plex_131']
         resultch = ['ratio_{}'.format(x) for x in channels]
         denom_ch = [channels[0], channels[-1]]
@@ -485,13 +542,13 @@ class TestIso(basetests.MzidTSVBaseTest):
             ch_medians = self.check_normalize_medians(channels, denom_ch,
                                                       minint, stdout,
                                                       medianpsms)
-        for in_line, resultline in zip(self.get_infile_lines(),
-                                       self.get_values(resultch)):
+        results = [x for x in self.get_values(resultch)]
+        resultlinenums = [x[0][0] for x in results]
+        for line_num, in_line in enumerate(self.get_infile_lines()):
             in_line.update({ch: in_line[ch]
                             if in_line[ch] != 'NA' and
                             float(in_line[ch]) > minint else 'NA'
                             for ch in channels})
-            resultline = [x[2] for x in resultline]
             denom = self.get_denominator({ch: in_line[ch] for ch in channels}, ratiomethod, denom_ch)
             if denom == 0:
                 exp_line = ['NA'] * len(channels)
@@ -503,69 +560,18 @@ class TestIso(basetests.MzidTSVBaseTest):
                 exp_line = [str((float(in_line[ch]) / denom))
                             if in_line[ch] != 'NA' else 'NA'
                             for ch in channels]
-            self.assertEqual(resultline, exp_line)
+            if not keep_na_quant and 'NA' in exp_line:
+                self.assertNotIn(line_num, resultlinenums)
+            else:
+                self.assertIn(line_num, resultlinenums)
+                nextres = results.pop(0)
+                resultline = [x[2] for x in nextres]
+                self.assertEqual(resultline, exp_line)
 
 
-class DeleteSet(MzidWithDB):
-    command = 'deletesets'
-    infilename = 'target_pg.tsv'
-    dbfn = 'target_psms.sqlite'
-
-    def test_deleteset(self):
-        set_to_del = 'Set1'
-        sql = """SELECT MIN(rownr), MAX(rownr) FROM psmrows"""
-        minrow, maxrow = self.get_values_from_db(self.workdb, sql).fetchone()
-        exprownr = 0
-        with open(self.infile) as fp:
-            head = next(fp).strip('\n').split('\t')
-            for line in fp:
-                line = {h: l for h, l in zip(head, line.strip('\n').split('\t'))}
-                if line['Biological set'] != set_to_del:
-                    exprownr += 1
-        self.run_command(['--dbfile', self.workdb, '--setnames', 'Set1'])
-        newrownr = 0
-        with open(self.resultfn) as fp:
-            head = next(fp).strip('\n').split('\t')
-            for line in fp:
-                line = {h: l for h, l in zip(head, line.strip('\n').split('\t'))}
-                self.assertNotEqual(line['Biological set'], set_to_del)
-                newrownr += 1
-        self.assertEqual(newrownr, exprownr)
-        newmin, newmax = self.get_values_from_db(self.workdb, sql).fetchone()
-        self.assertEqual(minrow, newmin)
-        self.assertGreater(maxrow, newmax)
-        self.assertEqual(exprownr, newmax + 1)
-        sql = """SELECT COUNT(set_name) FROM biosets WHERE set_name='Set1'"""
-        self.assertFalse(self.get_values_from_db(self.workdb, sql).fetchone()[0])
 
 
-class TestIsoSummarize(TestIso):
-    suffix = '_ratio_isobaric.txt'
-    command = 'isosummarize'
-    infilename = 'set1_target_pg.tsv'
-
-    def test_mediansweep(self):
-        result = self.run_command(['--isobquantcolpattern', 'plex',
-            '--mediansweep'])
-        self.do_check(0, result.stdout, ratiomethod='sweep')
-
-    def test_denomcolpattern(self):
-        result = self.run_command(['--isobquantcolpattern', 'plex',
-            '--denompatterns', '_126', '_131'])
-        self.do_check(0, result.stdout)
-
-    def test_summarize_avg(self):
-        result = self.run_command(['--isobquantcolpattern', 'plex',
-            '--denompatterns', '_126', '_131', '--summarize-average'])
-        self.do_check(0, result.stdout)
-
-    def test_denomcolpattern_regex(self):
-        result = self.run_command(['--isobquantcolpattern', 'plex', 
-            '--denompatterns', '_1[23][61]'])
-        self.do_check(0, result.stdout)
-
-
-class TestIsoFeatSummarize(TestIso):
+class TestIsoFeatSummarize(basetests.MzidTSVBaseTest):
     suffix = '_ratio_isobaric.txt'
     command = 'isosummarize'
     infilename = 'set1_target_pg.tsv'
@@ -584,7 +590,7 @@ class TestIsoFeatSummarize(TestIso):
 
     def test_normalized_isoquant(self):
         options = ['--featcol', '11', '--isobquantcolpattern', 'tmt10plex',
-                   '--denompatterns', '_126']
+                   '--denompatterns', '_126', '--keep-psms-na-quant']
         self.run_command(options)
         self.isoquant_check(os.path.join(self.fixdir, 'isosum_charge_column.txt'), # 'proteins_isosum_column.txt'),
             'Charge', self.channels, self.nopsms)

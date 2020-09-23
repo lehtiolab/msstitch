@@ -113,10 +113,11 @@ class TestPSM2Peptable(basetests.BaseTest):
         self.isoquant_check(os.path.join(self.fixdir, 'target_peptides.tsv'),
                 'Peptide sequence', self.channels, self.nopsms)
 
-    def test_no_spectracol_mediansweep(self):
+    def test_no_spectracol_mediansweep_keep_na(self):
         options = ['--isobquantcolpattern', 'tmt10plex',
                 '--scorecolpattern', 'svm',
                    '--mediansweep',
+                   '--keep-psms-na-quant',
                    '--ms1quantcolpattern', 'MS1', 
                    '--modelqvals', '--qvalthreshold', '1e-5',
                    '--minpepnr', str(4),
@@ -138,7 +139,7 @@ class TestProteinTable(basetests.ProttableTest):
         self.check_lines(expectedfn, self.resultfn)
 
     def test_sweep(self):
-        self.specialoptions = []
+        self.specialoptions = ['--keep-psms-na-quant']
         self.dotest_proteintable('^q-value', 'Master protein(s)', 'Protein ID', summarize_method='sweep')
         expectedfn = os.path.join(self.fixdir, 'proteins_sweep.txt')
         self.check_lines(expectedfn, self.resultfn)
@@ -150,7 +151,7 @@ class TestProteinTable(basetests.ProttableTest):
         self.check_lines(expectedfn, self.resultfn)
 
     def test_isonormalize_log(self):
-        self.specialoptions = ['--logisoquant', '--median-normalize']
+        self.specialoptions = ['--logisoquant', '--median-normalize', '--minint', '0.1']
         self.dotest_proteintable('^q-value', 'Master protein(s)', 'Protein ID')
         expectedfn = os.path.join(self.fixdir, 'proteins_isonorm_log.txt')
         self.check_lines(expectedfn, self.resultfn)

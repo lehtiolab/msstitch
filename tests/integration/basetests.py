@@ -385,7 +385,10 @@ class MergeTest(BaseTest):
                     setfield = '{}_{}'.format(setname, field)
                     if cutoff and exp_val[3] > cutoff:
                         exp_val = ['NA', 'NA']
-                    self.assertAlmostEqual(float(line[setfield]), exp_val[0])
+                    if line[setfield] != 'NA':
+                        self.assertAlmostEqual(float(line[setfield]), exp_val[0])
+                    else:
+                        self.assertEqual(exp_val[0], 'NA')
                     if not nopsms:
                         nr_psms = line['{} - # quanted PSMs'.format(setfield)]
                         self.assertEqual(nr_psms, str(exp_val[1]))
