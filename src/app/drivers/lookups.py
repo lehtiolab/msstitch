@@ -107,8 +107,7 @@ class SequenceLookupDriver(base.LookupDriver):
     command = 'storeseq'
     commandhelp = """Create a lookup DB from a FASTA file. Sequences are
     either stored as 1-aa-shifted overlapping peptides for full-length-protein 
-    matching, or as trypsinized peptides.
-    """
+    matching, or as trypsinized peptides."""
 
     def __init__(self):
         super().__init__()

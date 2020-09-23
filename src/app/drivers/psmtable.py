@@ -277,9 +277,7 @@ class DeleteSetDriver(PSMDriver):
     outsuffix = '_deletedset.txt'
     command = 'deletesets'
     lookuptype = 'psm'
-    commandhelp = """
-    Remove sample sets from an existing PSM table and its lookup file
-    """
+    commandhelp = """Remove sample sets from an existing PSM table and its lookup file"""
 
     def set_options(self):
         super().set_options()

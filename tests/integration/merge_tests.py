@@ -167,6 +167,8 @@ class TestProteinMerge(basetests.MergeTest):
         self.proteins()
 
     def test_mergecutoff(self):
+        # FIXME need worse peptides, all FDR is 0.0, cutoff not tested!!
+        # test is in check_built_isobaric
         self.proteins(0.0001)
 
     def test_nopsmnrs(self):
