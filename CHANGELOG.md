@@ -1,6 +1,11 @@
 # Changelog
 
 
+## [3.5] - 2020-09-23]
+## Changed
+- Isobaric quant summarizing to features now throws out all PSMs with NA in a channel by default, keep them with --keep-psms-na-quant
+
+
 ## [3.4] - 2020-09-17
 ### Added
 - Isobaric quant summarizing using denominators OR sweep OR median intensity
