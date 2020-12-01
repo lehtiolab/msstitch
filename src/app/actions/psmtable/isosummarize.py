@@ -87,7 +87,7 @@ def mediancenter_ratios(ratios, channels, logratios, psmfn):
 def get_psmratios(psmfn, header, channels, denom_channels, sweep, report_intensity, 
         summarize_by, min_int, acc_col, logintensities, keep_na_psms):
     allfeats, feat_order, psmratios = {}, OrderedDict(), []
-    for psm in reader.generate_tsv_psms(psmfn, header):
+    for psm in reader.generate_split_tsv_lines(psmfn, header):
         # remove uninformative psms when adding to features
         if acc_col and (psm[acc_col] == '' or ';' in psm[acc_col] or
                         not {psm[q] for q in channels}.difference(
@@ -126,7 +126,7 @@ def get_psmratios(psmfn, header, channels, denom_channels, sweep, report_intensi
 
 def get_ratios_from_fn(fn, header, channels):
     ratios = []
-    for feat in reader.generate_tsv_psms(fn, header):
+    for feat in reader.generate_split_tsv_lines(fn, header):
         ratios.append([float(feat[ch]) if feat[ch] != 'NA' else 'NA'
                        for ch in channels])
     return ratios
@@ -134,7 +134,7 @@ def get_ratios_from_fn(fn, header, channels):
 
 def paste_to_psmtable(psmfn, header, ratios):
     # loop psms in psmtable, paste the outratios in memory
-    for psm, ratio in zip(reader.generate_tsv_psms(psmfn, header), ratios):
+    for psm, ratio in zip(reader.generate_split_tsv_lines(psmfn, header), ratios):
         ratio.pop(ISOQUANTRATIO_FEAT_ACC)
         ratio = {'ratio_{}'.format(ch): val for ch, val in ratio.items()}
         psm.update(ratio)

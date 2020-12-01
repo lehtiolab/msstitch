@@ -101,7 +101,7 @@ class Perco2PSMDriver(PSMDriver):
             outfn = self.create_outfilepath(psmfn, self.outsuffix)
             mzns = mzidreader.get_mzid_namespace(mzidfn)
             mzidsr = mzidreader.mzid_spec_result_generator(mzidfn, mzns)
-            psms = tsvreader.generate_tsv_psms(psmfn, oldheader)
+            psms = tsvreader.generate_split_tsv_lines(psmfn, oldheader)
             psms_perco = perco.add_fdr_to_mzidtsv(psms, mzidsr, mzns,
                     self.percopsms)
             if self.filtpsm:
@@ -221,7 +221,7 @@ class PSMTableRefineDriver(PSMDriver):
                 psms, self.addbioset, self.addmiscleav)
         if self.oldpsmfile:
             prevheader = tsvreader.get_tsv_header(self.oldpsmfile)
-            previouspsms = tsvreader.generate_tsv_psms(self.oldpsmfile, prevheader)
+            previouspsms = tsvreader.generate_split_tsv_lines(self.oldpsmfile, prevheader)
             psms = chain(previouspsms, psms)
         # Enforce proteingroup last, since it has to come AFTER the chaining of old + new PSMs
         # In theory you could do it before, but that makes no sense since in a big experiment you

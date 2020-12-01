@@ -39,14 +39,14 @@ def create_psm_lookup(fn, header, proteins, pgdb, shiftrows, unroll, specfncol, 
     """
     mzmlmap = pgdb.get_mzmlfile_map()
     sequences = {}
-    for psm in tsvreader.generate_tsv_psms(fn, header):
+    for psm in tsvreader.generate_split_tsv_lines(fn, header):
         seq = tsvreader.get_psm_sequence(psm, unroll)
         sequences[seq] = 1
     pepseqmap = pgdb.get_peptide_seq_map()
     pgdb.store_pepseqs(((seq,) for seq in sequences if seq not in pepseqmap))
     pepseqmap = pgdb.get_peptide_seq_map()
     psms = []
-    for row, psm in enumerate(tsvreader.generate_tsv_psms(fn, header)):
+    for row, psm in enumerate(tsvreader.generate_split_tsv_lines(fn, header)):
         row += shiftrows
         specfn, psm_id, specscanid, seq, score = tsvreader.get_psm(psm, unroll, specfncol)
         if len(psms) % DB_STORE_CHUNK == 0:
@@ -75,7 +75,7 @@ def get_fasta_md5(fastafn):
 def store_proteins_descriptions(pgdb, fastafn, fastamd5, tsvfn, header, fastadelim, genefield):
     if not fastafn:
         prots = {}
-        for psm in tsvreader.generate_tsv_psms(tsvfn, header):
+        for psm in tsvreader.generate_split_tsv_lines(tsvfn, header):
             prots.update({x: 1 for x in
                              tsvreader.get_proteins_from_psm(psm)})
         prots = [(protein,) for protein in prots.keys()]
@@ -96,7 +96,7 @@ def store_psm_protein_relations(fn, header, pgdb, proteins, specfncol):
     allpsms = OrderedDict()
     last_id, psmids_to_store = None, set()
     store_soon = False
-    for psm in tsvreader.generate_tsv_psms(fn, header):
+    for psm in tsvreader.generate_split_tsv_lines(fn, header):
         psm_id, prots = tsvreader.get_pepproteins(psm, specfncol)
         # TODO can this be removed permanently? 
         # Filter proteins to only include those that match the protein 

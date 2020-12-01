@@ -11,12 +11,8 @@ def get_tsv_header(tsvfn):
 
 
 def generate_tsv_lines_multifile(fns, header):
-    return itertools.chain.from_iterable([generate_tsv_psms(fn, header)
+    return itertools.chain.from_iterable([generate_split_tsv_lines(fn, header)
                                           for fn in fns])
-
-
-def generate_tsv_proteins(fn, header):
-    return generate_split_tsv_lines(fn, header)
 
 
 def generate_tsv_pep_protein_quants(fns):
@@ -43,26 +39,12 @@ def mzmlfn_tsvfeature_generator(mzmlfns, ms1fns):
             yield os.path.basename(mzmlfn), quant_el
 
 
-def generate_tsv_psms(fn, header):
-    return generate_split_tsv_lines(fn, header)
-
-
-def generate_tsv_peptides(fn):
-    header = get_tsv_header(fn)
-    return generate_split_tsv_lines(fn, header)
-
-
 def generate_split_tsv_lines(fn, header):
     """Returns dicts with header-keys and psm statistic values"""
-    for line in generate_tsv_psms_line(fn):
-        yield {x: y for (x, y) in zip(header, line.strip().split('\t'))}
-
-
-def generate_tsv_psms_line(fn):
     with open(fn) as fp:
         next(fp)  # skip header
         for line in fp:
-            yield line
+            yield {x: y for (x, y) in zip(header, line.strip().split('\t'))}
 
 
 def get_psm_id(line, specfncol):

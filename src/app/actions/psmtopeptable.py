@@ -23,7 +23,7 @@ def generate_peptides(tsvfn, oldheader, switch_map, scorecol, precurquantcol,
     if fncol is None:
         fncol = mzidtsvdata.HEADER_SPECFILE
     peptides = {}
-    for psm in reader.generate_tsv_psms(tsvfn, oldheader):
+    for psm in reader.generate_split_tsv_lines(tsvfn, oldheader):
         for oldkey, newkey in switch_map.items():
             try:
                 psm[newkey] = psm.pop(oldkey)

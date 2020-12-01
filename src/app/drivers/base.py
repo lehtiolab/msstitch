@@ -179,7 +179,7 @@ class PSMDriver(BaseDriver):
         else:
             self.first_infile = self.fn
         self.oldheader = tsvreader.get_tsv_header(self.first_infile)
-        self.oldpsms = tsvreader.generate_tsv_psms(self.fn, self.oldheader)
+        self.oldpsms = tsvreader.generate_split_tsv_lines(self.fn, self.oldheader)
 
     def write(self):
         outfn = self.create_outfilepath(self.first_infile, self.outsuffix)

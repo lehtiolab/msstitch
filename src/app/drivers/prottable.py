@@ -26,8 +26,8 @@ class ProttableDriver(PepProttableDriver):
         self.header = [self.headeraccfield] + prottabledata.PICKED_HEADER
         tscorecol = tsvreader.get_cols_in_file(self.scorecolpattern, theader, True)
         dscorecol = tsvreader.get_cols_in_file(self.scorecolpattern, dheader, True)
-        tpeps = tsvreader.generate_tsv_psms(self.fn, theader)
-        dpeps = tsvreader.generate_tsv_psms(self.decoyfn, dheader)
+        tpeps = tsvreader.generate_split_tsv_lines(self.fn, theader)
+        dpeps = tsvreader.generate_split_tsv_lines(self.decoyfn, dheader)
         targets = proteins.generate_bestpep_proteins(tpeps, tscorecol, 
                 self.minlogscore, self.headeraccfield, self.fixedfeatcol)
         decoys = proteins.generate_bestpep_proteins(dpeps, dscorecol,
@@ -36,7 +36,7 @@ class ProttableDriver(PepProttableDriver):
 
     def get_quant(self, theader, features):
         if self.precursor:
-            tpeps = tsvreader.generate_tsv_psms(self.fn, theader)
+            tpeps = tsvreader.generate_split_tsv_lines(self.fn, theader)
             self.header.append(prottabledata.HEADER_AREA)
             features = proteins.add_ms1_quant_from_top3_mzidtsv(features, 
                     tpeps, self.headeraccfield, self.fixedfeatcol)
