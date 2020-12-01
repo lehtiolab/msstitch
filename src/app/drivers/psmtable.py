@@ -270,7 +270,7 @@ class IsoSummarizeDriver(PSMDriver):
         self.psms = isosummarize.get_isobaric_ratios(self.fn, self.oldheader,
                 quantcols, denomcols, self.mediansweep, self.medianintensity,
                 self.median_or_avg, self.minint, False, False, self.featcol,
-                self.logisoquant, self.mediannormalize, self.keepnapsms)
+                False, False, False, self.logisoquant, self.mediannormalize, self.keepnapsms)
 
 
 class DeleteSetDriver(PSMDriver):

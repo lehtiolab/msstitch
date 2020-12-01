@@ -64,7 +64,7 @@ class ProttableDriver(PepProttableDriver):
             features = isosummarize.get_isobaric_ratios(self.psmfile, psmheader,
                     quantcols, denomcols, self.mediansweep, self.medianintensity,
                     self.median_or_avg, self.minint, features, self.headeraccfield,
-                    self.fixedfeatcol, self.logisoquant, self.mediannormalize,
+                    self.fixedfeatcol, False, False, False, self.logisoquant, self.mediannormalize,
                     self.keepnapsms)
         return features
 

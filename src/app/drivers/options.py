@@ -457,5 +457,13 @@ peptable_options.update({
     'minpeptidenr': {'driverattr': 'minpeptidenr',
         'type': int, 'clarg': '--minpepnr', 'default': 10, 'help': 'Specifies '
         'the minimal amount of peptides (passing the --qvalthreshold) needed '
-        'to fit a linear model, default is 10.', 'required': False}
+        'to fit a linear model, default is 10.', 'required': False},
+    'totalprotfn': {'driverattr': 'totalprotfn', 'type': 'file', 
+        'clarg': '--totalproteome', 'required': False,
+        'help': 'File containing total proteome quantification to normalize PTM '
+        'peptide quantification against, i.e. Phospho peptides isobaric quant '
+        'ratios are divided by their proteins to distinguish differential '
+        'phosphorylation from the protein expression variation in the sample. '
+        'This file can also be a gene names or ENSG table. Accession should be '
+        'in the first column.'},
 })

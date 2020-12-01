@@ -13,7 +13,7 @@ ISOQUANTRATIO_FEAT_ACC = '##isoquant_target_acc##'
 
 def get_isobaric_ratios(psmfn, psmheader, channels, denom_channels, sweep,
         report_intensity, summarize_by, min_int, targetfeats, target_acc_field, accessioncol,
-        logintensities, normalize, keep_na_psms):
+        totalprot_feats, totalp_field, totalp_pepfield, logintensities, normalize, keep_na_psms):
     """Main function to calculate ratios for PSMs, peptides, proteins, genes.
     Can do simple ratios, median-of-ratios, median-centering, log2, etc
     """
@@ -26,14 +26,49 @@ def get_isobaric_ratios(psmfn, psmheader, channels, denom_channels, sweep,
         if normalize:
             outratios = mediancenter_ratios(outratios, channels, logintensities, psmfn)
         if targetfeats:
-            outratios = {x.pop(ISOQUANTRATIO_FEAT_ACC): x for x in outratios}
-            return output_to_targetfeats(targetfeats, target_acc_field, outratios, channels)
+            if totalprot_feats:
+                return totalproteome_normalization(outratios, targetfeats, totalprot_feats, totalp_field, totalp_pepfield, logratios)
+            else:
+                outratios = {x.pop(ISOQUANTRATIO_FEAT_ACC): x for x in outratios}
+                return output_to_targetfeats(targetfeats, target_acc_field, outratios, channels)
         else:
             # generate new table with accessions
             return ({(k if not k == ISOQUANTRATIO_FEAT_ACC else accessioncol): v
                      for k, v in ratio.items()} for ratio in outratios)
     else: 
         return paste_to_psmtable(psmfn, psmheader, outratios)
+
+
+def totalproteome_normalization(ratios, targetfeats, channels, totalprot,
+        totalp_field, totalp_pepfield, logratios):
+    """Normalizes PTM-peptides (mostly phospho usually) to their respective protein
+    ratios, by dividing or subtracting (log data) intensity ratios with the 
+    total proteome intensity ratios. Peptides which match to multiple proteins
+    are shown multiple times, by normalizing to each protein.
+    """
+    outratios = {x.pop(ISOQUANTRATIO_FEAT_ACC): x for x in outratios}
+    totalprot = {x[totalp_field]: x for x in totalprot}
+    for feat in targetfeats:
+        try:
+            quants = outratios[feat[acc_field]]
+        except KeyError:
+            quants = {ch: 'NA' for ch in channels}
+            quants.update({get_no_psms_field(ch): 'NA' for ch in channels})
+        else:
+            for totalp_acc in targetfeats[totalp_pepfield].split(';'):
+                # copy from quants to also include nr-of-psm fields
+                norm_q = {k: v for k,v in quants.items()}
+                if logratios:
+                    norm_q.update({ch: str(norm_q[ch] - totalprot[totalp_acc][ch])
+                        if quant[ch] != 'NA' and totalprot[totalp_acc][ch] != 'NA'
+                        else 'NA' for ch in channels})
+                else:
+                    norm_q.update({ch: str(norm_q[ch] / totalprot[totalp_acc][ch])
+                        if quant[ch] != 'NA' and totalprot[totalp_acc][ch] != 'NA'
+                        else 'NA' for ch in channels})
+                outfeat = {k: v for k,v in feat.items()}
+                outfeat.update(norm_q)
+                yield outfeat
 
 
 def mediancenter_ratios(ratios, channels, logratios, psmfn):
