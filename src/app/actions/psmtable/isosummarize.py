@@ -27,7 +27,9 @@ def get_isobaric_ratios(psmfn, psmheader, channels, denom_channels, sweep,
             outratios = mediancenter_ratios(outratios, channels, logintensities, psmfn)
         if targetfeats:
             if totalprot_feats:
-                return totalproteome_normalization(outratios, targetfeats, totalprot_feats, totalp_field, totalp_pepfield, logratios)
+                return totalproteome_normalization(outratios, targetfeats,
+                        target_acc_field, channels, totalprot_feats, totalp_field, 
+                        totalp_pepfield, logintensities)
             else:
                 outratios = {x.pop(ISOQUANTRATIO_FEAT_ACC): x for x in outratios}
                 return output_to_targetfeats(targetfeats, target_acc_field, outratios, channels)
@@ -39,15 +41,15 @@ def get_isobaric_ratios(psmfn, psmheader, channels, denom_channels, sweep,
         return paste_to_psmtable(psmfn, psmheader, outratios)
 
 
-def totalproteome_normalization(ratios, targetfeats, channels, totalprot,
-        totalp_field, totalp_pepfield, logratios):
+def totalproteome_normalization(outratios, targetfeats, acc_field, channels, totalprot,
+        totalp_field_tp, totalp_field_target, logratios):
     """Normalizes PTM-peptides (mostly phospho usually) to their respective protein
     ratios, by dividing or subtracting (log data) intensity ratios with the 
     total proteome intensity ratios. Peptides which match to multiple proteins
     are shown multiple times, by normalizing to each protein.
     """
     outratios = {x.pop(ISOQUANTRATIO_FEAT_ACC): x for x in outratios}
-    totalprot = {x[totalp_field]: x for x in totalprot}
+    totalprot = {x[totalp_field_tp]: x for x in totalprot}
     for feat in targetfeats:
         try:
             quants = outratios[feat[acc_field]]
@@ -55,16 +57,16 @@ def totalproteome_normalization(ratios, targetfeats, channels, totalprot,
             quants = {ch: 'NA' for ch in channels}
             quants.update({get_no_psms_field(ch): 'NA' for ch in channels})
         else:
-            for totalp_acc in targetfeats[totalp_pepfield].split(';'):
+            for totalp_acc in feat[totalp_field_target].split(';'):
                 # copy from quants to also include nr-of-psm fields
                 norm_q = {k: v for k,v in quants.items()}
                 if logratios:
-                    norm_q.update({ch: str(norm_q[ch] - totalprot[totalp_acc][ch])
-                        if quant[ch] != 'NA' and totalprot[totalp_acc][ch] != 'NA'
+                    norm_q.update({ch: str(norm_q[ch] - float(totalprot[totalp_acc][ch]))
+                        if quants[ch] != 'NA' and totalprot[totalp_acc][ch] != 'NA'
                         else 'NA' for ch in channels})
                 else:
-                    norm_q.update({ch: str(norm_q[ch] / totalprot[totalp_acc][ch])
-                        if quant[ch] != 'NA' and totalprot[totalp_acc][ch] != 'NA'
+                    norm_q.update({ch: str(norm_q[ch] / float(totalprot[totalp_acc][ch]))
+                        if quants[ch] != 'NA' and totalprot[totalp_acc][ch] != 'NA'
                         else 'NA' for ch in channels})
                 outfeat = {k: v for k,v in feat.items()}
                 outfeat.update(norm_q)

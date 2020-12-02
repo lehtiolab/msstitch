@@ -465,5 +465,7 @@ peptable_options.update({
         'ratios are divided by their proteins to distinguish differential '
         'phosphorylation from the protein expression variation in the sample. '
         'This file can also be a gene names or ENSG table. Accession should be '
-        'in the first column.'},
+        'in the first column. The file is preferably generated from a search '
+        'without the relevant PTM, and should not be normalized to channel '
+        'medians'},
 })
