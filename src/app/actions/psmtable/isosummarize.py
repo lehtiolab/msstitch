@@ -58,6 +58,8 @@ def totalproteome_normalization(outratios, targetfeats, acc_field, channels, tot
             quants.update({get_no_psms_field(ch): 'NA' for ch in channels})
         else:
             for totalp_acc in feat[totalp_field_target].split(';'):
+                if totalp_acc not in totalprot:
+                    continue
                 # copy from quants to also include nr-of-psm fields
                 norm_q = {k: v for k,v in quants.items()}
                 if logratios:
