@@ -129,6 +129,20 @@ msstitch peptides -i set1_target_psms.txt -o set1_target_peptides.txt \
   --minint 100 --keep-psms-na-quant
 ```
 
+In case of analyzing peptides with PTMs, you may want to process a subset of
+PSMs (with the interesting PTMs) to create a separate peptide table from. In
+that case, there is an option to normalize isobaric quant values to a protein
+(or gene) table from a non-PTM search. This allows discerning PTM-peptide 
+differential expression from its respective protein differential expression in the sample.
+Multiple-protein-matching peptides are output on multiple lines and normalized to
+each of the proteins. The protein table should be of the same experiment (sample set)
+and for example be from the below `msstitch proteins` command:
+
+```
+msstitch peptides -i set1_ptm_psms.txt -o set1_ptm_peptides.txt \
+  --scorecolpattern svm --isobquantcolpattern tmt10plex --denompatterns _126 _127C \
+  --logisoquant --totalproteome set1_proteins.txt
+```
 
 Create a protein table, with isobaric quantification as for peptides, the
 average of the top-3 highest intensity peptides for MS1 quantification:
