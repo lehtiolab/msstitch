@@ -118,7 +118,7 @@ class TestPSM2Peptable(basetests.BaseTest):
                 '--scorecolpattern', 'svm',
                    '--mediansweep',
                    '--keep-psms-na-quant',
-                   '--ms1quantcolpattern', 'MS1', 
+                   '--ms1quantcolpattern', 'MS1',
                    '--modelqvals', '--qvalthreshold', '1e-5',
                    '--minpepnr', str(4),
                    ]
@@ -126,6 +126,36 @@ class TestPSM2Peptable(basetests.BaseTest):
         self.check(1)
         self.isoquant_check(os.path.join(self.fixdir, 'target_peptides_sweep.tsv'),
                 'Peptide sequence', self.channels, self.nopsms)
+
+    def test_psm2peptable_totalproteome(self):
+        options = ['--spectracol', '1', '--isobquantcolpattern',
+                   'tmt10plex', '--scorecolpattern', 'svm',
+                   '--ms1quantcolpattern', 'MS1',
+                   '--modelqvals', '--qvalthreshold', '1e-5',
+                   '--minpepnr', str(4),
+                   '--denompatterns', '126',
+                   '--totalproteome', os.path.join(self.fixdir, 'proteins.txt'),
+                   ]
+        self.run_command(options)
+        self.check(1)
+        self.isoquant_check(os.path.join(self.fixdir, 'target_peptides_totalprotnorm_nolog.txt'),
+                'Peptide sequence', self.channels, self.nopsms)
+
+    def test_psm2peptable_totalproteome_logiso(self):
+        options = ['--spectracol', '1', '--isobquantcolpattern',
+                   'tmt10plex', '--scorecolpattern', 'svm',
+                   '--ms1quantcolpattern', 'MS1', 
+                   '--modelqvals', '--qvalthreshold', '1e-5',
+                   '--minpepnr', str(4),
+                   '--denompatterns', '126',
+                   '--logisoquant',
+                   '--totalproteome', os.path.join(self.fixdir, 'proteins_isonorm_log.txt'),
+                   ]
+        self.run_command(options)
+        self.check(1)
+        self.isoquant_check(os.path.join(self.fixdir, 'target_peptides_totalprotnorm.txt'),
+                'Peptide sequence', self.channels, self.nopsms)
+
 
 
 class TestProteinTable(basetests.ProttableTest):
