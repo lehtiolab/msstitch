@@ -25,14 +25,13 @@ def get_isobaric_ratios(psmfn, psmheader, channels, denom_channels, sweep,
     if accessioncol:
         if normalize:
             outratios = mediancenter_ratios(outratios, channels, logintensities, psmfn)
-        if targetfeats:
-            if totalprot_feats:
-                return totalproteome_normalization(outratios, targetfeats,
-                        target_acc_field, channels, totalprot_feats, totalp_field, 
-                        totalp_pepfield, logintensities)
-            else:
-                outratios = {x.pop(ISOQUANTRATIO_FEAT_ACC): x for x in outratios}
-                return output_to_targetfeats(targetfeats, target_acc_field, outratios, channels)
+        if targetfeats and totalprot_feats:
+            return totalproteome_normalization(outratios, targetfeats, 
+                    target_acc_field, channels, totalprot_feats, totalp_field,
+                    totalp_pepfield, logintensities)
+        elif targetfeats:
+            outratios = {x.pop(ISOQUANTRATIO_FEAT_ACC): x for x in outratios}
+            return output_to_targetfeats(targetfeats, target_acc_field, outratios, channels)
         else:
             # generate new table with accessions
             return ({(k if not k == ISOQUANTRATIO_FEAT_ACC else accessioncol): v
