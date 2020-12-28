@@ -18,7 +18,7 @@ class QuantDB(ResultLookupInterface):
 
     def store_channelmap(self, channels):
         self.store_many(
-            'INSERT INTO isobaric_channels(channel_name) VALUES(?)', channels)
+            'INSERT OR IGNORE INTO isobaric_channels(channel_name) VALUES(?)', channels)
 
     def store_isobaric_quants(self, quants):
         self.store_many(
