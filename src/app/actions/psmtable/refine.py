@@ -30,7 +30,7 @@ def create_header(oldheader, genes, proteingroup, precursor, isob_header, bioset
         psmdatafields = [mzidtsvdata.HEADER_SETNAME] + psmdatafields
     if miscleav:
         psmdatafields.append(mzidtsvdata.HEADER_MISSED_CLEAVAGE)
-    header = header[:specfncolnr +1] + psmdatafields + header[specfncolnr + 1:]
+    header = header[:specfncolnr +1] + [x for x in psmdatafields if x not in header] + header[specfncolnr + 1:]
     return header
 
 
