@@ -5,9 +5,12 @@ class QuantDB(ResultLookupInterface):
 
     def add_tables(self, tabletypes):
         if 'isobaric' in tabletypes:
-            self.create_tables(['isobaric_quant', 'isobaric_channels'])
+            self.create_tables(['isobaric_quant', 'isobaric_channels',
+                'precursor_ion_fraction'])
         if 'ms1' in tabletypes:
             self.create_tables(['ms1_quant', 'ms1_align', 'ms1_fwhm'])
+        #if 'pif' in tabletypes:
+        #    self.create_tables(['precursor_ion_fraction'])
 
     def get_fnfeats(self, fn_id):
         cursor = self.get_cursor()
@@ -20,14 +23,17 @@ class QuantDB(ResultLookupInterface):
         self.store_many(
             'INSERT OR IGNORE INTO isobaric_channels(channel_name) VALUES(?)', channels)
 
-    def store_isobaric_quants(self, quants):
+    def store_isobaric_quants(self, quants, pifs):
         self.store_many(
             'INSERT INTO isobaric_quant(spectra_id, channel_id, intensity) '
             'VALUES (?, ?, ?)', quants)
+        self.store_many(
+                'INSERT INTO precursor_ion_fraction(spectra_id, pif) VALUES (?, ?)', pifs)
 
     def index_isobaric_quants(self):
         self.index_column('spectraid_index', 'isobaric_quant', 'spectra_id')
         self.index_column('channel_id_index', 'isobaric_quant', 'channel_id')
+        self.index_column('pif_spectraid_ix', 'precursor_ion_fraction', 'spectra_id')
 
     def get_specmap(self, fn_id, retention_time=False, scan_nr=False):
         """Returns all spectra ids for spectra filename, keyed by 
@@ -39,7 +45,7 @@ class QuantDB(ResultLookupInterface):
         elif scan_nr:
             sql = 'SELECT scan_nr,spectra_id FROM mzml WHERE mzmlfile_id=? '
         cursor.execute(sql, tuple(values))
-        return {k: sid for k,sid in cursor.fetchall()}
+        return {k: {'id': sid} for k, sid in cursor.fetchall()}
 
     def get_channelmap(self):
         cursor = self.get_cursor()

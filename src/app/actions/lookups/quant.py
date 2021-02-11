@@ -17,24 +17,27 @@ def create_isobaric_quant_lookup(quantdb, specfn_consensus_els, channelmap):
     quantdb.store_channelmap(channels_store)
     channelmap_dbid = {channelmap[ch_name]: ch_id for ch_id, ch_name in
                        quantdb.get_channelmap()}
-    quants = []
+    #ms2scans = []
+    quants, pifs = [], []
     mzmlmap = quantdb.get_mzmlfile_map()
     active_fn = None
     for specfn, consensus_el in specfn_consensus_els:
         if specfn != active_fn:
             active_fn = specfn
             specmap = quantdb.get_specmap(mzmlmap[specfn], retention_time=True)
-        rt = openmsreader.get_consxml_rt(consensus_el)
+        rt, pif = openmsreader.get_consxml_rtpif(consensus_el)
         rt = round(float(Decimal(rt) / 60), 12)
+        spectra_id = specmap[rt]['id']
+        pifs.append((spectra_id, pif))
         qdata = get_quant_data(consensus_el)
-        spectra_id = specmap[rt]
+        #ms2scans.append((mzmlmap[specfn], spectra_id, rt, specmap[rt]['mz']))
         for channel_no in sorted(qdata.keys()):
             quants.append((spectra_id, channelmap_dbid[channel_no],
                            qdata[channel_no]))
             if len(quants) == DB_STORE_CHUNK:
-                quantdb.store_isobaric_quants(quants)
-                quants = []
-    quantdb.store_isobaric_quants(quants)
+                quantdb.store_isobaric_quants(quants, pifs)
+                quants, pifs = [], []
+    quantdb.store_isobaric_quants(quants, pifs)
     quantdb.index_isobaric_quants()
 
 

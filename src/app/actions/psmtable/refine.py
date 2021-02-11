@@ -24,7 +24,7 @@ def create_header(oldheader, genes, proteingroup, precursor, isob_header, bioset
     if precursor:
         header += [mzidtsvdata.HEADER_PRECURSOR_QUANT, mzidtsvdata.HEADER_PRECURSOR_FWHM]
     if isob_header:
-        header += isob_header
+        header += [mzidtsvdata.HEADER_PREC_PURITY, *isob_header]
     psmdatafields = mzidtsvdata.MOREDATA_HEADER
     if bioset:
         psmdatafields = [mzidtsvdata.HEADER_SETNAME] + psmdatafields
@@ -555,6 +555,7 @@ def generate_psms_quanted(quantdb, shiftrows, psms, isob_header, isobaric=False,
             while quant[0] == rownr:
                 isoquants.update({quant[sqlfields['isochan']]:
                                   str(quant[sqlfields['isoquant']])})
+                outpsm[mzidtsvdata.HEADER_PREC_PURITY] = str(quant[sqlfields['pif']])
                 try:
                     quant = next(allquants)
                 except StopIteration:

@@ -23,9 +23,12 @@ def mzmlfn_feature_generator(specfiles, featfiles):
                                   ['featureList'])
 
 
-def get_consxml_rt(cons_el):
+def get_consxml_rtpif(cons_el):
     """Returns consensusXML in seconds"""
-    return cons_el.find('centroid').attrib['rt']
+    pif = cons_el.xpath('./UserParam[@name="precursor_purity"]')
+    pif = pif[0].attrib['value'] if pif else 'NA'
+    rt = cons_el.find('centroid').attrib['rt']
+    return rt, pif
 
 
 def get_feature_info(feature):

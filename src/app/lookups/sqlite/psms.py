@@ -329,12 +329,14 @@ class PSMDB(ResultLookupInterface):
         joins = ['JOIN psms USING(psm_id)', 'JOIN mzml USING(spectra_id)']
         sqlfields, fieldcount = {}, 1
         if isobaric:
-            selects.extend(['ic.channel_name', 'iq.intensity'])
+            selects.extend(['ic.channel_name', 'iq.intensity', 'pif.pif'])
             joins.extend(['JOIN isobaric_quant AS iq USING(spectra_id)',
-                          'JOIN isobaric_channels AS ic USING(channel_id)'])
+                          'JOIN isobaric_channels AS ic USING(channel_id)',
+                          'JOIN precursor_ion_fraction AS pif USING(spectra_id)'])
             sqlfields['isochan'] = fieldcount
             sqlfields['isoquant'] = fieldcount + 1
-            fieldcount += 2
+            sqlfields['pif'] = fieldcount + 2
+            fieldcount += 3
         if precursor:
             selects.extend(['pq.intensity', 'pfw.fwhm'])
             joins.extend(['LEFT OUTER JOIN ms1_align USING(spectra_id)',
