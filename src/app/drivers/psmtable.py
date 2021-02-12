@@ -155,7 +155,7 @@ class PSMTableRefineDriver(PSMDriver):
     def set_options(self):
         super().set_options()
         options = self.define_options(['oldpsmfile', 'lookupfn', 'precursor', 'isobaric',
-            'unroll', 'spectracol', 'addbioset', 'addmiscleav', 'genes',
+            'minpurity', 'unroll', 'spectracol', 'addbioset', 'addmiscleav', 'genes',
             'proteingroup', 'fasta', 'genefield', 'fastadelim'], psmtable_options)
         self.options.update(options)
 
@@ -216,7 +216,7 @@ class PSMTableRefineDriver(PSMDriver):
             psms = refine.add_genes_to_psm_table(psms, self.lookup)
         if self.isobaric or self.precursor:
             psms = refine.generate_psms_quanted(self.lookup, shiftrows, psms,
-                    isob_header, self.isobaric, self.precursor)
+                    isob_header, self.isobaric, self.precursor, self.min_purity)
         psms = refine.generate_psms_spectradata(self.lookup, shiftrows, 
                 psms, self.addbioset, self.addmiscleav)
         if self.oldpsmfile:

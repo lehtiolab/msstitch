@@ -535,7 +535,8 @@ def get_protein_group_content(pgmap, master):
     return pg_content
 
 
-def generate_psms_quanted(quantdb, shiftrows, psms, isob_header, isobaric=False, precursor=False):
+def generate_psms_quanted(quantdb, shiftrows, psms, isob_header, isobaric,
+        precursor, min_prec_purity):
     """Takes dbfn and connects, gets quants for each line in tsvfn, sorts
     them in line by using keys in quantheader list."""
     allquants, sqlfields = quantdb.select_all_psm_quants(shiftrows, isobaric, precursor)
@@ -555,13 +556,13 @@ def generate_psms_quanted(quantdb, shiftrows, psms, isob_header, isobaric=False,
             while quant[0] == rownr:
                 isoquants.update({quant[sqlfields['isochan']]:
                                   str(quant[sqlfields['isoquant']])})
-                outpsm[mzidtsvdata.HEADER_PREC_PURITY] = str(quant[sqlfields['pif']])
+                pif = quant[sqlfields['pif']]
                 try:
                     quant = next(allquants)
                 except StopIteration:
                     # last PSM, break from while loop or it is not yielded at all
                     break
-            outpsm.update(get_quant_NAs(isoquants, isob_header))
+            outpsm.update(get_quant_NAs(isoquants, isob_header, pif, min_prec_purity))
         else:
             try:
                 quant = next(allquants)
@@ -572,13 +573,15 @@ def generate_psms_quanted(quantdb, shiftrows, psms, isob_header, isobaric=False,
         yield outpsm
 
 
-def get_quant_NAs(quantdata, quantheader):
+def get_quant_NAs(quantdata, quantheader, purity, min_purity):
     """Takes quantdata in a dict and header with quantkeys
     (eg iTRAQ isotopes). Returns dict of quant intensities
     with missing keys set to NA."""
-    out = {}
-    for qkey in quantheader:
-        out[qkey] = quantdata.get(qkey, 'NA')
+    if purity >= min_purity:
+        out = {k: quantdata.get(k, 'NA') for k in quantheader}
+    else:
+        out = {k: 'NA' for k in quantheader}
+    out[mzidtsvdata.HEADER_PREC_PURITY] = str(purity)
     return out
 
 

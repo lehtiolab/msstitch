@@ -28,7 +28,8 @@ def create_isobaric_quant_lookup(quantdb, specfn_consensus_els, channelmap):
         rt, pif = openmsreader.get_consxml_rtpif(consensus_el)
         rt = round(float(Decimal(rt) / 60), 12)
         spectra_id = specmap[rt]['id']
-        pifs.append((spectra_id, pif))
+        if pif:
+            pifs.append((spectra_id, float(pif)))
         qdata = get_quant_data(consensus_el)
         #ms2scans.append((mzmlmap[specfn], spectra_id, rt, specmap[rt]['mz']))
         for channel_no in sorted(qdata.keys()):

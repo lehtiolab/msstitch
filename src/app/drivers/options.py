@@ -336,6 +336,11 @@ psmtable_options = {
                  'help': 'Confidence type to define if higher or lower score '
                  'is better. One of [higher, lower]', 'type': str,
                  'choices': ['higher', 'lower']},
+    'minpurity': {'driverattr': 'min_purity', 'clarg': '--min-precursor-purity',
+        'type': float, 'required': False, 'default': 0,
+        'help': 'Minimum purity of precursor required to output isobaric '
+        'quantification data, MS2 scans with purity below this value '
+        'will be assigned NA in isobaric channels'},
     'medianpsms': {'driverattr': 'medianpsms', 'clarg': '--medianpsms',
                    'help': 'In case of using a separate PSM table with more '
                    'data to generate more robust medians (i.e. a superset of '
