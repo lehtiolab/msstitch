@@ -50,18 +50,21 @@ def totalproteome_normalization(outratios, targetfeats, acc_field, channels, tot
     outratios = {x.pop(ISOQUANTRATIO_FEAT_ACC): x for x in outratios}
     totalprot = {x[totalp_field_tp]: x for x in totalprot}
     for feat in targetfeats:
+        outfeat = {k: v for k,v in feat.items()}
         try:
             quants = outratios[feat[acc_field]]
         except KeyError:
             quants = {ch: 'NA' for ch in channels}
             quants.update({get_no_psms_field(ch): 'NA' for ch in channels})
+            outfeat.update(quants)
+            yield outfeat
         else:
             for totalp_acc in feat[totalp_field_target].split(';'):
-                if totalp_acc not in totalprot:
-                    continue
                 # copy from quants to also include nr-of-psm fields
                 norm_q = {k: v for k,v in quants.items()}
-                if logratios:
+                if totalp_acc not in totalprot:
+                    norm_q.update({ch: 'NA' for ch in channels})
+                elif logratios:
                     norm_q.update({ch: str(norm_q[ch] - float(totalprot[totalp_acc][ch]))
                         if quants[ch] != 'NA' and totalprot[totalp_acc][ch] != 'NA'
                         else 'NA' for ch in channels})
@@ -69,7 +72,6 @@ def totalproteome_normalization(outratios, targetfeats, acc_field, channels, tot
                     norm_q.update({ch: str(norm_q[ch] / float(totalprot[totalp_acc][ch]))
                         if quants[ch] != 'NA' and totalprot[totalp_acc][ch] != 'NA'
                         else 'NA' for ch in channels})
-                outfeat = {k: v for k,v in feat.items()}
                 outfeat.update(norm_q)
                 yield outfeat
 
