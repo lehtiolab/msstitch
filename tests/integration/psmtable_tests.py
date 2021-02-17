@@ -42,14 +42,16 @@ class TestPSMTable(MzidWithDB):
 
     def test_ionmobility(self):
         self.infilename = 'few_spec_timstof.tsv'
+        self.dbfn = 'spectra_lookup_timstof.sqlite'
+        self.setUp()
         options = ['--dbfile', self.workdb, '--spectracol', '1', '--addmiscleav', '--addbioset']
         self.run_command(options)
         sql = ('SELECT pr.rownr, bs.set_name, sp.retention_time, '
                'iit.ion_injection_time, im.ion_mobility '
                'FROM psmrows AS pr JOIN psms USING(psm_id) '
                'JOIN mzml AS sp USING(spectra_id) '
-               'JOIN ioninjtime AS iit USING(spectra_id) '
-               'JOIN ionmob AS im USING(spectra_id) '
+               'LEFT OUTER JOIN ioninjtime AS iit USING(spectra_id) '
+               'LEFT OUTER JOIN ionmob AS im USING(spectra_id) '
                'JOIN mzmlfiles USING(mzmlfile_id) '
                'JOIN biosets AS bs USING(set_id) '
                'ORDER BY pr.rownr')
