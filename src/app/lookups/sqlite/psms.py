@@ -332,7 +332,7 @@ class PSMDB(ResultLookupInterface):
             selects.extend(['ic.channel_name', 'iq.intensity', 'pif.pif'])
             joins.extend(['JOIN isobaric_quant AS iq USING(spectra_id)',
                           'JOIN isobaric_channels AS ic USING(channel_id)',
-                          'JOIN precursor_ion_fraction AS pif USING(spectra_id)'])
+                          'LEFT OUTER JOIN precursor_ion_fraction AS pif USING(spectra_id)'])
             sqlfields['isochan'] = fieldcount
             sqlfields['isoquant'] = fieldcount + 1
             sqlfields['pif'] = fieldcount + 2

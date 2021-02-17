@@ -577,11 +577,12 @@ def get_quant_NAs(quantdata, quantheader, purity, min_purity):
     """Takes quantdata in a dict and header with quantkeys
     (eg iTRAQ isotopes). Returns dict of quant intensities
     with missing keys set to NA."""
-    if purity >= min_purity:
+    comp_purity = purity if purity is not None else 0
+    if comp_purity >= min_purity:
         out = {k: quantdata.get(k, 'NA') for k in quantheader}
     else:
         out = {k: 'NA' for k in quantheader}
-    out[mzidtsvdata.HEADER_PREC_PURITY] = str(purity)
+    out[mzidtsvdata.HEADER_PREC_PURITY] = str(purity or 'NA')
     return out
 
 
