@@ -27,12 +27,13 @@ class PepTableProteinCentricDB(ProtPepTable):
     def create_pdata_map(self):
         """This runs only once, returns the data which is not dependent on sets,
         in a dict with accessions as keys"""
-        sql = """
-    SELECT sub.pep_id, sub.seq, GROUP_CONCAT(sub.pacc, ';'),
-    GROUP_CONCAT(sub.pgcnr, ';'),
-    GROUP_CONCAT(IFNULL(pd.description, 'NA'), ';'),
-    GROUP_CONCAT(pc.coverage, ';'), 
-    GROUP_CONCAT(IFNULL(gsub.ensg, 'NA'), ';'), GROUP_CONCAT(IFNULL(gnsub.gn, 'NA'), ';')
+
+        # First protein SQL, some peptides have TOO MANY proteingroup matches 
+        # for SQLite to output on a single line, therefore we loop rows 
+        # instead of doing GROUP_CONCAT
+        protsql = """
+    SELECT sub.pep_id, sub.pacc, sub.pgcnr, IFNULL(pd.description, 'NA'),
+    pc.coverage, IFNULL(gsub.ensg, 'NA'), IFNULL(gnsub.gn, 'NA')
     FROM (
         SELECT psms.pep_id AS pep_id, ps.sequence AS seq, pgm.master_id,
             pgm.pacc_id AS pacc_id, p.protein_acc AS pacc, COUNT(pgc.protein_acc) AS pgcnr
@@ -64,20 +65,30 @@ class PepTableProteinCentricDB(ProtPepTable):
         ) AS gnsub ON gnsub.pid=sub.pep_id
     LEFT OUTER JOIN protein_coverage AS pc ON sub.pacc=pc.protein_acc
     LEFT OUTER JOIN prot_desc AS pd ON sub.pacc_id=pd.pacc_id
-    GROUP BY sub.pep_id
-    """
-        cursor = self.get_cursor()
+        """
         pgdata = {}
-        for pid, seq, paccs, pgroupnrs, descs, covs, gaccs, aids in cursor.execute(sql):
-            pgdata[pid] = {
-                    ph.HEADER_PEPTIDE: seq,
-                    ph.HEADER_PROTEINS: paccs,
-                    ph.HEADER_NO_CONTENTPROTEINS: pgroupnrs,
-                    ph.HEADER_DESCRIPTIONS: descs,
-                    ph.HEADER_COVERAGES: covs,
-                    ph.HEADER_GENES: gaccs,
-                    ph.HEADER_ASSOCIATED: aids,
+        cursor = self.get_cursor()
+        for pid, pacc, pgroupnr, desc, cov, gacc, aid in cursor.execute(protsql):
+            if pid in pgdata:
+                pgdata[pid][ph.HEADER_PROTEINS] += ';{}'.format(pacc)
+                pgdata[pid][ph.HEADER_NO_CONTENTPROTEINS] += ';{}'.format(pgroupnr)
+                pgdata[pid][ph.HEADER_DESCRIPTIONS] += ';{}'.format(desc)
+                pgdata[pid][ph.HEADER_COVERAGES] += ';{}'.format(cov)
+                pgdata[pid][ph.HEADER_GENES] += ';{}'.format(gacc)
+                pgdata[pid][ph.HEADER_ASSOCIATED] += ';{}'.format(aid)
+            else:
+                pgdata[pid] = {
+                    ph.HEADER_PROTEINS: pacc,
+                    ph.HEADER_NO_CONTENTPROTEINS: pgroupnr,
+                    ph.HEADER_DESCRIPTIONS: desc,
+                    ph.HEADER_COVERAGES: cov,
+                    ph.HEADER_GENES: gacc,
+                    ph.HEADER_ASSOCIATED: aid,
                     }
+        pepsql = 'SELECT pep_id, sequence FROM peptide_sequences'
+        cursor = self.get_cursor()
+        for pid, seq in cursor.execute(pepsql):
+            pgdata[pid][ph.HEADER_PEPTIDE] = seq
         return pgdata
 
     def merge_features(self):
