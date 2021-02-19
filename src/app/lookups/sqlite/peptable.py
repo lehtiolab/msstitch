@@ -195,11 +195,13 @@ class PepTablePlainDB(PepTableProteinCentricDB):
         In plain DB we only output peptides, not proteins etc
         """
         sql = """
-    SELECT ps.pep_id, ps.sequence, GROUP_CONCAT(p.protein_acc, ';')
-    FROM protein_psm AS pp
-    INNER JOIN psms ON psms.psm_id=pp.psm_id
-    INNER JOIN peptide_sequences AS ps ON psms.pep_id=ps.pep_id
-    INNER JOIN proteins AS p ON p.protein_acc=pp.protein_acc
+    SELECT ps.pep_id, ps.sequence, GROUP_CONCAT(ppp.protein_acc, ';')
+    FROM peptide_sequences AS ps
+    INNER JOIN (
+            SELECT DISTINCT psms.pep_id, protein_acc
+            FROM psms
+            INNER JOIN protein_psm AS pp ON pp.psm_id=psms.psm_id
+            ) AS ppp ON ppp.pep_id=ps.pep_id
     GROUP BY ps.pep_id
         """
         cursor = self.get_cursor()
