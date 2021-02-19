@@ -66,18 +66,20 @@ class TestPSMTable(MzidWithDB):
 
     def check_addspec_miscleav_bioset(self):
         sql = ('SELECT pr.rownr, bs.set_name, sp.retention_time, '
-               'iit.ion_injection_time, im.ion_mobility '
+               'iit.ion_injection_time, im.ion_mobility, pif.pif '
                'FROM psmrows AS pr JOIN psms USING(psm_id) '
                'JOIN mzml AS sp USING(spectra_id) '
                'JOIN ioninjtime AS iit USING(spectra_id) '
-               'JOIN ionmob AS im USING(spectra_id) '
+               'LEFT OUTER JOIN ionmob AS im USING(spectra_id) '
+               'LEFT OUTER JOIN precursor_ion_fraction AS pif USING(spectra_id) '
                'JOIN mzmlfiles USING(mzmlfile_id) '
                'JOIN biosets AS bs USING(set_id) '
                'ORDER BY pr.rownr')
         fields = ['Biological set', 'Retention time(min)',
-                  'Ion injection time(ms)', 'Ion mobility(Vs/cm2)']
+                  'Ion injection time(ms)', 'Ion mobility(Vs/cm2)',
+                  'Precursor ion fraction']
         expected_values = self.process_dbvalues_both(self.workdb, sql, [],
-                                                     [1, 2, 3, 4], fields)
+                                                     [1, 2, 3, 4, 5], fields)
         self.check_results_sql(fields, self.rowify(expected_values))
         for val, exp in zip(self.get_values(['missed_cleavage']), self.get_values(['Peptide'], self.infile[0])):
             exp = re.sub('[0-9\+\.]', '', exp[0][1])[:-1]

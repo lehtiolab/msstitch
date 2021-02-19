@@ -366,16 +366,21 @@ class TestSpecQuantLookup(basetests.MSLookupTest):
             self.assertEqual(xml_channel, db_rec[0])
 
     def check_quantification(self):
-        sql = ('SELECT iq.intensity, ic.channel_name FROM isobaric_quant '
-               'AS iq JOIN isobaric_channels AS ic USING(channel_id)')
+        sql = ('SELECT iq.intensity, ic.channel_name, pif.pif FROM isobaric_quant '
+               'AS iq JOIN isobaric_channels AS ic USING(channel_id) '
+               'LEFT OUTER JOIN precursor_ion_fraction AS pif USING(spectra_id)')
         qch_map = self.get_quantch_map()
         dbtmt = self.get_values_from_db(self.resultfn, sql)
         for ac, xml_quant in etree.iterparse(self.isoinfile,
                                              tag='consensusElement'):
             for element in xml_quant.findall('.//element'):
-                qval, qchan = next(dbtmt)
+                qval, qchan, pif = next(dbtmt)
                 self.assertEqual(qch_map[element.attrib['map']], qchan)
                 self.assertEqual(float(element.attrib['it']), qval)
+            xmlpif = xml_quant.xpath('./UserParam[@name="precursor_purity"]')
+            if len(xmlpif):
+                self.assertEqual(float(xmlpif[0].attrib['value']), pif)
+
 
     def test_isoquant(self):
         options = ['--isobaric', self.isoinfile, '--spectra', self.fakespfn]
