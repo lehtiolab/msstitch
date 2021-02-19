@@ -129,9 +129,8 @@ class PepTableGeneCentricDB(PepTableProteinCentricDB):
         """
 
         sql = """
-SELECT ps.pep_id, ps.sequence, GROUP_CONCAT(p.protein_acc, ';'),
-        GROUP_CONCAT(IFNULL(pd.description, 'NA'), ';'), 
-        IFNULL(gsub.ensg, 'NA'), IFNULL(gnsub.gn, 'NA')
+SELECT ps.pep_id, ps.sequence, GROUP_CONCAT(IFNULL(gsub.ensg, 'NA'), ';'),
+    GROUP_CONCAT(IFNULL(gnsub.gn, 'NA'), ';')
     FROM protein_psm AS pp
     INNER JOIN psms ON psms.psm_id=pp.psm_id
     INNER JOIN peptide_sequences AS ps ON psms.pep_id=ps.pep_id
@@ -157,13 +156,11 @@ SELECT ps.pep_id, ps.sequence, GROUP_CONCAT(p.protein_acc, ';'),
             ) AS gnss
             GROUP BY gnss.pid
         ) AS gnsub ON gnsub.pid=ps.pep_id
-    LEFT OUTER JOIN prot_desc AS pd ON p.pacc_id=pd.pacc_id
-    LEFT OUTER JOIN protein_coverage AS pc ON p.protein_acc=pc.protein_acc
     GROUP BY ps.pep_id
     """
         cursor = self.get_cursor()
         pgdata = {}
-        for pid, seq, paccs, descs, gaccs, aids in cursor.execute(sql):
+        for pid, seq, gaccs, aids in cursor.execute(sql):
             pgdata[pid] = {
                     ph.HEADER_PEPTIDE: seq,
                     ph.HEADER_GENES: gaccs,
