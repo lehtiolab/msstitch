@@ -5,6 +5,7 @@ from statistics import median, StatisticsError
 from collections import OrderedDict
 
 from app.dataformats import prottable as prottabledata
+from app.dataformats import mzidtsv as psmh
 from app.readers import tsv as reader
 
 
@@ -95,9 +96,14 @@ def get_psmratios(psmfn, header, channels, denom_channels, sweep, report_intensi
     allfeats, feat_order, psmratios = {}, OrderedDict(), []
     for psm in reader.generate_split_tsv_lines(psmfn, header):
         # remove uninformative psms when adding to features
-        if acc_col and (psm[acc_col] == '' or ';' in psm[acc_col] or
-                        not {psm[q] for q in channels}.difference(
-                            {'NA', None, False, ''})):
+        # TODO the check for is-not-a-peptide can be removed but there are some usecases
+        # for which it is convenient, when adding information to the peptide
+        # sequence (e.g. PTM data). When having fully functional PTM
+        # data storage/analysis in msstitch, we can possibly remove it
+        if acc_col and (psm[acc_col] == '' or 
+                (acc_col != psmh.HEADER_PEPTIDE and ';' in psm[acc_col]) or
+                not {psm[q] for q in channels}.difference({'NA', None, False, ''})
+                ):
             continue
         ratios = calc_psm_ratios_or_int(psm, channels, denom_channels, sweep, 
                 report_intensity, min_int, logintensities)
