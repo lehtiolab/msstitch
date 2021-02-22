@@ -79,9 +79,9 @@ class PepTableProteinCentricDB(ProtPepTable):
             else:
                 pgdata[pid] = {
                     ph.HEADER_PROTEINS: pacc,
-                    ph.HEADER_NO_CONTENTPROTEINS: pgroupnr,
+                    ph.HEADER_NO_CONTENTPROTEINS: str(pgroupnr),
                     ph.HEADER_DESCRIPTIONS: desc,
-                    ph.HEADER_COVERAGES: cov,
+                    ph.HEADER_COVERAGES: str(cov),
                     ph.HEADER_GENES: gacc,
                     ph.HEADER_ASSOCIATED: aid,
                     }
