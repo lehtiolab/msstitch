@@ -29,15 +29,16 @@ class TestPSMTable(MzidWithDB):
     """
 
     def test_build_full_psmtable(self):
+        minpif = '0.4'
         fastafn = os.path.join(self.basefixdir, 'ens99_small.fasta')
         options = ['--dbfile', self.workdb, '--spectracol', '1', '--addmiscleav',
                 '--addbioset', '--genes', '--proteingroup', '--ms1quant', '--isobaric',
-                '--fasta', fastafn]
+                '--fasta', fastafn, '--min-precursor-purity', minpif]
         self.run_command(options)
         self.check_db_fasta(fastafn)
         self.check_addspec_miscleav_bioset()
         self.check_pg()
-        self.check_quanttsv()
+        self.check_quanttsv(minpif)
         self.check_addgenes()
 
     def test_ionmobility(self):
@@ -85,11 +86,13 @@ class TestPSMTable(MzidWithDB):
             exp = re.sub('[0-9\+\.]', '', exp[0][1])[:-1]
             self.assertEqual(int(val[0][1]), exp.count('K') + exp.count('R') - exp.count('KP') - exp.count('RP'))
 
-    def check_quanttsv(self):
-        sql = ('SELECT pr.rownr, ic.channel_name, iq.intensity '
-               'FROM psmrows AS pr JOIN psms USING(psm_id) '
-               'JOIN isobaric_quant AS iq USING(spectra_id) '
-               'JOIN isobaric_channels AS ic USING(channel_id)')
+    def check_quanttsv(self, minpif):
+        sql = ('SELECT pr.rownr, ic.channel_name, '
+                'CASE WHEN pif.pif > {} THEN iq.intensity ELSE "NA" END AS intensity '
+                'FROM psmrows AS pr JOIN psms USING(psm_id) '
+                'LEFT OUTER JOIN precursor_ion_fraction AS pif USING(spectra_id) '
+                'JOIN isobaric_quant AS iq USING(spectra_id) '
+                'JOIN isobaric_channels AS ic USING(channel_id) '.format(float(minpif)))
         expected_values = self.get_values_from_db(self.workdb, sql)
         fields = ['tmt10plex_{}'.format(ch) for ch in ['126', '127N', '127C',
                                                        '128N', '128C', '129N',
