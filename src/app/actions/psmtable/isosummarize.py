@@ -60,22 +60,21 @@ def totalproteome_normalization(outratios, targetfeats, acc_field, channels, tot
             outfeat.update(quants)
             yield outfeat
         else:
-            for totalp_acc in feat[totalp_field_target].split(';'):
-                # copy from quants to also include nr-of-psm fields
-                norm_q = {k: v for k,v in quants.items()}
-                if totalp_acc not in totalprot:
-                    norm_q.update({ch: 'NA' for ch in channels})
-                    norm_q.update({get_no_psms_field(ch): 'NA' for ch in channels})
-                elif logratios:
-                    norm_q.update({ch: str(norm_q[ch] - float(totalprot[totalp_acc][ch]))
-                        if quants[ch] != 'NA' and totalprot[totalp_acc][ch] != 'NA'
-                        else 'NA' for ch in channels})
-                else:
-                    norm_q.update({ch: str(norm_q[ch] / float(totalprot[totalp_acc][ch]))
-                        if quants[ch] != 'NA' and totalprot[totalp_acc][ch] != 'NA'
-                        else 'NA' for ch in channels})
-                outfeat.update(norm_q)
-                yield outfeat
+            totalp_acc = feat[totalp_field_target]
+            norm_q = {k: v for k,v in quants.items()}
+            if ';' in totalp_acc or totalp_acc not in totalprot:
+                norm_q.update({ch: 'NA' for ch in channels})
+                norm_q.update({get_no_psms_field(ch): 'NA' for ch in channels})
+            elif logratios:
+                norm_q.update({ch: str(norm_q[ch] - float(totalprot[totalp_acc][ch]))
+                    if quants[ch] != 'NA' and totalprot[totalp_acc][ch] != 'NA'
+                    else 'NA' for ch in channels})
+            else:
+                norm_q.update({ch: str(norm_q[ch] / float(totalprot[totalp_acc][ch]))
+                    if quants[ch] != 'NA' and totalprot[totalp_acc][ch] != 'NA'
+                    else 'NA' for ch in channels})
+            outfeat.update(norm_q)
+            yield outfeat
 
 
 def mediancenter_ratios(ratios, channels, logratios, psmfn):
