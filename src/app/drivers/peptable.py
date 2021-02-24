@@ -86,7 +86,7 @@ class CreatePeptableDriver(PepProttableDriver):
                 totalphead = tsvreader.get_tsv_header(self.totalprotfn)
                 totalproteome = tsvreader.generate_split_tsv_lines(self.totalprotfn, totalphead)
                 totalpfield_found = False
-                for tpacc, tp_pepacc in zip(proth.TPROT_HEADER_ACCS, peph.TPROT_HEADER_ACCS):
+                for tpacc, tp_pepacc in zip(proth.TPROT_HEADER_ACCS, psmh.TPROT_HEADER_ACCS):
                     if totalphead[0] == tpacc:
                         totalpfield_found = True
                         break
