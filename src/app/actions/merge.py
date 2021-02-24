@@ -4,11 +4,12 @@ from app.dataformats import prottable as prottabledata
 
 
 def create_lookup(fns, pqdb, poolnames, featcolnr, ms1_qcolpattern,
-        isobqcolpattern, fdrcolpattern):
+        isobqcolpattern, fdrcolpattern, flrcolpattern):
     psmnrpattern = prottabledata.HEADER_NO_PSMS_SUFFIX
     fullpsmpattern = prottabledata.HEADER_NO_FULLQ_PSMS
-    patterns = [ms1_qcolpattern, fdrcolpattern, fullpsmpattern]
-    storefuns = [pqdb.store_precursor_quants, pqdb.store_fdr, pqdb.store_fullq_psms]
+    patterns = [ms1_qcolpattern, fdrcolpattern, fullpsmpattern, flrcolpattern]
+    storefuns = [pqdb.store_precursor_quants, pqdb.store_fdr, pqdb.store_fullq_psms,
+            pqdb.store_ptm_flr]
     tablefn_map = create_tablefn_map(fns, pqdb, poolnames)
     feat_map = pqdb.get_feature_map()
     for pattern, storefun in zip(patterns, storefuns):

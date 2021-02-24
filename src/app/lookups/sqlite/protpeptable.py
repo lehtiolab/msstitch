@@ -33,6 +33,7 @@ class ProtPepTable(ResultLookupInterface):
                              'prectable': 'peptide_precur_quanted',
                              'fdrtable': 'peptide_fdr',
                              'fullqpsmtable': 'peptide_iso_fullpsms',
+                             'flrtable': 'ptm_flr',
                              }
                  }
 
@@ -42,8 +43,9 @@ class ProtPepTable(ResultLookupInterface):
 
     def add_tables(self, tabletypes=[]):
         ttypes = ['fntable', 'isoqtable', 'isochtable', 'prectable', 'fdrtable',
-                'fullqpsmtable']
-        self.create_tables([self.table_map[self.datatype][x] for x in ttypes])
+                'fullqpsmtable', 'flrtable']
+        self.create_tables([self.table_map[self.datatype][x] for x in ttypes
+            if x in self.table_map[self.datatype]])
 
     def get_all_poolnames(self):
         cursor = self.get_cursor()
@@ -138,6 +140,12 @@ class ProtPepTable(ResultLookupInterface):
         table = self.table_map[self.datatype]['fullqpsmtable']
         self.singlecols_to_index.append(('fullq_acc_ix', table, self.colmap[table][0]))
         self.singlecols_to_index.append(('fullq_table_ix', table, self.colmap[table][1]))
+
+    def store_ptm_flr(self, flrs):
+        self.store_singlecol('flrtable', flrs)
+        table = self.table_map[self.datatype]['flrtable']
+        self.singlecols_to_index.append(('flr_acc_ix', table, self.colmap[table][0]))
+        self.singlecols_to_index.append(('flr_table_ix', table, self.colmap[table][1]))
 
     def check_isoquant_psmnrs(self):
         cursor = self.get_cursor()

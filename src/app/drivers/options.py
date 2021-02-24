@@ -79,6 +79,10 @@ shared_options = {
                       'clarg': '--fdrcolpattern', 'type': str,
                       'default': None, 'help': 'Unique text pattern to identify '
                       'FDR column in input table.'},
+    'flrcolpattern': {'driverattr': 'flrcolpattern', 'required': False,
+                      'clarg': '--flrcolpattern', 'type': str,
+                      'default': None, 'help': 'Unique text pattern to identify '
+                      'FLR (peptide PTM false localization rate) column in input table.'},
     'fastadelim': {'driverattr': 'fastadelim', 'clarg': '--fastadelim',
                    'required': False, 'type': str,
                    'choices': ['tab', 'pipe', 'semicolon'],

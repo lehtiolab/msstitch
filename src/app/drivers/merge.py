@@ -18,6 +18,7 @@ class MergeDriver(base.PepProttableDriver):
                                                  'quantcolpattern',
                                                  'precursorquantcolpattern',
                                                  'fdrcolpattern',
+                                                 'flrcolpattern',
                                                  'multifiles', 'featcol'],
                                                 lookup_options))
         self.options.update(self.define_options(['lookupfn', 'mergecutoff'],
@@ -26,12 +27,12 @@ class MergeDriver(base.PepProttableDriver):
                                                 peptable_options))
 
     def parse_input(self, **kwargs):
-        self.peptidetable = False
+        self.is_peptidetable = False
         super().parse_input(**kwargs)
         header = tsvreader.get_tsv_header(self.fn[0])
         self.header = [header[0]]
         if header[0] == peph.HEADER_PEPTIDE:
-            self.peptidetable = True
+            self.is_peptidetable = True
             if self.genecentric:
                 self.lookuptype = 'peptidegenecentrictable'
                 self.header.extend([peph.HEADER_GENES, peph.HEADER_ASSOCIATED])
@@ -64,16 +65,18 @@ class MergeDriver(base.PepProttableDriver):
         self.setnames = [x.replace('"', '') for x in self.setnames]
         merge.create_lookup(self.fn, self.lookup, self.setnames, self.featcol,
                 self.precursorquantcolpattern, self.quantcolpattern,
-                self.fdrcolpattern)
+                self.fdrcolpattern, self.flrcolpattern)
         for field in self.lookup.stdheaderfields:
             self.header.extend(['{}_{}'.format(x, field) for x in self.setnames])
-        if self.fdrcolpattern and not self.header[0] == peph.HEADER_PEPTIDE:
+        if self.fdrcolpattern and not self.is_peptidetable:
             self.header.extend(['{}_{}'.format(x, ph.HEADER_QVAL) for x in self.setnames])
-        if self.precursorquantcolpattern:
-            if self.peptidetable:
+        if self.is_peptidetable:
+            if self.flrcolpattern:
+                self.header.extend(['{}_{}'.format(x, peph.HEADER_FALSE_LOC_RATE) for x in self.setnames])
+            if self.precursorquantcolpattern:
                 self.header.extend(['{}_{}'.format(x, peph.HEADER_AREA) for x in self.setnames])
-            else:
-                self.header.extend(['{}_{}'.format(x, ph.HEADER_AREA) for x in self.setnames])
+        elif self.precursorquantcolpattern:
+            self.header.extend(['{}_{}'.format(x, ph.HEADER_AREA) for x in self.setnames])
         if self.quantcolpattern:
             stored_psmnrs = self.lookup.check_isoquant_psmnrs()
             channels = [x for x in self.lookup.get_isoquant_headernames(stored_psmnrs)]

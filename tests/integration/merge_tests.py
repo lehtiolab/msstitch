@@ -26,6 +26,7 @@ class TestPeptideMerge(basetests.MergeTest):
 
     def test_genecentric(self):
         self.options.append('--genecentric')
+        self.options.extend(['--flrcolpattern', 'q-value'])
         self.run_command(self.options)
         sql = ('SELECT ps.sequence, p.psm_id, "NA", pd.description, '
                'g.gene_acc, aid.assoc_id, "NA" '
@@ -40,7 +41,7 @@ class TestPeptideMerge(basetests.MergeTest):
                'LEFT OUTER JOIN associated_ids AS aid USING(gn_id) '
                'JOIN protein_coverage AS pc USING(protein_acc) '
                )
-        self.check_iso_and_peptide_relations(sql)
+        self.check_iso_and_peptide_relations(sql, flr=True)
 
     def test_nogroups(self):
         self.options.append('--no-group-annotation')
@@ -53,15 +54,18 @@ class TestPeptideMerge(basetests.MergeTest):
                )
         self.check_iso_and_peptide_relations(sql, proteincentric=True, nogroup=True)
 
-    def check_iso_and_peptide_relations(self, sql, proteincentric=False, nogroup=False):
+    def check_iso_and_peptide_relations(self, sql, proteincentric=False, nogroup=False, flr=False):
         valsql = ('SELECT ps.sequence, bs.set_name, '
-               'ppq.quant, pf.fdr '
+               'ppq.quant, pf.fdr, flr.flr '
                'FROM peptide_sequences AS ps '
                'JOIN biosets AS bs '
                'JOIN peptide_precur_quanted AS ppq USING(pep_id) '
+               'LEFT OUTER JOIN ptm_flr AS flr USING(pep_id) '
                'JOIN peptide_fdr AS pf USING(pep_id) ')
-        self.check_build_values(valsql, ['MS1 area (highest of all PSMs)', 'q-value', ],
-                'Peptide sequence')
+        fields = ['MS1 area (highest of all PSMs)', 'q-value']
+        if flr:
+            fields += ['PTM FLR']
+        self.check_build_values(valsql, fields, 'Peptide sequence')
         isosql = ('SELECT ps.sequence, bs.set_name, ch.channel_name, '
                'iq.quantvalue, iq.amount_psms, fqp.amount_psms '
                'FROM peptide_sequences AS ps '

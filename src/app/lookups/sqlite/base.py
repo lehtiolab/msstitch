@@ -145,6 +145,13 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                    'REFERENCES '
                                    'peptide_tables(peptable_id) ON DELETE CASCADE'
                                    ],
+                   'ptm_flr': ['pep_id INTEGER',
+                           'peptable_id INTEGER',
+                           'flr DOUBLE',
+                           'FOREIGN KEY(pep_id) REFERENCES peptide_sequences(pep_id) '
+                           'FOREIGN KEY(peptable_id) '
+                           'REFERENCES peptide_tables(peptable_id) '
+                           'ON DELETE CASCADE'],
                    'protein_precur_quanted':
                    ['prot_precquant_id INTEGER PRIMARY KEY',
                     'pacc_id INTEGER',
