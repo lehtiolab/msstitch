@@ -83,11 +83,13 @@ class CreatePeptableDriver(PepProttableDriver):
                                                    self.quantcolpattern)
             totalproteome, tpacc, tp_pepacc = False, False, False
             if self.totalprotfn:
+                pep_tp_accs = [psmh.HEADER_MASTER_PROT, psmh.HEADER_SYMBOL,
+                        psmh.HEADER_GENE, peph.HEADER_PROTEINS]
                 totalphead = tsvreader.get_tsv_header(self.totalprotfn)
                 totalproteome = tsvreader.generate_split_tsv_lines(self.totalprotfn, totalphead)
                 totalpfield_found = False
-                for tpacc, tp_pepacc in zip(proth.TPROT_HEADER_ACCS, psmh.TPROT_HEADER_ACCS):
-                    if totalphead[0] == tpacc:
+                for tpacc, tp_pepacc in zip(proth.TPROT_HEADER_ACCS, pep_tp_accs):
+                    if totalphead[0] == tpacc and tp_pepacc in self.header:
                         totalpfield_found = True
                         break
                 if not totalpfield_found:
