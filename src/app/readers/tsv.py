@@ -20,9 +20,10 @@ def generate_tsv_pep_protein_quants(fns):
     from multiple files that may have different headers. Yields
     fn, header as well as quant data for each protein quant"""
     for fn in fns:
+        basefn = os.path.basename(fn)
         header = get_tsv_header(fn)
         for pquant in generate_split_tsv_lines(fn, header):
-            yield os.path.basename(fn), header, pquant
+            yield basefn, header, pquant
 
 
 def generate_ms1_feats(fn):
@@ -35,8 +36,9 @@ def mzmlfn_tsvfeature_generator(mzmlfns, ms1fns):
     """Generates tuples of spectra filename and corresponding output
     features from dinosaur/kronik"""
     for mzmlfn, ms1fn in zip(mzmlfns, ms1fns):
+        basefn = os.path.basename(mzmlfn)
         for quant_el in generate_ms1_feats(ms1fn):
-            yield os.path.basename(mzmlfn), quant_el
+            yield basefn, quant_el
 
 
 def generate_split_tsv_lines(fn, header):
