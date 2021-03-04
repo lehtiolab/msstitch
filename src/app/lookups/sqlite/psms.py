@@ -374,3 +374,7 @@ class PSMDB(ResultLookupInterface):
         # Put index back
         self.index_column('psmrowid_index', 'psmrows', 'psm_id')
         self.index_column('psmrow_index', 'psmrows', 'rownr')
+        cursor = self.get_cursor()
+        cursor.execute('DELETE FROM peptide_sequences WHERE pep_id IN ('
+            'SELECT ps.pep_id FROM peptide_sequences AS ps '
+            'LEFT OUTER JOIN psms ON ps.pep_id=psms.pep_id WHERE psms.pep_id IS NULL)')

@@ -1,7 +1,21 @@
 # Changelog
 
+## [3.6] - 2021-02-26 FIXME date
+## Added
+- Total protein normalization of PTM peptides
+- PTM FLR stored and output in peptide table merges
+- Precursor ion fraction (purity) from OpenMS to PSM table
+- Precursor purity filter sets PSM quant to NA, keeps PSMs
 
-## [3.5] - 2020-09-23]
+## Fixed
+- Do not create duplicate isobaric channels in DB and with that in PSM output
+- Do not add standard fields to PSM refined header that are already there
+- Do not crash on peptide table merge when a peptide has e.g. 600 protein matches
+- Merging no-group peptide tables no longer output multiple identical protein accessions for a peptide
+- Peptide table genecentric merge gets all genes per peptide, not only one
+
+
+## [3.5] - 2020-09-23
 ## Changed
 - Isobaric quant summarizing to features now throws out all PSMs with NA in a channel by default, keep them with --keep-psms-na-quant
 

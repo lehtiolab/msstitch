@@ -24,7 +24,8 @@ msstitch storespectra --dbfile lookup.sqlite --spectra file3.mzML file4.mzML \
 ```
 
 Then store quantification data from dinosaur (MS1 precursor quant) and isobaric 
-quantification from OpenMS together with the spectra:
+quantification (including precursor purities, but use centroided MS1 for this)
+from OpenMS together with the spectra:
 
 ```
 msstitch storequant --dbfile db.sqlite --spectra file1.mzML file2.mzML \
@@ -77,13 +78,14 @@ msstitch split -i allpsms.txt --splitcol TD
 
 Now refine the PSM tables, using the earlier created SQLite DB, 
 adding more information (sample name, MS1 precursor quant,
-isobaric quant, proteingroups, genes):
+isobaric quant, proteingroups, genes). In this example we set isobaric
+quantitation intensities to NA if the precursor purity measured is <0.3.
 
 ```
 cp db.sqlite decoy_db.sqlite
 msstitch psmtable -i target.tsv -o target_psmtable.txt --fasta uniprot.fasta \
   --dbfile db.sqlite --addmiscleav --addbioset --ms1quant --isobaric \
-  --proteingroup --genes
+  --min-precursor-purity 0.3 --proteingroup --genes
 msstitch psmtable -i decoy.tsv -o decoy_psmtable.txt --fasta decoy.fasta \
   --dbfile decoy_db.sqlite --proteingroup --genes --addbioset
 ```
@@ -130,13 +132,15 @@ msstitch peptides -i set1_target_psms.txt -o set1_target_peptides.txt \
 ```
 
 In case of analyzing peptides with PTMs, you may want to process a subset of
-PSMs (with the interesting PTMs) to create a separate peptide table from. In
-that case, there is an option to normalize isobaric quant values to a protein
-(or gene) table from a non-PTM search. This allows discerning PTM-peptide 
+PSMs (those with the PTMs) to create a separate peptide table from. In
+that case, there is an option to divide (or subtract for log2 data) isobaric 
+quant values to a protein (or gene) table from a non-PTM search, often done on
+another non-enriched sample. This allows discerning PTM-peptide 
 differential expression from its respective protein differential expression in the sample.
-Multiple-protein-matching peptides are output on multiple lines and normalized to
-each of the proteins. The protein table should be of the same experiment (sample set)
-and for example be from the below `msstitch proteins` command:
+The protein/gene table should obviously contain the same samples/channel,
+and for example be from an `msstitch proteins` or `msstitch isosummarize` command,
+using `--median-normalize` to get median centered ratios for the proteins or genes.
+After that, create a peptide table from PTM-PSMs as follows:
 
 ```
 msstitch peptides -i set1_ptm_psms.txt -o set1_ptm_peptides.txt \

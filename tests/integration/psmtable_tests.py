@@ -475,7 +475,7 @@ class DeleteSet(MzidWithDB):
 
 
 class TestIsoSummarize(basetests.MzidTSVBaseTest):
-    """Test producing PSM ratios, not actually summarizing"""
+    """Tests producing PSM ratios, not actually summarizing"""
     suffix = '_ratio_isobaric.txt'
     command = 'isosummarize'
     infilename = 'set1_target_pg.tsv'

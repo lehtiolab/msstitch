@@ -9,8 +9,6 @@ class QuantDB(ResultLookupInterface):
                 'precursor_ion_fraction'])
         if 'ms1' in tabletypes:
             self.create_tables(['ms1_quant', 'ms1_align', 'ms1_fwhm'])
-        #if 'pif' in tabletypes:
-        #    self.create_tables(['precursor_ion_fraction'])
 
     def get_fnfeats(self, fn_id):
         cursor = self.get_cursor()
