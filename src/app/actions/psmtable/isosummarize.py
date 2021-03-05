@@ -56,7 +56,6 @@ def totalproteome_normalization(outratios, targetfeats, acc_field, channels, tot
             quants = outratios[feat[acc_field]]
         except KeyError:
             quants = {ch: 'NA' for ch in channels}
-            quants.update({get_no_psms_field(ch): 'NA' for ch in channels})
             outfeat.update(quants)
             yield outfeat
         else:
@@ -64,7 +63,6 @@ def totalproteome_normalization(outratios, targetfeats, acc_field, channels, tot
             norm_q = {k: v for k,v in quants.items()}
             if ';' in totalp_acc or totalp_acc not in totalprot:
                 norm_q.update({ch: 'NA' for ch in channels})
-                norm_q.update({get_no_psms_field(ch): 'NA' for ch in channels})
             elif logratios:
                 norm_q.update({ch: str(norm_q[ch] - float(totalprot[totalp_acc][ch]))
                     if quants[ch] != 'NA' and totalprot[totalp_acc][ch] != 'NA'
