@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.6] - 2021-02-26 FIXME date
+## [3.6] - 2021-03-05
 ## Added
 - Total protein normalization of PTM peptides
 - PTM FLR stored and output in peptide table merges
