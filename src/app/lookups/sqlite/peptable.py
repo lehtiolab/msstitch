@@ -34,59 +34,67 @@ class PepTableProteinCentricDB(ProtPepTable):
         # for SQLite to output on a single line, therefore we loop rows 
         # instead of doing GROUP_CONCAT
         protsql = """
-    SELECT sub.pep_id, sub.pacc, sub.pgcnr, IFNULL(pd.description, 'NA'),
-    pc.coverage, IFNULL(gsub.ensg, 'NA'), IFNULL(gnsub.gn, 'NA')
-    FROM (
-        SELECT psms.pep_id AS pep_id, ps.sequence AS seq, pgm.master_id,
-            pgm.pacc_id AS pacc_id, p.protein_acc AS pacc, COUNT(pgc.protein_acc) AS pgcnr
-        FROM psm_protein_groups AS pp
-        INNER JOIN psms ON psms.psm_id=pp.psm_id
-        INNER JOIN protein_group_master AS pgm ON pgm.master_id=pp.master_id
-        INNER JOIN proteins AS p ON p.pacc_id=pgm.pacc_id
-        INNER JOIN protein_group_content AS pgc ON pgm.master_id=pgc.master_id
-        INNER JOIN peptide_sequences AS ps ON psms.pep_id=ps.pep_id
-        GROUP BY psms.pep_id, pgm.master_id
-        ) AS sub
-    LEFT OUTER JOIN (
-        SELECT DISTINCT psms.pep_id AS pid, g.gene_acc AS ensg
-        FROM genes as g
-        INNER JOIN ensg_proteins AS egp ON egp.gene_id=g.gene_id
-        INNER JOIN proteins AS p ON p.pacc_id=egp.pacc_id
-        INNER JOIN protein_group_master AS pgm ON pgm.pacc_id=egp.pacc_id
-        INNER JOIN psm_protein_groups AS ppg ON pgm.master_id=ppg.master_id
-        INNER JOIN psms ON psms.psm_id=ppg.psm_id
-        ) AS gsub ON gsub.pid=sub.pep_id
-    LEFT OUTER JOIN (
-        SELECT DISTINCT psms.pep_id AS pid, aid.assoc_id AS gn
-        FROM associated_ids AS aid
-        INNER JOIN genename_proteins AS gnp ON gnp.gn_id=aid.gn_id
-        INNER JOIN proteins AS p ON p.pacc_id=gnp.pacc_id
-        INNER JOIN protein_group_master AS pgm ON pgm.pacc_id=p.pacc_id
-        INNER JOIN psm_protein_groups AS ppg ON pgm.master_id=ppg.master_id
-        INNER JOIN psms ON psms.psm_id=ppg.psm_id
-        ) AS gnsub ON gnsub.pid=sub.pep_id
-    LEFT OUTER JOIN protein_coverage AS pc ON sub.pacc=pc.protein_acc
-    LEFT OUTER JOIN prot_desc AS pd ON sub.pacc_id=pd.pacc_id
-        """
+        SELECT sub.pep_id, sub.pacc, sub.pgcnr, IFNULL(pd.description, 'NA'), pc.coverage
+        FROM (
+            SELECT psms.pep_id AS pep_id, ps.sequence AS seq, pgm.master_id,
+                pgm.pacc_id AS pacc_id, p.protein_acc AS pacc, COUNT(pgc.protein_acc) AS pgcnr
+            FROM psm_protein_groups AS pp
+            INNER JOIN psms ON psms.psm_id=pp.psm_id
+            INNER JOIN protein_group_master AS pgm ON pgm.master_id=pp.master_id
+            INNER JOIN proteins AS p ON p.pacc_id=pgm.pacc_id
+            INNER JOIN protein_group_content AS pgc ON pgm.master_id=pgc.master_id
+            INNER JOIN peptide_sequences AS ps ON psms.pep_id=ps.pep_id
+            GROUP BY psms.pep_id, pgm.master_id
+            ) AS sub
+            LEFT OUTER JOIN protein_coverage AS pc ON sub.pacc=pc.protein_acc
+            LEFT OUTER JOIN prot_desc AS pd ON sub.pacc_id=pd.pacc_id
+            """
         pgdata = {}
         cursor = self.get_cursor()
-        for pid, pacc, pgroupnr, desc, cov, gacc, aid in cursor.execute(protsql):
+        for pid, pacc, pgroupnr, desc, cov in cursor.execute(protsql):
             if pid in pgdata:
-                pgdata[pid][ph.HEADER_PROTEINS] += ';{}'.format(pacc)
-                pgdata[pid][ph.HEADER_NO_CONTENTPROTEINS] += ';{}'.format(pgroupnr)
-                pgdata[pid][ph.HEADER_DESCRIPTIONS] += ';{}'.format(desc)
-                pgdata[pid][ph.HEADER_COVERAGES] += ';{}'.format(cov)
-                pgdata[pid][ph.HEADER_GENES] += ';{}'.format(gacc)
-                pgdata[pid][ph.HEADER_ASSOCIATED] += ';{}'.format(aid)
+                pgdata[pid][ph.HEADER_PROTEINS].append(pacc)
+                pgdata[pid][ph.HEADER_NO_CONTENTPROTEINS].append(str(pgroupnr))
+                pgdata[pid][ph.HEADER_DESCRIPTIONS].append(desc)
+                pgdata[pid][ph.HEADER_COVERAGES].append(str(cov))
             else:
                 pgdata[pid] = {
-                    ph.HEADER_PROTEINS: pacc,
-                    ph.HEADER_NO_CONTENTPROTEINS: str(pgroupnr),
-                    ph.HEADER_DESCRIPTIONS: desc,
-                    ph.HEADER_COVERAGES: str(cov),
-                    ph.HEADER_GENES: gacc,
-                    ph.HEADER_ASSOCIATED: aid,
+                    ph.HEADER_PROTEINS: [pacc],
+                    ph.HEADER_NO_CONTENTPROTEINS: [str(pgroupnr)],
+                    ph.HEADER_DESCRIPTIONS: [desc],
+                    ph.HEADER_COVERAGES: [str(cov)],
+                    ph.HEADER_GENES:  [],
+                    ph.HEADER_ASSOCIATED: [],
                     }
+
+        # Now get the genes
+        ensg_sql = """
+            SELECT DISTINCT psms.pep_id, IFNULL(g.gene_acc, 'NA')
+            FROM psms
+            INNER JOIN psm_protein_groups AS ppg ON psms.psm_id=ppg.psm_id
+            INNER JOIN protein_group_master AS pgm ON pgm.master_id=ppg.master_id
+            LEFT OUTER JOIN ensg_proteins AS egp ON egp.pacc_id=pgm.pacc_id
+            LEFT OUTER JOIN genes AS g ON g.gene_id=egp.gene_id
+            """
+
+        gn_sql = """
+            SELECT DISTINCT psms.pep_id, IFNULL(aid.assoc_id, 'NA')
+            FROM psms
+            INNER JOIN psm_protein_groups AS ppg ON psms.psm_id=ppg.psm_id
+            INNER JOIN protein_group_master AS pgm ON pgm.master_id=ppg.master_id
+            LEFT OUTER JOIN genename_proteins AS gnp ON gnp.pacc_id=pgm.pacc_id
+            LEFT OUTER JOIN associated_ids AS aid ON aid.gn_id=gnp.gn_id
+            """
+        for pid, ensg in cursor.execute(ensg_sql):
+            pgdata[pid][ph.HEADER_GENES].append(ensg)
+        for pid, gene in cursor.execute(gn_sql):
+            pgdata[pid][ph.HEADER_ASSOCIATED].append(gene)
+
+        # Finish with creating strings of the lists
+        for pid, headers in pgdata.items():
+            for header, vals in headers.items():
+                pgdata[pid][header] = ';'.join(vals)
+
         pepsql = 'SELECT pep_id, sequence FROM peptide_sequences'
         cursor = self.get_cursor()
         for pid, seq in cursor.execute(pepsql):
