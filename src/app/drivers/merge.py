@@ -82,6 +82,7 @@ class MergeDriver(base.PepProttableDriver):
             channels = [x for x in self.lookup.get_isoquant_headernames(stored_psmnrs)]
             for setn in self.setnames:
                 self.header.extend(['{}_{}'.format(setn, chan[0]) for chan in channels])
+            for setn in self.setnames:
                 if stored_psmnrs:
                     self.header.append('{}_{}'.format(setn, ph.HEADER_NO_FULLQ_PSMS))
                     self.header.extend(['{}_{}'.format(setn, chan[1]) for chan in channels])
