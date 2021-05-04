@@ -1,5 +1,10 @@
 # Changelog
 
+## [3.7] - 2021-03
+## Fixed
+- Peptide table merge bug that piled on duplicate proteins and exploded in processing time at big datasets
+
+
 ## [3.6] - 2021-03-05
 ## Added
 - Total protein normalization of PTM peptides
