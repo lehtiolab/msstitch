@@ -55,18 +55,19 @@ def add_fdr_to_mzidtsv(psms, mzid_specidr, mzns, percodata):
     # mzId results and PSM lines can be zipped
     scan = 0
     for specidr in mzid_specidr:
+        try:
+            scan = int({x.split('=')[0]: x.split('=')[1] for x in specidr.attrib['spectrumID'].split(' ')}['scan'])
+        except KeyError:
+            # in e.g. timstof data there are no true scan numbers, percolator sets it by increment
+            scan += 1
         for specidi in specidr.findall('{%s}SpectrumIdentificationItem' % mzns['xmlns']):
             psm = next(psms)
-            # percolator psm ID is: samplename_SII_scanindex_rank_scannr_charge_rank
-            scanindex, rank = specidi.attrib['id'].replace('SII_', '').split('_')
-            try:
-                scan = int({x.split('=')[0]: x.split('=')[1] for x in specidr.attrib['spectrumID'].split(' ')}['scan'])
-            except KeyError:
-                # in e.g. timstof data there are no true scan numbers, percolator sets it by increment
-                scan += 1
+            # percolator psm ID is: samplename_SII_scanindex_sii.ix_scannr_charge_rank
+            # SII_scanindex_sii.ix is in SII.attrib['id']
             spfile = os.path.splitext(psm[psmheaders.HEADER_SPECFILE])[0]
             try:
-                percopsm = percodata['{fn}_SII_{ix}_{rk}_{sc}_{ch}_{rk}'.format(fn=spfile, ix=scanindex, sc=scan, rk=rank, ch=psm['Charge'])]
+                percopsm = percodata['{fn}_{sii_id}_{sc}_{ch}_{rk}'.format(fn=spfile,
+                    sii_id=specidi.attrib['id'], sc=scan, rk=specidi.attrib['rank'], ch=psm['Charge'])]
             except KeyError:
                 continue
             outpsm = {k: v for k,v in psm.items()}
