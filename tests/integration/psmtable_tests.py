@@ -1,5 +1,6 @@
 import os
 import re
+import sqlite3
 import subprocess
 from lxml import etree
 from Bio import SeqIO
@@ -448,8 +449,16 @@ class DeleteSet(MzidWithDB):
 
     def test_deleteset(self):
         set_to_del = 'Set1'
-        sql = """SELECT MIN(rownr), MAX(rownr) FROM psmrows"""
-        minrow, maxrow = self.get_values_from_db(self.workdb, sql).fetchone()
+        db = sqlite3.connect(self.workdb)
+        # Add peptide which is to be deleted since it will not belong to a remaining
+        # set (peptides in set1/2 in DB are identical)
+        db.execute('INSERT INTO peptide_sequences(sequence) VALUES("fake_seq")')
+        db.commit()
+        
+        rowsql = 'SELECT MIN(rownr), MAX(rownr) FROM psmrows'
+        minrow, maxrow = db.execute(rowsql).fetchone()
+        pepsql = 'SELECT COUNT(*) FROM peptide_sequences'
+        pep_precount = db.execute(pepsql).fetchone()[0]
         exprownr = 0
         with open(self.infile) as fp:
             head = next(fp).strip('\n').split('\t')
@@ -466,12 +475,15 @@ class DeleteSet(MzidWithDB):
                 self.assertNotEqual(line['Biological set'], set_to_del)
                 newrownr += 1
         self.assertEqual(newrownr, exprownr)
-        newmin, newmax = self.get_values_from_db(self.workdb, sql).fetchone()
+        newmin, newmax = db.execute(rowsql).fetchone()
         self.assertEqual(minrow, newmin)
         self.assertGreater(maxrow, newmax)
         self.assertEqual(exprownr, newmax + 1)
-        sql = """SELECT COUNT(set_name) FROM biosets WHERE set_name='Set1'"""
-        self.assertFalse(self.get_values_from_db(self.workdb, sql).fetchone()[0])
+        pep_newcount = db.execute(pepsql).fetchone()[0]
+        self.assertGreater(pep_precount, pep_newcount)
+        print(pep_precount, pep_newcount)
+        biosql = """SELECT COUNT(set_name) FROM biosets WHERE set_name='Set1'"""
+        self.assertFalse(db.execute(biosql).fetchone()[0])
 
 
 class TestIsoSummarize(basetests.MzidTSVBaseTest):

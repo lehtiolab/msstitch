@@ -378,3 +378,4 @@ class PSMDB(ResultLookupInterface):
         cursor.execute('DELETE FROM peptide_sequences WHERE pep_id IN ('
             'SELECT ps.pep_id FROM peptide_sequences AS ps '
             'LEFT OUTER JOIN psms ON ps.pep_id=psms.pep_id WHERE psms.pep_id IS NULL)')
+        self.conn.commit()
