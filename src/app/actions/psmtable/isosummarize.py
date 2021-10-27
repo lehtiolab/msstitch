@@ -46,7 +46,7 @@ def totalproteome_normalization(outratios, targetfeats, acc_field, channels, tot
     """Normalizes PTM-peptides (mostly phospho usually) to their respective protein
     ratios, by dividing or subtracting (log data) intensity ratios with the 
     total proteome intensity ratios. Peptides which match to multiple proteins
-    are shown multiple times, by normalizing to each protein.
+    are set to NA
     """
     outratios = {x.pop(ISOQUANTRATIO_FEAT_ACC): x for x in outratios}
     totalprot = {x[totalp_field_tp]: x for x in totalprot}

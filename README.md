@@ -197,7 +197,7 @@ Here we set an cutoff so that features with FDR > 0.01 are set to NA for the
 respective sample set.
 
 ```
-msstitch merge -i set1_proteins.txt set2_proteins.txt \
+msstitch merge -i set1_proteins.txt set2_proteins.txt -o protein_table.txt \
   --setnames sampleset1 sampleset2 \
   --dbfile db.sqlite \
   --fdrcolpattern 'q-value' --mergecutoff 0.01 \
