@@ -1,6 +1,15 @@
 # Changelog
 
-## [3.7] - 2021-03
+## [3.8] - 2021-10-28
+## Changed
+- Field order in peptide/protein tables: channels of all sets, then # of PSMs used to quantify
+
+## Fixed
+- Deletesets bug where unused peptide sequences where not removed from DB due to a missing commit
+- Fix percolator to TSV ID creation which affected non-scannumbered data (e.g. TIMS data) where multiple PSMs to spectrum occur and it keeps enumerating scans
+
+
+## [3.7] - 2021-03-13
 ## Fixed
 - Peptide table merge bug that piled on duplicate proteins and exploded in processing time at big datasets
 
