@@ -15,24 +15,24 @@ class MergeDriver(base.PepProttableDriver):
     def set_options(self):
         super().set_options()
         self.options.update(self.define_options(['setnames',
-                                                 'quantcolpattern',
-                                                 'precursorquantcolpattern',
-                                                 'fdrcolpattern',
-                                                 'flrcolpattern',
-                                                 'multifiles', 'featcol'],
-                                                lookup_options))
+            'quantcolpattern', 'precursorquantcolpattern', 'fdrcolpattern',
+            'flrcolpattern', 'multifiles', 
+            'featcol'], lookup_options))
         self.options.update(self.define_options(['lookupfn', 'mergecutoff'],
-                                                prottable_options))
-        self.options.update(self.define_options(['nogroup', 'genecentric'],
-                                                peptable_options))
+            prottable_options))
+        self.options.update(self.define_options(['nogroup', 'pepcolpattern',
+            'genecentric'], peptable_options))
 
     def parse_input(self, **kwargs):
-        self.is_peptidetable = False
         super().parse_input(**kwargs)
         header = tsvreader.get_tsv_header(self.fn[0])
         self.header = [header[0]]
         if header[0] == peph.HEADER_PEPTIDE:
             self.is_peptidetable = True
+        else:
+            self.is_peptidetable = False
+            self.pepcolpattern = None # override input if any
+        if header[0] == peph.HEADER_PEPTIDE:
             if self.genecentric:
                 self.lookuptype = 'peptidegenecentrictable'
                 self.header.extend([peph.HEADER_GENES, peph.HEADER_ASSOCIATED])
@@ -65,7 +65,7 @@ class MergeDriver(base.PepProttableDriver):
         self.setnames = [x.replace('"', '') for x in self.setnames]
         merge.create_lookup(self.fn, self.lookup, self.setnames, self.featcol,
                 self.precursorquantcolpattern, self.quantcolpattern,
-                self.fdrcolpattern, self.flrcolpattern)
+                self.fdrcolpattern, self.pepcolpattern, self.flrcolpattern)
         for field in self.lookup.stdheaderfields:
             self.header.extend(['{}_{}'.format(x, field) for x in self.setnames])
         if self.fdrcolpattern and not self.is_peptidetable:

@@ -32,6 +32,7 @@ class ProtPepTable(ResultLookupInterface):
                              'isochtable': 'pepquant_channels',
                              'prectable': 'peptide_precur_quanted',
                              'fdrtable': 'peptide_fdr',
+                             'peptable': 'peptide_pep',
                              'fullqpsmtable': 'peptide_iso_fullpsms',
                              'flrtable': 'ptm_flr',
                              }
@@ -40,12 +41,6 @@ class ProtPepTable(ResultLookupInterface):
     def __init__(self, fn=None):
         super().__init__(fn)
         self.singlecols_to_index = []
-
-    def add_tables(self, tabletypes=[]):
-        ttypes = ['fntable', 'isoqtable', 'isochtable', 'prectable', 'fdrtable',
-                'fullqpsmtable', 'flrtable']
-        self.create_tables([self.table_map[self.datatype][x] for x in ttypes
-            if x in self.table_map[self.datatype]])
 
     def get_all_poolnames(self):
         cursor = self.get_cursor()
@@ -134,6 +129,10 @@ class ProtPepTable(ResultLookupInterface):
         table = self.table_map[self.datatype]['fdrtable']
         self.singlecols_to_index.append(('fdr_acc_ix', table, self.colmap[table][0]))
         self.singlecols_to_index.append(('fdr_table_ix', table, self.colmap[table][1]))
+
+    def store_pep(self, pep):
+        '''Overridden in peptide table lookup'''
+        pass
 
     def store_fullq_psms(self, fullqpsms):
         self.store_singlecol('fullqpsmtable', fullqpsms)

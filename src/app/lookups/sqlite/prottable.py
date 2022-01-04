@@ -9,6 +9,13 @@ class ProtGeneTableBase(ProtPepTable):
             ph.HEADER_NO_UNIPEP,
             ]
     singlefields = stdheaderfields + [ph.HEADER_QVAL, ph.HEADER_AREA, ph.HEADER_NO_FULLQ_PSMS]
+
+    def add_tables(self, tabletypes=[]):
+        ttypes = ['fntable', 'isoqtable', 'isochtable', 'prectable',
+                'fdrtable', 'fullqpsmtable', 'flrtable']
+        self.create_tables([self.table_map[self.datatype][x] for x in ttypes
+            if x in self.table_map[self.datatype]])
+
     
 
 class ProtTableDB(ProtGeneTableBase):

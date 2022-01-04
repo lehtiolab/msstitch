@@ -463,6 +463,10 @@ peptable_options.update({
         'inclusion threshold for q-values to fit a linear model to. Any scores/'
         'q-values below this threshold will not be used.', 'default': 10e-4,
         'required': False},
+    'pepcolpattern': {'driverattr': 'pepcolpattern', 'required': False,
+                      'clarg': '--pepcolpattern', 'type': str,
+                      'default': None, 'help': 'Unique text pattern to identify '
+                      'PEP column (given by percolator for peptides) in input table.'},
     'minpeptidenr': {'driverattr': 'minpeptidenr',
         'type': int, 'clarg': '--minpepnr', 'default': 10, 'help': 'Specifies '
         'the minimal amount of peptides (passing the --qvalthreshold) needed '
