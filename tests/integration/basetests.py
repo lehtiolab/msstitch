@@ -185,10 +185,10 @@ class MzidTSVBaseTest(BaseTest):
         row, rownr = [], 0
         for record in records:
             if record[0] == rownr:
-                row.append(record)
+                row.append(record[1:])
             else:
                 yield row
-                row = [record]
+                row = [record[1:]]
                 rownr += 1
 
     def check_results_sql(self, checkfields, expected_values):
@@ -199,26 +199,17 @@ class MzidTSVBaseTest(BaseTest):
                                   for x in expectval],
                                  [str(x) for x in resultval])
 
-    def process_dbvalues_both(self, dbfile, sql, channel_fields, permfieldnrs,
-                              permfieldnames):
+    def process_dbvalues_both(self, dbfile, sql, permfieldnrs, permfieldnames):
+        '''FIXME what does this do, is it same as rowify but with fields?'''
         dbvals = self.get_values_from_db(dbfile, sql)
-        outresults, rownr, permvals = [], 0, []
+        rownr, permvals = 0, []
         for record in dbvals:
             if record[0] != rownr:
-                for outresult in outresults:
-                    yield outresult
-                for pfname, pval in zip(permfieldnames, permvals):
-                    yield (rownr, pfname, pval)
-                if channel_fields != []:
-                    outresults = [tuple([record[0]] +
-                                        [record[x] for x in channel_fields])]
+                yield [tuple([x, y]) for x, y in zip(permfieldnames, permvals)]
                 permvals = [record[nr] for nr in permfieldnrs]
                 rownr += 1
             else:
-                permvals = [record[nr] for nr in permfieldnrs]
-                if channel_fields != []:
-                    result = [record[0]] + [record[x] for x in channel_fields]
-                    outresults.append(tuple(result))
+                permvals.extend([record[nr] for nr in permfieldnrs])
 
     def get_values(self, checkfields, outfile=False):
         if not outfile:
@@ -226,15 +217,13 @@ class MzidTSVBaseTest(BaseTest):
         with open(outfile) as fp:
             header = next(fp).strip('\n').split('\t')
             fieldindices = [header.index(field) for field in checkfields]
-            row = 0
             for line in fp:
                 line = line.strip('\n').split('\t')
                 if len(checkfields) > 1:
-                    yield [(row, field, line[ix]) for field, ix in
+                    yield [(field, line[ix]) for field, ix in
                            zip(checkfields, fieldindices)]
                 else:
-                    yield [(row, line[ix]) for ix in fieldindices]
-                row += 1
+                    yield [(line[ix],) for ix in fieldindices]
 
 
 class MSLookupTest(BaseTest):

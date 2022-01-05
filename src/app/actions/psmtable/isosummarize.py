@@ -104,7 +104,7 @@ def get_psmratios(psmfn, header, channels, denom_channels, sweep, report_intensi
             continue
         ratios = calc_psm_ratios_or_int(psm, channels, denom_channels, sweep, 
                 report_intensity, min_int, logintensities)
-        if not keep_na_psms and any((ratios[ix] == 'NA' for ix, q in enumerate(channels))):
+        if acc_col and not keep_na_psms and any((ratios[ix] == 'NA' for ix, q in enumerate(channels))):
             continue
         elif acc_col:
             try:

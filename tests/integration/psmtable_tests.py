@@ -59,12 +59,12 @@ class TestPSMTable(MzidWithDB):
                'ORDER BY pr.rownr')
         fields = ['Biological set', 'Retention time(min)',
                   'Ion injection time(ms)', 'Ion mobility(Vs/cm2)']
-        expected_values = self.process_dbvalues_both(self.workdb, sql, [],
+        expected_values = self.process_dbvalues_both(self.workdb, sql,
                                                      [1, 2, 3, 4], fields)
-        self.check_results_sql(fields, self.rowify(expected_values))
+        self.check_results_sql(fields, expected_values)
         for val, exp in zip(self.get_values(['missed_cleavage']), self.get_values(['Peptide'], self.infile[0])):
-            exp = re.sub('[0-9\+\.]', '', exp[0][1])[:-1]
-            self.assertEqual(int(val[0][1]), exp.count('K') + exp.count('R') - exp.count('KP') - exp.count('RP'))
+            exp = re.sub('[0-9\+\.]', '', exp[0][0])[:-1]
+            self.assertEqual(int(val[0][0]), exp.count('K') + exp.count('R') - exp.count('KP') - exp.count('RP'))
 
     def check_addspec_miscleav_bioset(self):
         sql = ('SELECT pr.rownr, bs.set_name, sp.retention_time, '
@@ -80,12 +80,12 @@ class TestPSMTable(MzidWithDB):
         fields = ['Biological set', 'Retention time(min)',
                   'Ion injection time(ms)', 'Ion mobility(Vs/cm2)',
                   'Precursor ion fraction']
-        expected_values = self.process_dbvalues_both(self.workdb, sql, [],
+        expected_values = self.process_dbvalues_both(self.workdb, sql,
                                                      [1, 2, 3, 4, 5], fields)
-        self.check_results_sql(fields, self.rowify(expected_values))
+        self.check_results_sql(fields, expected_values)
         for val, exp in zip(self.get_values(['missed_cleavage']), self.get_values(['Peptide'], self.infile[0])):
-            exp = re.sub('[0-9\+\.]', '', exp[0][1])[:-1]
-            self.assertEqual(int(val[0][1]), exp.count('K') + exp.count('R') - exp.count('KP') - exp.count('RP'))
+            exp = re.sub('[0-9\+\.]', '', exp[0][0])[:-1]
+            self.assertEqual(int(val[0][0]), exp.count('K') + exp.count('R') - exp.count('KP') - exp.count('RP'))
 
     def check_quanttsv(self, minpif):
         sql = ('SELECT pr.rownr, ic.channel_name, '
@@ -94,18 +94,18 @@ class TestPSMTable(MzidWithDB):
                 'LEFT OUTER JOIN precursor_ion_fraction AS pif USING(spectra_id) '
                 'JOIN isobaric_quant AS iq USING(spectra_id) '
                 'JOIN isobaric_channels AS ic USING(channel_id) '.format(float(minpif)))
-        expected_values = self.get_values_from_db(self.workdb, sql)
         fields = ['tmt10plex_{}'.format(ch) for ch in ['126', '127N', '127C',
                                                        '128N', '128C', '129N',
                                                        '129C', '130N', '130C',
                                                        '131']]
-        self.check_results_sql(fields, self.rowify(expected_values))
+        expected_values = self.rowify(self.get_values_from_db(self.workdb, sql))
+        self.check_results_sql(fields, expected_values)
         sql = ('SELECT pr.rownr, pq.intensity '
                'FROM psmrows AS pr JOIN psms USING(psm_id) '
                'LEFT OUTER JOIN ms1_align USING(spectra_id) '
                'LEFT OUTER JOIN ms1_quant AS pq USING(feature_id)')
-        expected_values = self.get_values_from_db(self.workdb, sql)
-        self.check_results_sql(['MS1 area'], self.rowify(expected_values))
+        expected_values = self.rowify(self.get_values_from_db(self.workdb, sql))
+        self.check_results_sql(['MS1 area'], expected_values)
 
     def check_db_fasta(self, fasta, exp_proteins=None, desc=True):
         if exp_proteins is None:
@@ -248,11 +248,11 @@ class TestPSMTable(MzidWithDB):
     def check_addgenes(self):
         for line in self.get_values(['Gene ID', 'Gene Name', 'Description',
                                      'Protein']):
-            genes = line[0][2].split(';')
-            assoc_ids = line[1][2].split(';')
+            genes = line[0][1].split(';')
+            assoc_ids = line[1][1].split(';')
             descriptions = ['{}]'.format(x).replace(']]', ']')
-                            for x in line[2][2].split('];')]
-            proteins = [x.split('(')[0] for x in line[3][2].split(';')]
+                            for x in line[2][1].split('];')]
+            proteins = [x.split('(')[0] for x in line[3][1].split(';')]
             sql = ('SELECT p.protein_acc, g.gene_acc, a.assoc_id, '
                    'd.description FROM proteins AS p '
                    'JOIN ensg_proteins USING(pacc_id) '
@@ -295,8 +295,8 @@ class TestPercoTSV(basetests.MzidTSVBaseTest):
         for res, exp in zip(self.get_values(checkfields), expected):
             for i, field in enumerate(checkfields):
                 if field in checkfields:
-                    self.assertEqual(field, res[i][1])
-                    self.assertEqual(exp[field], res[i][2])
+                    self.assertEqual(field, res[i][0])
+                    self.assertEqual(exp[field], res[i][1])
 
     def test_add_tdc_fdr(self):
         mzidfn = os.path.join(self.fixdir, 'few_spectra.mzid')
@@ -311,8 +311,8 @@ class TestPercoTSV(basetests.MzidTSVBaseTest):
         for res, exp in zip(self.get_values(checkfields), expected):
             for i, field in enumerate(checkfields):
                 if field in checkfields:
-                    self.assertEqual(field, res[i][1])
-                    self.assertEqual(exp[field], res[i][2])
+                    self.assertEqual(field, res[i][0])
+                    self.assertEqual(exp[field], res[i][1])
 
 
 class TestPercoTSVTIMS(basetests.MzidTSVBaseTest):
@@ -332,8 +332,8 @@ class TestPercoTSVTIMS(basetests.MzidTSVBaseTest):
         expected = [{field: line[i] for i, field in enumerate(header)} for line in expected]
         for res, exp in zip(self.get_values(header), expected):
             for i, field in enumerate(header):
-                self.assertEqual(field, res[i][1])
-                self.assertEqual(exp[field], res[i][2])
+                self.assertEqual(field, res[i][0])
+                self.assertEqual(exp[field], res[i][1])
 
 
 class TestConcatTSV(basetests.MzidTSVBaseTest):
@@ -497,25 +497,25 @@ class TestIsoSummarize(basetests.MzidTSVBaseTest):
             '--mediansweep'])
         self.do_check(0, result.stdout, ratiomethod='sweep')
 
-    def test_keep_zero_NA_psms_denomcolpattern(self):
-        result = self.run_command(['--isobquantcolpattern', 'plex',
-            '--denompatterns', '_126', '_131', '--keep-psms-na-quant'])
-        self.do_check(0, result.stdout, keep_na_quant=True)
-
     def test_summarize_avg(self):
+        denompats = ['_126']
         result = self.run_command(['--isobquantcolpattern', 'plex',
-            '--denompatterns', '_126', '_131', '--summarize-average'])
-        self.do_check(0, result.stdout)
+            '--denompatterns', *denompats, '--summarize-average'])
+        self.do_check(0, result.stdout, denompats=denompats)
 
     def test_denomcolpattern_regex(self):
+        denompats = ['_1[23][61]']
         result = self.run_command(['--isobquantcolpattern', 'plex', 
-            '--denompatterns', '_1[23][61]'])
-        self.do_check(0, result.stdout)
+            '--denompatterns', *denompats])
+        self.do_check(0, result.stdout, denompats=denompats)
 
     def get_denominator(self, line, method, denom_ch):
         if method == 'denoms':
             denomvals = [float(line[ch]) for ch in denom_ch if line[ch] != 'NA']
-            return sum(denomvals) / len(denomvals)
+            if denomvals == []:
+                return 0
+            else:
+                return sum(denomvals) / len(denomvals)
         elif method == 'sweep':
             return median([float(line[ch]) for ch in line.keys() if line[ch] != 'NA'])
 
@@ -553,22 +553,27 @@ class TestIsoSummarize(basetests.MzidTSVBaseTest):
         return ch_medians
 
     def do_check(self, minint, stdout, normalize=False, medianpsms=None,
-                 ratiomethod='denoms', resultch=False, keep_na_quant=False):
+                 ratiomethod='denoms', resultch=False, denompats=False):
         channels = ['tmt10plex_126'] + [x.format('tmt10plex_1', y+27) for x in ['{}{}C', '{}{}N'] for y in range(4)] + ['tmt10plex_131']
-        resultch = ['ratio_{}'.format(x) for x in channels]
-        denom_ch = [channels[0], channels[-1]]
+        resultch = ['#SpecFile', 'SpecID'] + ['ratio_{}'.format(x) for x in channels]
+        denom_ch = []
+        if denompats:
+            for denompat in denompats:
+                denom_ch.extend([x for x in channels if re.search(denompat, x)])
         if normalize:
             ch_medians = self.check_normalize_medians(channels, denom_ch,
                                                       minint, stdout,
                                                       medianpsms)
         results = [x for x in self.get_values(resultch)]
-        resultlinenums = [x[0][0] for x in results]
+        resultspecids = [f'{x[0][1]}_{x[1][1]}' for x in results]
         for line_num, in_line in enumerate(self.get_infile_lines()):
             in_line.update({ch: in_line[ch]
                             if in_line[ch] != 'NA' and
                             float(in_line[ch]) > minint else 'NA'
                             for ch in channels})
-            denom = self.get_denominator({ch: in_line[ch] for ch in channels}, ratiomethod, denom_ch)
+            specid = f'{in_line["#SpecFile"]}_{in_line["SpecID"]}'
+            denom = self.get_denominator({ch: in_line[ch] for ch in channels},
+                    ratiomethod, denom_ch)
             if denom == 0:
                 exp_line = ['NA'] * len(channels)
             elif normalize:
@@ -579,13 +584,10 @@ class TestIsoSummarize(basetests.MzidTSVBaseTest):
                 exp_line = [str((float(in_line[ch]) / denom))
                             if in_line[ch] != 'NA' else 'NA'
                             for ch in channels]
-            if not keep_na_quant and 'NA' in exp_line:
-                self.assertNotIn(line_num, resultlinenums)
-            else:
-                self.assertIn(line_num, resultlinenums)
-                nextres = results.pop(0)
-                resultline = [x[2] for x in nextres]
-                self.assertEqual(resultline, exp_line)
+            self.assertIn(specid, resultspecids)
+            nextres = results.pop(0)
+            resultline = [x[1] for x in nextres]
+            self.assertEqual(resultline[2:], exp_line)
 
 
 
