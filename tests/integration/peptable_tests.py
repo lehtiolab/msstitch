@@ -110,7 +110,7 @@ class TestPSM2Peptable(basetests.BaseTest):
                    ]
         self.run_command(options)
         self.check(1)
-        self.isoquant_check(os.path.join(self.fixdir, 'target_peptides.tsv'),
+        self.isoquant_check(os.path.join(self.fixdir, 'target_peptides_avg.tsv'),
                 'Peptide sequence', self.channels, self.nopsms)
 
     def test_no_spectracol_mediansweep_keep_na(self):
@@ -177,7 +177,7 @@ class TestProteinTable(basetests.ProttableTest):
     def test_average_summarizing(self):
         self.specialoptions = ['--summarize-average']
         self.dotest_proteintable('^q-value', 'Master protein(s)', 'Protein ID')
-        expectedfn = os.path.join(self.fixdir, 'proteins.txt')
+        expectedfn = os.path.join(self.fixdir, 'proteins_avg.txt')
         self.check_lines(expectedfn, self.resultfn)
 
     def test_isonormalize_log(self):
