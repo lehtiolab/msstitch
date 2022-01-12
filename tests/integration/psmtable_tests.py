@@ -378,7 +378,7 @@ class TestSplitTSV(basetests.MzidTSVBaseTest):
 
     def test_splitcol(self):
         setnames = ['Set1', 'Set2']
-        options = ['--splitcol', '28']
+        options = ['--splitcol', '30']
         self.run_command(options)
         resultfiles = [os.path.join(self.workdir, '{}.tsv'.format(setname))
                        for setname in setnames]
