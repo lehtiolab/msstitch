@@ -159,30 +159,22 @@ class PepTableGeneCentricDB(PepTableProteinCentricDB):
         sql = """
 SELECT ps.pep_id, ps.sequence, GROUP_CONCAT(IFNULL(gsub.ensg, 'NA'), ';'),
     GROUP_CONCAT(IFNULL(gnsub.gn, 'NA'), ';')
-    FROM protein_psm AS pp
-    INNER JOIN psms ON psms.psm_id=pp.psm_id
-    INNER JOIN peptide_sequences AS ps ON psms.pep_id=ps.pep_id
-    INNER JOIN proteins AS p ON p.protein_acc=pp.protein_acc
+    FROM peptide_sequences AS ps
     LEFT OUTER JOIN (
-        SELECT gss.pid AS pid, gss.ensg AS ensg FROM (
-            SELECT DISTINCT psms.pep_id AS pid, g.gene_acc AS ensg
-            FROM genes as g
-            INNER JOIN ensg_proteins AS egp ON egp.gene_id=g.gene_id
-            INNER JOIN proteins AS p ON p.pacc_id=egp.pacc_id
-            INNER JOIN protein_psm AS pp ON pp.protein_acc=p.protein_acc
-            INNER JOIN psms ON psms.psm_id=pp.psm_id
-            ) AS gss GROUP BY gss.pid
+        SELECT DISTINCT psms.pep_id AS pid, g.gene_acc AS ensg
+        FROM genes as g
+        INNER JOIN ensg_proteins AS egp ON egp.gene_id=g.gene_id
+        INNER JOIN proteins AS p ON p.pacc_id=egp.pacc_id
+        INNER JOIN protein_psm AS pp ON pp.protein_acc=p.protein_acc
+        INNER JOIN psms ON psms.psm_id=pp.psm_id
         ) AS gsub ON gsub.pid=ps.pep_id
     LEFT OUTER JOIN (
-        SELECT gnss.pid AS pid, GROUP_CONCAT(gnss.gn) AS gn FROM (
-            SELECT DISTINCT psms.pep_id AS pid, aid.assoc_id AS gn
-            FROM associated_ids AS aid
-            INNER JOIN genename_proteins AS gnp ON gnp.gn_id=aid.gn_id
-            INNER JOIN proteins AS p ON p.pacc_id=gnp.pacc_id
-            INNER JOIN protein_psm AS pp ON pp.protein_acc=p.protein_acc
-            INNER JOIN psms ON psms.psm_id=pp.psm_id
-            ) AS gnss
-            GROUP BY gnss.pid
+        SELECT DISTINCT psms.pep_id AS pid, aid.assoc_id AS gn
+        FROM associated_ids AS aid
+        INNER JOIN genename_proteins AS gnp ON gnp.gn_id=aid.gn_id
+        INNER JOIN proteins AS p ON p.pacc_id=gnp.pacc_id
+        INNER JOIN protein_psm AS pp ON pp.protein_acc=p.protein_acc
+        INNER JOIN psms ON psms.psm_id=pp.psm_id
         ) AS gnsub ON gnsub.pid=ps.pep_id
     GROUP BY ps.pep_id
     """
