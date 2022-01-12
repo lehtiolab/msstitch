@@ -7,50 +7,42 @@ from app.dataformats import mzidtsv as psmheaders
 
 
 def calculate_target_decoy_competition(percofn):
-    """From a percolator XML output file, use its svm scores to calculate an FDR
-    using TD-competition (not percolator's mixmax method). Output 
-    can be used
-    to deliver 
     """
-    # TODO add option to calculate FDR or not (percolator default one)
+    From a percolator XML output file, take the FDR (q-value) and PEP and apply
+    to the PSM table
+    """
     ns = xml.get_namespace_from_top(percofn, None)
-    # First calculate PSM FDRs
+    # Get PSM FDRs
     psms = {
-            p.attrib['{%s}psm_id' % ns['xmlns']]: (
-                float(p.find('{%s}svm_score' % ns['xmlns']).text),
-                p.attrib['{%s}decoy' % ns['xmlns']] == 'true')
+            p.attrib['{%s}psm_id' % ns['xmlns']]: {
+                'svm': float(p.find('{%s}svm_score' % ns['xmlns']).text),
+                'qval': float(p.find('{%s}q_value' % ns['xmlns']).text),
+                'pep': float(p.find('{%s}pep' % ns['xmlns']).text),
+                'td': 'decoy' if p.attrib['{%s}decoy' % ns['xmlns']] == 'true' else 'target',
+                }
             for p in percoreader.generate_psms(percofn, ns)
             }
-    decoys = {True: 0, False: 0}
-    for psm in sorted([(pid, score, decoy) for pid, (score, decoy) in psms.items()], reverse=True, key=lambda x:x[1]):
-        decoys[psm[2]] += 1
-        try:
-            psms[psm[0]] = {'decoy': psm[2], 'svm': psm[1], 'qval': min(decoys[True]/decoys[False], 1)}  # T-TDC
-        except ZeroDivisionError:
-            psms[psm[0]] = {'decoy': psm[2], 'svm': psm[1], 'qval': 1}  # T-TDC
-    # Then calculate peptide FDRs
-    decoys = {'true': 0, 'false': 0}
-    for svm, decoy, psm_ids in sorted([(float(x.find('{%s}svm_score' % ns['xmlns']).text), x.attrib['{%s}decoy' % ns['xmlns']], x.find('{%s}psm_ids' % ns['xmlns'])) for x in percoreader.generate_peptides(percofn, ns)], reverse=True, key=lambda x:x[0]):
-        decoys[decoy] += 1
-        for pid in psm_ids:
+    # Then get peptide FDRs and add them to PSMs
+    for peptide in percoreader.generate_peptides(percofn, ns):
+        psm_ids = peptide.find('{%s}psm_ids' % ns['xmlns'])
+        for psm_id in psm_ids:
             try:
-                psms[pid.text]['pepqval'] = min(decoys['true']/decoys['false'], 1)
-            except ZeroDivisionError:
-                psms[pid.text]['pepqval'] = 1
+                psms[psm_id.text].update({
+                    'pepqval': float(peptide.find('{%s}q_value' % ns['xmlns']).text),
+                    'peppep': float(peptide.find('{%s}pep' % ns['xmlns']).text),
+                    })
             except KeyError:
                 # Edgecase, sometimes filtering percolator data causes this:
                 # when there is a peptide with a PSM ID not in percolator PSMs 
                 # set all its PSMs pep-q-values to 1
-                [psms[x].update({'pepqval': 1}) for x in psm_ids if x in psms]
+                [psms[x].update({'pepqval': 1, 'peppep': 1}) for x in psm_ids if x in psms]
                 break
     return psms
 
 
 def add_fdr_to_mzidtsv(psms, mzid_specidr, mzns, percodata):
     """Takes PSMs from an mzIdentML and its MSGF+ TSV and a corresponding 
-    percolator XML. Calculate FDR from percolator scores and adds these 
-    to tsv lines. FDR calculation is done outside of percolator to avoid 
-    Mix-max FDR and instead use target-decoy competition.
+    percolator XML. 
     """
     # mzId results and PSM lines can be zipped
     scan = 0
@@ -74,12 +66,14 @@ def add_fdr_to_mzidtsv(psms, mzid_specidr, mzns, percodata):
             outpsm.update({
                 psmheaders.HEADER_SVMSCORE: percopsm['svm'], 
                 psmheaders.HEADER_PSMQ: percopsm['qval'], 
+                psmheaders.HEADER_PSM_PEP: percopsm['pep'], 
                 psmheaders.HEADER_PEPTIDE_Q: percopsm['pepqval'], 
-                psmheaders.HEADER_TARGETDECOY: 'decoy' if percopsm['decoy'] else 'target', 
+                psmheaders.HEADER_PEPTIDE_PEP: percopsm['peppep'], 
+                psmheaders.HEADER_TARGETDECOY: percopsm['td'],
                 })
             # Remove all decoy protein matches from target proteins, to ensure downstream
             # processing does not trip up on them, e.g. having a decoy master protein.
-            if not percopsm['decoy']:
+            if percopsm['td'] != 'decoy':
                 outprots = []
                 for prot in outpsm[psmheaders.HEADER_PROTEIN].split(';'):
                     if not prot.startswith(psmheaders.DECOY_PREFIX):

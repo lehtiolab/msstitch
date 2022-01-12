@@ -279,40 +279,41 @@ class TestPercoTSV(basetests.MzidTSVBaseTest):
     infilename = 'few_spectra.tsv'
 
     def test_conffilt(self):
+        threshold = 0.3
         mzidfn = os.path.join(self.fixdir, 'few_spectra.mzid')
         percofn = os.path.join(self.fixdir, 'perco.xml')
-        options = ['--mzid', mzidfn, '--perco', percofn, '--filtpep', '0.01',
-            '--filtpsm', '0.01']
+        options = ['--mzid', mzidfn, '--perco', percofn, '--filtpep', 
+            str(threshold), '--filtpsm', str(threshold)]
         self.run_command(options)
-        checkfields = ['percolator svm-score', 'PSM q-value', 'peptide q-value', 'TD']
+        checkfields = ['percolator svm-score', 'PSM q-value', 'peptide q-value',
+            'PSM PEP', 'peptide PEP', 'TD']
         with open(os.path.join(self.fixdir, 'few_spectra.tsv_fdr.tsv')) as fp:
             header = next(fp).strip().split('\t')
             expected = [line.strip().split('\t') for line in fp]
         expected = [{field: line[i] for i, field in enumerate(header)} for line in expected]
-        expected = [line for line in expected if float(line['PSM q-value']) < 0.01 and
-            float(line['peptide q-value']) < 0.01]
+        expected = [line for line in expected if float(line['PSM q-value']) < threshold and
+            float(line['peptide q-value']) < threshold]
         self.assertEqual(len(expected),  len([x for x in self.get_values(checkfields)]))
         for res, exp in zip(self.get_values(checkfields), expected):
             for i, field in enumerate(checkfields):
-                if field in checkfields:
-                    self.assertEqual(field, res[i][0])
-                    self.assertEqual(exp[field], res[i][1])
+                self.assertEqual(field, res[i][0])
+                self.assertEqual(exp[field], res[i][1])
 
-    def test_add_tdc_fdr(self):
+    def test_add_fdr(self):
         mzidfn = os.path.join(self.fixdir, 'few_spectra.mzid')
         percofn = os.path.join(self.fixdir, 'perco.xml')
         options = ['--mzid', mzidfn, '--perco', percofn]
         self.run_command(options)
-        checkfields = ['percolator svm-score', 'PSM q-value', 'peptide q-value', 'TD']
+        checkfields = ['percolator svm-score', 'PSM q-value', 'peptide q-value',
+            'PSM PEP', 'peptide PEP', 'TD']
         with open(os.path.join(self.fixdir, 'few_spectra.tsv_fdr.tsv')) as fp:
             header = next(fp).strip().split('\t')
             expected = [line.strip().split('\t') for line in fp]
         expected = [{field: line[i] for i, field in enumerate(header)} for line in expected]
         for res, exp in zip(self.get_values(checkfields), expected):
             for i, field in enumerate(checkfields):
-                if field in checkfields:
-                    self.assertEqual(field, res[i][0])
-                    self.assertEqual(exp[field], res[i][1])
+                self.assertEqual(field, res[i][0])
+                self.assertEqual(exp[field], res[i][1])
 
 
 class TestPercoTSVTIMS(basetests.MzidTSVBaseTest):
@@ -321,7 +322,7 @@ class TestPercoTSVTIMS(basetests.MzidTSVBaseTest):
     infilename = 'few_spec_timstof.tsv'
     dbfn = 'spectra_lookup_timstof.sqlite'
 
-    def test_add_tdc_fdr_timstof(self):
+    def test_add_fdr_timstof(self):
         mzidfn = os.path.join(self.fixdir, 'few_spec_timstof.mzid')
         percofn = os.path.join(self.fixdir, 'perco_timstof.xml')
         options = ['--mzid', mzidfn, '--perco', percofn]
