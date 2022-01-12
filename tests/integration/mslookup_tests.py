@@ -461,5 +461,12 @@ class TestSpecQuantLookup(basetests.MSLookupTest):
         # Now check we have a feature for all scans
         sql = """SELECT m.scan_sid, ma.feature_id FROM mzml AS m
         LEFT OUTER JOIN ms1_align AS ma USING(spectra_id)"""
+        exemptscans = {'dino': [10229], 'kr': [10148, 10229]}
+        exemptscans = [f'controllerType=0 controllerNumber=1 scan={x}' for x 
+                in exemptscans[feattype]]
         for scan, featid in self.get_values_from_db(self.resultfn, sql):
-            self.assertFalse(featid == None)
+            # some scans do not have a aligned MS1 value
+            if scan not in exemptscans:
+                self.assertFalse(featid == None)
+            else:
+                self.assertTrue(featid == None)
