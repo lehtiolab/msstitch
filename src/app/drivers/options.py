@@ -162,6 +162,13 @@ shared_options = {
         'peptide level. This median-centers the data for each channel by '
         'dividing with the median channel value (or subtracting in case of '
         'log data), for each channel in output features, e.g. proteins.'},
+    'mednorm_factors': {'driverattr': 'mednorm_factors',
+        'clarg': '--normalization-factors-table', 'type': 'file', 'required': False, 
+        'help': 'A protein/peptide/gene table that provides an alternate source '
+        'of normalization factors than the table to be normalized. This can be '
+        'used e.g. when having a PTM table which does not have a large amount '
+        'of peptides or is noisy. Use together with --median-normalize',
+        },
     'ms1mediannormalize': {'driverattr': 'ms1mediannormalize',
         'clarg': '--median-normalize-ms1', 'default': False, 
         'required': False, 'action': 'store_const', 'const': True,

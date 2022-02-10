@@ -35,8 +35,8 @@ class CreatePeptableDriver(PepProttableDriver):
         self.options.update(self.define_options(['spectracol', 'scorecolpattern', 
             'quantcolpattern', 'precursorquantcolpattern', 'minint', 'denomcols',
             'denompatterns', 'mediansweep', 'medianintensity', 'median_or_avg',
-            'logisoquant', 'mediannormalize', 'modelqvals', 'qvalthreshold',
-            'keep_psms_na', 'minpeptidenr', 'totalprotfn'], peptable_options))
+            'logisoquant', 'mediannormalize', 'mednorm_factors', 'modelqvals',
+            'qvalthreshold', 'keep_psms_na', 'minpeptidenr', 'totalprotfn'], peptable_options))
 
     def prepare(self):
         self.oldheader = tsvreader.get_tsv_header(self.fn)
@@ -87,7 +87,6 @@ class CreatePeptableDriver(PepProttableDriver):
                 pep_tp_accs = [psmh.HEADER_MASTER_PROT, psmh.HEADER_SYMBOL,
                         psmh.HEADER_GENE, peph.HEADER_PROTEINS]
                 totalphead = tsvreader.get_tsv_header(self.totalprotfn)
-                totalproteome = tsvreader.generate_split_tsv_lines(self.totalprotfn, totalphead)
                 totalpfield_found = False
                 for tpacc, tp_pepacc in zip(proth.TPROT_HEADER_ACCS, pep_tp_accs):
                     if totalphead[0] == tpacc and tp_pepacc in self.header:
@@ -98,13 +97,18 @@ class CreatePeptableDriver(PepProttableDriver):
                             'proteome table passed. '
                             'Should be one of {}'.format(proth.TPROT_HEADER_ACCS))
                     sys.exit(1)
+                totalproteome = tsvreader.generate_split_tsv_lines(self.totalprotfn, totalphead)
+            mn_factors = False
+            if self.mednorm_factors:
+                mnhead = tsvreader.get_tsv_header(self.mednorm_factors)
+                mn_factors = tsvreader.generate_split_tsv_lines(self.mednorm_factors, mnhead)
             nopsms = [isosummarize.get_no_psms_field(qf) for qf in quantcols]
             self.header = self.header + quantcols + nopsms + [proth.HEADER_NO_FULLQ_PSMS]
             peptides = isosummarize.get_isobaric_ratios(self.fn, self.oldheader, 
                     quantcols, denomcols, self.mediansweep, self.medianintensity,
                     self.median_or_avg, self.minint, peptides, self.header[0],
                     psmh.HEADER_PEPTIDE, totalproteome, tpacc, tp_pepacc,
-                    self.logisoquant, self.mediannormalize, self.keepnapsms)
+                    self.logisoquant, self.mediannormalize, mn_factors, self.keepnapsms)
         if self.modelqvals:
             qix = self.header.index(peph.HEADER_QVAL) + 1
             self.header = self.header[:qix] + [peph.HEADER_QVAL_MODELED] + self.header[qix:]

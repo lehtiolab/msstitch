@@ -14,7 +14,8 @@ ISOQUANTRATIO_FEAT_ACC = '##isoquant_target_acc##'
 
 def get_isobaric_ratios(psmfn, psmheader, channels, denom_channels, sweep,
         report_intensity, summarize_by, min_int, targetfeats, target_acc_field, accessioncol,
-        totalprot_feats, totalp_field, totalp_pepfield, logintensities, normalize, keep_na_psms):
+        totalprot_feats, totalp_field, totalp_pepfield, logintensities, mediannormalize,
+        medianfactors, keep_na_psms):
     """Main function to calculate ratios for PSMs, peptides, proteins, genes.
     Can do simple ratios, median-of-ratios, median-centering, log2, etc
     """
@@ -24,17 +25,26 @@ def get_isobaric_ratios(psmfn, psmheader, channels, denom_channels, sweep,
     # at this point, outratios look like:
     # [{ch1: 123, ch2: 456, ISOQUANTRATIO_FEAT_ACC: ENSG1244}, ]
     if accessioncol:
-        if normalize:
-            outratios = mediancenter_ratios(outratios, channels, logintensities, psmfn)
-        if targetfeats and totalprot_feats:
+        if mediannormalize:
+            # median center ratios before proceeding to output
+            # with or without factor report (do not need it if using another
+            # table since that is implied to have been analysed elsewhere anyway)
+            if medianfactors:
+                report_factors = False
+            else:
+                report_factors = os.path.basename(psmfn)
+            outratios = mediancenter_ratios(outratios, channels, logintensities, medianfactors, report_factors)
+        if totalprot_feats:
+            # immediately output
             return totalproteome_normalization(outratios, targetfeats, 
                     target_acc_field, channels, totalprot_feats, totalp_field,
                     totalp_pepfield, logintensities)
-        elif targetfeats:
+        if targetfeats:
+            # Output to the target feat table (e.g. existing peptable, protein table etc)
             outratios = {x.pop(ISOQUANTRATIO_FEAT_ACC): x for x in outratios}
             return output_to_targetfeats(targetfeats, target_acc_field, outratios, channels)
         else:
-            # generate new table with accessions
+            # generate new table with accessions if no existing ID table is specified
             return ({(k if not k == ISOQUANTRATIO_FEAT_ACC else accessioncol): v
                      for k, v in ratio.items()} for ratio in outratios)
     else: 
@@ -64,26 +74,31 @@ def totalproteome_normalization(outratios, targetfeats, acc_field, channels, tot
             if ';' in totalp_acc or totalp_acc not in totalprot:
                 norm_q.update({ch: 'NA' for ch in channels})
             elif logratios:
-                norm_q.update({ch: str(norm_q[ch] - float(totalprot[totalp_acc][ch]))
+                norm_q.update({ch: norm_q[ch] - float(totalprot[totalp_acc][ch])
                     if quants[ch] != 'NA' and totalprot[totalp_acc][ch] != 'NA'
                     else 'NA' for ch in channels})
             else:
-                norm_q.update({ch: str(norm_q[ch] / float(totalprot[totalp_acc][ch]))
+                norm_q.update({ch: norm_q[ch] / float(totalprot[totalp_acc][ch])
                     if quants[ch] != 'NA' and totalprot[totalp_acc][ch] != 'NA'
                     else 'NA' for ch in channels})
             outfeat.update(norm_q)
             yield outfeat
+        # FIXMNE correct medians? Get 0.0. for all, suspicious
 
-
-def mediancenter_ratios(ratios, channels, logratios, psmfn):
-    flatratios = [[feat[ch] for ch in channels] for feat in ratios]
-    ch_medians = get_medians(channels, flatratios, basename_report=os.path.basename(psmfn))
+        
+def mediancenter_ratios(ratios, channels, logratios, factor_table, report_factors):
+    if factor_table:
+        factor_ratios = [[float(x[ch]) if x[ch] != 'NA' else 'NA'
+            for ch in channels] for x in factor_table]
+    else:
+        factor_ratios = [[x[ch] for ch in channels] for x in ratios]
+    ch_medians = get_medians(channels, factor_ratios, basename_report=report_factors)
     for quant in ratios:
         if logratios:
-            quant.update({ch: str(quant[ch] - ch_medians[ch])
+            quant.update({ch: quant[ch] - ch_medians[ch]
                 if quant[ch] != 'NA' else 'NA' for ch in channels})
         else:
-            quant.update({ch: str(quant[ch] / ch_medians[ch])
+            quant.update({ch: quant[ch] / ch_medians[ch]
                 if quant[ch] != 'NA' else 'NA' for ch in channels})
         yield quant
 
