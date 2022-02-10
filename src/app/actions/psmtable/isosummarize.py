@@ -148,14 +148,6 @@ def get_psmratios(psmfn, header, channels, denom_channels, sweep, report_intensi
     return outfeatures
 
 
-def get_ratios_from_fn(fn, header, channels):
-    ratios = []
-    for feat in reader.generate_split_tsv_lines(fn, header):
-        ratios.append([float(feat[ch]) if feat[ch] != 'NA' else 'NA'
-                       for ch in channels])
-    return ratios
-
-
 def paste_to_psmtable(psmfn, header, ratios):
     # loop psms in psmtable, paste the outratios in memory
     for psm, ratio in zip(reader.generate_split_tsv_lines(psmfn, header), ratios):
