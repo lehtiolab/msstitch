@@ -244,7 +244,7 @@ class IsoSummarizeDriver(PSMDriver):
         self.options.update(self.define_options(['quantcolpattern', 'denompatterns',
             'denomcols', 'mediansweep', 'medianintensity', 'median_or_avg',
             'keep_psms_na', 'minint', 'featcol', 'logisoquant', 
-            'mediannormalize'], psmtable_options))
+            'mediannormalize', 'mednorm_factors'], psmtable_options))
 
     def set_features(self):
         denomcols = False
@@ -260,6 +260,10 @@ class IsoSummarizeDriver(PSMDriver):
                                'or regex pattterns to find them')
         quantcols = tsvreader.get_columns_by_pattern(self.oldheader,
                                                self.quantcolpattern)
+        mn_factors = False
+        if self.mednorm_factors:
+            mnhead = tsvreader.get_tsv_header(self.mednorm_factors)
+            mn_factors = tsvreader.generate_split_tsv_lines(self.mednorm_factors, mnhead)
         nopsms = [isosummarize.get_no_psms_field(qf) for qf in quantcols]
         if self.featcol:
             self.get_column_header_for_number(['featcol'], self.oldheader)
@@ -270,7 +274,8 @@ class IsoSummarizeDriver(PSMDriver):
         self.psms = isosummarize.get_isobaric_ratios(self.fn, self.oldheader,
                 quantcols, denomcols, self.mediansweep, self.medianintensity,
                 self.median_or_avg, self.minint, False, False, self.featcol,
-                False, False, False, self.logisoquant, self.mediannormalize, self.keepnapsms)
+                False, False, False, self.logisoquant, self.mediannormalize,
+                mn_factors, self.keepnapsms)
 
 
 class DeleteSetDriver(PSMDriver):

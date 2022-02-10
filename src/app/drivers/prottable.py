@@ -19,7 +19,7 @@ class ProttableDriver(PepProttableDriver):
         options = self.define_options(['decoyfn', 'scorecolpattern', 'minlogscore',
             'quantcolpattern', 'minint', 'denomcols', 'denompatterns', 'mediansweep',
             'medianintensity', 'median_or_avg', 'logisoquant', 'mediannormalize',
-            'keep_psms_na', 'precursor', 'psmfile'], prottable_options)
+            'mednorm_factors', 'keep_psms_na', 'precursor', 'psmfile'], prottable_options)
         self.options.update(options)
 
     def get_td_proteins_bestpep(self, theader, dheader):
@@ -59,13 +59,17 @@ class ProttableDriver(PepProttableDriver):
                 print('Cannot do median-centering on intensity values, exiting')
                 sys.exit(1)
             quantcols = tsvreader.get_columns_by_pattern(psmheader, self.quantcolpattern)
+            mn_factors = False
+            if self.mednorm_factors:
+                mnhead = tsvreader.get_tsv_header(self.mednorm_factors)
+                mn_factors = tsvreader.generate_split_tsv_lines(self.mednorm_factors, mnhead)
             nopsms = [isosummarize.get_no_psms_field(qf) for qf in quantcols]
             self.header = self.header + quantcols + nopsms + [prottabledata.HEADER_NO_FULLQ_PSMS]
             features = isosummarize.get_isobaric_ratios(self.psmfile, psmheader,
                     quantcols, denomcols, self.mediansweep, self.medianintensity,
                     self.median_or_avg, self.minint, features, self.headeraccfield,
                     self.fixedfeatcol, False, False, False, self.logisoquant, self.mediannormalize,
-                    self.keepnapsms)
+                    mn_factors, self.keepnapsms)
         return features
 
 
