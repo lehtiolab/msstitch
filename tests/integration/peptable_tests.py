@@ -127,7 +127,7 @@ class TestPSM2Peptable(basetests.BaseTest):
         self.isoquant_check(os.path.join(self.fixdir, 'target_peptides_sweep.tsv'),
                 'Peptide sequence', self.channels, self.nopsms)
 
-    def test_psm2peptable_totalproteome(self):
+    def test_totalproteome(self):
         options = ['--spectracol', '1', '--isobquantcolpattern',
                    'tmt10plex', '--scorecolpattern', 'svm',
                    '--ms1quantcolpattern', 'MS1',
@@ -141,7 +141,7 @@ class TestPSM2Peptable(basetests.BaseTest):
         self.isoquant_check(os.path.join(self.fixdir, 'target_peptides_totalprotnorm_nolog.txt'),
                 'Peptide sequence', self.channels, self.nopsms)
 
-    def test_psm2peptable_totalproteome_logiso(self):
+    def test_totalproteome_logiso(self):
         options = ['--spectracol', '1', '--isobquantcolpattern',
                    'tmt10plex', '--scorecolpattern', 'svm',
                    '--ms1quantcolpattern', 'MS1', 
@@ -154,6 +154,26 @@ class TestPSM2Peptable(basetests.BaseTest):
         self.run_command(options)
         self.check(1)
         self.isoquant_check(os.path.join(self.fixdir, 'target_peptides_totalprotnorm.txt'),
+                'Peptide sequence', self.channels, self.nopsms)
+
+    def test_totalproteome_logiso_sepnorm(self):
+        '''Most proteins/peptides have identical quant in this small exp. So output of
+        totalprotnormalizing with median centering is pep - prot - median = 0 - median
+        '''
+        options = ['--spectracol', '1', '--isobquantcolpattern',
+                   'tmt10plex', '--scorecolpattern', 'svm',
+                   '--ms1quantcolpattern', 'MS1', 
+                   '--modelqvals', '--qvalthreshold', '1e-5',
+                   '--minpepnr', str(4),
+                   '--denompatterns', '126',
+                   '--logisoquant',
+                   '--totalproteome', os.path.join(self.fixdir, 'proteins_nonorm_log.txt'),
+                   '--median-normalize',
+                   '--normalization-factors-table', os.path.join(self.fixdir, 'proteins_nonorm_log.txt'),
+                   ]
+        self.run_command(options)
+        self.check(1)
+        self.isoquant_check(os.path.join(self.fixdir, 'target_peptides_totalp_sepnorm.txt'),
                 'Peptide sequence', self.channels, self.nopsms)
 
 
