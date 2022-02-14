@@ -1,27 +1,39 @@
 # Changelog
 
+## [3.9] - 2022-02-14
+### Added
+- Add PEP (posterior error) from percolator to output
+- Possible to do median-centering on a peptide/protein/gene table using median factors from another table (e.g. PTM peptides centered with a protein table)
+
+### Changed
+- No longer recalculate percolator FDR to avoid mix-max, let user choose in percolator instead
+
+### Fixed
+- Genecentric peptide table merging bug with many identical gene output fixed
+
+
 ## [3.8] - 2021-10-28
-## Changed
+### Changed
 - Field order in peptide/protein tables: channels of all sets, then # of PSMs used to quantify
 
-## Fixed
+### Fixed
 - Deletesets bug where unused peptide sequences where not removed from DB due to a missing commit
 - Fix percolator to TSV ID creation which affected non-scannumbered data (e.g. TIMS data) where multiple PSMs to spectrum occur and it keeps enumerating scans
 
 
 ## [3.7] - 2021-03-13
-## Fixed
+### Fixed
 - Peptide table merge bug that piled on duplicate proteins and exploded in processing time at big datasets
 
 
 ## [3.6] - 2021-03-05
-## Added
+### Added
 - Total protein normalization of PTM peptides
 - PTM FLR stored and output in peptide table merges
 - Precursor ion fraction (purity) from OpenMS to PSM table
 - Precursor purity filter sets PSM quant to NA, keeps PSMs
 
-## Fixed
+### Fixed
 - Do not create duplicate isobaric channels in DB and with that in PSM output
 - Do not add standard fields to PSM refined header that are already there
 - Do not crash on peptide table merge when a peptide has e.g. 600 protein matches
@@ -30,7 +42,7 @@
 
 
 ## [3.5] - 2020-09-23
-## Changed
+### Changed
 - Isobaric quant summarizing to features now throws out all PSMs with NA in a channel by default, keep them with --keep-psms-na-quant
 
 

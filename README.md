@@ -61,7 +61,9 @@ msstitch makedecoy uniprot.fasta -o decoy.fasta --scramble tryp_rev --ignore-tar
 
 
 After running two samples of MSGF and percolator, we can start making 
-a more proper set of PSM tables:
+a more proper set of PSM tables by adding percolator data and filtering
+on FDR. The following adds percolator svm-score, q-value (FDR), and posterior
+error as columns to the PSM table:
 
 ```
 # Add percolator data, filter 0.01 FDR
@@ -148,7 +150,18 @@ msstitch peptides -i set1_ptm_psms.txt -o set1_ptm_peptides.txt \
   --logisoquant --totalproteome set1_proteins.txt
 ```
 
-Create a protein table, with isobaric quantification as for peptides, the
+For proper median centering of this table (as it would otherwise be impacted by
+sample differences per channel), you may want to median-center. In the case of 
+small and possibly noisy PTM tables, it can be advisable to use another table
+from a global search (or e.g. the full peptide or protein table from the PTM search)
+for determining channel medians. This is possible by specifying the above command
+plus:
+
+```
+  --median-normalize --normalization-factors-table /path/to/set1_global_proteins.txt
+```
+
+To create a protein table, with isobaric quantification as for peptides, the
 average of the top-3 highest intensity peptides for MS1 quantification:
 For all of these, summarizing isobaric PSM data to peptide, protein, gene features 
 is done using medians of log2 PSM quantification values per feature (e.g. a protein). If you'd
