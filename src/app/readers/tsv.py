@@ -7,7 +7,7 @@ from app.dataformats import prottable as prottabledata
 
 def get_tsv_header(tsvfn):
     with open(tsvfn) as fp:
-        return next(fp).strip().split('\t')
+        return next(fp).strip('\n').split('\t')
 
 
 def generate_tsv_lines_multifile(fns, header):
@@ -46,7 +46,7 @@ def generate_split_tsv_lines(fn, header):
     with open(fn) as fp:
         next(fp)  # skip header
         for line in fp:
-            yield {x: y for (x, y) in zip(header, line.strip().split('\t'))}
+            yield {x: y for (x, y) in zip(header, line.strip('\n').split('\t'))}
 
 
 def get_psm_id(line, specfncol):
