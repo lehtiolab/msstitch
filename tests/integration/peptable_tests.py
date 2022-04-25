@@ -13,7 +13,7 @@ class TestPSM2Peptable(basetests.BaseTest):
                                                '128N', '128C', '129N',
                                                '129C', '130N', '130C',
                                                '131']]
-    nopsms = ['{} - # quanted PSMs'.format(ch) for ch in channels]
+    nopsms = ['{} - Quanted PSM count'.format(ch) for ch in channels]
 
     def check(self, fncol):
         psms = {}
@@ -26,7 +26,7 @@ class TestPSM2Peptable(basetests.BaseTest):
         wildcardstrip = 'tmt10plex_'
         striplist = ['#SpecFile', 'Files/scans for peptide', 'MS1 area', 
                 'MS1 area (highest of all PSMs)', 'q-value (linear modeled)',
-                'Amount fully quanted PSMs']
+                'Fully quanted PSM count']
         for peptide in self.tsv_generator(self.resultfn):
             for newkey, oldkey in zip(['Peptide', 'peptide q-value', 'Protein'],
                                       ['Peptide sequence', 'q-value', 'Protein(s)']):

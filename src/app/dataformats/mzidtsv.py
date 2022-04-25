@@ -15,7 +15,7 @@ HEADER_PREC_PURITY = 'Precursor ion fraction'
 HEADER_PRECURSOR_FWHM = 'FWHM'
 HEADER_MASTER_PROT = 'Master protein(s)'
 HEADER_PG_CONTENT = 'Protein group(s) content'
-HEADER_PG_AMOUNT_PROTEIN_HITS = 'Amount of matching proteins in group(s)'
+HEADER_PG_AMOUNT_PROTEIN_HITS = 'Total number of matching proteins in group(s)'
 HEADER_PG = [HEADER_MASTER_PROT, HEADER_PG_CONTENT,
              HEADER_PG_AMOUNT_PROTEIN_HITS]
 HEADER_SVMSCORE = 'percolator svm-score'

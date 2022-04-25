@@ -601,7 +601,7 @@ class TestIsoFeatSummarize(basetests.MzidTSVBaseTest):
                                                    '128N', '128C', '129N',
                                                    '129C', '130N', '130C',
                                                    '131']]
-    nopsms = ['{} - # quanted PSMs'.format(ch) for ch in channels]
+    nopsms = ['{} - Quanted PSM count'.format(ch) for ch in channels]
 
     def test_isoquant(self):
         options = ['--featcol', '14', '--isobquantcolpattern', 'tmt10plex',

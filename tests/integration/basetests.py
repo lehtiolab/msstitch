@@ -379,10 +379,10 @@ class MergeTest(BaseTest):
                     else:
                         self.assertEqual(exp_val[0], 'NA')
                     if not nopsms:
-                        nr_psms = line['{} - # quanted PSMs'.format(setfield)]
+                        nr_psms = line['{} - Quanted PSM count'.format(setfield)]
                         self.assertEqual(nr_psms, str(exp_val[1]))
                 if not nopsms:
-                    nr_fqpsms = line['{}_Amount fully quanted PSMs'.format(setname)]
+                    nr_fqpsms = line['{}_Fully quanted PSM count'.format(setname)]
                     self.assertEqual(nr_fqpsms, str(exp_val[2]))
             expected.pop(line[accession])
         self.check_exp_empty(expected, cutoff)
@@ -422,10 +422,10 @@ class MergeTest(BaseTest):
         for protein in self.tsv_generator(self.resultfn):
             pacc = protein[pdatalup[centric]['acc']]
             poolname = 'Set1'
-            self.assertEqual(protein['{}_# Unique peptides'.format(poolname)],
+            self.assertEqual(protein['{}_Unique peptide count'.format(poolname)],
                              str(expected[pacc]['unipep']))
-            self.assertEqual(protein['{}_# Peptides'.format(poolname)],
+            self.assertEqual(protein['{}_Peptide count'.format(poolname)],
                              str(len(expected[pacc]['pep'])))
-            self.assertEqual(protein['{}_# PSMs'.format(poolname)],
+            self.assertEqual(protein['{}_PSM count'.format(poolname)],
                              str(len(expected[pacc]['psms'])))
 
