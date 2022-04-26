@@ -8,6 +8,7 @@ class TestPeptideMerge(basetests.MergeTest):
     infilename = 'target_peptides.tsv'
 
     def test_proteincentric(self):
+        self.options.extend(['--pepcolpattern', 'peptide PEP'])
         self.run_command(self.options)
         sql = ('SELECT ps.sequence, p.psm_id, prot.protein_acc, pd.description, '
                'g.gene_acc, aid.assoc_id, pc.coverage '
@@ -26,6 +27,7 @@ class TestPeptideMerge(basetests.MergeTest):
 
     def test_genecentric(self):
         self.options.append('--genecentric')
+        self.options.extend(['--pepcolpattern', 'peptide PEP'])
         self.options.extend(['--flrcolpattern', 'q-value'])
         self.run_command(self.options)
         sql = ('SELECT ps.sequence, p.psm_id, "NA", pd.description, '
@@ -44,6 +46,7 @@ class TestPeptideMerge(basetests.MergeTest):
         self.check_iso_and_peptide_relations(sql, flr=True)
 
     def test_nogroups(self):
+        self.options.extend(['--pepcolpattern', 'peptide PEP'])
         self.options.append('--no-group-annotation')
         self.run_command(self.options)
         sql = ('SELECT ps.sequence, p.psm_id, prot.protein_acc, "NA", "NA", "NA", "NA" '
@@ -56,13 +59,14 @@ class TestPeptideMerge(basetests.MergeTest):
 
     def check_iso_and_peptide_relations(self, sql, proteincentric=False, nogroup=False, flr=False):
         valsql = ('SELECT ps.sequence, bs.set_name, '
-               'ppq.quant, pf.fdr, flr.flr '
+               'ppq.quant, pf.fdr, pp.pep, flr.flr '
                'FROM peptide_sequences AS ps '
                'JOIN biosets AS bs '
                'JOIN peptide_precur_quanted AS ppq USING(pep_id) '
                'LEFT OUTER JOIN ptm_flr AS flr USING(pep_id) '
-               'JOIN peptide_fdr AS pf USING(pep_id) ')
-        fields = ['MS1 area (highest of all PSMs)', 'q-value']
+               'JOIN peptide_fdr AS pf USING(pep_id) '
+               'JOIN peptide_pep AS pp USING(pep_id) ')
+        fields = ['MS1 area (highest of all PSMs)', 'q-value', 'PEP']
         if flr:
             fields += ['PTM FLR']
         self.check_build_values(valsql, fields, 'Peptide sequence')
