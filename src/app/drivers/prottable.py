@@ -19,7 +19,8 @@ class ProttableDriver(PepProttableDriver):
         options = self.define_options(['decoyfn', 'scorecolpattern', 'minlogscore',
             'quantcolpattern', 'minint', 'denomcols', 'denompatterns', 'mediansweep',
             'medianintensity', 'median_or_avg', 'logisoquant', 'mediannormalize',
-            'mednorm_factors', 'keep_psms_na', 'precursor', 'psmfile'], prottable_options)
+            'mednorm_factors', 'keep_psms_na', 'precursor', 'psmfile', 'fastadelim', 
+            'genefield', 't_fasta', 'd_fasta', 'fdrtype'], prottable_options)
         self.options.update(options)
 
     def get_td_proteins_bestpep(self, theader, dheader):
@@ -72,7 +73,22 @@ class ProttableDriver(PepProttableDriver):
                     mn_factors, self.keepnapsms)
         return features
 
-
+    def set_features(self):
+        theader = tsvreader.get_tsv_header(self.fn)
+        dheader = tsvreader.get_tsv_header(self.decoyfn)
+        targets, decoys = self.get_td_proteins_bestpep(theader, dheader)
+        if self.fdrtype == 'picked':
+            if not self.t_fasta or not self.d_fasta:
+                print('Must use --targetfasta and --decoyfasta when using picked FDR')
+                sys.exit(1)
+            fastadelim, genefield = self.get_fastadelim_genefield(self.fastadelim,
+                    self.genefield)
+            features = proteins.generate_pick_fdr(
+               targets, decoys, self.t_fasta, self.d_fasta, self.headeraccfield,
+               fastadelim, genefield)
+        else:
+            features = proteins.generate_classic_fdr(targets, decoys, self.headeraccfield)
+        self.features = self.get_quant(theader, features)
 
 
 class ProteinsDriver(ProttableDriver):
@@ -82,13 +98,6 @@ class ProteinsDriver(ProttableDriver):
     headeraccfield = prottabledata.HEADER_PROTEIN
     fixedfeatcol = peptabledata.HEADER_MASTERPROTEINS
 
-    def set_features(self):
-        theader = tsvreader.get_tsv_header(self.fn)
-        dheader = tsvreader.get_tsv_header(self.decoyfn)
-        targets, decoys = self.get_td_proteins_bestpep(theader, dheader)
-        features = proteins.generate_protein_fdr(targets, decoys, self.headeraccfield)
-        self.features = self.get_quant(theader, features)
-
 
 class GenesDriver(ProttableDriver):
     command = 'genes'
@@ -96,23 +105,6 @@ class GenesDriver(ProttableDriver):
     outsuffix = '_genes.tsv'
     headeraccfield = prottabledata.HEADER_GENENAME
     fixedfeatcol = mzidtsvdata.HEADER_SYMBOL
-
-    def set_options(self):
-        super().set_options()
-        options = self.define_options(['fastadelim', 'genefield', 't_fasta', 
-            'd_fasta'], prottable_options)
-        self.options.update(options)
-
-    def set_features(self):
-        theader = tsvreader.get_tsv_header(self.fn)
-        dheader = tsvreader.get_tsv_header(self.decoyfn)
-        targets, decoys = self.get_td_proteins_bestpep(theader, dheader)
-        fastadelim, genefield = self.get_fastadelim_genefield(self.fastadelim,
-                                                             self.genefield)
-        features = proteins.generate_pick_fdr(
-           targets, decoys, self.t_fasta, self.d_fasta, 'fasta', self.headeraccfield,
-           fastadelim, genefield)
-        self.features = self.get_quant(theader, features)
 
 
 class ENSGDriver(GenesDriver):

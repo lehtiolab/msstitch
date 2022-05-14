@@ -84,7 +84,9 @@ def get_genes_pickfdr(fastafn, outputtype, fastadelim, genefield):
     """Called by protein FDR module for both ENSG and e.g. Uniprot"""
     for rec in parse_fasta(fastafn):
         rtype = get_record_type(rec)
-        if rtype == 'ensembl' and outputtype == 'ensg':
+        if outputtype == 'protein':
+            yield rec.id
+        elif rtype == 'ensembl' and outputtype == 'ensg':
             yield get_ensg(rec)
         elif outputtype == 'genename':
             yield get_symbol(rec, rtype, fastadelim, genefield)

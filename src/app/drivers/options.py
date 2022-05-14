@@ -414,23 +414,20 @@ prottable_options.update({
                     'action': 'store_const', 'default': False, 'const': True,
                     'required': False, 'help': 'Score, e.g. q-values will '
                     'be converted to -log10 values.'},
-    't_fasta': {'driverattr': 't_fasta', 'clarg': '--targetfasta',
+    't_fasta': {'driverattr': 't_fasta', 'clarg': '--targetfasta', 'required': False,
                 'type': 'file', 'help': 'FASTA file with target proteins '
                 'to determine best scoring proteins of target/decoy pairs '
-                'for picked FDR. In case using --picktype ensg/genename',},
-    'd_fasta': {'driverattr': 'd_fasta', 'clarg': '--decoyfasta',
+                'for picked FDR. Required when using --fdrtype picked',},
+    'd_fasta': {'driverattr': 'd_fasta', 'clarg': '--decoyfasta', 'required': False,
                 'type': 'file', 'help': 'FASTA file with decoy proteins '
                 'to determine best scoring proteins of target/decoy pairs '
-                'for picked FDR. In case using --picktype ensg/genename',},
-    'picktype': {'driverattr': 'picktype', 'clarg': '--picktype', 'required': False,
-                'type': str, 'choices': ['fasta', 'result'], 'default': 'fasta',
-                 'help': 'Feature type to use for determining picked FDR. Can '
-                 'be one of [ensg, genename, result]. "result" will infer T/D pairs '
-                 'from the protein table and may not be as cleanly matched as '
-                 'using ensg or genename options, which are based on being able to'
-                 ' find genes in the fasta. Use result when genes are coming '
-                 'from another source than your fasta input, or when you dont '
-                 'have exact matching target/decoy paired fasta.'},
+                'for picked FDR. Required when using --fdrtype picked',},
+    'fdrtype': {'driverattr': 'fdrtype', 'clarg': '--fdrtype', 'required': False,
+                'type': str, 'choices': ['picked', 'classic'], 'default': 'classic',
+                 'help': 'FDR strategy type used. Can be one of [classic, picked]. '
+                 'Picked FDR is implemented after Savitski et al. 2015, MCP, and '
+                 'needs target and decoy fasta files to form pairs',
+                 },
     'mergecutoff': {'driverattr': 'mergecutoff', 'clarg': '--mergecutoff',
                     'type': float, 'default': False, 'help': 'FDR cutoff when '
                     'building merged protein table, to use when a cutoff has '

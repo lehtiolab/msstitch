@@ -50,7 +50,8 @@ def log_score(score, nextbestscore):
     return logged_score
 
 
-def generate_protein_fdr(target, decoy, featfield):
+def generate_classic_fdr(target, decoy, featfield):
+    '''Normal FDR in which we just rank all the proteins/genes and do not pick from pairs'''
     tproteins = [x for x in target if get_score(x) is not None]
     dproteins = [x for x in decoy if get_score(x) is not None]
     [x.update({'target_decoy': 'target'}) for x in tproteins]
@@ -64,7 +65,7 @@ def generate_protein_fdr(target, decoy, featfield):
         yield protein
 
 
-def generate_pick_fdr(target, decoy, tfastafn, dfastafn, picktype, featfield,
+def generate_pick_fdr(target, decoy, tfastafn, dfastafn, featfield,
         fastadelim, genefield):
     t_scores, d_scores = {}, {}
     for protein in target:
@@ -75,24 +76,24 @@ def generate_pick_fdr(target, decoy, tfastafn, dfastafn, picktype, featfield,
         acc = protein[featfield]
         d_scores[acc] = protein
         d_scores[acc]['target_decoy'] = 'decoy'
-    if picktype == 'fasta':
-        prefixlen = len(mzidtsvdata.DECOY_PREFIX)
-        genetype = 'genename' if featfield == mzidtsvdata.HEADER_SYMBOL else 'ensg'
-        tfasta = fasta.get_genes_pickfdr(tfastafn, genetype, fastadelim, genefield)
-        dfasta = fasta.get_genes_pickfdr(dfastafn, genetype, fastadelim, genefield)
-        tdmap = {}
-        for target, decoy in zip(tfasta, dfasta):
-            tdmap[target] = decoy
-    elif picktype == 'result':
-        # FIXME this code path is not accessed but kept  in case we ever need
-        # to get back to result picktype. See commit 58080fdc11d0800117a09122d66173e7ac54292a
-        tdmap = {}
-        for dprot in d_scores:
-            faketprot = dprot.replace(mzidtsvdata.DECOY_PREFIX, '')
-            tdmap[faketprot] = dprot
-        for tprot in t_scores:
-            if not tdmap.get(tprot, False):
-                tdmap[tprot] = None
+    # FIXME make sure pairs are correct?
+    # I mean, they are just names really - we should probably verify the T/D fasta?
+    # Also use the concatenated DB instead, which is sort of the point of picking
+    prefixlen = len(mzidtsvdata.DECOY_PREFIX)
+    if featfield == prottabledata.HEADER_PROTEIN:
+        acctype = 'protein'
+    elif featfield == prottabledata.HEADER_GENENAME:
+        acctype = 'genename'
+    elif featfield == prottabledata.HEADER_GENEID:
+        acctype = 'ensg'
+    else:
+        print('Error determining accession type of table to calculate FDR for')
+        sys.exit(1)
+    tfasta = fasta.get_genes_pickfdr(tfastafn, acctype, fastadelim, genefield)
+    dfasta = fasta.get_genes_pickfdr(dfastafn, acctype, fastadelim, genefield)
+    tdmap = {}
+    for target, decoy in zip(tfasta, dfasta):
+        tdmap[target] = decoy
     picked_proteins = []
     for tgene, dgene in tdmap.items():
         picked = pick_target_decoy(t_scores.get(tgene), d_scores.get(dgene))

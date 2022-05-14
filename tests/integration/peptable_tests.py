@@ -183,9 +183,12 @@ class TestProteinTable(basetests.ProttableTest):
     infilename = 'target_peptides.tsv'
 
     def test_denoms(self):
-        self.specialoptions = []
+        self.specialoptions = ['--fdrtype', 'picked',
+                '--targetfasta', os.path.join(self.basefixdir, 'ens99_small.fasta'),
+                '--decoyfasta', os.path.join(self.fixdir, 'protrev_ens99_small.fasta'),
+                ]
         self.dotest_proteintable('^q-value', 'Master protein(s)', 'Protein ID')
-        expectedfn = os.path.join(self.fixdir, 'proteins.txt')
+        expectedfn = os.path.join(self.fixdir, 'proteins_denoms_pickfdr.txt')
         self.check_lines(expectedfn, self.resultfn)
 
     def test_sweep(self):
@@ -235,6 +238,7 @@ class TestGenenameTable(basetests.ProttableTest):
 
     def test(self):
         self.specialoptions = [
+                '--fdrtype', 'picked',
                 '--targetfasta', os.path.join(self.basefixdir, 'ens99_small.fasta'),
                 '--decoyfasta', os.path.join(self.fixdir, 'protrev_ens99_small.fasta')]
         self.dotest_proteintable('^q-value', 'Gene Name', 'Gene Name')
@@ -248,6 +252,7 @@ class TestENSGTable(basetests.ProttableTest):
 
     def test(self):
         self.specialoptions = [
+                '--fdrtype', 'picked',
                 '--targetfasta', os.path.join(self.basefixdir, 'ens99_small.fasta'),
                 '--decoyfasta', os.path.join(self.fixdir, 'protrev_ens99_small.fasta')]
         self.dotest_proteintable('svm', 'Gene ID', 'Gene ID')
