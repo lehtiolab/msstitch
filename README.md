@@ -150,7 +150,7 @@ msstitch peptides -i set1_ptm_psms.txt -o set1_ptm_peptides.txt \
   --logisoquant --totalproteome set1_proteins.txt
 ```
 
-For proper median centering of this table (as it would otherwise be impacted by
+For proper normalizing of this table (as it would otherwise be impacted by
 sample differences per channel), you may want to median-center. In the case of 
 small and possibly noisy PTM tables, it can be advisable to use another table
 from a global search (or e.g. the full peptide or protein table from the PTM search)
@@ -162,11 +162,14 @@ plus:
 ```
 
 To create a protein table, with isobaric quantification as for peptides, the
-average of the top-3 highest intensity peptides for MS1 quantification:
+average of the top-3 highest intensity peptides for MS1 quantification.
 For all of these, summarizing isobaric PSM data to peptide, protein, gene features 
 is done using medians of log2 PSM quantification values per feature (e.g. a protein). If you'd
 rather use averages, use `--summarize-average` as below, where we also show log2
-transformation of intensities before summarizing and subsequent median-centering:
+transformation of intensities before summarizing and subsequent median-centering.
+FDR (q-values) for the protein table is here calculated 'classically', by ranking
+target and decoy proteins, taking their best scoring peptide's q-value as a score.
+`--logscore` is used since q-value is used (higher is better when comparing peptides).
 
 ```
 msstitch proteins -i set1_target_peptides.txt --decoyfn set1_decoy_peptides \
@@ -181,13 +184,16 @@ msstitch proteins -i set1_target_peptides.txt --decoyfn set1_decoy_peptides \
 Or the analogous process for genes, using median sweeping to get intensity ratios instead of denominators:
 As for peptides above, one can use the --keep-psms-na-quant flag to NOT
 throw out the PSMs which have isobaric intensity below the mininum intensity
-(default 0 used here) in any channel
+(default 0 used here) in any channel. Here we use picked FDR (Savitski et al. 2015 MCP)
+to define q-values for the genes, for which you need a target and decoy fasta to form pairs.
+The fasta files need to be analogous, i.e. the same order for matching T/D pair genes.
 
 ```
 msstitch genes -i set1_target_peptides.txt --decoyfn set1_decoy_peptides \
   --psmtable set1_target_psms.txt \
   -o set1_genes.txt \
   --scorecolpattern '^q-value' --logscore \
+  --fdrtype picked --targetfasta tdb.fa --decoyfasta decoy.fa \
   --ms1quant \
   --isobquantcolpattern tmt10plex --mediansweep \
   --keep-psms-na-quant

@@ -1,5 +1,15 @@
 # Changelog
 
+## [3.10] - 2022-05-20
+### Changed
+- Wording "amount" to "count" or "total number"
+- Protein FDR can be picked or classic with a command line parameter
+
+### Fixed
+- PEP/q-value field positions in PSM table
+- Allow whitespace at end of TSV line
+
+
 ## [3.9] - 2022-02-14
 ### Added
 - Add PEP (posterior error) from percolator to output
