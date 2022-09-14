@@ -1,4 +1,5 @@
 from decimal import Decimal
+from collections import defaultdict
 
 from app.readers import openms as openmsreader
 DB_STORE_CHUNK = 500000
@@ -107,19 +108,27 @@ def align_quants_psms(quantdb, rt_tolerance, mz_tolerance, mz_toltype):
 
 def align_psm(psm_mz, psm_rt, charge, featmap, rttol):
     rttol_min = rttol / 60
-    alignments = {}
+    alignments = defaultdict(list)
     try:
         featlist = featmap[charge]
     except KeyError:
         return False
     for feat_mz, feat_rt, feat_id in featlist:
-        if abs(psm_rt - feat_rt) > rttol_min:
+        rtdiff = abs(psm_rt - feat_rt)
+        mzdiff = abs(psm_mz - feat_mz)
+        if rtdiff > rttol_min:
             continue
-        alignments[abs(psm_mz - feat_mz)] = feat_id
+        alignments[mzdiff].append((feat_id, rtdiff))
     try:
-        return alignments[min(alignments)]
+        best_mz = alignments[min(alignments)]
     except ValueError:
         return False
+    if len(best_mz) > 1:
+        print('Multiple features of same m/z found within RT window, possibly '
+                'your RT tolerance is set too large')
+        return sorted(best_mz, key=lambda x: x[1])[0][0]
+    else:
+        return best_mz[0][0]
 
 
 def get_precursors_from_window(mzfeatmap, minmz):
