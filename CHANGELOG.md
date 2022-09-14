@@ -1,5 +1,10 @@
 # Changelog
 
+## [3.11] - 2022-09
+### Fixed
+- MS1 alignment had a 60x too large retention time window (minutes instead of seconds)
+
+
 ## [3.10] - 2022-05-20
 ### Changed
 - Wording "amount" to "count" or "total number"

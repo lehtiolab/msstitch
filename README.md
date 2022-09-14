@@ -25,10 +25,14 @@ msstitch storespectra --dbfile lookup.sqlite --spectra file3.mzML file4.mzML \
 
 Then store quantification data from dinosaur (MS1 precursor quant) and isobaric 
 quantification (including precursor purities, but use centroided MS1 for this)
-from OpenMS together with the spectra:
+from OpenMS together with the spectra. MS1 precursor quant features will be aligned
+with MS2 spectra by selecting the best m/z match (an m/z window of 2x m/z 
+tolerance), from all features within the retention time window of 2x RT tolerance.
+--rttol is specified in seconds.
 
 ```
 msstitch storequant --dbfile db.sqlite --spectra file1.mzML file2.mzML \
+  --mztol 10 --mztoltype ppm --rttol 10 \
   --dinosaur file1.dinosaur file2.dinosaur \
   --isobaric file1.consensusXML file2.consensusXML
 ```
