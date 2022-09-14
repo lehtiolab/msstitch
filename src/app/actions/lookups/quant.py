@@ -106,14 +106,14 @@ def align_quants_psms(quantdb, rt_tolerance, mz_tolerance, mz_toltype):
 
 
 def align_psm(psm_mz, psm_rt, charge, featmap, rttol):
-    minrt, maxrt = get_minmax(psm_rt, rttol / 60)
+    rttol_min = rttol / 60
     alignments = {}
     try:
         featlist = featmap[charge]
     except KeyError:
         return False
     for feat_mz, feat_rt, feat_id in featlist:
-        if abs(psm_rt - feat_rt) > rttol:
+        if abs(psm_rt - feat_rt) > rttol_min:
             continue
         alignments[abs(psm_mz - feat_mz)] = feat_id
     try:
