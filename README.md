@@ -274,6 +274,18 @@ msstitch filterperco -i perco.xml --dbfile proteins.sqlite \
   --fullprotein --deamidate --minlen 7 -o filtered.xml
 ```
 
+Split a percolator file with PSMs and peptides into files with specific protein headers.
+The below will split perco.xml and output two files: perco.xml_h0.xml, containing all
+PSMs/peptides that have at least one mapping to a `novel_p` protein, and perco.xml_h1.xml,
+which will contain all PSMs/peptides mapping to either `lncRNA` or `intergenic` proteins,
+but which will __NOT__ contain PSMs/peptides mapping to also either/or `ENSP` and `sp`. 
+More files, _h2.xml etc can be created by adding more headers.
+
+
+```
+msstitch splitperco -i perco.xml --protheaders "novel_p" "known:ENSP;sp|novel:lncRNA;intergenic"`
+```
+
 
 Create an isobaric ratio table median-summarizing the PSMs by any column number 
 you want in a PSM table. E.g. you have added a column with exons. The following 
