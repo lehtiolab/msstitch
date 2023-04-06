@@ -150,6 +150,12 @@ shared_options = {
             'the PSMs that have an NA in any channel, even if these may contain '
             'overly noisy quant data in the other channels. Normally these PSMs '
             'would be skipped in quantification'},
+    'splitmultientries': {'driverattr': 'splitmultientries', 'clarg': '--split-multi-entries',
+            'action': 'store_const', 'const': True, 'default': False, 'required': False,
+            'help': 'When summarizing isobaric quantification data, also use '
+            'the PSMs that have multiple mappings to their column, and split these, '
+            'so that quant data from a PSM mapping to two proteins is used for both '
+            'proteins Normally these PSMs accessionould be skipped in quantification'},
     'logisoquant': {'driverattr': 'logisoquant', 'clarg': '--logisoquant',
         'required': False, 'action': 'store_const', 'const': True, 'help':
         'Output log2 values for isoquant ratios. This log2-transforms input PSM data '

@@ -15,13 +15,13 @@ ISOQUANTRATIO_FEAT_ACC = '##isoquant_target_acc##'
 def get_isobaric_ratios(psmfn, psmheader, channels, denom_channels, sweep,
         report_intensity, summarize_by, min_int, targetfeats, target_acc_field, accessioncol,
         totalprot_feats, totalp_field, totalp_pepfield, logintensities, mediannormalize,
-        medianfactors, keep_na_psms):
+        medianfactors, keep_na_psms, split_multi_entries=False):
     """Main function to calculate ratios for PSMs, peptides, proteins, genes.
     Can do simple ratios, median-of-ratios, median-centering, log2, etc
     """
     outratios = get_psmratios(psmfn, psmheader, channels, denom_channels,
             sweep, report_intensity, summarize_by, min_int, accessioncol, logintensities,
-            keep_na_psms)
+            keep_na_psms, split_multi_entries)
     # at this point, outratios look like:
     # [{ch1: 123, ch2: 456, ISOQUANTRATIO_FEAT_ACC: ENSG1244}, ]
     if accessioncol:
@@ -104,7 +104,7 @@ def mediancenter_ratios(ratios, channels, logratios, factor_table, report_factor
 
 
 def get_psmratios(psmfn, header, channels, denom_channels, sweep, report_intensity, 
-        summarize_by, min_int, acc_col, logintensities, keep_na_psms):
+        summarize_by, min_int, acc_col, logintensities, keep_na_psms, split_multi_entries):
     allfeats, feat_order, psmratios = {}, OrderedDict(), []
     for psm in reader.generate_split_tsv_lines(psmfn, header):
         # remove uninformative psms when adding to features
@@ -112,8 +112,14 @@ def get_psmratios(psmfn, header, channels, denom_channels, sweep, report_intensi
         # for which it is convenient, when adding information to the peptide
         # sequence (e.g. PTM data). When having fully functional PTM
         # data storage/analysis in msstitch, we can possibly remove it
+        if acc_col and not split_multi_entries:
+            rm_multi_map = ';' in psm[acc_col]
+            accessions = [psm[acc_col]]
+        elif acc_col:
+            rm_multi_map = False
+            accessions = psm[acc_col].split(';')
         if acc_col and (psm[acc_col] == '' or 
-                (acc_col != psmh.HEADER_PEPTIDE and ';' in psm[acc_col]) or
+                (acc_col != psmh.HEADER_PEPTIDE and rm_multi_map) or
                 not {psm[q] for q in channels}.difference({'NA', None, False, ''})
                 ):
             continue
@@ -122,11 +128,12 @@ def get_psmratios(psmfn, header, channels, denom_channels, sweep, report_intensi
         if acc_col and not keep_na_psms and any((ratios[ix] == 'NA' for ix, q in enumerate(channels))):
             continue
         elif acc_col:
-            try:
-                allfeats[psm[acc_col]].append(ratios)
-            except KeyError:
-                allfeats[psm[acc_col]] = [ratios]
-            feat_order[psm[acc_col]] = 1
+            for accession in accessions:
+                try:
+                    allfeats[accession].append(ratios)
+                except KeyError:
+                    allfeats[accession] = [ratios]
+                feat_order[accession] = 1
         else:
             psmquant = {ch: str(ratios[ix]) if ratios[ix] != 'NA' else 'NA'
                         for ix, ch in enumerate(channels)}

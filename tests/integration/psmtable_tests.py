@@ -616,3 +616,10 @@ class TestIsoFeatSummarize(basetests.MzidTSVBaseTest):
         self.run_command(options)
         self.isoquant_check(os.path.join(self.fixdir, 'isosum_charge_column.txt'), # 'proteins_isosum_column.txt'),
             'Charge', self.channels, self.nopsms)
+
+    def test_split_multi_mapping(self):
+        options = ['--featcol', '13', '--isobquantcolpattern', 'tmt10plex',
+                   '--denompatterns', '_126', '--split-multi-entries']
+        self.run_command(options)
+        self.isoquant_check(os.path.join(self.fixdir, 'proteins_quantonly_splitmulti.txt'),
+            'Protein', self.channels, self.nopsms)

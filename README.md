@@ -297,6 +297,20 @@ msstitch isosummarize -i psm_table.txt --featcol 20 \
   --isobquantcolpattern tmt10plex --denompatterns 126 127C
 ```
 
+We can also use this command to create a table multi-mapping PSMs are counted towards
+identification and quant of all its mappings, e.g. proteins separated by `;`. This is
+not recommended for conventional protein table construction, use at your own risk
+in cases that benefit from this behaviour.
+
+```
+msstitch isosummarize -i psm_table.txt --featcol 20 \
+  --isobquantcolpattern tmt10plex --denompatterns 126 127C \
+  --split-multi-entries
+```
+
+
+
+
 
 Re-use an earlier PSM table and add PSMs from searched spectra files of a new or
 re-searched sample. Saves time so you won't have to re-search all the spectra 
