@@ -1,3 +1,5 @@
+import re
+
 from app.lookups.sqlite.protpeptable import ProtPepTable
 from app.dataformats import peptable as ph
 from app.dataformats import prottable as proth
