@@ -10,7 +10,7 @@ def get_proteins_for_db(fastafn, fastadelim, genefield):
             SeqIO.index(fastafn, 'fasta').items()}
     proteins = ((x,) for x in records.keys())
     sequences = ((acc, str(rec.seq)) for acc, (rec, rtype) in records.items())
-    desc = ((acc, get_description(rec, rtype)) for acc, (rec, rtype) in records.items() if rtype)
+    desc = ((acc, get_description(rec, rtype)) for acc, (rec, rtype) in records.items())
     evid = ((acc, get_uniprot_evidence_level(rec, rtype)) for acc, (rec, rtype) in 
         records.items())
     ensgs = [(get_ensg(rec), acc) for acc, (rec, rtype) in records.items()
@@ -74,6 +74,9 @@ def get_description(record, rectype):
                 break
             desc.append(part)
         return ' '.join(desc)
+    else:
+        # record is first part of definition until space, so strip it
+        return record.description[len(record.id) + 1:].lstrip()
 
 
 def get_other_gene(record, fastadelim, genefield):
