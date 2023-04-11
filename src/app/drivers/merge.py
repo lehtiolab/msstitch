@@ -27,22 +27,24 @@ class MergeDriver(base.PepProttableDriver):
         super().parse_input(**kwargs)
         header = tsvreader.get_tsv_header(self.fn[0])
         self.header = [header[0]]
-        if header[0] == peph.HEADER_PEPTIDE:
-            self.is_peptidetable = True
-        else:
+        if header[0] != peph.HEADER_PEPTIDE:
             self.is_peptidetable = False
             self.pepcolpattern = None # override input if any
+        #else:
         if header[0] == peph.HEADER_PEPTIDE:
+            self.header.append(peph.HEADER_BAREPEP)
+            self.is_peptidetable = True
             if self.genecentric:
                 self.lookuptype = 'peptidegenecentrictable'
                 self.header.extend([peph.HEADER_GENES, peph.HEADER_ASSOCIATED])
             elif self.nogroup:
                 self.lookuptype = 'peptidetableplain'
-                self.header.extend([peph.HEADER_PROTEINS])
+                self.header.extend([peph.HEADER_PROTEINS, peph.HEADER_STARTSTOP])
             else:
                 self.header.extend([
-                    peph.HEADER_PROTEINS, peph.HEADER_NO_CONTENTPROTEINS, peph.HEADER_DESCRIPTIONS,
-                    peph.HEADER_COVERAGES, peph.HEADER_GENES, peph.HEADER_ASSOCIATED])
+                    peph.HEADER_PROTEINS, peph.HEADER_STARTSTOP, peph.HEADER_NO_CONTENTPROTEINS, 
+                    peph.HEADER_DESCRIPTIONS, peph.HEADER_COVERAGES, peph.HEADER_GENES, 
+                    peph.HEADER_ASSOCIATED])
                 self.lookuptype = 'peptidetable'
         elif header[0] == ph.HEADER_PROTEIN:
             self.lookuptype = 'prottable'

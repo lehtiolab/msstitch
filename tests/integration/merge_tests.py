@@ -1,4 +1,5 @@
 import os
+import re
 from math import log
 
 from tests.integration import basetests
@@ -11,12 +12,13 @@ class TestPeptideMerge(basetests.MergeTest):
         self.options.extend(['--pepcolpattern', 'peptide PEP'])
         self.run_command(self.options)
         sql = ('SELECT ps.sequence, p.psm_id, prot.protein_acc, pd.description, '
-               'g.gene_acc, aid.assoc_id, pc.coverage '
+               'g.gene_acc, aid.assoc_id, pc.coverage, pseq.sequence '
                'FROM peptide_sequences AS ps '
                'JOIN psms AS p USING(pep_id) '
                'JOIN psm_protein_groups USING(psm_id) '
                'JOIN protein_group_master AS pm USING(master_id) '
                'JOIN proteins AS prot USING(pacc_id) '
+               'JOIN protein_seq AS pseq USING(protein_acc) '
                'LEFT OUTER JOIN prot_desc AS pd USING(pacc_id) '
                'LEFT OUTER JOIN ensg_proteins AS egp USING(pacc_id) '
                'LEFT OUTER JOIN genes AS g USING(gene_id) '
@@ -31,7 +33,7 @@ class TestPeptideMerge(basetests.MergeTest):
         self.options.extend(['--flrcolpattern', 'q-value'])
         self.run_command(self.options)
         sql = ('SELECT ps.sequence, p.psm_id, "NA", pd.description, '
-               'g.gene_acc, aid.assoc_id, "NA" '
+               'g.gene_acc, aid.assoc_id, "NA", "NA" '
                'FROM peptide_sequences AS ps '
                'JOIN psms AS p USING(pep_id) '
                'JOIN protein_psm USING(psm_id) '
@@ -49,11 +51,12 @@ class TestPeptideMerge(basetests.MergeTest):
         self.options.extend(['--pepcolpattern', 'peptide PEP'])
         self.options.append('--no-group-annotation')
         self.run_command(self.options)
-        sql = ('SELECT ps.sequence, p.psm_id, prot.protein_acc, "NA", "NA", "NA", "NA" '
+        sql = ('SELECT ps.sequence, p.psm_id, prot.protein_acc, "NA", "NA", "NA", "NA", pseq.sequence '
                'FROM peptide_sequences AS ps '
                'JOIN psms AS p USING(pep_id) '
                'JOIN protein_psm USING(psm_id) '
                'JOIN proteins AS prot USING(protein_acc) '
+               'JOIN protein_seq AS pseq USING(protein_acc) '
                )
         self.check_iso_and_peptide_relations(sql, proteincentric=True, nogroup=True)
 
@@ -79,45 +82,57 @@ class TestPeptideMerge(basetests.MergeTest):
                'JOIN peptide_iso_fullpsms AS fqp USING(pep_id) '
                )
         self.check_built_isobaric(isosql, 'Peptide sequence')
-        if sql:
-            expected, psm_id, pep = {}, None, None
-            for rec in self.get_values_from_db(self.dbfile, sql):
-                rec = [rec[0]] + ['NA' if x is None else x for x in rec[1:]]
-                try:
-                    expected[rec[0]]['psms'].add(rec[1])
-                except KeyError:
-                    expected[rec[0]] = {'psms': set([rec[1]]),
-                                        'pgroups': set([rec[2]]),
-                                        'descriptions': set([rec[3]]),
-                                        'genes': set([rec[4]]),
-                                        'assoc': set([rec[5]]),
-                                        'cover': set([rec[6]]),
-                                        }
-                else:
-                    expected[rec[0]]['pgroups'].add(rec[2])
-                    expected[rec[0]]['descriptions'].add(rec[3])
-                    expected[rec[0]]['genes'].add(rec[4])
-                    expected[rec[0]]['assoc'].add(rec[5])
-                    expected[rec[0]]['cover'].add(rec[6])
-            for line in self.tsv_generator(self.resultfn):
-                if proteincentric:
-                    self.assertEqual(set(line['Protein(s)'].split(';')),
-                                     expected[line['Peptide sequence']]['pgroups'])
-                    if not nogroup:
-                        self.assertEqual(
-                            set(line['Description(s)'].split(';')),
-                            set([y for x in
-                                 expected[line['Peptide sequence']]['descriptions']
-                                 for y in x.split(';')]))
-                        rescovs = sorted(line['Coverage(s)'].split(';'))
-                        expcovs = sorted(expected[line['Peptide sequence']]['cover'])
-                        for rescov, expcov in zip(rescovs, expcovs):
-                            self.assertAlmostEqual(float(rescov), expcov)
+        expected, psm_id = {}, None
+        for rec in self.get_values_from_db(self.dbfile, sql):
+            rec = [rec[0]] + ['NA' if x is None else x for x in rec[1:]]
+            try:
+                expected[rec[0]]['psms'].add(rec[1])
+            except KeyError:
+                expected[rec[0]] = {'psms': set([rec[1]]),
+                                    'pgroups': set([rec[2]]),
+                                    'descriptions': set([rec[3]]),
+                                    'genes': set([rec[4]]),
+                                    'assoc': set([rec[5]]),
+                                    'cover': set([rec[6]]),
+                                    'pseqs': {rec[2]: rec[7]},
+                                    }
+            else:
+                expected[rec[0]]['pgroups'].add(rec[2])
+                expected[rec[0]]['descriptions'].add(rec[3])
+                expected[rec[0]]['genes'].add(rec[4])
+                expected[rec[0]]['assoc'].add(rec[5])
+                expected[rec[0]]['cover'].add(rec[6])
+                expected[rec[0]]['pseqs'][rec[2]] = rec[7]
+        for line in self.tsv_generator(self.resultfn):
+            pepseq = line['Peptide sequence']
+            barepep = re.sub('[^A-Z]', '', pepseq)
+            self.assertEqual(line['Bare peptide'], barepep)
+            if proteincentric or nogroup:
+                proteins = line['Protein(s)'].split(';')
+                for pacc, ss in zip(proteins, line['Protein start/stop site(s)'].split(';')):
+                    start, stop = [int(x) for x in ss.split('-')]
+                    ix = expected[pepseq]['pseqs'][pacc].index(barepep)
+                    self.assertEqual(start, ix + 1)
+                    self.assertEqual(stop, ix + len(barepep))
+                
+            if proteincentric:
+                self.assertEqual(set(line['Protein(s)'].split(';')),
+                                 expected[pepseq]['pgroups'])
                 if not nogroup:
-                    self.assertEqual(set(line['Gene ID(s)'].split(';')),
-                                     expected[line['Peptide sequence']]['genes'])
-                    self.assertEqual(set(line['Gene name(s)'].split(';')),
-                                     expected[line['Peptide sequence']]['assoc'])
+                    self.assertEqual(
+                        set(line['Description(s)'].split(';')),
+                        set([y for x in
+                             expected[pepseq]['descriptions']
+                             for y in x.split(';')]))
+                    rescovs = sorted(line['Coverage(s)'].split(';'))
+                    expcovs = sorted(expected[pepseq]['cover'])
+                    for rescov, expcov in zip(rescovs, expcovs):
+                        self.assertAlmostEqual(float(rescov), expcov)
+            if not nogroup:
+                self.assertEqual(set(line['Gene ID(s)'].split(';')),
+                                 expected[pepseq]['genes'])
+                self.assertEqual(set(line['Gene name(s)'].split(';')),
+                                 expected[pepseq]['assoc'])
 
 
 class TestProteinMerge(basetests.MergeTest):

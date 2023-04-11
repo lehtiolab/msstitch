@@ -48,14 +48,15 @@ class PepTableProteinCentricDB(ProtPepTable):
         # for SQLite to output on a single line, therefore we loop rows 
         # instead of doing GROUP_CONCAT
         protsql = """
-        SELECT sub.pep_id, sub.pacc, sub.pgcnr, IFNULL(pd.description, 'NA'), pc.coverage
+        SELECT sub.pep_id, sub.seq, sub.pseq, sub.pacc, sub.pgcnr, IFNULL(pd.description, 'NA'), pc.coverage
         FROM (
-            SELECT psms.pep_id AS pep_id, ps.sequence AS seq, pgm.master_id,
+            SELECT psms.pep_id AS pep_id, ps.sequence AS seq, pseq.sequence AS pseq, pgm.master_id,
                 pgm.pacc_id AS pacc_id, p.protein_acc AS pacc, COUNT(pgc.protein_acc) AS pgcnr
             FROM psm_protein_groups AS pp
             INNER JOIN psms ON psms.psm_id=pp.psm_id
             INNER JOIN protein_group_master AS pgm ON pgm.master_id=pp.master_id
             INNER JOIN proteins AS p ON p.pacc_id=pgm.pacc_id
+            INNER JOIN protein_seq AS pseq ON p.protein_acc=pseq.protein_acc
             INNER JOIN protein_group_content AS pgc ON pgm.master_id=pgc.master_id
             INNER JOIN peptide_sequences AS ps ON psms.pep_id=ps.pep_id
             GROUP BY psms.pep_id, pgm.master_id
@@ -65,15 +66,21 @@ class PepTableProteinCentricDB(ProtPepTable):
             """
         pgdata = {}
         cursor = self.get_cursor()
-        for pid, pacc, pgroupnr, desc, cov in cursor.execute(protsql):
+        for pid, seq, pseq, pacc, pgroupnr, desc, cov in cursor.execute(protsql):
+            barepep = re.sub('[^A-Za-z]', '', seq)
+            start = pseq.index(barepep) + 1
+            stop = start + len(barepep) - 1
             if pid in pgdata:
                 pgdata[pid][ph.HEADER_PROTEINS].append(pacc)
+                pgdata[pid][ph.HEADER_STARTSTOP].append(f'{start}-{stop}')
                 pgdata[pid][ph.HEADER_NO_CONTENTPROTEINS].append(str(pgroupnr))
                 pgdata[pid][ph.HEADER_DESCRIPTIONS].append(desc)
                 pgdata[pid][ph.HEADER_COVERAGES].append(str(cov))
             else:
                 pgdata[pid] = {
                     ph.HEADER_PROTEINS: [pacc],
+                    ph.HEADER_BAREPEP: [barepep],
+                    ph.HEADER_STARTSTOP: [f'{start}-{stop}'],
                     ph.HEADER_NO_CONTENTPROTEINS: [str(pgroupnr)],
                     ph.HEADER_DESCRIPTIONS: [desc],
                     ph.HEADER_COVERAGES: [str(cov)],
@@ -181,8 +188,10 @@ SELECT ps.pep_id, ps.sequence, GROUP_CONCAT(IFNULL(gsub.ensg, 'NA'), ';'),
         cursor = self.get_cursor()
         pgdata = {}
         for pid, seq, gaccs, aids in cursor.execute(sql):
+            barepep = re.sub('[^A-Za-z]', '', seq)
             pgdata[pid] = {
                     ph.HEADER_PEPTIDE: seq,
+                    ph.HEADER_BAREPEP: barepep,
                     ph.HEADER_GENES: gaccs,
                     ph.HEADER_ASSOCIATED: aids,
                     }
@@ -227,21 +236,33 @@ class PepTablePlainDB(PepTableProteinCentricDB):
         In plain DB we only output peptides, not proteins etc
         """
         sql = """
-    SELECT ps.pep_id, ps.sequence, GROUP_CONCAT(ppp.protein_acc, ';')
+    SELECT ps.pep_id, ps.sequence, GROUP_CONCAT(ppp.protein_acc, ';'), GROUP_CONCAT(ppp.sequence, ';')
     FROM peptide_sequences AS ps
     INNER JOIN (
-            SELECT DISTINCT psms.pep_id, protein_acc
+            SELECT DISTINCT psms.pep_id, pp.protein_acc, pseq.sequence
             FROM psms
             INNER JOIN protein_psm AS pp ON pp.psm_id=psms.psm_id
+            INNER JOIN protein_seq AS pseq ON pp.protein_acc=pseq.protein_acc
             ) AS ppp ON ppp.pep_id=ps.pep_id
     GROUP BY ps.pep_id
         """
         cursor = self.get_cursor()
         pgdata = {}
-        for pid, seq, prots in cursor.execute(sql):
+        for pid, seq, prots, pseqs in cursor.execute(sql):
+            barepep = re.sub('[^A-Za-z]', '', seq)
+            startstop = []
+            for pseq in pseqs.split(';'):
+                start = pseq.index(barepep) + 1
+                stop = start + len(barepep) - 1
+                startstop.append(f'{start}-{stop}')
+            if pid in pgdata:
+                pgdata[pid][ph.HEADER_PROTEINS].append(pacc)
+                pgdata[pid][ph.HEADER_STARTSTOP].append(f'{start}-{stop}')
             pgdata[pid] = {
                     ph.HEADER_PEPTIDE: seq,
+                    ph.HEADER_BAREPEP: barepep,
                     ph.HEADER_PROTEINS: prots,
+                    ph.HEADER_STARTSTOP: ';'.join(startstop)
                     }
         return pgdata
 
