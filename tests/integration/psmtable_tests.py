@@ -120,14 +120,16 @@ class TestPSMTable(MzidWithDB):
                     desc = rd[rd.index('description:') + 12:]
                 elif 'GN=' in rd:
                     six = rd.index('GN=') + 3
-                    desc = [x for x in rd.split() if '=' not in x][1:]
+                    rsp = rd.split()[1:]
+                    nextterm = [i for i,x in enumerate(rsp) if '=' in x][0]
+                    desc = ' '.join(rsp[:nextterm])
                 elif 'msstitch_fake_gene' in rd:
                     # special case fake fasta record for non-standard gene 
-                    six, desc = False, 'NA'
-                    symbol = rd.split()[-1]
+                    six = False
+                    desc = rd.split()[-1]
                 elif 'msstitch_fake_onlypeptide' in rd:
                     # special fake fasta record for unannotated peptide
-                    six, symbol, desc = False, 'NA', 'NA'
+                    six, desc = False, 'NA'
                 exp_proteins[rec.id] = {
                         'seq': rec.seq,
                         'gene': gene,
@@ -137,11 +139,11 @@ class TestPSMTable(MzidWithDB):
         self.check_db_base(exp_proteins)
         sql = ('SELECT ps.protein_acc, ps.sequence, g.gene_acc, aid.assoc_id, '
                 'pd.description '
-                'FROM genes AS g '
-                'JOIN ensg_proteins USING(gene_id) '
-                'JOIN genename_proteins AS gnp USING(pacc_id) '
-                'JOIN associated_ids AS aid USING(gn_id) '
-                'JOIN proteins AS p USING(pacc_id) '
+                'FROM proteins AS p '
+                'LEFT OUTER JOIN ensg_proteins USING(pacc_id) '
+                'LEFT OUTER JOIN genes AS g USING(gene_id) '
+                'LEFT OUTER JOIN genename_proteins AS gnp USING(pacc_id) '
+                'LEFT OUTER JOIN associated_ids AS aid USING(gn_id) '
                ' JOIN protein_seq AS ps ON ps.protein_acc=p.protein_acc '
                ' JOIN prot_desc AS pd ON pd.pacc_id=p.pacc_id ')
         if not desc:
@@ -152,8 +154,8 @@ class TestPSMTable(MzidWithDB):
                                                              sql):
             self.assertEqual(exp_proteins[prot]['seq'], seq)
             if desc:
-                self.assertEqual(exp_proteins[prot]['gene'], gene)
-                self.assertEqual(exp_proteins[prot]['symbol'], aid)
+                self.assertEqual(exp_proteins[prot]['gene'], gene or 'NA')
+                self.assertEqual(exp_proteins[prot]['symbol'], aid or 'NA')
                 self.assertEqual(exp_proteins[prot]['desc'], desc)
 
     def check_db_base(self, expected_proteins=None):

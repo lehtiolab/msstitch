@@ -74,6 +74,8 @@ def get_description(record, rectype):
                 break
             desc.append(part)
         return ' '.join(desc)
+    elif record.description.strip() == record.id:
+        return 'NA'
     else:
         # record is first part of definition until space, so strip it
         return record.description[len(record.id) + 1:].lstrip()
