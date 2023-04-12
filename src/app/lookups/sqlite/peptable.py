@@ -237,6 +237,9 @@ class PepTablePlainDB(PepTableProteinCentricDB):
         in a dict with accessions as keys. 
         In plain DB we only output peptides, not proteins etc
         """
+        # FIXME LEFT OUTER JOIN protein_seq is normally INNER JOIN, but there is an
+        # edge case since we use it in dda pipeline for PTM merging. If PTMs are ever
+        # included in msstitch, we could fix this.
         sql = """
     SELECT ps.pep_id, ps.sequence, GROUP_CONCAT(ppp.protein_acc, ';'), GROUP_CONCAT(ppp.sequence, ';')
     FROM peptide_sequences AS ps
@@ -244,7 +247,7 @@ class PepTablePlainDB(PepTableProteinCentricDB):
             SELECT DISTINCT psms.pep_id, pp.protein_acc, pseq.sequence
             FROM psms
             INNER JOIN protein_psm AS pp ON pp.psm_id=psms.psm_id
-            INNER JOIN protein_seq AS pseq ON pp.protein_acc=pseq.protein_acc
+            LEFT OUTER JOIN protein_seq AS pseq ON pp.protein_acc=pseq.protein_acc
             ) AS ppp ON ppp.pep_id=ps.pep_id
     GROUP BY ps.pep_id
         """
@@ -253,7 +256,8 @@ class PepTablePlainDB(PepTableProteinCentricDB):
         for pid, seq, prots, pseqs in cursor.execute(sql):
             barepep = re.sub('[^A-Za-z]', '', seq)
             startstop = []
-            for pseq in pseqs.split(';'):
+            pseqs_or_na = pseqs.split(';') if pseqs else []
+            for pseq in pseqs_or_na:
                 start = pseq.index(barepep) + 1
                 stop = start + len(barepep) - 1
                 startstop.append(f'{start}-{stop}')
