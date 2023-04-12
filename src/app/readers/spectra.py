@@ -10,8 +10,13 @@ def mzmlfn_ms2_spectra_generator(mzmlfiles):
         if mslvl != '2':
             continue
         specscanid = spec.attrib['id']
-        rt, iit, ionmob  = fetch_cvparams_values_from_subel(spec, 'scan', [
-            'scan start time', 
+        scan = basereader.find_element_xpath(spec, 'scan', ns)
+        rtcv = [x for x in scan.findall('{%s}cvParam' % ns['xmlns']) if x.attrib['accession'] == 'MS:1000016'][0]
+        if rtcv.attrib['unitAccession'] == 'UO:0000031':
+            rt = float(rtcv.attrib['value'])
+        elif rtcv.attrib['unitAccession'] == 'UO:0000010':
+            rt = float(rtcv.attrib['value']) / 60
+        iit, ionmob  = fetch_cvparams_values_from_subel(spec, 'scan', [
             'ion injection time', 
             'inverse reduced ion mobility'], ns)
         mz, charge = fetch_cvparams_values_from_subel(spec, 'selectedIon', [

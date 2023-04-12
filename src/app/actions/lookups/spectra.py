@@ -21,7 +21,7 @@ def create_spectra_lookup(lookup, fn_spectra):
     mzmlmap = lookup.get_mzmlfile_map()
     for fn, spectrum in fn_spectra:
         spec_id = '{}_{}'.format(mzmlmap[fn], spectrum['specscanid'])
-        mzml_rt = round(float(spectrum['rt']), 12)
+        mzml_rt = round(spectrum['rt'], 12)
         mzml_iit = round(float(spectrum['iit']), 12)
         mzml_mob = round(float(spectrum['ionmob']), 12)
         mz = float(spectrum['mz'])

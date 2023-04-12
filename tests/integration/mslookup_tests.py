@@ -284,18 +284,20 @@ class SpectraLookup(basetests.MSLookupTest):
                 precursor = multifind(['precursorList', 'precursor',
                                        'selectedIonList', 'selectedIon'],
                                       spectrum, ns)
-                rt = get_cvparam_value(scan, 'scan start time', ns)[0]
+                rtval = get_cvparam_value(scan, 'scan start time', ns)[0]
                 if ionmob:
                     ion = get_cvparam_value(scan, 'inverse reduced ion mobility', ns)[0]
+                    rt = float(rtval) / 60
                 else:
                     ion = get_cvparam_value(scan, 'ion injection time', ns)[0]
+                    rt = float(rtval)
                 charge = get_cvparam_value(precursor, 'charge state', ns)
                 charge = charge[0] if len(charge) else False
                 mz = get_cvparam_value(precursor, 'selected ion m/z', ns)[0]
                 exp_data = {'fn': os.path.basename(infile), 'bs': bset,
                             'charge': int(charge),
                             'sid': '{}_{}'.format(mzfnid + 1, scansid),
-                            'mz': float(mz), 'rt': round(float(rt), 12), 'ion_something': round(float(ion), 12)}
+                            'mz': float(mz), 'rt': round(rt, 12), 'ion_something': round(float(ion), 12)}
                 yield scansid, exp_data
 
 
