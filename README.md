@@ -241,19 +241,25 @@ Options as for trypsinization, --insourcefrag builds lookup with support for
 in-source fragmented peptides that have lost some N-terminal residues:
 
 ```
-msstitch storeseq -i canonical.fa --cutproline --minlen 7 \
+msstitch storeseq -i canonical.fa -o tryptic.sqlite --cutproline --minlen 7 \
   --miscleav 1 --insourcefrag
 ```
 
-Filter a percolator output file using the created SQLite, removing sequences
+Filter a percolator output file, or a PSM file using the created SQLite,
+removing sequences
 that match those stored in the SQLite. The below also removes sequences in the 
 sample which are deamidated (i.e. D -> N), and sequences that have lost at most
 2 N-terminal amino acids due to in-source fragmentation (DB must have been 
 built with support for that).
 
 ```
+# Percolator:
 msstitch filterperco -i perco.xml --dbfile tryptic.sqlite \
   --insourcefrag 2 --deamidate -o filtered.xml
+
+# PSM file:
+msstitch seqfilt -i psms.txt --dbfile tryptic.sqlite \
+  --insourcefrag 2 --deamidate -o filtered.psms.txt
 ```
 
 Create an SQLite file with full-protein sequences for filtering any peptide of 
@@ -261,17 +267,22 @@ a minimum length specified that matches to those. Slower than filtering tryptic
 sequences but more comprehensive:
 
 ```
-msstitch storeseq -i canonical.fa --fullprotein --minlen 7
+msstitch storeseq -i canonical.fa -o proteins.sqlite --fullprotein --minlen 7
 ```
 
-Filter a percolator output file on protein sequences using the SQLite, removing 
+Filter a percolator output or PSM file on protein sequences using the SQLite, removing 
 sequences in sample which match to anywhere in the protein. Sequences may be 
 deamidated, and minimum length parameter must match the one the database is 
 built with.
 
 ```
+# Percolator
 msstitch filterperco -i perco.xml --dbfile proteins.sqlite \
   --fullprotein --deamidate --minlen 7 -o filtered.xml
+
+# PSM file:
+msstitch seqfilt -i psms.txt --dbfile proteins.sqlite \
+  --fullprotein --deamidate --minlen 7 -o filtered.psms.txt
 ```
 
 Split a percolator file with PSMs and peptides into files with specific protein headers.

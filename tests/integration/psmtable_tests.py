@@ -389,6 +389,112 @@ class TestSplitTSV(basetests.MzidTSVBaseTest):
                 self.assertIn(line, self.expectlines)
 
 
+class TestSeqFilt(basetests.MzidTSVBaseTest):
+    command = 'seqfilt'
+    infilename = 'few_spectra.tsv'
+    suffix = '_filtseq.txt'
+    dbfn = 'known_peptide_lookup.sqlite'
+    reversed_dbfn = 'rev_known_peptide_lookup.sqlite'
+
+    def create_db(self, seqs, reverse=False, fullprotein=False, minlen=False):
+        with open('seqs.fa', 'w') as fp:
+            for ix, seq in enumerate(seqs):
+                fp.write(f'>{ix}\n{seq}\n')
+        cmd = ['msstitch', 'storeseq', '-i', 'seqs.fa', '-o', 'seqs.db']
+        if reverse:
+            cmd.append('--insourcefrag')
+        elif fullprotein:
+            cmd.extend(['--fullprotein', '--minlen', str(minlen)])
+        subprocess.run(cmd)
+
+    def test_noflags(self):
+        seqs = ['AIASWNR']
+        self.create_db(seqs)
+        options = ['--dbfile', 'seqs.db']
+        self.run_command(options)
+        self.check_peps_in_out(seqs, matching=True)
+
+    def check_peps_in_out(self, seqs, matching):
+        pepfound = False
+        with open(self.resultfn) as fp:
+            header = next(fp).strip().split('\t')
+            filtpsms = {}
+            for line in fp:
+                psm = {k: v for k,v in zip(header, line.strip().split('\t'))}
+                seq = re.sub('[^A-Z]', '', psm['Peptide'])
+                scan = psm['ScanNum']
+                filtpsms[scan] = seq
+                if seq in seqs:
+                    pepfound = True
+                    break
+        if matching:
+            self.assertFalse(pepfound)
+        else:
+            self.assertTrue(pepfound)
+        with open(self.infile[0]) as fp:
+            allpsms = {}
+            header = next(fp).strip().split('\t')
+            for line in fp:
+                psm = {k: v for k,v in zip(header, line.strip().split('\t'))}
+                seq = re.sub('[^A-Z]', '', psm['Peptide'])
+                scan = psm['ScanNum']
+                allpsms[scan] = seq
+                if seq in seqs:
+                    pepfound = True
+                    break
+                else:
+                    self.assertEqual(seq, filtpsms[scan])
+        self.assertTrue(pepfound)
+
+    def test_ntermwildcards(self):
+        seqs = ['XXAIASWNR']
+        seqs_to_filter = ['AIASWNR']
+        self.create_db(seqs, reverse=True)
+
+        # Find peptide
+        max_falloff = 2
+        options = ['--dbfile', 'seqs.db', '--insourcefrag', str(max_falloff)]
+        self.run_command(options)
+        self.check_peps_in_out(seqs_to_filter, matching=True)
+
+        # Now failing, too short falloff
+        max_falloff = 1
+        options = ['--dbfile', 'seqs.db', '--insourcefrag', str(max_falloff)]
+        self.run_command(options)
+        self.check_peps_in_out(seqs_to_filter, matching=False)
+
+    def test_deamidate(self):
+        # deamidation: N -> D
+        seqs = ['NIENLR']
+        seqs_to_filter = ['DIENLR']
+        self.create_db(seqs, reverse=True)
+        options = ['--dbfile', 'seqs.db', '--deamidate']
+        self.run_command(options)
+        self.check_peps_in_out(seqs_to_filter, matching=False)
+
+    def test_fullprotein(self):
+        # Succeed
+        seqs = ['XXXXXXXXXXAIASWNRYYYYYYY']
+        seqs_to_filter = ['AIASWNR']
+        self.create_db(seqs, fullprotein=True, minlen=6)
+        # Find peptide
+        options = ['--dbfile', 'seqs.db', '--fullprotein', '--minlen', '6',
+                '--fasta', 'seqs.fa']
+        self.run_command(options)
+        self.check_peps_in_out(seqs_to_filter, matching=True)
+
+        # Do not filter because minlen stretches into the YYYYYY residues, the
+        # R is not there
+        seqs = ['XXXXXXXXXXAIASWNYYYYYYY']
+        seqs_to_filter = ['AIASWNR']
+        self.create_db(seqs, fullprotein=True, minlen=6)
+        # Find peptide
+        options = ['--dbfile', 'seqs.db', '--fullprotein', '--minlen', '6',
+                '--fasta', 'seqs.fa']
+        self.run_command(options)
+        self.check_peps_in_out(seqs_to_filter, matching=False)
+
+
 class TestConffiltTSV(basetests.MzidTSVBaseTest):
     command = 'conffilt'
     infilename = 'few_spectra.tsv'

@@ -3,7 +3,7 @@ import sys
 from hashlib import md5
 from itertools import chain
 
-from app.drivers.options import psmtable_options
+from app.drivers.options import psmtable_options, percolator_options
 from app.drivers.base import PSMDriver
 
 from app.readers import tsv as tsvreader
@@ -142,6 +142,32 @@ class ConfidenceFilterDriver(PSMDriver):
                                        confkey,
                                        self.conflvl,
                                        self.lowerbetter)
+
+
+class SequenceFilterDriver(PSMDriver):
+    outsuffix = '_filtseq.txt'
+    command = 'seqfilt'
+    commandhelp = 'Filters PSMs by their sequence'
+    lookuptype = 'searchspace'
+
+    def set_options(self):
+        super().set_options()
+        options = self.define_options(['fullprotein', 'fasta', 'lookupfn', 'unroll',
+            'minlength'], psmtable_options)
+        self.options.update(options)
+        options = self.define_options(['deamidate', 'forcetryp', 'falloff'],
+                percolator_options)
+        self.options.update(options)
+
+    def set_features(self):
+        self.header = self.oldheader[:]
+        if self.fullprotein:
+            self.psms = filtering.filter_whole_proteins(self.oldpsms, self.fasta, 
+                    self.lookup, psmhead.HEADER_PEPTIDE, self.deamidate, 
+                    self.minlength, self.forcetryp)
+        else:
+            self.psms = filtering.filter_known_searchspace(self.oldpsms, 
+                    self.lookup, psmhead.HEADER_PEPTIDE, self.falloff, self.deamidate)
 
 
 class PSMTableRefineDriver(PSMDriver):
