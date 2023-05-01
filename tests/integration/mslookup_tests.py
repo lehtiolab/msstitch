@@ -20,34 +20,41 @@ class TestTrypsinize(SearchspaceLookup):
     suffix = '_tryp.fa'
     command = 'trypsinize'
 
-    def run_case(self, minlen, cutproline, miscleav):
+    def run_case(self, minlen, cutproline, miscleav, ntermloss):
         options = ['-o', self.resultfn]
-        seqtype = 'fully_tryptic'
         if minlen:
             options.extend(['--minlen', str(minlen)])
         if cutproline:
             options.extend(['--cutproline'])
             seqtype = 'proline_cuts'
-        if miscleav:
+        if ntermloss and miscleav:
+            options.extend(['--nterm-meth-loss', '--miscleav', str(miscleav)])
+            seqtype = 'fully_tryptic_minlen_ntermloss'
+        elif miscleav:
             options.extend(['--miscleav', str(miscleav)])
             seqtype = 'miscleav'
         self.run_command(options)
         with open(os.path.join(self.basefixdir, 'peptides_trypsinized.json')) as fp:
             tryp_sequences = json.load(fp)
+        foundseqs = {}
         for rec in SeqIO.parse(self.resultfn, 'fasta'):
             self.assertEqual(tryp_sequences[seqtype][str(rec.seq)], rec.id)
+            foundseqs[str(rec.seq)] = rec.id
             if minlen:
                 self.assertGreaterEqual(len(str(rec.seq)), minlen)
+        for pep, prot in tryp_sequences[seqtype].items():
+            if not minlen or len(pep) >= minlen:
+                self.assertEqual(prot, foundseqs[pep])
 
-
-    def test_fullytryptic(self):
-        self.run_case(8, False, False)
+    def test_fullytryptic_minlen_ntermloss(self):
+        self.run_case(8, False, 1, True)
 
     def test_prolinecut(self):
-        self.run_case(False, True, False)
+        self.run_case(False, True, False, False)
 
     def test_miss_cleavage(self):
-        self.run_case(False, False, 1)
+        self.run_case(False, False, 1, False)
+
 
 
 class TestDecoyFa(SearchspaceLookup):

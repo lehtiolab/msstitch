@@ -209,7 +209,12 @@ sequence_options = {
                'help': 'Amount of missed cleavages to allow when trypsinizing, '
                'default is 0',
                },
-        }
+    'ntermmloss': {'driverattr': 'ntermmloss', 'clarg': '--nterm-meth-loss', 
+        'required': False, 'action': 'store_const', 'const': True, 'default': False,
+        'help': 'Include peptides in trypsinization where the protein N-term methionine '
+        'residue has been lost'
+        },
+    }
 
 
 lookup_options = {

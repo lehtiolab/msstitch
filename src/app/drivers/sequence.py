@@ -48,11 +48,13 @@ class TrypsinizeDriver(base.BaseDriver):
     def set_options(self):
         super().set_options()
         self.options.update(self.define_options([
-            'fn', 'outfile', 'miss_cleavage', 'minlength', 'proline'], sequence_options))
+            'fn', 'outfile', 'miss_cleavage', 'minlength', 'proline',
+            'ntermmloss'], sequence_options))
 
     def run(self):
         outfn = self.create_outfilepath(self.fn, self.outsuffix)
         with open(self.fn) as fp, open(outfn, 'w') as wfp:
             seqs = SeqIO.parse(fp, 'fasta')
-            decoyfa = sequence.create_trypsinized(seqs, self.proline, self.miss_cleavage, self.minlength)
-            SeqIO.write(decoyfa, wfp, 'fasta')
+            trypfa = sequence.create_trypsinized(seqs, self.proline, self.miss_cleavage, self.minlength,
+                    self.ntermmloss)
+            SeqIO.write(trypfa, wfp, 'fasta')
