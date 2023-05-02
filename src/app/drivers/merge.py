@@ -16,11 +16,11 @@ class MergeDriver(base.PepProttableDriver):
         super().set_options()
         self.options.update(self.define_options(['setnames',
             'quantcolpattern', 'precursorquantcolpattern', 'fdrcolpattern',
-            'flrcolpattern', 'multifiles', 
+            'flrcolpattern', 'multifiles', 'nogroup', 
             'featcol'], lookup_options))
         self.options.update(self.define_options(['lookupfn', 'mergecutoff'],
             prottable_options))
-        self.options.update(self.define_options(['nogroup', 'pepcolpattern',
+        self.options.update(self.define_options(['pepcolpattern',
             'genecentric'], peptable_options))
 
     def parse_input(self, **kwargs):
@@ -46,6 +46,8 @@ class MergeDriver(base.PepProttableDriver):
                     peph.HEADER_DESCRIPTIONS, peph.HEADER_COVERAGES, peph.HEADER_GENES, 
                     peph.HEADER_ASSOCIATED])
                 self.lookuptype = 'peptidetable'
+        elif header[0] == ph.HEADER_PROTEIN and self.nogroup:
+            self.lookuptype = 'plainprottable'
         elif header[0] == ph.HEADER_PROTEIN:
             self.lookuptype = 'prottable'
             self.header.extend([

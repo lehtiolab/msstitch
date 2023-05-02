@@ -105,6 +105,64 @@ SELECT pgm.master_id, p.protein_acc, IFNULL(g.gene_acc, 'NA'),
         return cursor
 
 
+class ProtTableNoGroupNoMapDB(ProtGeneTableBase):
+    datatype = 'protein'
+    colmap = {#'protein_group_master': ['master_id', 'protein_acc'],
+              'proteins': ['pacc_id', 'protein_acc'],
+              'protein_precur_quanted': ['pacc_id', 'prottable_id', 'quant'],
+              'protein_fdr': ['pacc_id', 'prottable_id', 'fdr'],
+              'protein_iso_fullpsms': ['pacc_id', 'prottable_id', 'amount_psms'],
+              'protquant_channels': ['channel_id', 'prottable_id',
+                                     'channel_name', 'amount_psms_name'],
+              'protein_iso_quanted': ['proteinquant_id', 'pacc_id',
+                                      'channel_id', 'quantvalue',
+                                      'amount_psms'],
+              }
+
+    def create_pdata_map(self):
+        """This runs only once, returns the data which is not dependent on sets,
+        in a dict with accessions as keys"""
+        sql = 'SELECT pacc_id, protein_acc FROM proteins'
+        cursor = self.get_cursor()
+        return {pid: {ph.HEADER_PROTEIN: pacc} for pid, pacc in cursor.execute(sql)}
+
+    def merge_features(self):
+        sql = """
+    SELECT bs.set_name, prots.pacc_id, COUNT(DISTINCT pp.psm_id), 
+    COUNT (DISTINCT ps.pep_id), COUNT(DISTINCT uni.pep_id), 
+    IFNULL(pf.fdr, 'NA'), ppq.quant, fqpsm.amount_psms, GROUP_CONCAT(pqc.channel_name), GROUP_CONCAT(piq.quantvalue),
+    GROUP_CONCAT(piq.amount_psms)
+        FROM protein_psm AS pp 
+        INNER JOIN psms ON pp.psm_id=psms.psm_id 
+        INNER JOIN mzml ON psms.spectra_id=mzml.spectra_id
+        INNER JOIN mzmlfiles ON mzml.mzmlfile_id=mzmlfiles.mzmlfile_id
+        INNER JOIN biosets AS bs ON mzmlfiles.set_id=bs.set_id
+        INNER JOIN peptide_sequences AS ps ON psms.pep_id=ps.pep_id
+        INNER JOIN protein_tables AS pt ON pt.set_id=bs.set_id
+        INNER JOIN proteins AS prots ON prots.protein_acc=pp.protein_acc
+        INNER JOIN protein_fdr AS pf ON pf.prottable_id=pt.prottable_id AND 
+            pf.pacc_id=prots.pacc_id
+        LEFT OUTER JOIN protein_precur_quanted AS ppq ON ppq.prottable_id=pt.prottable_id AND 
+            ppq.pacc_id=prots.pacc_id
+        LEFT OUTER JOIN protein_iso_fullpsms AS fqpsm ON fqpsm.prottable_id=pt.prottable_id AND 
+            fqpsm.pacc_id=prots.pacc_id
+        LEFT OUTER JOIN protquant_channels AS pqc ON pqc.prottable_id=pt.prottable_id
+        LEFT OUTER JOIN protein_iso_quanted AS piq ON piq.channel_id=pqc.channel_id AND
+            piq.pacc_id=prots.pacc_id
+        LEFT OUTER JOIN (
+                SELECT ppg.pep_id AS pep_id FROM (
+                    SELECT psms.pep_id AS pep_id, COUNT (DISTINCT pp.protein_acc) AS nrpep 
+                        FROM protein_psm AS pp INNER JOIN psms USING(psm_id)
+                        GROUP BY psms.pep_id
+                    ) AS ppg WHERE ppg.nrpep==1
+                ) AS uni ON uni.pep_id=ps.pep_id
+        GROUP BY prots.pacc_id, bs.set_id
+        """
+        cursor = self.get_cursor()
+        cursor.execute(sql)
+        return cursor
+
+
 
 class GeneTableDB(ProtGeneTableBase):
     datatype = 'gene'

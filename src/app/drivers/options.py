@@ -279,6 +279,11 @@ lookup_options = {
         'type': int, 'clarg': '--peptidecol', 'default': 1, 'required': False,
         'help': 'Column nr of peptide table where peptide sequences are '
         'stored. First and default column is nr. 1'},
+    'nogroup': {'driverattr': 'nogroup',
+                   'clarg': '--no-group-annotation', 'action': 'store_const',
+                   'const': True, 'default': False, 'required': False,
+                   'help': 'For protein/peptide table merging. Do not include protein group '
+                   'or gene data in output, just use protein accessions.'},
 }
 lookup_options['featcol'] = {k: v for k, v 
         in shared_options['featcol'].items()}
@@ -455,11 +460,6 @@ peptable_options.update({
                    'containing PSM table spectrafiles (e.g. mzML) '
                    'if you want to track PSMs when creating peptide '
                    'tables', 'required': False},
-    'nogroup': {'driverattr': 'nogroup',
-                   'clarg': '--no-group-annotation', 'action': 'store_const',
-                   'const': True, 'default': False, 'required': False,
-                   'help': 'For peptide table merging. Do not include protein group '
-                   'or gene data in output, just use accessions. '},
     'genecentric': {'driverattr': 'genecentric',
                     'clarg': '--genecentric', 'action': 'store_const',
                     'const': True, 'default': False, 'required': False,
