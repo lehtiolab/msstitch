@@ -75,7 +75,7 @@ shared_options = {
                     'identify column in table in which protein or gene '
                     'accessions are. Use in case of not using standard '
                     '{} column', 'default': False},
-    'fdrcolpattern': {'driverattr': 'fdrcolpattern',
+    'fdrcolpattern': {'driverattr': 'fdrcolpattern', 'required': False,
                       'clarg': '--fdrcolpattern', 'type': str,
                       'default': None, 'help': 'Unique text pattern to identify '
                       'FDR column in input table.'},
