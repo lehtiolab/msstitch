@@ -429,3 +429,14 @@ class MergeTest(BaseTest):
             self.assertEqual(protein['{}_PSM count'.format(poolname)],
                              str(len(expected[pacc]['psms'])))
 
+
+def create_db(seqs, reverse=False, fullprotein=False, minlen=False):
+    with open('seqs.fa', 'w') as fp:
+        for ix, seq in enumerate(seqs):
+            fp.write(f'>{ix}\n{seq}\n')
+    cmd = ['msstitch', 'storeseq', '-i', 'seqs.fa', '-o', 'seqs.db']
+    if reverse:
+        cmd.append('--insourcefrag')
+    elif fullprotein:
+        cmd.extend(['--fullprotein', '--minlen', str(minlen)])
+    subprocess.run(cmd)

@@ -2,10 +2,10 @@ import os
 import sqlite3
 from itertools import product
 
-from tests.integration.basetests import BaseTestPycolator
+from tests.integration import basetests
 
 
-class TestSplitProteinHeader(BaseTestPycolator):
+class TestSplitProteinHeader(basetests.BaseTestPycolator):
     command = 'splitperco'
     suffix = ''
 
@@ -44,50 +44,63 @@ class TestSplitProteinHeader(BaseTestPycolator):
                 self.assertNotIn('ENSP000002', [x.text[:10] for x in el.findall('{%s}protein_id' % ns['xmlns'])])
 
 
-class TestFilterKnown(BaseTestPycolator):
+class TestFilterKnown(basetests.BaseTestPycolator):
     command = 'filterperco'
     suffix = '_filtseq.xml'
-    dbfn = 'known_peptide_lookup.sqlite'
-    reversed_dbfn = 'rev_known_peptide_lookup.sqlite'
+    dbpath = 'seqs.db'
 
     def test_noflags(self):
-        self.dbpath = os.path.join(self.basefixdir, self.dbfn)
-        self.assert_seqs_correct()
+        seqs = ['DSGTLQSQEAK']
+        basetests.create_db(seqs)
+        self.assert_seqs_correct(seqs)
 
     def test_ntermwildcards(self):
-        max_falloff = 12
-        self.dbpath = os.path.join(self.basefixdir, self.reversed_dbfn)
-        self.assert_seqs_correct(['--insourcefrag', str(max_falloff)],
-                                 'ntermfalloff', max_falloff)
+        seqs = ['DSGTLQSQEAK']
+        falloff = 'LLLLLL'
+        basetests.create_db([f'{falloff}{x}' for x in seqs], reverse=True)
+        self.assert_seqs_correct(seqs, ['--insourcefrag', f'{len(falloff)+1}'])
 
     def test_deamidate(self):
-        self.dbpath = os.path.join(self.basefixdir, self.dbfn)
-        self.assert_seqs_correct(['--deamidate'], 'deamidate')
+        seqs = ['NSGTLQSQEAK']
+        basetests.create_db(seqs)
+        self.assert_seqs_correct(seqs, ['--deamidate'], deamidate=True)
 
+    def test_fullprotein(self):
+        seqs = ['SEEAHRAEQLQDAEEEK']
+        proteins = [f'XXXXXXXXX{x}XXXXXXXXX' for x in seqs]
+        basetests.create_db(proteins, fullprotein=True, minlen=6)
+        self.assert_seqs_correct(seqs, ['--fullprotein', '--minlen', '6'], fullprot=True)
+        
     def deamidate(self, sequence):
+        '''Deamidation is N->D, so any sequences found with D can have originally been N
+        and should be checked with N in DB as well'''
         aa_possible = [(aa,) if aa != 'D' else ('D', 'N') for aa in sequence]
         return list(''.join(aa) for aa in product(*aa_possible))
 
-    def assert_seqs_correct(self, flags=[], seqtype=None, max_falloff=False):
+    def assert_seqs_correct(self, seqs_filter, flags=[], deamidate=False, fullprot=False):
         """Does the actual testing"""
         options = ['--dbfile', self.dbpath]
         options.extend(flags)
         self.run_command(options)
         result = self.get_psm_pep_ids_from_file(self.resultfn)
         origin = self.get_psm_pep_ids_from_file(self.infile[0])
+        seq_in_ori = {'peptide_ids': False, 'psm_seqs': False}
         for feattype in ['peptide_ids', 'psm_seqs']:
             original_seqs = origin[feattype]
             result_seqs = result[feattype]
             db = sqlite3.connect(self.dbpath)
             for oriseq in original_seqs:
+                thisseq_filter = False
                 seq_dbcheck = self.strip_modifications(oriseq)
-                if seqtype == 'deamidate':
+                if deamidate:
                     testseqs = self.deamidate(seq_dbcheck)
                 else:
                     testseqs = [seq_dbcheck]
                 for seq in testseqs:
-                    if self.seq_in_db(db, seq, seqtype, max_falloff):
+                    if seq in seqs_filter:
+                        thisseq_filter = True
+                        seq_in_ori[feattype] = True
                         self.assertNotIn(oriseq, result_seqs)
-                        break
-                    else:
-                        self.assertIn(oriseq, result_seqs)
+                if not thisseq_filter:
+                    self.assertIn(oriseq, result_seqs)
+        self.assertTrue(all(seq_in_ori.values()))

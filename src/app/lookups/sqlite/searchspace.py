@@ -4,7 +4,7 @@ from app.lookups.sqlite.base import DatabaseConnection
 class SearchSpaceDB(DatabaseConnection):
     def add_tables(self, tabletypes):
         """Creates a searchspace lookup sqlite."""
-        self.create_tables(['known_searchspace', 'protein_peptides'])
+        self.create_tables(['known_searchspace', 'protein_peptides', 'proteins', 'protein_seq'])
 
     def write_peps(self, peps, reverse_seqs):
         """Writes peps to db. We can reverse to be able to look up
@@ -28,12 +28,18 @@ class SearchSpaceDB(DatabaseConnection):
 
     def store_pep_proteins(self, pepproteins):
         cursor = self.get_cursor()
-        cursor.executemany('INSERT INTO protein_peptides(seq, protid, pos) '
-                           'VALUES(?, ?, ?)', pepproteins)
+        cursor.executemany('INSERT INTO proteins(protein_acc) VALUES(?)', ((x,) for x in pepproteins))
+        cursor.executemany('INSERT INTO protein_seq(protein_acc, sequence) VALUES(?,?)',
+                ((k, v['seq']) for k, v in pepproteins.items()))
+        cursor.executemany('INSERT INTO protein_peptides(seq, protein_acc, pos) '
+                           'VALUES(?, ?, ?)', ((pep[0], k, pep[1]) for k,v in pepproteins.items()
+                               for pep in v['peps']))
         self.conn.commit()
 
     def index_proteins(self):
         self.index_column('pepix', 'protein_peptides', 'seq')
+        self.index_column('pp_protix', 'protein_peptides', 'protein_acc')
+        self.index_column('pseq_protix', 'protein_seq', 'protein_acc')
         self.conn.commit()
 
     def get_multi_seq(self, allseqs):
@@ -71,8 +77,10 @@ class SearchSpaceDB(DatabaseConnection):
                    'where seqs=? limit 1)')
             return cursor.execute(sql, (seq, )).fetchone()[0] == 1
 
-    def get_protein_from_pep(self, peptide):
+    def get_proteins_from_peps(self, peptides, minpeplen):
+        '''Retrieve peptide/proteinseq combinations'''
         cursor = self.get_cursor()
-        cursor.execute('SELECT protid, pos FROM protein_peptides WHERE seq='
-                       '"{}"'.format(peptide))
-        return cursor
+        sql = ('SELECT pp.protein_acc, pp.pos, ps.sequence FROM protein_peptides AS pp '
+            'INNER JOIN protein_seq AS ps ON ps.protein_acc=pp.protein_acc WHERE pp.seq=?')
+        return {seq: [(protid, pos, pseq) for protid, pos, pseq in
+            cursor.execute(sql, (seq[:minpeplen],))] for seq in peptides}

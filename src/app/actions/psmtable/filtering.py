@@ -1,7 +1,6 @@
 import re
 
 from app.dataformats import mzidtsv as header
-from app.readers import fasta
 from app.actions.percolator.filters import sequence_to_filterseqs
 
 
@@ -40,23 +39,14 @@ def filter_known_searchspace(psms, lookup, seqcol, ntermwildcards, deamidation):
             yield psm
 
 
-def filter_whole_proteins(psms, protein_fasta, lookup, seqcol, deamidation,
-        minpeplen, enforce_tryp):
-    # Remove duplicate sequences by using them as keys
-    whole_proteins = {str(prot.seq).replace('L', 'I'): prot.id for prot in
-                      fasta.parse_fasta(protein_fasta)}
-    whole_proteins = {v: k for k, v in whole_proteins.items()}
+def filter_whole_proteins(psms, lookup, seqcol, deamidation, minpeplen, enforce_tryp):
     for psm in psms:
         seq_matches_protein = False
         seq = re.sub('[^A-Z]', '', psm[seqcol].upper())
         filterseqs = sequence_to_filterseqs(seq, deamidation)
-        print(seq, filterseqs)
-        found_prots = {seq: [(protid, pos) for protid, pos in
-            lookup.get_protein_from_pep(seq[:minpeplen])]
-                         for seq in filterseqs}
+        found_prots = lookup.get_proteins_from_peps(filterseqs, minpeplen)
         for pepseq, proteins in found_prots.items():
-            for prot_id, pos in proteins:
-                protseq = whole_proteins[prot_id]
+            for prot_id, pos, protseq in proteins:
                 if pepseq in protseq:
                     if enforce_tryp and (pos == 0 or not set(
                             [pepseq[-1],

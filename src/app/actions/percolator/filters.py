@@ -2,25 +2,17 @@ import re
 from itertools import product
 
 from app.readers import percolator as reader
-from app.readers import fasta
 from app.readers import xmlformatting as formatting
 
 
-def filter_whole_proteins(elements, protein_fasta, lookup, seqtype, ns,
-                          deamidation, minpeplen, enforce_tryp):
+def filter_whole_proteins(elements, lookup, seqtype, ns, deamidation, minpeplen, enforce_tryp):
     # Remove duplicate sequences by using them as keys
-    whole_proteins = {str(prot.seq).replace('L', 'I'): prot.id for prot in
-                      fasta.parse_fasta(protein_fasta)}
-    whole_proteins = {v: k for k, v in whole_proteins.items()}
     for element in elements:
         seq_matches_protein = False
         element_seqs = get_seqs_from_element(element, seqtype, ns, deamidation)
-        element_prots = {seq: [(protid, pos) for protid, pos in
-                               lookup.get_protein_from_pep(seq[:minpeplen])]
-                         for seq in element_seqs}
+        element_prots = lookup.get_proteins_from_peps(element_seqs, minpeplen)
         for pepseq, proteins in element_prots.items():
-            for prot_id, pos in proteins:
-                protseq = whole_proteins[prot_id]
+            for prot_id, pos, protseq in proteins:
                 if pepseq in protseq:
                     if enforce_tryp and (pos == 0 or not set(
                             [pepseq[-1],

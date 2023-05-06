@@ -152,7 +152,7 @@ class SequenceFilterDriver(PSMDriver):
 
     def set_options(self):
         super().set_options()
-        options = self.define_options(['fullprotein', 'fasta', 'lookupfn', 'unroll',
+        options = self.define_options(['fullprotein', 'lookupfn', 'unroll',
             'minlength'], psmtable_options)
         self.options.update(options)
         options = self.define_options(['deamidate', 'forcetryp', 'falloff'],
@@ -162,7 +162,7 @@ class SequenceFilterDriver(PSMDriver):
     def set_features(self):
         self.header = self.oldheader[:]
         if self.fullprotein:
-            self.psms = filtering.filter_whole_proteins(self.oldpsms, self.fasta, 
+            self.psms = filtering.filter_whole_proteins(self.oldpsms, 
                     self.lookup, psmhead.HEADER_PEPTIDE, self.deamidate, 
                     self.minlength, self.forcetryp)
         else:

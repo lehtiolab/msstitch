@@ -393,23 +393,10 @@ class TestSeqFilt(basetests.MzidTSVBaseTest):
     command = 'seqfilt'
     infilename = 'few_spectra.tsv'
     suffix = '_filtseq.txt'
-    dbfn = 'known_peptide_lookup.sqlite'
-    reversed_dbfn = 'rev_known_peptide_lookup.sqlite'
-
-    def create_db(self, seqs, reverse=False, fullprotein=False, minlen=False):
-        with open('seqs.fa', 'w') as fp:
-            for ix, seq in enumerate(seqs):
-                fp.write(f'>{ix}\n{seq}\n')
-        cmd = ['msstitch', 'storeseq', '-i', 'seqs.fa', '-o', 'seqs.db']
-        if reverse:
-            cmd.append('--insourcefrag')
-        elif fullprotein:
-            cmd.extend(['--fullprotein', '--minlen', str(minlen)])
-        subprocess.run(cmd)
 
     def test_noflags(self):
         seqs = ['AIASWNR']
-        self.create_db(seqs)
+        basetests.create_db(seqs)
         options = ['--dbfile', 'seqs.db']
         self.run_command(options)
         self.check_peps_in_out(seqs, matching=True)
@@ -449,7 +436,7 @@ class TestSeqFilt(basetests.MzidTSVBaseTest):
     def test_ntermwildcards(self):
         seqs = ['XXAIASWNR']
         seqs_to_filter = ['AIASWNR']
-        self.create_db(seqs, reverse=True)
+        basetests.create_db(seqs, reverse=True)
 
         # Find peptide
         max_falloff = 2
@@ -467,7 +454,7 @@ class TestSeqFilt(basetests.MzidTSVBaseTest):
         # deamidation: N -> D
         seqs = ['NIENLR']
         seqs_to_filter = ['DIENLR']
-        self.create_db(seqs, reverse=True)
+        basetests.create_db(seqs, reverse=True)
         options = ['--dbfile', 'seqs.db', '--deamidate']
         self.run_command(options)
         self.check_peps_in_out(seqs_to_filter, matching=False)
@@ -476,10 +463,9 @@ class TestSeqFilt(basetests.MzidTSVBaseTest):
         # Succeed
         seqs = ['XXXXXXXXXXAIASWNRYYYYYYY']
         seqs_to_filter = ['AIASWNR']
-        self.create_db(seqs, fullprotein=True, minlen=6)
+        basetests.create_db(seqs, fullprotein=True, minlen=6)
         # Find peptide
-        options = ['--dbfile', 'seqs.db', '--fullprotein', '--minlen', '6',
-                '--fasta', 'seqs.fa']
+        options = ['--dbfile', 'seqs.db', '--fullprotein', '--minlen', '6']
         self.run_command(options)
         self.check_peps_in_out(seqs_to_filter, matching=True)
 
@@ -487,10 +473,9 @@ class TestSeqFilt(basetests.MzidTSVBaseTest):
         # R is not there
         seqs = ['XXXXXXXXXXAIASWNYYYYYYY']
         seqs_to_filter = ['AIASWNR']
-        self.create_db(seqs, fullprotein=True, minlen=6)
+        basetests.create_db(seqs, fullprotein=True, minlen=6)
         # Find peptide
-        options = ['--dbfile', 'seqs.db', '--fullprotein', '--minlen', '6',
-                '--fasta', 'seqs.fa']
+        options = ['--dbfile', 'seqs.db', '--fullprotein', '--minlen', '6']
         self.run_command(options)
         self.check_peps_in_out(seqs_to_filter, matching=False)
 
