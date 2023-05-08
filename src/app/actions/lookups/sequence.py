@@ -7,13 +7,14 @@ PROTEIN_STORE_CHUNK_SIZE = 100000
 
 def create_searchspace_wholeproteins(lookup, fastafn, minpeplen):
     fasta = SeqIO.parse(fastafn, 'fasta')
-    prots = {str(prot.seq).replace('L', 'I'): prot.id for prot in fasta}
     storeseqs = {}
     peptotal = 0
-    for protseq, prot_id in prots.items():
+    for record in fasta:
+        prot_id, protseq = record.id, str(record.seq)
         storeseqs[prot_id] = {'seq': protseq, 'peps': []}
+        isoseq = protseq.replace('L', 'I') 
         for pos in range(0, len(protseq) - minpeplen + 1):
-            possible_pep = protseq[pos:pos + minpeplen]
+            possible_pep = isoseq[pos:pos + minpeplen]
             peptotal += 1
             storeseqs[prot_id]['peps'].append((possible_pep, pos))
         if len(storeseqs) > PROTEIN_STORE_CHUNK_SIZE:
@@ -21,8 +22,7 @@ def create_searchspace_wholeproteins(lookup, fastafn, minpeplen):
             storeseqs = {}
     lookup.store_pep_proteins(storeseqs)
     lookup.index_proteins()
-    print('Stored {} peptides from {} proteins (reduced FASTA to remove '
-          'duplicate sequences)'.format(peptotal, len(prots)))
+    print(f'Stored {peptotal} peptides')
 
 
 def create_searchspace(lookup, infile, minlen, proline_cut=False, reverse_seqs=True,

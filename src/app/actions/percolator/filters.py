@@ -13,7 +13,7 @@ def filter_whole_proteins(elements, lookup, seqtype, ns, deamidation, minpeplen,
         element_prots = lookup.get_proteins_from_peps(element_seqs, minpeplen)
         for pepseq, proteins in element_prots.items():
             for prot_id, pos, protseq in proteins:
-                if pepseq in protseq:
+                if pepseq in protseq.replace('L', 'I'):
                     if enforce_tryp and (pos == 0 or not set(
                             [pepseq[-1],
                              protseq[pos - 1]]).difference(['K', 'R'])):
