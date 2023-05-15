@@ -1,8 +1,8 @@
 >test_protein
 TQTGDSSSISSFSYRIAMAPEPTIDEKTRYIDENTIFYME
 
->test_protein2
+>test_protein2 - inlcuding a reverse-match to p1
 YSFSSISSSDGTQTRIAMAPEPTIDEKTRYME
 
->test_peptide
+>test_peptide - AAAK can not be shuffled
 IAMAPEPTREDIKAAAK

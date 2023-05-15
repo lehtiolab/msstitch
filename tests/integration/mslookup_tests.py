@@ -66,7 +66,7 @@ class TestDecoyFa(SearchspaceLookup):
         options.extend(['-o', self.resultfn])
         self.run_command(options)
 
-    def run_without_db(self, options):
+    def run_without_predb(self, options):
         self.run_check(options)
 
     def run_with_existing_db(self, options):
@@ -74,46 +74,64 @@ class TestDecoyFa(SearchspaceLookup):
         options.extend(['--dbfile', 'decoycheck.sqlite'])
         self.run_check(options)
 
-    def check_seqs(self, checkfile, targetscrambling=False):
+    def check_seqs(self, checkfile, dbcheck=False, keep_maxscrambled=False):
+        targetfa = SeqIO.index(self.infile[0], 'fasta')
         checkfa = SeqIO.index(os.path.join(self.fixdir, checkfile), 'fasta')
         resfa = SeqIO.index(self.resultfn, 'fasta')
+        ttryps = {}
+        for tid, t in targetfa.items():
+            ttryps[tid] = [y for x in t.seq.split('K') for y in x.split('R')]
+        allttryps = (y for x in ttryps.values() for y in x)
+        # Are all seqs from result in expected?
         for seqid, seq in resfa.items():
+            check = checkfa[seqid]
+            trypseqs = [y for x in seq.seq.split('K') for y in x.split('R')]
+            trypchecks = [y for x in check.seq.split('K') for y in x.split('R')]
             try:
-                self.assertEqual(seq.seq, checkfa[seqid].seq)
+                self.assertEqual(seq.seq, check.seq)
             except AssertionError:
-                if targetscrambling:
-                    self.assertEqual(seq.seq[-1], checkfa[seqid].seq[-1])
-                    self.assertEqual(set(seq.seq), set(checkfa[seqid].seq))
+                if dbcheck:
+                    tseqs = ttryps[seq.id.replace('decoy_', '')]
+                    for resseq, tseq in zip(trypseqs, tseqs):
+                        if resseq in allttryps:
+                            self.assertEqual(resseq[-1], tseq[-1])
+                            self.assertEqual(len(resseq), len(tseq))
+                    self.assertEqual(set(seq.seq), set(check.seq))
+                    if keep_maxscrambled:
+                        self.assertEqual(len(seq), len(check))
                 else:
                     raise
+
+        # Are all seqs from check in result?
         for seqid, seq in checkfa.items():
             try:
                 self.assertEqual(seq.seq, resfa[seqid].seq)
             except AssertionError:
-                if targetscrambling:
-                    self.assertEqual(seq.seq[-1], resfa[seqid].seq[-1])
-                    self.assertEqual(set(seq.seq), set(resfa[seqid].seq))
-                else:
+                if dbcheck and keep_maxscrambled:
+                    self.assertEqual(len(seq), len(resfa[seqid]))
+                elif not dbcheck:
                     raise
 
-    def test_tryprev_predb(self):
-        self.run_with_existing_db(['--scramble', 'tryp_rev', '--maxshuffle', '10'])
-        self.check_seqs('decoy_tryprev_targetcheck_twoproteins.fasta', targetscrambling=True)
+    # FIXME REDO tests to have sequences that are removed/shuffled
+    # test_tryprev_ignoredb, w/wo db, w/wo keep_target, minlen to exclude
+    def test_tryprev_predb_keeptargets(self):
+        self.run_with_existing_db(['--scramble', 'tryp_rev', '--maxshuffle', '10', '--keep-target'])
+        self.check_seqs('decoy_tryprev_tcheck_keeptarget_twoproteins.fasta', dbcheck=True, keep_maxscrambled=True)
 
     def test_tryprev_yesdb(self):
-        self.run_without_db(['--scramble', 'tryp_rev'])
-        self.check_seqs('decoy_tryprev_targetcheck_twoproteins.fasta', targetscrambling=True)
+        self.run_without_predb(['--scramble', 'tryp_rev'])
+        self.check_seqs('decoy_tryprev_targetcheck_twoproteins.fasta', dbcheck=True)
 
     def test_tryprev_yesdb_minlen(self):
-        self.run_without_db(['--scramble', 'tryp_rev', '--minlen', '5'])
-        self.check_seqs('decoy_tryprev_minlen_twoproteins.fasta', targetscrambling=True)
+        self.run_without_predb(['--scramble', 'tryp_rev', '--minlen', '5'])
+        self.check_seqs('decoy_tryprev_minlen_twoproteins.fasta', dbcheck=True)
 
     def test_tryprev_ignore_db(self):
-        self.run_without_db(['--scramble', 'tryp_rev', '--ignore-target-hits'])
-        self.check_seqs('decoy_tryprev_twoproteins.fasta', targetscrambling=True)
+        self.run_without_predb(['--scramble', 'tryp_rev', '--ignore-target-hits'])
+        self.check_seqs('decoy_tryprev_twoproteins.fasta', dbcheck=True)
 
     def test_protrev(self):
-        self.run_without_db(['--scramble', 'prot_rev'])
+        self.run_without_predb(['--scramble', 'prot_rev'])
         self.check_seqs('decoy_twoproteins.fasta')
 
 
@@ -131,7 +149,7 @@ class TestDecoyFaPretryp(SearchspaceLookup):
         self.run_command(options)
         self.check_seqs('decoy_tryprev_pretryp_twoproteins.fasta', True)
 
-    def check_seqs(self, checkfile, targetscrambling=False):
+    def check_seqs(self, checkfile, dbcheck=False):
         checkfa = SeqIO.index(os.path.join(self.fixdir, checkfile), 'fasta')
         resfa = SeqIO.index(self.resultfn, 'fasta')
         for seqid, seq in resfa.items():
@@ -139,7 +157,7 @@ class TestDecoyFaPretryp(SearchspaceLookup):
                 self.assertEqual(seq.seq, checkfa[seqid].seq)
             except AssertionError:
                 # peptide may have been shuffled when in db
-                if targetscrambling:
+                if dbcheck:
                     self.assertEqual(seq.seq[-1], checkfa[seqid].seq[-1])
                     self.assertEqual(set(seq.seq), set(checkfa[seqid].seq))
                 else:

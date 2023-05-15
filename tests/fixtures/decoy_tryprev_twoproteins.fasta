@@ -1,6 +1,6 @@
 >decoy_test_protein
 YSFSSISSSDGTQTREDITPEPAMAIKTREMYFITNEDIY
->decoy_test_protein2
+>decoy_test_protein2 - including a reverse-match to p1
 TQTGDSSSISSFSYREDITPEPAMAIKTREMY
 >decoy_test_peptide
 TPEPAMAIRIDEKAAAK

@@ -56,7 +56,7 @@ def trypsinize(proseq, proline_cut=False, miss_cleavage=0, opt_nt_meth_loss=Fals
     return outpeps + nterm_losspeps
 
 
-def tryp_rev(seq, lookup, do_trypsinize, miss_cleavage, minlen, max_shuffle):
+def tryp_rev(seq, lookup, do_trypsinize, miss_cleavage, minlen, max_shuffle, keep_target):
     if do_trypsinize:
         segments = trypsinize(seq, miss_cleavage=miss_cleavage)
     else:
@@ -87,8 +87,11 @@ def tryp_rev(seq, lookup, do_trypsinize, miss_cleavage, minlen, max_shuffle):
                     nterm = list(s[:-1])
                     shuffle(nterm)
                     tests[i] = ('{}{}'.format(''.join(nterm), s[-1]), shufcount + 1, origdecoy)
-                else:
+                elif keep_target:
                     decoy_segs[i] = origdecoy
+                    tests.pop(i)
+                    nr_decoymatching += 1
+                else:
                     tests.pop(i)
                     nr_decoymatching += 1
     if set(decoy_segs.values()) != {''}:
@@ -106,7 +109,8 @@ def prot_rev(seq):
     return seq
 
 
-def create_decoy_fa(fastafn, method, lookup, is_trypsinized, miss_cleavage, minlen, max_shuffle):
+def create_decoy_fa(fastafn, method, lookup, is_trypsinized, miss_cleavage, minlen, max_shuffle,
+        keep_target):
     outfasta = SeqIO.parse(fastafn, 'fasta')
     if method == 'prot_rev':
         for seq in outfasta:
@@ -114,7 +118,7 @@ def create_decoy_fa(fastafn, method, lookup, is_trypsinized, miss_cleavage, minl
     if method == 'tryp_rev':
         decoymatching, nr_peptides = 0, 0
         outtryp = (tryp_rev(x, lookup, is_trypsinized, miss_cleavage, minlen, 
-            max_shuffle) for x in outfasta)
+            max_shuffle, keep_target) for x in outfasta)
         for seq, nr_decoymatching, nr_pep in outtryp:
             decoymatching += nr_decoymatching
             nr_peptides += nr_pep

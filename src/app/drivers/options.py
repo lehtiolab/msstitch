@@ -199,6 +199,11 @@ sequence_options = {
                'help': 'Do not trypsinize. User is expected to deliver a'
                'pretrypsinized FASTA file'
                },
+    'keep_target': {'driverattr': 'keep_target', 'clarg': '--keep-target', 'required': False,
+        'action': 'store_true', 'default': False, 'help': 'If this flag is passed, sequences '
+        'that are shuffled the --max-shuffle amount of times will be kept as unshuffled '
+        'tryptic reversed peptides. In case you want to keep the target/decoy DB the same '
+        'sizes'},
     'max_shuffle': {'driverattr': 'max_shuffle',
                'clarg': '--maxshuffle', 'required': False, 'type': int, 'default': 10,
                'help': 'Amount of times to attempt to shuffle a decoy reversed peptide '

@@ -51,13 +51,16 @@ in the above command.
 
 
 ### Handling MS search engines
-Create a decoy database where peptides are reversed between tryptic residues:
+Create a decoy database where peptides are reversed between tryptic residues. Decoy
+peptides will be shuffled if they match a target sequence, but if they after shuffling
+a number of times (max as in `--maxshuffle`) still match a target sequence, they will 
+be removed. To avoid removal (e.g. for keeping database sizes identical), pass `--keep-target'.
 
 ```
 msstitch makedecoy uniprot.fasta -o decoy.fasta --scramble tryp_rev --maxshuffle 10
 ```
 
-Or without removing peptide sequences that match to the target DB:
+Or without even trying to shuffle peptide sequences that match to the target DB:
 
 ```
 msstitch makedecoy uniprot.fasta -o decoy.fasta --scramble tryp_rev --ignore-target-hits
