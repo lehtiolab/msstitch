@@ -82,7 +82,7 @@ SELECT pgm.master_id, p.protein_acc, IFNULL(g.gene_acc, 'NA'),
         INNER JOIN protein_tables AS pt ON pt.set_id=bs.set_id
         INNER JOIN protein_group_master AS pgm ON pgm.master_id=ppg.master_id
         INNER JOIN proteins AS prots ON prots.pacc_id=pgm.pacc_id
-        INNER JOIN protein_fdr AS pf ON pf.prottable_id=pt.prottable_id AND 
+        LEFT OUTER JOIN protein_fdr AS pf ON pf.prottable_id=pt.prottable_id AND 
             pf.pacc_id=prots.pacc_id
         LEFT OUTER JOIN protein_precur_quanted AS ppq ON ppq.prottable_id=pt.prottable_id AND 
             ppq.pacc_id=prots.pacc_id
@@ -140,7 +140,7 @@ class ProtTableNoGroupNoMapDB(ProtGeneTableBase):
         INNER JOIN peptide_sequences AS ps ON psms.pep_id=ps.pep_id
         INNER JOIN protein_tables AS pt ON pt.set_id=bs.set_id
         INNER JOIN proteins AS prots ON prots.protein_acc=pp.protein_acc
-        INNER JOIN protein_fdr AS pf ON pf.prottable_id=pt.prottable_id AND 
+        LEFT OUTER JOIN protein_fdr AS pf ON pf.prottable_id=pt.prottable_id AND 
             pf.pacc_id=prots.pacc_id
         LEFT OUTER JOIN protein_precur_quanted AS ppq ON ppq.prottable_id=pt.prottable_id AND 
             ppq.pacc_id=prots.pacc_id
