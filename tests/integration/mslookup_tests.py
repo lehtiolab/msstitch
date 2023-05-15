@@ -97,8 +97,7 @@ class TestDecoyFa(SearchspaceLookup):
                             self.assertEqual(resseq[-1], tseq[-1])
                             self.assertEqual(len(resseq), len(tseq))
                     self.assertEqual(set(seq.seq), set(check.seq))
-                    if keep_maxscrambled:
-                        self.assertEqual(len(seq), len(check))
+                    self.assertEqual(len(seq), len(check))
                 else:
                     raise
 
@@ -112,8 +111,6 @@ class TestDecoyFa(SearchspaceLookup):
                 elif not dbcheck:
                     raise
 
-    # FIXME REDO tests to have sequences that are removed/shuffled
-    # test_tryprev_ignoredb, w/wo db, w/wo keep_target, minlen to exclude
     def test_tryprev_predb_keeptargets(self):
         self.run_with_existing_db(['--scramble', 'tryp_rev', '--maxshuffle', '10', '--keep-target'])
         self.check_seqs('decoy_tryprev_tcheck_keeptarget_twoproteins.fasta', dbcheck=True, keep_maxscrambled=True)
@@ -134,19 +131,45 @@ class TestDecoyFa(SearchspaceLookup):
         self.run_without_predb(['--scramble', 'prot_rev'])
         self.check_seqs('decoy_twoproteins.fasta')
 
+    def test_pretryp_predb(self):
+        options = ['--scramble', 'tryp_rev', '--notrypsin']
+        self.infilename = 'trypsinized_twoproteins.fasta'
+        self.infile = [os.path.join(self.fixdir, self.infilename)]
+        self.run_with_existing_db(options)
+        self.check_seqs('decoy_tryprev_pretryp_twoproteins.fasta', True)
+
+    def test_pretryp_predb_keeptarget(self):
+        options = ['--scramble', 'tryp_rev', '--notrypsin', '--keep-target']
+        self.infilename = 'trypsinized_twoproteins.fasta'
+        self.infile = [os.path.join(self.fixdir, self.infilename)]
+        self.run_with_existing_db(options)
+        self.check_seqs('decoy_tryprev_pretryp_keeptarget_twoproteins.fasta', True)
+
+
 
 class TestDecoyFaPretryp(SearchspaceLookup):
     command = 'makedecoy'
-    infilename = 'trypsinized_twoproteins.fasta'
     
     def setUp(self):
         super().setUp()
         self.infile = os.path.join(self.fixdir, self.infilename)
 
-    def test_tryprev_predb_trypsinized(self):
+    def run_check(self, options):
         self.resultfn = os.path.join(self.workdir, 'decoy.fa')
-        options = ['--scramble', 'tryp_rev', '--notrypsin', '-o', self.resultfn]
+        options.extend(['-o', self.resultfn])
         self.run_command(options)
+
+    def run_without_predb(self, options):
+        self.run_check(options)
+
+    def run_with_existing_db(self, options):
+        self.copy_db_to_workdir('decoycheck.sqlite', 'decoycheck.sqlite')
+        options.extend(['--dbfile', 'decoycheck.sqlite'])
+        self.run_check(options)
+
+    def test_tryprev_predb_trypsinized(self):
+        options = ['--scramble', 'tryp_rev', '--notrypsin']
+        self.run_with_existing_db(options)
         self.check_seqs('decoy_tryprev_pretryp_twoproteins.fasta', True)
 
     def check_seqs(self, checkfile, dbcheck=False):

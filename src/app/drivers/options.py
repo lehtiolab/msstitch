@@ -196,8 +196,7 @@ sequence_options = {
     'trypsinize': {'driverattr': 'trypsinize',
                'clarg': '--notrypsin', 'required': False,
                'action': 'store_const', 'const': False, 'default': True,
-               'help': 'Do not trypsinize. User is expected to deliver a'
-               'pretrypsinized FASTA file'
+               'help': 'Do not trypsinize. In case of using a pretrypsinized FASTA file'
                },
     'keep_target': {'driverattr': 'keep_target', 'clarg': '--keep-target', 'required': False,
         'action': 'store_true', 'default': False, 'help': 'If this flag is passed, sequences '

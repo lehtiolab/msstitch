@@ -93,9 +93,10 @@ def tryp_rev(seq, lookup, do_trypsinize, miss_cleavage, minlen, max_shuffle, kee
                     nr_decoymatching += 1
                 else:
                     tests.pop(i)
+                    decoy_segs.pop(i)
                     nr_decoymatching += 1
-    if set(decoy_segs.values()) != {''}:
-        seq.seq = Seq(''.join([decoy_segs[i] for i in range(0, len(decoy_segs))]))
+    if decoy_segs and set(decoy_segs.values()) != {''}:
+        seq.seq = Seq(''.join([decoy_segs[i] for i in range(0, max(decoy_segs)+1) if i in decoy_segs]))
         seq.id = 'decoy_{}'.format(seq.name)
         seq.description = 'decoy_{}'.format(seq.description)
     else:
@@ -109,7 +110,7 @@ def prot_rev(seq):
     return seq
 
 
-def create_decoy_fa(fastafn, method, lookup, is_trypsinized, miss_cleavage, minlen, max_shuffle,
+def create_decoy_fa(fastafn, method, lookup, trypsinize, miss_cleavage, minlen, max_shuffle,
         keep_target):
     outfasta = SeqIO.parse(fastafn, 'fasta')
     if method == 'prot_rev':
@@ -117,7 +118,7 @@ def create_decoy_fa(fastafn, method, lookup, is_trypsinized, miss_cleavage, minl
             yield prot_rev(seq)
     if method == 'tryp_rev':
         decoymatching, nr_peptides = 0, 0
-        outtryp = (tryp_rev(x, lookup, is_trypsinized, miss_cleavage, minlen, 
+        outtryp = (tryp_rev(x, lookup, trypsinize, miss_cleavage, minlen, 
             max_shuffle, keep_target) for x in outfasta)
         for seq, nr_decoymatching, nr_pep in outtryp:
             decoymatching += nr_decoymatching
@@ -125,5 +126,6 @@ def create_decoy_fa(fastafn, method, lookup, is_trypsinized, miss_cleavage, minl
             if seq:
                 yield seq
         if decoymatching:
-            print('Unable to shuffle {} decoys (of a total of {} decoy peptides) '
-                    'that matched target DB (retained non-shuffled)'.format(decoymatching, nr_peptides))
+            retain = '(retained those as tryptic reverse)' if keep_target else ''
+            print(f'Unable to shuffle {decoymatching} decoys (of a total of {nr_peptides} decoy peptides) '
+                    f'that matched target DB {retain}')
