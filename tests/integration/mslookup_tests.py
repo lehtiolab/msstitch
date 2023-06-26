@@ -146,47 +146,6 @@ class TestDecoyFa(SearchspaceLookup):
         self.check_seqs('decoy_tryprev_pretryp_keeptarget_twoproteins.fasta', True)
 
 
-
-class TestDecoyFaPretryp(SearchspaceLookup):
-    command = 'makedecoy'
-    
-    def setUp(self):
-        super().setUp()
-        self.infile = os.path.join(self.fixdir, self.infilename)
-
-    def run_check(self, options):
-        self.resultfn = os.path.join(self.workdir, 'decoy.fa')
-        options.extend(['-o', self.resultfn])
-        self.run_command(options)
-
-    def run_without_predb(self, options):
-        self.run_check(options)
-
-    def run_with_existing_db(self, options):
-        self.copy_db_to_workdir('decoycheck.sqlite', 'decoycheck.sqlite')
-        options.extend(['--dbfile', 'decoycheck.sqlite'])
-        self.run_check(options)
-
-    def test_tryprev_predb_trypsinized(self):
-        options = ['--scramble', 'tryp_rev', '--notrypsin']
-        self.run_with_existing_db(options)
-        self.check_seqs('decoy_tryprev_pretryp_twoproteins.fasta', True)
-
-    def check_seqs(self, checkfile, dbcheck=False):
-        checkfa = SeqIO.index(os.path.join(self.fixdir, checkfile), 'fasta')
-        resfa = SeqIO.index(self.resultfn, 'fasta')
-        for seqid, seq in resfa.items():
-            try:
-                self.assertEqual(seq.seq, checkfa[seqid].seq)
-            except AssertionError:
-                # peptide may have been shuffled when in db
-                if dbcheck:
-                    self.assertEqual(seq.seq[-1], checkfa[seqid].seq[-1])
-                    self.assertEqual(set(seq.seq), set(checkfa[seqid].seq))
-                else:
-                    raise
-
-
 class TestTrypticLookup(SearchspaceLookup):
     command = 'storeseq'
 
