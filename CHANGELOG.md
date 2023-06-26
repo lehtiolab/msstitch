@@ -1,6 +1,21 @@
 # Changelog
 
-## [3.11] - 2022-09
+## [3.12] - 2023-06-26
+### Added
+- `isosummarize` cmd can use multiple PSM mappings if that is desired behaviour --split-multi-entries
+- Peptide table contains bare sequences and start/stop sites
+- PSM table filtering by sequence possible using `seqfilt` cmd
+- Optional use of N-term-M loss for trypsinization
+- Protein table can also be merged using `--no-group-annotation` (will skip protein groups)
+
+### Changed
+- Full fasta header used in case of doubt about fasta type (swiss/ensembl)
+- TIMS (and other) RT stored in minutes
+- `storeseq` includes full protein sequence so no need for fasta parsing in subsequential filtering step
+- FDR colpattern not strictly needed in merges
+
+
+## [3.11] - 2022-09-14
 ### Fixed
 - MS1 alignment had a 60x too large retention time window (minutes instead of seconds)
 
