@@ -33,15 +33,12 @@ class QuantDB(ResultLookupInterface):
         self.index_column('channel_id_index', 'isobaric_quant', 'channel_id')
         self.index_column('pif_spectraid_ix', 'precursor_ion_fraction', 'spectra_id')
 
-    def get_specmap(self, fn_id, retention_time=False, scan_nr=False):
+    def get_specmap(self, fn_id):
         """Returns all spectra ids for spectra filename, keyed by 
         retention time"""
         cursor = self.get_cursor()
         values = [fn_id]
-        if retention_time:
-            sql = 'SELECT retention_time,spectra_id FROM mzml WHERE mzmlfile_id=? '
-        elif scan_nr:
-            sql = 'SELECT scan_nr,spectra_id FROM mzml WHERE mzmlfile_id=? '
+        sql = 'SELECT scan_sid,spectra_id FROM mzml WHERE mzmlfile_id=? '
         cursor.execute(sql, tuple(values))
         return {k: {'id': sid} for k, sid in cursor.fetchall()}
 
