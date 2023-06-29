@@ -1,5 +1,10 @@
 # Changelog
 
+## [3.13] - 2023-06-29
+### Fixed
+- Match isoquant from OpenMS to spectra using scan IDs instead of RT (RT can be identical for multiple spectra in merged TIMS data)
+
+
 ## [3.12] - 2023-06-26
 ### Added
 - `isosummarize` cmd can use multiple PSM mappings if that is desired behaviour --split-multi-entries
