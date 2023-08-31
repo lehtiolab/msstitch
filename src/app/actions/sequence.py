@@ -1,6 +1,6 @@
 from Bio import SeqIO
 from Bio.Seq import Seq
-from random import shuffle
+from random import Random
 
 
 def create_trypsinized(proteins, proline_cut, miss_cleavage, minlen, nterm_meth_loss):
@@ -75,6 +75,7 @@ def tryp_rev(seq, lookup, do_trypsinize, miss_cleavage, minlen, max_shuffle, kee
     if minlen:
         decoy_segs = {k: (v if len(v) >=minlen else '') for k,v in decoy_segs.items() }
     nr_peptides = len([x for x in decoy_segs.values() if x != ''])
+    random_seeded = Random(1) # with defined seed so it becomes reproducible
     if lookup is not None:
         shufflecount = 0
         targets, tests = True, {k: (v, 0, v) for k,v in decoy_segs.items()}
@@ -85,7 +86,7 @@ def tryp_rev(seq, lookup, do_trypsinize, miss_cleavage, minlen, max_shuffle, kee
                     decoy_segs[i] = tests.pop(i)[0]
                 elif shufcount < max_shuffle:
                     nterm = list(s[:-1])
-                    shuffle(nterm)
+                    random_seeded.shuffle(nterm)
                     tests[i] = ('{}{}'.format(''.join(nterm), s[-1]), shufcount + 1, origdecoy)
                 elif keep_target:
                     decoy_segs[i] = origdecoy

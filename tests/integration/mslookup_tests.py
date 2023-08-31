@@ -100,38 +100,42 @@ class TestDecoyFa(SearchspaceLookup):
                     self.assertEqual(len(seq), len(check))
                 else:
                     raise
-
         # Are all seqs from check in result?
         for seqid, seq in checkfa.items():
-            try:
-                self.assertEqual(seq.seq, resfa[seqid].seq)
-            except AssertionError:
-                if dbcheck and keep_maxscrambled:
-                    self.assertEqual(len(seq), len(resfa[seqid]))
-                elif not dbcheck:
-                    raise
+            self.assertEqual(seq.seq, resfa[seqid].seq)
 
     def test_tryprev_predb_keeptargets(self):
+        '''Tests making decoy where target hits are validated against DB, NOT removed if
+        matching target despite shuffling'''
         self.run_with_existing_db(['--scramble', 'tryp_rev', '--maxshuffle', '10', '--keep-target'])
         self.check_seqs('decoy_tryprev_tcheck_keeptarget_twoproteins.fasta', dbcheck=True, keep_maxscrambled=True)
 
     def test_tryprev_yesdb(self):
+        '''Tests making decoy where target hits are validated against DB, removed if
+        matching target despite shuffling'''
         self.run_without_predb(['--scramble', 'tryp_rev'])
         self.check_seqs('decoy_tryprev_targetcheck_twoproteins.fasta', dbcheck=True)
 
     def test_tryprev_yesdb_minlen(self):
+        '''Tests making decoy where target hits are validated against DB, removed if
+        matching target despite shuffling and also removed if len < 5'''
         self.run_without_predb(['--scramble', 'tryp_rev', '--minlen', '5'])
         self.check_seqs('decoy_tryprev_minlen_twoproteins.fasta', dbcheck=True)
 
     def test_tryprev_ignore_db(self):
+        '''Tests decoy where target hits are kept and no DB is checked'''
         self.run_without_predb(['--scramble', 'tryp_rev', '--ignore-target-hits'])
         self.check_seqs('decoy_tryprev_twoproteins.fasta', dbcheck=True)
 
     def test_protrev(self):
+        '''Tests making decoy using protein-reverse, no target checking is done here'''
         self.run_without_predb(['--scramble', 'prot_rev'])
         self.check_seqs('decoy_twoproteins.fasta')
 
     def test_pretryp_predb(self):
+        '''Tests making decoy where sequences are trypsinized before hand, and supplying
+        an existing SQLite DB for matching target. Persistent (despite shuffling) target-matching 
+        sequences will be removed'''
         options = ['--scramble', 'tryp_rev', '--notrypsin']
         self.infilename = 'trypsinized_twoproteins.fasta'
         self.infile = [os.path.join(self.fixdir, self.infilename)]
@@ -139,6 +143,9 @@ class TestDecoyFa(SearchspaceLookup):
         self.check_seqs('decoy_tryprev_pretryp_twoproteins.fasta', True)
 
     def test_pretryp_predb_keeptarget(self):
+        '''Tests making decoy where sequences are trypsinized before hand, and supplying
+        an existing SQLite DB for matching target. Persistent (despite shuffling) target-matching 
+        sequences will not be removed'''
         options = ['--scramble', 'tryp_rev', '--notrypsin', '--keep-target']
         self.infilename = 'trypsinized_twoproteins.fasta'
         self.infile = [os.path.join(self.fixdir, self.infilename)]

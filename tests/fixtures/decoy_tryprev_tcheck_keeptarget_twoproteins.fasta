@@ -1,6 +1,6 @@
 >decoy_test_protein
-DGTSFSYSSQTISSREDITPEPAMAIKTREMYFITNEDIY
->decoy_test_protein2 - including a reverse-match to p1
-FSSSSTQSSTGYDIREDITPEPAMAIKTREMY
+TGYQSISSSTSSDFREDITPEPAMAIKTREMYFITNEDIY
+>decoy_test_protein2 - inlcuding a reverse-match to p1
+YSTSSSGISFDQSTREDITPEPAMAIKTREMY
 >decoy_test_peptide - AAAK can not be shuffled
 TPEPAMAIRIDEKAAAK
