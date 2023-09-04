@@ -211,7 +211,7 @@ class PSMTableRefineDriver(PSMDriver):
             proteins = set([x for x in self.lookup.get_protids()])
             self.lookup.drop_psm_indices()
         else:
-            shiftrows = 0
+            shiftrows, oldfasta_md5 = 0, False
 
         if self.proteingroup:
             if not fasta_md5 and not oldfasta_md5:
