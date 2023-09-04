@@ -1,5 +1,11 @@
 # Changelog
 
+## [3.14] - 2023-09
+### Changed
+- Less memory overhead for `msstitch storequant --fullprotein`
+- Reproducible "random" shuffling of target-matching sequences for decoy generation with tryptic reverse
+
+
 ## [3.13] - 2023-06-29
 ### Fixed
 - Match isoquant from OpenMS to spectra using scan IDs instead of RT (RT can be identical for multiple spectra in merged TIMS data)
