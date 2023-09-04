@@ -471,18 +471,18 @@ class TestSeqFilt(basetests.MzidTSVBaseTest):
         self.check_peps_in_out(seqs_to_filter, matching=False)
 
     def test_fullprotein(self):
-        # Succeed
-        seqs = ['XXXXXXXXXXAIASWNRYYYYYYY']
-        seqs_to_filter = ['AIASWNR']
+        '''Testing if PSMs with sequence match (except Isoleucine) are removed'''
+        seqs = ['XXXXXXXXXXFMPNNLERYYYYYYY']
+        seqs_to_filter = ['FMPNNIER']
         basetests.create_db(seqs, fullprotein=True, minlen=6)
         # Find peptide
         options = ['--dbfile', 'seqs.db', '--fullprotein', '--minlen', '6']
         self.run_command(options)
         self.check_peps_in_out(seqs_to_filter, matching=True)
 
-        # Do not filter because minlen stretches into the YYYYYY residues, the
-        # R is not there
-        seqs = ['XXXXXXXXXXAIASWNYYYYYYY']
+    def test_fullprotein_minlenwrong(self):
+        '''Do not filter since even with matching 6-aa peptide, the 7th of the PSM does not match'''
+        seqs = ['XXXXXXXXXXALASWNYYYYYYY']
         seqs_to_filter = ['AIASWNR']
         basetests.create_db(seqs, fullprotein=True, minlen=6)
         # Find peptide
