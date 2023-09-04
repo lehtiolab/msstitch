@@ -552,7 +552,7 @@ def generate_psms_quanted(quantdb, shiftrows, psms, isob_header, isobaric,
                 mzidtsvdata.HEADER_PRECURSOR_FWHM: str(pquant[1]),
                 })
         if isobaric:
-            isoquants = {}
+            isoquants, pif = {}, None
             while quant[0] == rownr:
                 isoquants.update({quant[sqlfields['isochan']]:
                                   str(quant[sqlfields['isoquant']])})

@@ -66,6 +66,17 @@ class TestPSMTable(MzidWithDB):
             exp = re.sub('[0-9\+\.]', '', exp[0][0])[:-1]
             self.assertEqual(int(val[0][0]), exp.count('K') + exp.count('R') - exp.count('KP') - exp.count('RP'))
 
+    def test_no_isoquant_in_some_rows(self):
+        '''Test when not all rows of PSMs have isoquant data, e.g. when some are
+        CID.'''
+        # delete isoquant for first scan in PSM table
+        db = sqlite3.connect(self.workdb)
+        spec_id_to_rm = '1_controllerType=0 controllerNumber=1 scan=10029'
+        db.execute(f'DELETE FROM isobaric_quant WHERE spectra_id="{spec_id_to_rm}"')
+        db.execute(f'DELETE FROM precursor_ion_fraction WHERE spectra_id="{spec_id_to_rm}"')
+        db.commit()
+        self.test_build_full_psmtable()
+
     def check_addspec_miscleav_bioset(self):
         sql = ('SELECT pr.rownr, bs.set_name, sp.retention_time, '
                'iit.ion_injection_time, im.ion_mobility, pif.pif '
