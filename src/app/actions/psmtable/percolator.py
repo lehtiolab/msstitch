@@ -35,7 +35,7 @@ def calculate_target_decoy_competition(percofn):
                 # Edgecase, sometimes filtering percolator data causes this:
                 # when there is a peptide with a PSM ID not in percolator PSMs 
                 # set all its PSMs pep-q-values to 1
-                [psms[x].update({'pepqval': 1, 'peppep': 1}) for x in psm_ids if x in psms]
+                [psms[x.text].update({'pepqval': 1, 'peppep': 1}) for x in psm_ids if x.text in psms]
                 break
     return psms
 
