@@ -328,6 +328,29 @@ class TestPercoTSV(basetests.MzidTSVBaseTest):
                 self.assertEqual(field, res[i][0])
                 self.assertEqual(exp[field], res[i][1])
 
+    def test_use_qvality_tsv(self):
+        mzidfn = os.path.join(self.fixdir, 'few_spectra.mzid')
+        percofn = os.path.join(self.fixdir, 'perco.xml')
+        qval_psms = os.path.join(self.fixdir, 'qvality_psms.txt')
+        qval_peps = os.path.join(self.fixdir, 'qvality_peps.txt')
+        options = ['--mzid', mzidfn, '--perco', percofn, '--qvalitypsms', qval_psms, '--qvalitypeps',
+                qval_peps]
+        self.run_command(options)
+        checkfields = ['percolator svm-score', 'PSM q-value', 'peptide q-value',
+            'PSM PEP', 'peptide PEP', 'TD']
+        with open(os.path.join(self.fixdir, 'few_spectra.tsv_fdr.tsv')) as fp:
+            header = next(fp).strip().split('\t')
+            expected = [line.strip().split('\t') for line in fp]
+        expected = [{field: line[i] for i, field in enumerate(header)} for line in expected]
+        for res, exp in zip(self.get_values(checkfields), expected):
+            for i, field in enumerate(checkfields):
+                if field == 'PSM q-value':
+                    self.assertAlmostEqual(float(exp[field]) + 0.1, float(res[i][1]))
+                else:
+                    self.assertEqual(exp[field], res[i][1])
+                self.assertEqual(field, res[i][0])
+
+
 
 class TestPercoTSVTIMS(basetests.MzidTSVBaseTest):
     command = 'perco2psm'
