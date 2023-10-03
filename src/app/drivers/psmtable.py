@@ -85,14 +85,22 @@ class Perco2PSMDriver(PSMDriver):
     def set_options(self):
         super().set_options()
         self.options.update(self.define_options(['multifiles', 'mzidfns', 'percofn',
-            'filtpep', 'filtpsm'], psmtable_options))
+            'filtpep', 'filtpsm', 'qvalitypsms', 'qvalitypeps'], psmtable_options))
 
     def prepare(self):
         # multiple PSM tables passed so do not read here, match with mzid
         pass
 
     def set_features(self):
-        self.percopsms = perco.calculate_target_decoy_competition(self.percofn)
+        if self.qvalitypsms:
+            qvpsmhead = tsvreader.get_tsv_header(self.qvalitypsms)
+            qvpephead = tsvreader.get_tsv_header(self.qvalitypeps)
+            qvpsms = tsvreader.generate_split_tsv_lines(self.qvalitypsms, qvpsmhead)
+            qvpeps = tsvreader.generate_split_tsv_lines(self.qvalitypeps, qvpephead)
+            self.percopsms = perco.get_scores_fdrs_from_percoqvality(self.percofn, qvpsms, qvpeps)
+        else:
+            self.percopsms = perco.get_scores_fdrs_from_percoxml(self.percofn)
+
                 
     def write(self):
         for psmfn, mzidfn in zip(self.fn, self.mzidfns):

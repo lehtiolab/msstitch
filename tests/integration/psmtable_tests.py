@@ -329,6 +329,15 @@ class TestPercoTSV(basetests.MzidTSVBaseTest):
                 self.assertEqual(exp[field], res[i][1])
 
     def test_use_qvality_tsv(self):
+        '''Get FDR data from recalculation in qvality. Qvality input is prepared
+        as a TSV with header, for target and decoy (so qvality -d) . In this case 
+        I have simply taken the percolator svm/qval/pep scores from perco.xml and 
+        added 0.1 to each PSM (not peptide) q-value using bash:
+        cat <(echo $'Score\tPEP\tq-value') \
+                <(grep -A3 '<psm p' perco.xml| grep -v psm| grep -v '\-\-' | \
+                sed -E 's/\s*<[\/]*[a-z_]+>//g' | paste - - - ) | \
+                awk -v FS='\t' -v OFS='\t' '{print $1, $3, $2+0.1}' > qvality_psms.txt 
+        '''
         mzidfn = os.path.join(self.fixdir, 'few_spectra.mzid')
         percofn = os.path.join(self.fixdir, 'perco.xml')
         qval_psms = os.path.join(self.fixdir, 'qvality_psms.txt')

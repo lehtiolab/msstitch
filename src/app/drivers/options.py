@@ -382,6 +382,12 @@ psmtable_options = {
                    'data', 'type': 'file', 'required': False},
     'percofn': {'driverattr': 'percofn', 'clarg': '--perco', 'help': 'Percolator '
         'XML output file', 'type': 'file'},
+    'qvalitypsms': {'driverattr': 'qvalitypsms', 'clarg': '--qvalitypsms', 'help': 'Qvality '
+        'tab separated output containing targets and decoys (i.e. prepared with qvality -d) '
+        'for PSM scores', 'type': 'file', 'required': False},
+    'qvalitypeps': {'driverattr': 'qvalitypeps', 'clarg': '--qvalitypeps', 'help': 'Qvality '
+        'tab separated output containing targets and decoys (i.e. prepared with qvality -d) '
+        'for peptide scores ', 'type': 'file', 'required': False},
     'mzidfns': {'driverattr': 'mzidfns', 'clarg': '--mzids', 'help': 'MzIdentML '
         ' output files belonging to PSM table TSV files, use same order as for TSVs', 
         'type': 'file', 'nargs': '+'},

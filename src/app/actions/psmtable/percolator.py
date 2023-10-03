@@ -4,9 +4,42 @@ from app.readers import tsv as tsvreader
 from app.readers import xml
 from app.readers import percolator as percoreader 
 from app.dataformats import mzidtsv as psmheaders
+from app.dataformats import qvality as qvalityheaders
 
 
-def calculate_target_decoy_competition(percofn):
+def get_scores_fdrs_from_percoqvality(percofn, qvality_psms, qvality_peps):
+    '''From percolator output get svm scores, and use a separate qvality output
+    for getting the calculated FDR values. Nice in case of recalculating FDR
+    after filtering etc
+    '''
+    ns = xml.get_namespace_from_top(percofn, None)
+    psms = {}
+    for qvalitypsm, psm in zip(qvality_psms, percoreader.generate_psms(percofn, ns)):
+        psms[psm.attrib['{%s}psm_id' % ns['xmlns']]] = {
+                'svm': float(psm.find('{%s}svm_score' % ns['xmlns']).text),
+                'qval': float(qvalitypsm[qvalityheaders.HEADER_QVAL]),
+                'pep': float(qvalitypsm[qvalityheaders.HEADER_PEP]),
+                'td': 'decoy' if psm.attrib['{%s}decoy' % ns['xmlns']] == 'true' else 'target',
+                }
+    for qvalitypep, peptide in zip(qvality_peps, percoreader.generate_peptides(percofn, ns)):
+        psm_ids = peptide.find('{%s}psm_ids' % ns['xmlns'])
+        for psm_id in psm_ids:
+            try:
+                psms[psm_id.text].update({
+                    'pepqval': float(qvalitypep[qvalityheaders.HEADER_QVAL]),
+                    'peppep': float(qvalitypep[qvalityheaders.HEADER_PEP]),
+                    })
+            except KeyError:
+                # Edgecase, sometimes filtering percolator data causes this:
+                # when there is a peptide with a PSM ID not in percolator PSMs 
+                # set all its PSMs pep-q-values to 1
+                [psms[x.text].update({'pepqval': 1, 'peppep': 1}) for x in psm_ids if x.text in psms]
+                break
+    return psms
+
+
+
+def get_scores_fdrs_from_percoxml(percofn):
     """
     From a percolator XML output file, take the FDR (q-value) and PEP and apply
     to the PSM table
@@ -63,14 +96,24 @@ def add_fdr_to_mzidtsv(psms, mzid_specidr, mzns, percodata):
             except KeyError:
                 continue
             outpsm = {k: v for k,v in psm.items()}
-            outpsm.update({
+            psmscores = {
                 psmheaders.HEADER_SVMSCORE: percopsm['svm'], 
                 psmheaders.HEADER_PSMQ: percopsm['qval'], 
                 psmheaders.HEADER_PSM_PEP: percopsm['pep'], 
-                psmheaders.HEADER_PEPTIDE_Q: percopsm['pepqval'], 
-                psmheaders.HEADER_PEPTIDE_PEP: percopsm['peppep'], 
-                psmheaders.HEADER_TARGETDECOY: percopsm['td'],
-                })
+                }
+            try:
+                pepscores = {
+                    psmheaders.HEADER_PEPTIDE_Q: percopsm['pepqval'], 
+                    psmheaders.HEADER_PEPTIDE_PEP: percopsm['peppep'], 
+                    psmheaders.HEADER_TARGETDECOY: percopsm['td'],
+                    }
+            except KeyError:
+                pepscores = {
+                    psmheaders.HEADER_PEPTIDE_Q: 1,
+                    psmheaders.HEADER_PEPTIDE_PEP: 1,
+                    psmheaders.HEADER_TARGETDECOY: 1,
+                    }
+            outpsm.update({**psmscores, **pepscores})
             # Remove all decoy protein matches from target proteins, to ensure downstream
             # processing does not trip up on them, e.g. having a decoy master protein.
             if percopsm['td'] != 'decoy':
