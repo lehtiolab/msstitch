@@ -300,7 +300,7 @@ class TestProteinMerge(basetests.MergeTest):
         self.check_protein_data('assoccentric', sql, psm_sql) 
 
     def check_peptide_relations(self, sql):
-        expected, psm_id, pep = {}, None, None
+        expected, psm_id = {}, None
         for rec in self.get_values_from_db(self.dbfile, sql):
             rec = [rec[0]] + ['NA' if x is None else x for x in rec[1:]]
             try:

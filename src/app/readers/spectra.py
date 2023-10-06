@@ -5,7 +5,7 @@ from app.readers import xmlformatting as formatting
 
 def mzmlfn_ms2_spectra_generator(mzmlfiles):
     for fn, spec, ns in mzmlfn_spectra_generator(mzmlfiles):
-        specparams = get_all_cvparams(spec, ns)
+        specparams = spec.findall('{%s}cvParam' % ns['xmlns'])
         mslvl = fetch_cvparam_value_by_name(specparams, 'ms level')
         if mslvl != '2':
             continue
@@ -48,7 +48,7 @@ def fetch_cvparams_values_from_subel(base, subelname, paramnames, ns):
     for the paramnames that match. Value order in list equals input
     paramnames order."""
     sub_el = basereader.find_element_xpath(base, subelname, ns)
-    cvparams = get_all_cvparams(sub_el, ns)
+    cvparams = sub_el.findall('{%s}cvParam' % ns['xmlns'])
     output = []
     for param in paramnames:
         output.append(fetch_cvparam_value_by_name(cvparams, param))
@@ -63,7 +63,3 @@ def fetch_cvparam_value_by_name(params, name):
         except KeyError:
             pass
     return False
-
-
-def get_all_cvparams(element, ns):
-    return element.findall('{%s}cvParam' % ns['xmlns'])

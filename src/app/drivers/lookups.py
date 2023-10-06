@@ -100,7 +100,7 @@ class QuantLookupDriver(base.LookupDriver):
 class SequenceLookupDriver(base.LookupDriver):
     """Creates an SQLite lookup DB from a FASTA file. Sequences are
     trypsinized and stored. It's possible to store sequences reversed
-    for N-terminal falloff indexing, and it can be specified to cut
+    for N-terminal insource fragmentation indexing, and it can be specified to cut
     tryptic before proline.
     """
     lookuptype = 'searchspace'
@@ -117,7 +117,7 @@ class SequenceLookupDriver(base.LookupDriver):
         super().set_options()
         self.options.update(self.define_options(['fn', 'outfile']))
         self.options['lookupfn'].update({'required': False, 'default': None})
-        self.options.update(self.define_options(['fullprotein', 'falloff',
+        self.options.update(self.define_options(['fullprotein', 'insourcefrag',
             'proline', 'minlength'], lookup_options))
         self.options.update(self.define_options(['trypsinize', 'miss_cleavage'],
             sequence_options))
@@ -131,10 +131,10 @@ class SequenceLookupDriver(base.LookupDriver):
                 print('--minlen not specified, default to 7')
             print('Creating full-length protein lookup, minimum matching '
                     'peptide length is {}'.format(self.minlength))
-            if self.proline or self.falloff or not self.trypsinize or self.miss_cleavage:
+            if self.proline or self.insourcefrag or not self.trypsinize or self.miss_cleavage:
                 print('Ignoring other options for tryptic lookup building')
             seqlookups.create_searchspace_wholeproteins(self.lookup, self.fn,
                                                          self.minlength)
         else:
             seqlookups.create_searchspace(self.lookup, self.fn, self.minlength, self.proline,
-                                           self.falloff, self.trypsinize, self.miss_cleavage)
+                                           self.insourcefrag, self.trypsinize, self.miss_cleavage)

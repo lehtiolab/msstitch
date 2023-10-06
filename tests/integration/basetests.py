@@ -58,7 +58,7 @@ class BaseTest(unittest.TestCase):
 
     def seq_in_db(self, dbconn, seq, seqtype, max_falloff=False):
         seq = seq.replace('L', 'I')
-        if seqtype == 'ntermfalloff':
+        if seqtype == 'insourcefrag':
             seq = '{0}%'.format(seq[::-1])
             sql = 'SELECT seqs FROM known_searchspace WHERE seqs LIKE ?'
             for match in dbconn.execute(sql, (seq,)):

@@ -618,7 +618,6 @@ class DeleteSet(MzidWithDB):
         self.assertEqual(exprownr, newmax + 1)
         pep_newcount = db.execute(pepsql).fetchone()[0]
         self.assertGreater(pep_precount, pep_newcount)
-        print(pep_precount, pep_newcount)
         biosql = """SELECT COUNT(set_name) FROM biosets WHERE set_name='Set1'"""
         self.assertFalse(db.execute(biosql).fetchone()[0])
 

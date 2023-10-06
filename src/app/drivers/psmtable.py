@@ -163,7 +163,7 @@ class SequenceFilterDriver(PSMDriver):
         options = self.define_options(['fullprotein', 'lookupfn', 'unroll',
             'minlength'], psmtable_options)
         self.options.update(options)
-        options = self.define_options(['deamidate', 'forcetryp', 'falloff'],
+        options = self.define_options(['deamidate', 'forcetryp', 'insourcefrag'],
                 percolator_options)
         self.options.update(options)
 
@@ -175,7 +175,7 @@ class SequenceFilterDriver(PSMDriver):
                     self.minlength, self.forcetryp)
         else:
             self.psms = filtering.filter_known_searchspace(self.oldpsms, 
-                    self.lookup, psmhead.HEADER_PEPTIDE, self.falloff, self.deamidate)
+                    self.lookup, psmhead.HEADER_PEPTIDE, self.insourcefrag, self.deamidate)
 
 
 class PSMTableRefineDriver(PSMDriver):

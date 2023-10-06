@@ -18,7 +18,7 @@ class FilterSequences(base.PercolatorDriver):
     def set_options(self):
         super().set_options()
         self.options.update(self.define_options(['fullprotein', 'deamidate', 
-            'minlength', 'lookupfn', 'forcetryp', 'falloff'],
+            'minlength', 'lookupfn', 'forcetryp', 'insourcefrag'],
             percolator_options))
 
     def set_features(self):
@@ -45,13 +45,13 @@ class FilterSequences(base.PercolatorDriver):
                                                                 'pep',
                                                                 self.lookup,
                                                                 self.ns,
-                                                                self.falloff,
+                                                                self.insourcefrag,
                                                                 self.deamidate),
                 'psm': filters.filter_known_searchspace(self.allpsms,
                                                             'psm',
                                                             self.lookup,
                                                             self.ns,
-                                                            self.falloff,
+                                                            self.insourcefrag,
                                                             self.deamidate),
             }
 

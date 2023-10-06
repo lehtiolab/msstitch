@@ -267,6 +267,17 @@ msstitch seqfilt -i psms.txt --dbfile tryptic.sqlite \
   --insourcefrag 2 --deamidate -o filtered.psms.txt
 ```
 
+Now that you have filtered percolator, the svm-score populations will have changed,
+and you may want to rerun its `qvality` component for the PSM and peptide score populations
+to obtain fresh FDRs. To put those into the PSM table, you can use:
+
+```
+msstitch perco2psm -i psms.txt \
+  --perco filtered.xml --mzid psms1.mzIdentML \
+  --qvalitypsms qvality_psms.txt --qvalitypeps qvality_peptides.txt \
+  --filtpsm 0.01 --filtpep 0.01
+```
+
 Create an SQLite file with full-protein sequences for filtering any peptide of 
 a minimum length specified that matches to those. Stop codons are also here treated
 as separating peptides. Slower than filtering tryptic sequences but more comprehensive:

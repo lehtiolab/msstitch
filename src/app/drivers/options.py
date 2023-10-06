@@ -226,7 +226,8 @@ sequence_options = {
 
 
 lookup_options = {
-    'falloff': {'driverattr': 'falloff',
+    # NB this is a flag, in percolator/PSM table filtering it is an int param
+    'insourcefrag': {'driverattr': 'insourcefrag',
                 'clarg': '--insourcefrag', 'default': False,
                 'action': 'store_const', 'const': True, 'help': 'Apply '
                 'filter against both intact peptides and those '
@@ -324,7 +325,7 @@ percolator_options = {
                   'position upstream of the peptide, and the peptide '
                   'C-terminal should also be K,R. Useful when discerning '
                   'from pseudogenes', 'required': False},
-    'falloff': {'driverattr': 'falloff',
+    'insourcefrag': {'driverattr': 'insourcefrag',
                 'clarg': '--insourcefrag',
                 'type': int, 'default': 0, 'help': 'Apply '
                 'filter against both intact peptides and those '
