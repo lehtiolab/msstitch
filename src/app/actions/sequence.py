@@ -3,19 +3,22 @@ from Bio.Seq import Seq
 from random import Random
 
 
-def create_trypsinized(proteins, proline_cut, miss_cleavage, minlen, nterm_meth_loss):
+def create_trypsinized(proteins, proline_cut, miss_cleavage, minlen, nterm_meth_loss,
+        splitstopcodons):
     for proseq in proteins:
         trypnr = 0
-        outpeps = trypsinize(str(proseq.seq), proline_cut, miss_cleavage, nterm_meth_loss)
+        outpeps = trypsinize(str(proseq.seq), proline_cut, miss_cleavage, nterm_meth_loss,
+                splitstopcodons)
         if minlen:
             outpeps = [pep for pep in outpeps if len(pep) >= minlen]
         for pep in outpeps:
             trypnr += 1
-            trypseq = SeqIO.SeqRecord(Seq(pep), id='{}_{}'.format(proseq.id, trypnr), name=proseq.name, description='')
+            trypseq = SeqIO.SeqRecord(Seq(pep), id='{}_{}'.format(proseq.id, trypnr),
+                    name=proseq.name, description='')
             yield trypseq
 
 
-def trypsinize(proseq, proline_cut=False, miss_cleavage=0, opt_nt_meth_loss=False):
+def trypsinize(input_protein, proline_cut=False, miss_cleavage=0, opt_nt_meth_loss=False, split_stop_codons=False):
     # TODO add cysteine to non cut options
     """Trypsinize a protein sequence. Returns a list of peptides.
     Peptides include both cut and non-cut when P is behind a tryptic
@@ -23,36 +26,46 @@ def trypsinize(proseq, proline_cut=False, miss_cleavage=0, opt_nt_meth_loss=Fals
     When opt_nt_meth_loss is True, peptides from protein N-term will come with
     and without the protein N-term methionine residue.
     """
-    #if not set(str(proseq.seq[1:-1])).intersection('RK'):
-    #    return [str(proseq.seq)]
     outpeps, nterm_losspeps = [], []
     trypres = set(['K', 'R'])
     noncutters = set()
     if not proline_cut:
         noncutters.add('P')
-    peptide = ''
-    for i, aa in enumerate(proseq):
-        peptide += aa
-        if i == len(proseq) - 1:
-            outpeps.append(peptide)
-        elif aa in trypres and proseq[i + 1] not in noncutters:
-            if not outpeps and opt_nt_meth_loss and peptide[0].upper() == 'M':
-                # Include protein N-term M loss peptide
-                nterm_losspeps.append(peptide[1:])
-            outpeps.append(peptide)  # do actual cut by storing peptides
-            peptide = ''
-        
-    # Get missed cleavages by re-attaching tryptic peptides, extra round for
-    # nterm_loss peptides
-    ft_pep_amount = len(outpeps)
-    for i in range(1, miss_cleavage + 1):
-        full_tryp_outpeps = [x for x in outpeps]
-        for j, pep in enumerate(full_tryp_outpeps):
-            if j + i < ft_pep_amount:
-                outpeps.append(''.join([x for x in (outpeps[j:j + i + 1])]))
-        if nterm_losspeps and i+1 < ft_pep_amount:
-            # Also get the nterm-loss/miscleav peps if used
-            nterm_losspeps.append(f'{nterm_losspeps[0]}{"".join(full_tryp_outpeps[1:i+1])}')
+    if split_stop_codons:
+        protein_sequences = input_protein.split('*')
+    else:
+        protein_sequences = [input_protein]
+    for proseq in protein_sequences:
+        peptide, proseq_outpeps = '', []
+        protein_has_ntermlosspep = False
+        for i, aa in enumerate(proseq.upper()):
+            peptide += aa
+            try:
+                next_aa = proseq[i + 1]
+            except IndexError:
+                next_aa = False
+            if aa in trypres and next_aa not in noncutters:
+                if not outpeps and opt_nt_meth_loss and peptide[0].upper() == 'M':
+                    # Include protein N-term M loss peptide
+                    nterm_losspeps.append(peptide[1:])
+                    protein_has_ntermlosspep = True
+                proseq_outpeps.append(peptide)  # do actual cut by storing peptides
+                peptide = ''
+        if len(peptide):
+            proseq_outpeps.append(peptide)
+            
+        # Get missed cleavages by re-attaching tryptic peptides, extra round for
+        # nterm_loss peptides
+        ft_pep_amount = len(proseq_outpeps)
+        for i in range(1, miss_cleavage + 1):
+            full_tryp_outpeps = [x for x in proseq_outpeps]
+            for j, pep in enumerate(full_tryp_outpeps):
+                if j + i < ft_pep_amount:
+                    proseq_outpeps.append(''.join([x for x in (proseq_outpeps[j:j + i + 1])]))
+            if protein_has_ntermlosspep and i < ft_pep_amount:
+                # Also get the nterm-loss/miscleav peps if used
+                nterm_losspeps.append(f'{nterm_losspeps[0]}{"".join(full_tryp_outpeps[1:i+1])}')
+        outpeps.extend(proseq_outpeps)
     return outpeps + nterm_losspeps
 
 

@@ -213,6 +213,10 @@ sequence_options = {
                'help': 'Amount of missed cleavages to allow when trypsinizing, '
                'default is 0',
                },
+    'stopcodonsplit': {'driverattr': 'stopcodonsplit', 'clarg': '--ignore-stop-codons',
+        'required': False, 'action': 'store_const', 'const': False, 'default': True, 
+        'help': 'Ignore stop codons in protein sequences when trypsinizing them (default is '
+        'to split on them.'},
     'ntermmloss': {'driverattr': 'ntermmloss', 'clarg': '--nterm-meth-loss', 
         'required': False, 'action': 'store_const', 'const': True, 'default': False,
         'help': 'Include peptides in trypsinization where the protein N-term methionine '

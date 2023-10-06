@@ -35,7 +35,7 @@ def create_searchspace(lookup, infile, minlen, proline_cut=False, reverse_seqs=T
     allpeps = []
     def treat_pep(seq, do_trypsinize, proline_cut, miss_cleavage, minlen): 
         if do_trypsinize:
-            pepseqs = trypsinize(seq, proline_cut, miss_cleavage=miss_cleavage)
+            pepseqs = trypsinize(seq, proline_cut, miss_cleavage=miss_cleavage, split_stop_codons=True)
         else:
             pepseqs = [seq]
         # Exchange all leucines to isoleucines because MS can't differ

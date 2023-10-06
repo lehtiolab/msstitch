@@ -20,16 +20,19 @@ class TestTrypsinize(SearchspaceLookup):
     suffix = '_tryp.fa'
     command = 'trypsinize'
 
-    def run_case(self, minlen, cutproline, miscleav, ntermloss):
+    def run_case(self, minlen, cutproline, miscleav, ntermloss, ignorestopcodons):
         options = ['-o', self.resultfn]
         if minlen:
             options.extend(['--minlen', str(minlen)])
         if cutproline:
             options.extend(['--cutproline'])
             seqtype = 'proline_cuts'
-        if ntermloss and miscleav:
+        if ntermloss and miscleav and ignorestopcodons:
+            options.extend(['--nterm-meth-loss', '--miscleav', str(miscleav), '--ignore-stop-codons'])
+            seqtype = 'fully_tryptic_minlen_ntermloss_ignorestop'
+        elif ntermloss and miscleav:
             options.extend(['--nterm-meth-loss', '--miscleav', str(miscleav)])
-            seqtype = 'fully_tryptic_minlen_ntermloss'
+            seqtype = 'fully_tryptic_ntermloss'
         elif miscleav:
             options.extend(['--miscleav', str(miscleav)])
             seqtype = 'miscleav'
@@ -46,15 +49,18 @@ class TestTrypsinize(SearchspaceLookup):
             if not minlen or len(pep) >= minlen:
                 self.assertEqual(prot, foundseqs[pep])
 
-    def test_fullytryptic_minlen_ntermloss(self):
-        self.run_case(8, False, 1, True)
+    def test_fullytryptic_minlen_ntermloss_stopcodons(self):
+        self.run_case(8, False, 1, True, True)
 
     def test_prolinecut(self):
-        self.run_case(False, True, False, False)
+        self.run_case(False, True, False, False, False)
 
     def test_miss_cleavage(self):
-        self.run_case(False, False, 1, False)
+        self.run_case(False, False, 1, False, False)
 
+    def test_nterm_miss_cleavage(self):
+        '''Specific code path for this, so test it'''
+        self.run_case(False, False, 1, True, False)
 
 
 class TestDecoyFa(SearchspaceLookup):
