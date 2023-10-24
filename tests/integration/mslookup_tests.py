@@ -356,6 +356,7 @@ class TestSpecQuantLookup(basetests.MSLookupTest):
     command = 'storequant'
     infilename = ''
     isoinfilename = 'few_spectra.consXML'
+    isoinfilename2 = 'few_spec_timstof.consXML'
     krinfilename = 'few_spectra.kr'
     dinoinfilename = 'few_spectra.dino'
     base_db_fn = 'spectra_lookup.sqlite'
@@ -363,10 +364,12 @@ class TestSpecQuantLookup(basetests.MSLookupTest):
     def setUp(self):
         super().setUp()
         self.isoinfile = os.path.join(self.fixdir, self.isoinfilename)
+        self.isoinfile2 = os.path.join(self.fixdir, self.isoinfilename2)
         self.krfile = os.path.join(self.fixdir, self.krinfilename)
         self.dinofile = os.path.join(self.fixdir, self.dinoinfilename)
         self.fakespfn = os.path.join(self.workdir, 'few_spectra.mzML')
         self.fakespfn2 = os.path.join(self.workdir, 'set2.mzML')
+        self.fakespfn3 = os.path.join(self.workdir, 'few_spec_timstof.mzML')
 
     def get_std_options(self):
         return [self.executable, self.command]
@@ -403,6 +406,12 @@ class TestSpecQuantLookup(basetests.MSLookupTest):
             if len(xmlpif):
                 self.assertEqual(float(xmlpif[0].attrib['value']), pif)
 
+
+    def test_isoquant_mixtypes(self):
+        options = ['--isobaric', self.isoinfile, self.isoinfile2, '--spectra', self.fakespfn, self.fakespfn3]
+        self.run_command(options)
+        self.check_quantmap()
+        self.check_quantification()
 
     def test_isoquant(self):
         options = ['--isobaric', self.isoinfile, '--spectra', self.fakespfn]
@@ -482,7 +491,11 @@ class TestSpecQuantLookup(basetests.MSLookupTest):
                 self.assertEqual((float(line[fields['intensity']]), fwhm), resval)
         # Now check we have a feature for all scans
         sql = """SELECT m.scan_sid, ma.feature_id FROM mzml AS m
-        LEFT OUTER JOIN ms1_align AS ma USING(spectra_id)"""
+        JOIN mzmlfiles AS mzf USING(mzmlfile_id)
+        JOIN biosets AS bs USING(set_id)
+        LEFT OUTER JOIN ms1_align AS ma USING(spectra_id)
+        WHERE bs.set_name != 'Set3'
+        """
         exemptscans = {'dino': [10229], 'kr': [10148, 10229]}
         exemptscans = [f'controllerType=0 controllerNumber=1 scan={x}' for x 
                 in exemptscans[feattype]]
