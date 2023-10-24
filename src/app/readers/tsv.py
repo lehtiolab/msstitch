@@ -118,6 +118,17 @@ def get_cols_in_file(pattern, header, single_col=False):
     return cols_found
 
 
+def get_columns_by_combined_patterns(header, patterns):
+    columns = []
+    for field in header:
+        if all(re.search(p, field) for p in patterns):
+            columns.append(field)
+    if not columns:
+        raise RuntimeError('Could not find fieldname in header with '
+                           'pattern: {}'.format(pattern))
+    return columns
+
+
 def get_columns_by_pattern(header, pattern):
     columns = []
     for field in header:

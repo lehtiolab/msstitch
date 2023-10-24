@@ -77,8 +77,8 @@ class CreatePeptableDriver(PepProttableDriver):
                 denomcols = [self.number_to_headerfield(col, self.oldheader)
                              for col in self.denomcols]
             elif self.denompatterns is not None:
-                denomcolnrs = [tsvreader.get_columns_by_pattern(self.oldheader, pattern)
-                               for pattern in self.denompatterns]
+                denomcolnrs = [tsvreader.get_columns_by_combined_patterns(self.oldheader,
+                    [self.quantcolpattern, pattern]) for pattern in self.denompatterns]
                 denomcols = set([col for cols in denomcolnrs for col in cols])
             quantcols = tsvreader.get_columns_by_pattern(self.oldheader,
                                                    self.quantcolpattern)
