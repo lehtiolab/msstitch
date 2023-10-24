@@ -1,3 +1,4 @@
+import os
 from decimal import Decimal
 from collections import defaultdict
 
@@ -7,39 +8,39 @@ FEATURE_ALIGN_WINDOW_AMOUNT = 1000
 PROTON_MASS = 1.0072
 
 
-def create_isobaric_quant_lookup(quantdb, specfn_consensus_els, channelmap):
+def create_isobaric_quant_lookup(quantdb, specfns, isobaricfns):
     """Creates an sqlite lookup table of scannrs with quant data.
 
     spectra - an iterable of tupled (filename, spectra)
     consensus_els - a iterable with consensusElements"""
-    # store quantchannels in lookup and generate a db_id vs channel map
-    channels_store = ((name,) for name, c_id
-                      in sorted(channelmap.items(), key=lambda x: int(x[1])))
-    quantdb.store_channelmap(channels_store)
-    channelmap_dbid = {channelmap[ch_name]: ch_id for ch_id, ch_name in
-                       quantdb.get_channelmap()}
-    #ms2scans = []
-    quants, pifs = [], []
     mzmlmap = quantdb.get_mzmlfile_map()
-    active_fn = None
-    for specfn, consensus_el in specfn_consensus_els:
-        if specfn != active_fn:
-            active_fn = specfn
-            specmap = quantdb.get_specmap(mzmlmap[specfn])
-        pif, sid = openmsreader.get_consxml_sid_pif(consensus_el)
-        # FIXME what if sid not in specmap? error then
-        spectra_id = specmap[sid]['id']
-        if pif:
-            pifs.append((spectra_id, float(pif)))
-        qdata = get_quant_data(consensus_el)
-        #ms2scans.append((mzmlmap[specfn], spectra_id, rt, specmap[rt]['mz']))
-        for channel_no in sorted(qdata.keys()):
-            quants.append((spectra_id, channelmap_dbid[channel_no],
-                           qdata[channel_no]))
-            if len(quants) == DB_STORE_CHUNK:
-                quantdb.store_isobaric_quants(quants, pifs)
-                quants, pifs = [], []
-    quantdb.store_isobaric_quants(quants, pifs)
+    for specfpath, isofn in zip(specfns, isobaricfns):
+        specfn = os.path.basename(specfpath)
+        quants, pifs = [], []
+        # store quantchannels in lookup and generate a db_id vs channel map
+        channelmap = openmsreader.get_quantmap(isofn)
+        channels_store = ((name,) for name, c_id
+                          in sorted(channelmap.items(), key=lambda x: int(x[1])))
+        quantdb.store_channelmap(channels_store)
+        print(channelmap)
+        channelmap_dbid = {channelmap[ch_name]: ch_id for ch_id, ch_name in
+                quantdb.get_channelmap() if ch_name in channelmap}
+        # Get DB spectra IDs keyed by scan SIDs
+        specmap = quantdb.get_specmap(mzmlmap[specfn])
+        for _, consensus_el in openmsreader.mzmlfn_cons_el_generator([specfn], [isofn]):
+            pif, sid = openmsreader.get_consxml_sid_pif(consensus_el)
+            # FIXME what if sid not in specmap? error then
+            spectra_id = specmap[sid]['id']
+            if pif:
+                pifs.append((spectra_id, float(pif)))
+            qdata = get_quant_data(consensus_el)
+            for channel_no in sorted(qdata.keys()):
+                quants.append((spectra_id, channelmap_dbid[channel_no],
+                               qdata[channel_no]))
+                if len(quants) == DB_STORE_CHUNK:
+                    quantdb.store_isobaric_quants(quants, pifs)
+                    quants, pifs = [], []
+        quantdb.store_isobaric_quants(quants, pifs)
     quantdb.index_isobaric_quants()
 
 

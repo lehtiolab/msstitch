@@ -86,11 +86,7 @@ class QuantLookupDriver(base.LookupDriver):
 
     def create_lookup(self):
         if self.isobaricfns:
-            quantmap = openmsreader.get_quantmap(self.isobaricfns[0])
-            mzmlfn_consxml = openmsreader.mzmlfn_cons_el_generator(self.spectrafns,
-                    self.isobaricfns)
-            quantlookups.create_isobaric_quant_lookup(self.lookup, mzmlfn_consxml, 
-                    quantmap),
+            quantlookups.create_isobaric_quant_lookup(self.lookup, self.spectrafns, self.isobaricfns)
         if self.ms1type:
             ms1feats = tsvreader.mzmlfn_tsvfeature_generator(self.spectrafns, self.ms1fns)
             quantlookups.create_precursor_quant_lookup(self.lookup, ms1feats,

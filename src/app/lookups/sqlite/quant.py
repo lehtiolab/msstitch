@@ -18,6 +18,7 @@ class QuantDB(ResultLookupInterface):
             'WHERE mzmlfile_id=? ORDER BY mz', (fn_id,))
 
     def store_channelmap(self, channels):
+        '''Stores channels if they do not exist yet (unique names in table)'''
         self.store_many(
             'INSERT OR IGNORE INTO isobaric_channels(channel_name) VALUES(?)', channels)
 
@@ -34,8 +35,8 @@ class QuantDB(ResultLookupInterface):
         self.index_column('pif_spectraid_ix', 'precursor_ion_fraction', 'spectra_id')
 
     def get_specmap(self, fn_id):
-        """Returns all spectra ids for spectra filename, keyed by 
-        retention time"""
+        """Returns all DB spectra ids for spectra filename, keyed by 
+        mzML SID (per scan)"""
         cursor = self.get_cursor()
         values = [fn_id]
         sql = 'SELECT scan_sid,spectra_id FROM mzml WHERE mzmlfile_id=? '
