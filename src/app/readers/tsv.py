@@ -125,7 +125,7 @@ def get_columns_by_combined_patterns(header, patterns):
             columns.append(field)
     if not columns:
         raise RuntimeError('Could not find fieldname in header with '
-                           'pattern: {}'.format(pattern))
+                           f'combined patterns: {patterns}')
     return columns
 
 
