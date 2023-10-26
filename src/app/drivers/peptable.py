@@ -48,15 +48,16 @@ class CreatePeptableDriver(PepProttableDriver):
 
 
     def set_features(self):
-        qpat = self.quantcolpattern if self.quantcolpattern else '[a-z]+[0-9]+plex_'
         header = [x for x in self.oldheader if x != psmh.HEADER_SPECFILE]
+        qpat = '[a-z]+[0-9]+plex_'
         try:
             isocols = tsvreader.get_columns_by_pattern(header, qpat)
         except RuntimeError:
-            pass
-        else:
-            for col in isocols:
-                header.pop(header.index(col))
+            isocols = []
+            if self.quantcolpattern:
+                isocols = tsvreader.get_columns_by_pattern(header, self.quantcolpattern)
+        for col in isocols:
+            header.pop(header.index(col))
         if self.precurquantcol:
             header = [peph.HEADER_AREA if x == self.precurquantcol
                       else x for x in header]

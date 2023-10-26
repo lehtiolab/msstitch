@@ -156,11 +156,18 @@ class ProtPepTable(ResultLookupInterface):
     def get_isoquant_headernames(self, stored_psmnrs):
         cursor = self.get_cursor()
         tables = self.table_map[self.datatype]
-        if stored_psmnrs:
-            cursor.execute(
-                'SELECT DISTINCT channel_name, amount_psms_name '
-                'FROM {}'.format(tables['isochtable']))
+        if self.datatype == 'peptide':
+            table_id_fieldname = 'peptable_id'
         else:
-            cursor.execute(
-                'SELECT DISTINCT channel_name FROM {}'.format(tables['isochtable']))
-        return cursor
+            table_id_fieldname = f"{tables['fntable'][:4]}table_id"
+        if stored_psmnrs:
+            sql = ('SELECT set_name || "_" || channel_name, set_name || "_" || amount_psms_name '
+                    f'FROM {tables["isochtable"]} '
+                    f'JOIN {tables["fntable"]} USING({table_id_fieldname}) '
+                    'JOIN biosets USING(set_id)')
+        else:
+            sql = ('SELECT set_name || "_" || channel_name '
+                    f'FROM {tables["isochtable"]} '
+                    f'JOIN {tables["fntable"]} USING({table_id_fieldname}) '
+                    'JOIN biosets USING(set_id)')
+        return cursor.execute(sql)
