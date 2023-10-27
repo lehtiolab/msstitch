@@ -113,7 +113,7 @@ class SequenceLookupDriver(base.LookupDriver):
         super().set_options()
         self.options.update(self.define_options(['fn', 'outfile']))
         self.options['lookupfn'].update({'required': False, 'default': None})
-        self.options.update(self.define_options(['fullprotein', 'insourcefrag',
+        self.options.update(self.define_options(['fullprotein', 'insourcefrag', 'ntermmloss',
             'proline', 'minlength'], lookup_options))
         self.options.update(self.define_options(['trypsinize', 'miss_cleavage'],
             sequence_options))
@@ -133,4 +133,4 @@ class SequenceLookupDriver(base.LookupDriver):
                                                          self.minlength)
         else:
             seqlookups.create_searchspace(self.lookup, self.fn, self.minlength, self.proline,
-                                           self.insourcefrag, self.trypsinize, self.miss_cleavage)
+                    self.insourcefrag, self.trypsinize, self.miss_cleavage, self.ntermmloss)

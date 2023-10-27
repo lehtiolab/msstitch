@@ -232,18 +232,20 @@ msstitch merge -i set1_proteins.txt set2_proteins.txt -o protein_table.txt \
 
 
 ### Some other useful commands
-Trypsinize a fasta file (minimum retained peptide length, do cut K/RP, allow 1 missed cleavage).
+Trypsinize a fasta file (minimum retained peptide length, do cut K/RP, allow 1 missed cleavage, 
+also generate peptides from protein N-term with methionine loss).
 This also treats stop codons as separators and will not read through them if they are in a protein.
 Pass `--ignore-stop-codons` if you would like to treat an `*` as any other amino acid.
 
 ```
 msstitch trypsinize -i uniprot.fasta -o tryp_up.fasta --minlen 7 \
-  --cutproline --miscleav 1
+  --cutproline --miscleav 1 --nterm-meth-loss
 ```
 
 Create an SQLite file with tryptic sequences for filtering out e.g. known-sequence data.
 Options and behaviour as for `trypsinize`, plus --insourcefrag which builds a lookup with support for 
-in-source fragmented peptides that have lost some N-terminal residues:
+in-source fragmented peptides that have lost some N-terminal residues. If one instead of 
+in-source fragmentation only wishes to include protein N-term methionine loss, use `--nterm-meth-loss`
 
 ```
 msstitch storeseq -i canonical.fa -o tryptic.sqlite --cutproline --minlen 7 \

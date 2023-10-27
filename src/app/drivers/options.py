@@ -104,6 +104,12 @@ shared_options = {
             'clarg': '--addmiscleav', 'required': False, 'action': 'store_const',
             'default': False, 'const': True, 'help': 'Add missed cleavages to PSM table',
                },
+    'ntermmloss': {'driverattr': 'ntermmloss', 'clarg': '--nterm-meth-loss', 
+        'required': False, 'action': 'store_const', 'const': True, 'default': False,
+        'help': 'Include peptides in trypsinization where the protein N-term methionine '
+        'residue has been lost. When used in storeseq, the filter database should '
+        'be built with this flag in order for the filtering to work.' 
+        },
     'fullprotein': {'driverattr': 'fullprotein', 'clarg': '--fullprotein',
         'default': False, 'action': 'store_const', 'const': True, 'help':
         'Store full protein sequences (at a minimum-match length) in the '
@@ -217,11 +223,6 @@ sequence_options = {
         'required': False, 'action': 'store_const', 'const': False, 'default': True, 
         'help': 'Ignore stop codons in protein sequences when trypsinizing them (default is '
         'to split on them.'},
-    'ntermmloss': {'driverattr': 'ntermmloss', 'clarg': '--nterm-meth-loss', 
-        'required': False, 'action': 'store_const', 'const': True, 'default': False,
-        'help': 'Include peptides in trypsinization where the protein N-term methionine '
-        'residue has been lost'
-        },
     }
 
 

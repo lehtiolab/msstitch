@@ -29,13 +29,14 @@ def create_searchspace_wholeproteins(lookup, fastafn, minpeplen):
 
 
 def create_searchspace(lookup, infile, minlen, proline_cut=False, reverse_seqs=True,
-        do_trypsinize=True, miss_cleavage=False):
+        do_trypsinize=True, miss_cleavage=False, ntermmloss=False):
     """Given a FASTA database, proteins are trypsinized and resulting peptides
     stored in a database or dict for lookups"""
     allpeps = []
     def treat_pep(seq, do_trypsinize, proline_cut, miss_cleavage, minlen): 
         if do_trypsinize:
-            pepseqs = trypsinize(seq, proline_cut, miss_cleavage=miss_cleavage, split_stop_codons=True)
+            pepseqs = trypsinize(seq, proline_cut, miss_cleavage=miss_cleavage, split_stop_codons=True,
+                    opt_nt_meth_loss=ntermmloss)
         else:
             pepseqs = [seq]
         # Exchange all leucines to isoleucines because MS can't differ

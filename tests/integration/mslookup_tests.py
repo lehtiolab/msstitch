@@ -208,6 +208,12 @@ class TestTrypticLookup(SearchspaceLookup):
     def test_ntermwildcards_yes_db(self):
         self.run_with_existing_db(['--insourcefrag'], 'insourcefrag')
 
+    def test_ntermmethloss_nodb(self):
+        self.run_without_db(['--nterm-meth-loss', '--miscleav', '1'], 'fully_tryptic_ntermloss')
+
+    def test_ntermmethloss_yesdb(self):
+        self.run_with_existing_db(['--nterm-meth-loss', '--miscleav', '1'], 'fully_tryptic_ntermloss')
+
     def test_noflags_no_db(self):
         self.run_without_db()
 
