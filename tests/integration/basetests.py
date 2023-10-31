@@ -56,19 +56,6 @@ class BaseTest(unittest.TestCase):
         db = sqlite3.connect(dbfile)
         return db.execute(sql)
 
-    def seq_in_db(self, dbconn, seq, seqtype, max_falloff=False):
-        seq = seq.replace('L', 'I')
-        if seqtype == 'insourcefrag':
-            seq = '{0}%'.format(seq[::-1])
-            sql = 'SELECT seqs FROM known_searchspace WHERE seqs LIKE ?'
-            for match in dbconn.execute(sql, (seq,)):
-                if match[0][:-max_falloff] in seq:
-                    return True
-        else:
-            sql = ('SELECT EXISTS(SELECT seqs FROM known_searchspace WHERE '
-                   'seqs=? LIMIT 1)')
-            return dbconn.execute(sql, (seq,)).fetchone()[0] == 1
-
     def get_tsvheader(self, fn):
         with open(fn) as fp:
             return next(fp).strip('\n').split('\t')
@@ -430,13 +417,16 @@ class MergeTest(BaseTest):
                              str(len(expected[pacc]['psms'])))
 
 
-def create_db(seqs, reverse=False, fullprotein=False, minlen=False):
+def create_db(seqs, reverse=False, fullprotein=False, minlen=False, mapaccession=False):
     with open('seqs.fa', 'w') as fp:
         for ix, seq in enumerate(seqs):
             fp.write(f'>{ix}\n{seq}\n')
     cmd = ['msstitch', 'storeseq', '-i', 'seqs.fa', '-o', 'seqs.db']
-    if reverse:
-        cmd.append('--insourcefrag')
-    elif fullprotein:
+    if fullprotein:
         cmd.extend(['--fullprotein', '--minlen', str(minlen)])
+    else:
+        if reverse:
+            cmd.append('--insourcefrag')
+        if mapaccession:
+            cmd.append('--map-accession')
     subprocess.run(cmd)

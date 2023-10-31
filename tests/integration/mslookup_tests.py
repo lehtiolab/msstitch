@@ -162,14 +162,6 @@ class TestDecoyFa(SearchspaceLookup):
 class TestTrypticLookup(SearchspaceLookup):
     command = 'storeseq'
 
-    def all_seqs_in_db(self, dbfn, sequences, seqtype):
-        db = sqlite3.connect(dbfn)
-        seqs_in_db = set()
-        for seq in sequences:
-            seqs_in_db.add(self.seq_in_db(db, seq, seqtype))
-        db.close()
-        return seqs_in_db == set([True])
-
     def query_db_assert(self, options=None, seqtype=None):
         if options is None:
             options = []
@@ -180,12 +172,20 @@ class TestTrypticLookup(SearchspaceLookup):
         else:
             sequences = tryp_sequences['fully_tryptic']
         self.run_command(options)
-        self.assertTrue(self.all_seqs_in_db(self.resultfn,
-                                            sequences, seqtype))
+        db = sqlite3.connect(self.resultfn)
+        seqs_in_db = []
+        for seq in sequences:
+            seq = seq.replace('L', 'I')
+            sql = ('SELECT EXISTS(SELECT seqs FROM known_searchspace WHERE '
+                       'seqs=? LIMIT 1)')
+            seqs_in_db.append((seq, db.execute(sql, (seq,)).fetchone()[0] == 1))
+        [self.assertTrue(x[1]) for x in seqs_in_db]
+        seqcount_db = db.execute('SELECT COUNT(*) FROM known_searchspace').fetchone()[0]
+        db.close()
+        self.assertEqual(len(sequences), seqcount_db)
 
     def run_without_db(self, options=None, seqtype=None):
-        self.resultfn = os.path.join(self.workdir,
-                                     'mslookup_db.sqlite')
+        self.resultfn = os.path.join(self.workdir, 'mslookup_db.sqlite')
         self.query_db_assert(options, seqtype)
 
     def run_with_existing_db(self, options=None, seqtype=None):
@@ -224,30 +224,27 @@ class TestTrypticLookup(SearchspaceLookup):
 class TestWholeProteinSeqLookup(SearchspaceLookup):
     command = 'storeseq'
 
-    def all_seqs_in_db(self, dbfn, sequences, seqtype):
-        db = sqlite3.connect(dbfn)
-        seqs_in_db = set()
-        sql = ('SELECT EXISTS(SELECT seq FROM protein_peptides WHERE '
-               'seq=? LIMIT 1)')
-        for seq in sequences:
-            seqs_in_db.add(db.execute(sql, (seq,)).fetchone()[0] == 1)
-        db.close()
-        return seqs_in_db == set([True])
-
     def query_db_assert(self, options):
         with open(os.path.join(self.basefixdir, 'allpeptides_proteins.json')) as fp:
             sequences = [x.replace('L', 'I') for x in json.load(fp)]
         options.extend(['--fullprotein', '--minlen', '6'])
         self.run_command(options)
-        self.assertTrue(self.all_seqs_in_db(self.resultfn, sequences,
-                                            seqtype=False))
+        db = sqlite3.connect(self.resultfn)
+        seqs_in_db = []
+        sql = ('SELECT EXISTS(SELECT seq FROM protein_peptides WHERE '
+               'seq=? LIMIT 1)')
+        for seq in sequences:
+            seqs_in_db.append((seq, db.execute(sql, (seq,)).fetchone()[0] == 1))
+        seqcount_db = db.execute('SELECT COUNT() FROM protein_peptides').fetchone()[0]
+        db.close()
+        [self.assertTrue(x[1]) for x in seqs_in_db]
+        self.assertEqual(len(sequences), seqcount_db)
 
-    def test_without_db(self, seqtype=None):
-        self.resultfn = os.path.join(self.workdir,
-                                     'mslookup_db.sqlite')
+    def test_without_db(self):
+        self.resultfn = os.path.join(self.workdir, 'mslookup_db.sqlite')
         self.query_db_assert([])
 
-    def test_with_existing_db(self, seqtype=None):
+    def test_with_existing_db(self):
         self.resultfn = os.path.join(self.workdir, 'seqspace.db')
         options = ['--dbfile', self.resultfn]
         self.copy_db_to_workdir('spectra_lookup.sqlite')
