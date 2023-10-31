@@ -285,6 +285,11 @@ lookup_options = {
                   'help': 'Type of tolerance in mass-to-charge when mapping '
                   'MS1 feature quant info to identifications in the PSM table.'
                   ' One of ppm, Da.'},
+    'pepprotmapping': {'driverattr': 'pepprotmapping', 'clarg': '--map-accessions',
+        'required': False, 'action': 'store_const', 'const': True, 'default': False,
+        'help': 'Use this flag when building a peptide lookup (not --fullprotein) where '
+        'you want to keep the protein mapping for later use in e.g. annotating PSM table '
+        'with sequence hits to the passed FASTA'},
     'peptidecol': {'driverattr': 'peptidecol',
         'type': int, 'clarg': '--peptidecol', 'default': 1, 'required': False,
         'help': 'Column nr of peptide table where peptide sequences are '

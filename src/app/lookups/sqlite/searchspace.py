@@ -6,13 +6,11 @@ class SearchSpaceDB(DatabaseConnection):
         """Creates a searchspace lookup sqlite."""
         self.create_tables(['known_searchspace', 'protein_peptides', 'proteins', 'protein_seq'])
 
-    def write_peps(self, peps, reverse_seqs):
+    def write_peps(self, peps):
         """Writes peps to db. We can reverse to be able to look up
         peptides that have some amino acids missing at the N-terminal.
         This way we can still use the index.
         """
-        if reverse_seqs:
-            peps = ((x[0][::-1],) for x in peps)
         cursor = self.get_cursor()
         cursor.executemany(
             'INSERT OR IGNORE INTO known_searchspace(seqs) VALUES (?)', peps)
@@ -36,10 +34,27 @@ class SearchSpaceDB(DatabaseConnection):
                                for pep in v['peps']))
         self.conn.commit()
 
+    def store_tryp_peps_mapped(self, pepproteins):
+        """Writes peps to db, but this time peps is a dict where {prot1: [PEPSEQ, IAMAPEPTIDE, ...], ...},
+        and we also store the mapping to a peptide's proteins. We can reverse to be able to look up
+        peptides that have some amino acids missing at the N-terminal.
+        This way we can still use the index.
+        """
+        cursor = self.get_cursor()
+        cursor.executemany('INSERT INTO proteins(protein_acc) VALUES(?)', ((x,) for x in pepproteins))
+        cursor.executemany('INSERT INTO protein_peptides(seq, protein_acc, pos) VALUES(?, ?, ?)',
+                ((pep, prot, 0) for prot,peps in pepproteins.items() for pep in peps))
+
     def index_proteins(self):
         self.index_column('pepix', 'protein_peptides', 'seq')
         self.index_column('pp_protix', 'protein_peptides', 'protein_acc')
         self.index_column('pseq_protix', 'protein_seq', 'protein_acc')
+        self.conn.commit()
+
+    def index_peps_mapped(self, reverse_seqs):
+        collate = ' COLLATE NOCASE' if reverse_seqs else ''
+        self.index_column('reverse_seqs_index', 'protein_peptides', f'seq{collate}', unique=True)
+        self.index_column('pp_protix', 'protein_peptides', 'protein_acc')
         self.conn.commit()
 
     def get_multi_seq(self, allseqs):

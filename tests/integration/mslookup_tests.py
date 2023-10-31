@@ -251,6 +251,40 @@ class TestWholeProteinSeqLookup(SearchspaceLookup):
         self.query_db_assert(options)
 
 
+class TestPepProtMapLookup(SearchspaceLookup):
+    command = 'storeseq'
+
+    def run_without_db(self, options, seqtype):
+        dbfn = 'mslookup_db.sqlite'
+        self.resultfn = os.path.join(self.workdir, dbfn)
+        with open(os.path.join(self.basefixdir, 'peptides_trypsinized.json')) as fp:
+            sequences = [x.replace('L', 'I') for x in json.load(fp)[seqtype]]
+        self.run_command(['--map-accessions', *options])
+        db = sqlite3.connect(dbfn)
+        seqs_in_db = set()
+        sql = ('SELECT EXISTS(SELECT seq FROM protein_peptides WHERE '
+               'seq=? LIMIT 1)')
+        for seq in sequences:
+            seqs_in_db.add((seq, db.execute(sql, (seq,)).fetchone()[0] == 1))
+        print(seqs_in_db)
+        [self.assertTrue(x[1]) for x in seqs_in_db]
+        seqcount_db = db.execute('SELECT COUNT(*) FROM protein_peptides').fetchone()[0]
+        db.close()
+        self.assertEqual(len(sequences), seqcount_db)
+
+    def test_fulltryp_nodb(self):
+        self.run_without_db([], 'fully_tryptic')
+
+    def test_ntermloss_miscleav_nodb(self):
+        self.run_without_db(['--nterm-meth-loss', '--miscleav', '1'], 'fully_tryptic_ntermloss')
+
+    def test_insourcefrag_nodb(self):
+        self.run_without_db(['--insourcefrag'], 'insourcefrag')
+
+    def test_cutproline_nodb(self):
+        self.run_without_db(['--cutproline'], 'proline_cuts')
+
+
 class SpectraLookup(basetests.MSLookupTest):
     command = 'storespectra'
 

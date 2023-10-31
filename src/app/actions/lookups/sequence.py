@@ -1,4 +1,5 @@
 from Bio import SeqIO
+from collections import defaultdict
 
 from app.actions.sequence import trypsinize
 
@@ -28,22 +29,25 @@ def create_searchspace_wholeproteins(lookup, fastafn, minpeplen):
     print(f'Stored {peptotal} peptides')
 
 
+def process_sequence(seq, do_trypsinize, proline_cut, miss_cleavage, minlen, reverse, ntermmloss): 
+    if do_trypsinize:
+        pepseqs = trypsinize(seq, proline_cut, miss_cleavage=miss_cleavage, split_stop_codons=True,
+                opt_nt_meth_loss=ntermmloss)
+    else:
+        pepseqs = [(seq)]
+    # Exchange all leucines to isoleucines because MS can't differ
+    pepseqs = (pep.replace('L', 'I') for pep in pepseqs)
+    if minlen:
+        pepseqs = (pep for pep in pepseqs if len(pep) >= minlen)
+    if reverse:
+        pepseqs = (pep[::-1] for pep in pepseqs)
+    return pepseqs
+
+
 def create_searchspace(lookup, infile, minlen, proline_cut=False, reverse_seqs=True,
         do_trypsinize=True, miss_cleavage=False, ntermmloss=False):
     """Given a FASTA database, proteins are trypsinized and resulting peptides
     stored in a database or dict for lookups"""
-    allpeps = []
-    def treat_pep(seq, do_trypsinize, proline_cut, miss_cleavage, minlen): 
-        if do_trypsinize:
-            pepseqs = trypsinize(seq, proline_cut, miss_cleavage=miss_cleavage, split_stop_codons=True,
-                    opt_nt_meth_loss=ntermmloss)
-        else:
-            pepseqs = [seq]
-        # Exchange all leucines to isoleucines because MS can't differ
-        pepseqs = [(pep.replace('L', 'I'),) for pep in pepseqs]
-        if minlen:
-            pepseqs = [pep for pep in pepseqs if len(pep[0]) >= minlen]
-        return pepseqs
     with open(infile) as fp:
         ftype = 'fasta' if fp.read(1) == '>' else 'txt'
         fp.seek(0)
@@ -51,5 +55,22 @@ def create_searchspace(lookup, infile, minlen, proline_cut=False, reverse_seqs=T
             records = (str(x.seq) for x in SeqIO.parse(fp, 'fasta'))
         elif ftype == 'txt':
             records = (x.strip('\n') for x in fp)
-        lookup.write_peps((pep for x in records for pep in treat_pep(x, do_trypsinize, proline_cut, miss_cleavage, minlen)), reverse_seqs)
+        lookup.write_peps((pep,) for x in records for pep in process_sequence(x, do_trypsinize,
+            proline_cut, miss_cleavage, minlen, reverse_seqs, ntermmloss))
     lookup.index_peps(reverse_seqs)
+
+
+def create_searchspace_map_accessions(lookup, infile, minlen, proline_cut=False, reverse_seqs=True,
+        do_trypsinize=True, miss_cleavage=False, ntermmloss=False):
+    """Given a FASTA database, proteins are trypsinized and resulting peptides
+    stored in a database or dict for lookups, but this time with mapping protein accessions
+    also stored, so we can find them later"""
+    allpeps = defaultdict(list)
+    peptotal, pepsubtotal = 0, 0
+    with open(infile) as fp:
+        for rec in SeqIO.parse(fp, 'fasta'):
+            peps = process_sequence(rec.seq, do_trypsinize, proline_cut, miss_cleavage, minlen,
+                reverse_seqs, ntermmloss)
+            allpeps[rec.id].extend(peps)
+    lookup.store_tryp_peps_mapped(allpeps) 
+    lookup.index_peps_mapped(reverse_seqs)

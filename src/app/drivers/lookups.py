@@ -113,8 +113,8 @@ class SequenceLookupDriver(base.LookupDriver):
         super().set_options()
         self.options.update(self.define_options(['fn', 'outfile']))
         self.options['lookupfn'].update({'required': False, 'default': None})
-        self.options.update(self.define_options(['fullprotein', 'insourcefrag', 'ntermmloss',
-            'proline', 'minlength'], lookup_options))
+        self.options.update(self.define_options(['fullprotein', 'pepprotmapping', 'insourcefrag',
+            'ntermmloss', 'proline', 'minlength'], lookup_options))
         self.options.update(self.define_options(['trypsinize', 'miss_cleavage'],
             sequence_options))
 
@@ -131,6 +131,9 @@ class SequenceLookupDriver(base.LookupDriver):
                 print('Ignoring other options for tryptic lookup building')
             seqlookups.create_searchspace_wholeproteins(self.lookup, self.fn,
                                                          self.minlength)
+        elif self.pepprotmapping:
+            seqlookups.create_searchspace_map_accessions(self.lookup, self.fn, self.minlength, self.proline,
+                    self.insourcefrag, self.trypsinize, self.miss_cleavage, self.ntermmloss)
         else:
             seqlookups.create_searchspace(self.lookup, self.fn, self.minlength, self.proline,
                     self.insourcefrag, self.trypsinize, self.miss_cleavage, self.ntermmloss)
