@@ -112,8 +112,9 @@ shared_options = {
         },
     'fullprotein': {'driverattr': 'fullprotein', 'clarg': '--fullprotein',
         'default': False, 'action': 'store_const', 'const': True, 'help':
-        'Store full protein sequences (at a minimum-match length) in the '
-        'SQLite file rather than tryptic sequences', 'required': False},
+        'Store (storeseq) or use (seqfilt, seqmatch) full protein sequences '
+        '(at a minimum-match length) in the SQLite file rather than tryptic sequences',
+        'required': False},
     'minint': {'driverattr': 'minint', 'clarg': '--minint', 'type': float,
                'help': 'Intensity threshold of PSMs when calculating '
                'isobaric ratios. Values below threshold will be set to NA. '
@@ -378,6 +379,9 @@ psmtable_options = {
                  'help': 'Confidence type to define if higher or lower score '
                  'is better. One of [higher, lower]', 'type': str,
                  'choices': ['higher', 'lower']},
+    'matchfilename': {'driverattr': 'matchfilename', 'clarg': '--matchcolname', 'type': str,
+        'help': 'Column header field name for the column where matching accessions will be in'
+        },
     'minpurity': {'driverattr': 'min_purity', 'clarg': '--min-precursor-purity',
         'type': float, 'required': False, 'default': 0,
         'help': 'Minimum purity of precursor required to output isobaric '

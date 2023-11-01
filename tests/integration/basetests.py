@@ -420,7 +420,7 @@ class MergeTest(BaseTest):
 def create_db(seqs, reverse=False, fullprotein=False, minlen=False, mapaccession=False):
     with open('seqs.fa', 'w') as fp:
         for ix, seq in enumerate(seqs):
-            fp.write(f'>{ix}\n{seq}\n')
+            fp.write(f'>acc_{ix}\n{seq}\n')
     cmd = ['msstitch', 'storeseq', '-i', 'seqs.fa', '-o', 'seqs.db']
     if fullprotein:
         cmd.extend(['--fullprotein', '--minlen', str(minlen)])

@@ -432,6 +432,84 @@ class TestSplitTSV(basetests.MzidTSVBaseTest):
                 self.assertIn(line, self.expectlines)
 
 
+class TestSeqMatchFastaDB(basetests.MzidTSVBaseTest):
+    command = 'seqmatch'
+    infilename = 'few_spectra.tsv'
+    suffix = '_seqmatch.txt'
+
+    def check_peps_in_out(self, options, seqs, matching=True):
+        matchcol = 'TESTMATCH'
+        self.run_command([*options, '--dbfile', 'seqs.db', '--matchcolname', matchcol])
+        pepfound = False
+        seqs_nrmap = {x: ix for ix,x in enumerate(seqs)}
+        with open(self.resultfn) as fp:
+            header = next(fp).strip().split('\t')
+            out_linecount = 0
+            for line in fp:
+                out_linecount += 1
+                psm = {k: v for k,v in zip(header, line.strip().split('\t'))}
+                seq = re.sub('[^A-Z]', '', psm['Peptide'])
+                if seq in seqs_nrmap and matching:
+                    self.assertEqual(psm[matchcol], f'acc_{seqs_nrmap[seq]}')
+                else:
+                    self.assertEqual(psm[matchcol], 'No match')
+        with open(self.infile[0]) as fp:
+            header = next(fp).strip().split('\t')
+            in_linecount = 0
+            for line in fp:
+                in_linecount += 1
+        self.assertEqual(in_linecount, out_linecount)
+
+    def test_noflags(self):
+        seqs = ['AIASWNR']
+        basetests.create_db(seqs, mapaccession=True)
+        options = ['--dbfile', 'seqs.db']
+        self.check_peps_in_out(options, seqs)
+
+    def test_ntermwildcards(self):
+        seqs = ['XXAIASWNR']
+        seqs_to_filter = ['AIASWNR']
+        basetests.create_db(seqs, reverse=True, mapaccession=True)
+
+        # Find peptide
+        max_falloff = 2
+        options = ['--insourcefrag', str(max_falloff)]
+        self.check_peps_in_out(options, seqs_to_filter)
+
+# FIXME
+#        # Now failing, too short falloff
+#        max_falloff = 1
+#        options = ['--insourcefrag', str(max_falloff)]
+#        self.check_peps_in_out(options, seqs_to_filter)
+
+    def test_deamidate(self):
+        # deamidation: N -> D
+        seqs = ['NIENLR']
+        seqs_to_filter = ['DIENLR']
+        basetests.create_db(seqs, mapaccession=True)
+        options = ['--deamidate']
+        self.check_peps_in_out(options, seqs_to_filter)
+
+    def test_fullprotein(self):
+        '''Testing if PSMs with sequence match (except Isoleucine) are removed'''
+        seqs = ['XXXXXXXXXXFMPNNLERYYYYYYY']
+        seqs_to_filter = ['FMPNNIER']
+        basetests.create_db(seqs, fullprotein=True, minlen=6, mapaccession=True)
+        # Find peptide
+        options = ['--fullprotein', '--minlen', '6']
+        self.check_peps_in_out(options, seqs_to_filter)
+
+    def test_fullprotein_minlenwrong(self):
+        '''Do not filter since even with matching 6-aa peptide, the 7th of the PSM does not match'''
+        seqs = ['XXXXXXXXXXALASWNYYYYYYY']
+        seqs_to_filter = ['AIASWNR']
+        basetests.create_db(seqs, fullprotein=True, minlen=6, mapaccession=True)
+        # Find peptide
+        options = ['--fullprotein', '--minlen', '6']
+        self.check_peps_in_out(options, seqs_to_filter, matching=False)
+
+
+
 class TestSeqFilt(basetests.MzidTSVBaseTest):
     command = 'seqfilt'
     infilename = 'few_spectra.tsv'

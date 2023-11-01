@@ -178,6 +178,26 @@ class SequenceFilterDriver(PSMDriver):
                     self.lookup, psmhead.HEADER_PEPTIDE, self.insourcefrag, self.deamidate)
 
 
+class SequenceMatchDriver(PSMDriver):
+    outsuffix = '_seqmatch.txt'
+    command = 'seqmatch'
+    commandhelp = 'Adds column to PSMs with matched sequences'
+    lookuptype = 'searchspace'
+
+    def set_options(self):
+        super().set_options()
+        options = self.define_options(['fullprotein', 'lookupfn', 'unroll', 'minlength', 'matchfilename'],
+                psmtable_options)
+        self.options.update(options)
+        options = self.define_options(['deamidate', 'forcetryp', 'insourcefrag'], percolator_options)
+        self.options.update(options)
+
+    def set_features(self):
+        self.header = [*self.oldheader[:], self.matchfilename]
+        self.psms = filtering.match_sequence(self.oldpsms, self.lookup, psmhead.HEADER_PEPTIDE,
+                self.matchfilename, self.insourcefrag, self.deamidate, self.minlength, self.forcetryp)
+
+
 class PSMTableRefineDriver(PSMDriver):
     # gene, quant, pg, spectra
     outsuffix = '_refined.txt'

@@ -99,3 +99,25 @@ class SearchSpaceDB(DatabaseConnection):
             'INNER JOIN protein_seq AS ps ON ps.protein_acc=pp.protein_acc WHERE pp.seq=?')
         return {seq: [(protid, pos, pseq) for protid, pos, pseq in
             cursor.execute(sql, (seq[:minpeplen],))] for seq in peptides}
+
+    def get_proteins_matching_peptides(self, peptides, amount_ntermwildcards, minlen):
+        '''Retrieve peptide/proteinseq combinations'''
+        cursor = self.get_cursor()
+        if amount_ntermwildcards > 0:
+            protids = set()
+            for seq in peptides:
+                findseq = f'{seq[::-1]}'
+                sql = (f'SELECT pp.seq, pp.protein_acc FROM protein_peptides AS pp WHERE pp.seq LIKE "{findseq}%"')
+                for match in cursor.execute(sql):
+                    if match[0][:-amount_ntermwildcards] in findseq:
+                        protids.add(match[1])
+
+        elif minlen:
+            sql = ('SELECT pp.protein_acc, pp.pos, ps.sequence FROM protein_peptides AS pp '
+            'INNER JOIN protein_seq AS ps ON ps.protein_acc=pp.protein_acc WHERE pp.seq=?')
+            protids = {seq: [(protid, pos, pseq) for protid, pos, pseq in 
+                    cursor.execute(sql, (seq[:minlen],))] for seq in peptides}
+        else:
+            sql = ('SELECT pp.protein_acc FROM protein_peptides AS pp WHERE pp.seq=?')
+            protids = {protid[0] for seq in peptides for protid in cursor.execute(sql, (seq,))}
+        return protids
