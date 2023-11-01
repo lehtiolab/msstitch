@@ -445,6 +445,10 @@ class TestSeqFilt(basetests.MzidTSVBaseTest):
         self.check_peps_in_out(seqs, matching=True)
 
     def check_peps_in_out(self, seqs, matching):
+        '''Check if peptides in seqs are contained in new PSM tables.
+        matching is 0/1 - True: peptides passed match, should NOT be found anymore
+                          False: peptides do not match, should be found in DB
+        '''
         pepfound = False
         with open(self.resultfn) as fp:
             header = next(fp).strip().split('\t')
@@ -497,10 +501,10 @@ class TestSeqFilt(basetests.MzidTSVBaseTest):
         # deamidation: N -> D
         seqs = ['NIENLR']
         seqs_to_filter = ['DIENLR']
-        basetests.create_db(seqs, reverse=True)
+        basetests.create_db(seqs)
         options = ['--dbfile', 'seqs.db', '--deamidate']
         self.run_command(options)
-        self.check_peps_in_out(seqs_to_filter, matching=False)
+        self.check_peps_in_out(seqs_to_filter, matching=True)
 
     def test_fullprotein(self):
         '''Testing if PSMs with sequence match (except Isoleucine) are removed'''
