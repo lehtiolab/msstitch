@@ -243,7 +243,7 @@ msstitch trypsinize -i uniprot.fasta -o tryp_up.fasta --minlen 7 \
 ```
 
 Create an SQLite file with tryptic sequences for filtering out e.g. known-sequence data.
-Options and behaviour as for `trypsinize`, plus --insourcefrag which builds a lookup with support for 
+Options and behaviour as for `trypsinize`, plus `--insourcefrag` which builds a lookup with support for 
 in-source fragmented peptides that have lost some N-terminal residues. If one instead of 
 in-source fragmentation only wishes to include protein N-term methionine loss, use `--nterm-meth-loss`
 
@@ -301,6 +301,27 @@ msstitch filterperco -i perco.xml --dbfile proteins.sqlite \
 # PSM file:
 msstitch seqfilt -i psms.txt --dbfile proteins.sqlite \
   --fullprotein --deamidate --minlen 7 -o filtered.psms.txt
+```
+
+Using a similar DB from `storeseq` with `--map-accessions`, we can add a column in a PSM file which contains
+sequence-matches from a fasta file, so any peptide matching these sequences can
+get annotated with the fasta ID for that sequences as provided in e.g. `external.fa`:
+
+```
+msstitch storeseq -i external.fa -o tryptic.sqlite --cutproline --minlen 7 \
+  --miscleav 1 --insourcefrag --map-accessions
+
+# Or use a full protein DB to match non-tryptic peptides:
+msstitch storeseq -i external.fa -o fullprotein.sqlite --fullprotein \
+  --minlen 7 --map-accessions
+
+# Now add the annotations
+msstitch seqmatch -i psms.txt --dbfile tryptic.sqlite --matchcolname COLUMN_NAME \
+  --insourcefrag 3 --deamidate -o annotated_psms.txt
+
+# For the fullprotein DB
+msstitch seqmatch -i psms.txt --dbfile fullprotein.sqlite --matchcolname ANOTHER_COLUMN_NAME \
+  --minlen 7 --fullprotein --enforce-tryptic -o annotated_psms.txt
 ```
 
 Split a percolator file with PSMs and peptides into files with specific protein headers.

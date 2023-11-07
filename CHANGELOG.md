@@ -1,6 +1,21 @@
 # Changelog
 
-## [3.14] - 2023-09
+## [3.15] - 2023-11-07
+### Added
+- qvality input can be used for adding FDR to PSM table (8ead34b0cf95fab966634e38fb49cd860b109428)
+- `--report_seqmatch` for annotation of a PSM table with peptide matches in external fasta files
+
+### Changed
+- Trypsinize and storeseq now separate peptides on stop codons, can be ignored if needed (b6629ef8cb012c1e0dcf9a4ad8fd45a1283eef1f)
+
+### Fixed
+- When percolator peptide has missing PSMs, set remaining PSMs to FDR=1
+- When percolator PSM has no peptide, set PSM to FDR=1 (8ead34b0cf95fab966634e38fb49cd860b109428)
+- When multiple different isobaric types are passed to storequant, make sure it doesnt crash by storing correctly
+- When multiple different isobaric types are in a PSM table, do not crash when parsing denominator patterns
+
+
+## [3.14] - 2023-09-04
 ### Changed
 - Less memory overhead for `msstitch storequant --fullprotein`
 - Reproducible "random" shuffling of target-matching sequences for decoy generation with tryptic reverse
