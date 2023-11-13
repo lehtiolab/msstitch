@@ -510,6 +510,39 @@ class TestSeqMatchFastaDB(basetests.MzidTSVBaseTest):
 
 
 
+class TestRemoveDupPSM(basetests.MzidTSVBaseTest):
+    command = 'deduppsms'
+    infilename = 'few_spectra_duplicate.tsv'
+    suffix = '_dedup.txt'
+
+    def get_line_count(self, fn):
+        with open(fn) as fp:
+            return sum(1 for _line in fp)
+
+    def test_nodup_noremove(self):
+        options = []
+        self.infile = [os.path.join(self.fixdir, 'few_spectra.tsv')]
+        self.run_command(options)
+        self.assertEqual(self.get_line_count(self.infile[0]), self.get_line_count(self.resultfn))
+
+    def test_removedup(self):
+        '''There are two duplicated PSMs in the input file, which is derived from
+        the few_spectra.tsv file'''
+        options = []
+        self.run_command(options)
+        self.assertEqual(self.get_line_count(self.infile[0]) - 2, self.get_line_count(self.resultfn))
+        checkfile = os.path.join(self.fixdir, 'few_spectra.tsv')
+        self.assertEqual(os.path.getsize(checkfile), os.path.getsize(self.resultfn))
+
+    def test_removedup_seqcol(self):
+        '''Some PSMs are already duplicate by Scan Number since they have 
+        two equal scoring solutions from search engine by sequence'''
+        self.infile = [os.path.join(self.fixdir, 'few_spectra.tsv')]
+        options = ['--peptidecolpattern', 'ScanNum']
+        self.run_command(options)
+        self.assertEqual(self.get_line_count(self.infile[0]) - 3, self.get_line_count(self.resultfn))
+
+
 class TestSeqFilt(basetests.MzidTSVBaseTest):
     command = 'seqfilt'
     infilename = 'few_spectra.tsv'

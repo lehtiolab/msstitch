@@ -20,6 +20,7 @@ def main():
                psmtable.PSMTableRefineDriver(),
                psmtable.IsoSummarizeDriver(),
                psmtable.DeleteSetDriver(),
+               psmtable.DuplicateFilterDriver(),
                psmtable.SequenceFilterDriver(),
                psmtable.SequenceMatchDriver(),
 

@@ -152,6 +152,35 @@ class ConfidenceFilterDriver(PSMDriver):
                                        self.lowerbetter)
 
 
+class DuplicateFilterDriver(PSMDriver):
+    outsuffix = '_dedup.txt'
+    command = 'deduppsms'
+    commandhelp = 'Removes duplicate PSMs by file/scan/sequence combination'
+
+    def set_options(self):
+        super().set_options()
+        options = self.define_options(['spectracol', 'peptidecolpattern'], psmtable_options)
+        self.options.update(options)
+
+    def set_features(self):
+        self.header = self.oldheader[:]
+        specfncolnr = int(self.spectracol) - 1
+        specfncol = self.oldheader[specfncolnr]
+        if self.peptidecolpattern:
+            seqcol = tsvreader.get_columns_by_pattern(self.oldheader, self.peptidecolpattern)
+            if len(seqcol) > 1:
+                print('Your pattern to find the sequence colum in the PSM table resulted '
+                        f'in multiple column names returned: [{", ".join(seqcol)}]')
+                sys.exit(1)
+            else:
+                seqcol = seqcol[0]
+        else:
+            seqcol = psmhead.HEADER_PEPTIDE
+        scancol = psmhead.HEADER_SCANNR
+        self.psms = filtering.remove_duplicate_psms(self.oldpsms, specfncol, scancol, seqcol)
+
+
+
 class SequenceFilterDriver(PSMDriver):
     outsuffix = '_filtseq.txt'
     command = 'seqfilt'

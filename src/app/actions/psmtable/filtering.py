@@ -24,6 +24,17 @@ def filter_psms_remove_set(psms, setnames):
             yield psm
 
 
+def remove_duplicate_psms(psms, speccol, scancol, seqcol):
+    '''Removes PSMs that are duplicate, i.e. have identical file/scan/sequence
+    combinations'''
+    known_seqids = set() 
+    for psm in psms:
+        seqid = f'{psm[speccol]}_{psm[scancol]}_{psm[seqcol]}'
+        if seqid not in known_seqids:
+            known_seqids.add(seqid)
+            yield psm
+
+
 def filter_known_searchspace(psms, lookup, seqcol, ntermwildcards, deamidation):
     """Yields peptides from generator as long as their sequence is not found in
     known search space dict. Useful for excluding peptides that are found in

@@ -331,11 +331,16 @@ which will contain all PSMs/peptides mapping to either `lncRNA` or `intergenic` 
 but which will __NOT__ contain PSMs/peptides mapping to also either/or `ENSP` and `sp`. 
 More files, _h2.xml etc can be created by adding more headers.
 
-
 ```
 msstitch splitperco -i perco.xml --protheaders "novel_p" "known:ENSP;sp|novel:lncRNA;intergenic"`
 ```
 
+
+Remove duplicate PSMs from the output if you've introduced those, for very much edge cases like removing identical bare peptides where the only difference is 
+a modification position.
+```
+msstitch deduppsms -i psms.txt --peptidecolpattern 'Peptide' -o dedup_psms.txt
+```
 
 Create an isobaric ratio table median-summarizing the PSMs by any column number 
 you want in a PSM table. E.g. you have added a column with exons. The following 

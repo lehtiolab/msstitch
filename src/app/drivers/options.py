@@ -291,10 +291,6 @@ lookup_options = {
         'help': 'Use this flag when building a peptide lookup (not --fullprotein) where '
         'you want to keep the protein mapping for later use in e.g. annotating PSM table '
         'with sequence hits to the passed FASTA'},
-    'peptidecol': {'driverattr': 'peptidecol',
-        'type': int, 'clarg': '--peptidecol', 'default': 1, 'required': False,
-        'help': 'Column nr of peptide table where peptide sequences are '
-        'stored. First and default column is nr. 1'},
     'nogroup': {'driverattr': 'nogroup',
                    'clarg': '--no-group-annotation', 'action': 'store_const',
                    'const': True, 'default': False, 'required': False,
@@ -344,6 +340,10 @@ percolator_options = {
                 'flag in order for the lookup to work, since sequences '
                 'will be stored and looked up reversed', 'required': False
                 },
+    'deduppsms': {'driverattr': 'deduppsms', 'clarg': '--includepsms', 'const': True,
+        'default': False, 'action': 'store_const', 'help': 'When running dedupperco '
+        'also remove "duplicate" PSMs (by PSM ID plus sequence). Keeps first PSM '
+        'encountered of each PSM ID / sequence combination', 'required': False},
 }
 
 psmtable_options = {
@@ -406,6 +406,10 @@ psmtable_options = {
     'mzidfns': {'driverattr': 'mzidfns', 'clarg': '--mzids', 'help': 'MzIdentML '
         ' output files belonging to PSM table TSV files, use same order as for TSVs', 
         'type': 'file', 'nargs': '+'},
+    'peptidecolpattern': {'driverattr': 'peptidecolpattern',
+        'type': str, 'clarg': '--peptidecolpattern', 'default': False,
+        'required': False, 'help': 'Regular expression pattern to find header '
+        'field in table where peptide sequences are stored'},
     'splitcol': {'driverattr': 'splitcol', 'clarg': '--splitcol',
                  'help': 'Either a column number to split a PSM table on, or '
                  '"TD", "bioset" for splitting on target/decoy or biological '
