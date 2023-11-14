@@ -79,7 +79,6 @@ def generate_spec_id_items(mzid_specidr, mzns):
     scan = 0
     has_scans = True
     for specidr in mzid_specidr:
-        specid = specidr.attrib['spectrumID']
         if has_scans:
             try:
                 scan = int({x.split('=')[0]: x.split('=')[1] for x in specidr.attrib['spectrumID'].split(' ')}['scan'])
@@ -90,7 +89,7 @@ def generate_spec_id_items(mzid_specidr, mzns):
         else:
             scan += 1
         for specidi in specidr.findall('{%s}SpectrumIdentificationItem' % mzns['xmlns']):
-            yield scan, specid, specidi
+            yield scan, specidi
 
 
 def add_fdr_to_mzidtsv(psms, mzid_specidr, mzns, percodata):
@@ -102,28 +101,13 @@ def add_fdr_to_mzidtsv(psms, mzid_specidr, mzns, percodata):
     # have identical scoring, i.e. MSGF is run with -n1 (default)
 
     specidis = generate_spec_id_items(mzid_specidr, mzns)
-    for psm in psms:
-        psmspecid = psm[psmheaders.HEADER_SPECSCANID]
-        psmseq = re.sub('[^A-Z]', '', psm[psmheaders.HEADER_PEPTIDE].upper())
-        psmcharge = psm[psmheaders.HEADER_CHARGE]
-
-        mzid_specid = False
+    for psm, (scan, specidi) in zip(psms, specidis):
         spfile = os.path.splitext(psm[psmheaders.HEADER_SPECFILE])[0]
-        percopsm = False
-        while mzid_specid != psmspecid:
-            try:
-                scan, mzid_specid, specidi = next(specidis)
-            except StopIteration:
-                print('PSM tsv file and corresponding mzIdentML are not lined '
-                        'up properly')
-                sys,exit(1)
-            else:
-                perco_id = f'{spfile}_{specidi.attrib["id"]}_{scan}_{psmcharge}_{specidi.attrib["rank"]}'
-                try:
-                    percopsm = percodata[perco_id]
-                except KeyError:
-                    pass
-        if not percopsm:
+        psmcharge = psm[psmheaders.HEADER_CHARGE]
+        perco_id = f'{spfile}_{specidi.attrib["id"]}_{scan}_{psmcharge}_{specidi.attrib["rank"]}'
+        try:
+            percopsm = percodata[perco_id]
+        except KeyError:
             continue
         outpsm = {k: v for k,v in psm.items()}
         psmscores = {

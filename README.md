@@ -69,8 +69,11 @@ msstitch makedecoy uniprot.fasta -o decoy.fasta --scramble tryp_rev --ignore-tar
 
 After running two samples of MSGF and percolator, we can start making 
 a more proper set of PSM tables by adding percolator data and filtering
-on FDR. The following adds percolator svm-score, q-value (FDR), and posterior
-error as columns to the PSM table:
+on FDR. You need percolator data, a PSM table and a matching mzIdentML file.
+The PSM table / mzIdentML should not have been filtered differently, as each PSM
+is expected to be a single item in the mzIdentML file and vice versa. PSMs not found
+in the percolator data are not output. The following adds percolator svm-score,
+q-value (FDR), and posterior error as columns to the PSM table:
 
 ```
 # Add percolator data, filter 0.01 FDR
