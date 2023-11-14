@@ -282,6 +282,10 @@ msstitch perco2psm -i psms.txt \
   --qvalitypsms qvality_psms.txt --qvalitypeps qvality_peptides.txt \
   --filtpsm 0.01 --filtpep 0.01
 ```
+Note that the qvality PSMs and peptides files containing svm-scores and FDR, have to
+be made of the filtered.xml percolator output, as their content will be zipped, thus
+each line in the qvality PSMs file represents a PSM present in percolator XML, 
+and vice versa. The same goes for peptides.
 
 Create an SQLite file with full-protein sequences for filtering any peptide of 
 a minimum length specified that matches to those. Stop codons are also here treated
@@ -345,7 +349,8 @@ by only retaining the best peptides:
 msstitch dedupperco -i perco.xml -o dedup_peptides.xml
 ```
 
-Remove duplicate PSMs from the output if you've introduced those, for very much edge cases like removing identical bare peptides where the only difference is 
+Remove duplicate PSMs from the output if you've introduced those, for really edge cases 
+like removing identical bare peptides where the only difference is 
 a modification position.
 ```
 msstitch deduppsms -i psms.txt --peptidecolpattern 'Peptide' -o dedup_psms.txt

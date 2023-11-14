@@ -131,6 +131,8 @@ class BaseTestPycolator(BaseTest):
     infilename = 'perco.xml'
 
     def get_psm_pep_ids_from_file(self, fn):
+        '''Returns PSM and peptide IDs found in percolator output
+        as a dict with lists'''
         contents = self.read_percolator_out(fn)
         return {'psm_ids': self.get_element_ids(contents['psms'],
                                                 'psm_id', contents['ns']),

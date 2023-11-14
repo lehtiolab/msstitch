@@ -306,6 +306,7 @@ class TestPercoTSV(basetests.MzidTSVBaseTest):
         expected = [{field: line[i] for i, field in enumerate(header)} for line in expected]
         expected = [line for line in expected if float(line['PSM q-value']) < threshold and
             float(line['peptide q-value']) < threshold]
+        # check how many PSMs made the cut:
         self.assertEqual(len(expected),  len([x for x in self.get_values(checkfields)]))
         for res, exp in zip(self.get_values(checkfields), expected):
             for i, field in enumerate(checkfields):
@@ -358,7 +359,6 @@ class TestPercoTSV(basetests.MzidTSVBaseTest):
                 else:
                     self.assertEqual(exp[field], res[i][1])
                 self.assertEqual(field, res[i][0])
-
 
 
 class TestPercoTSVTIMS(basetests.MzidTSVBaseTest):
