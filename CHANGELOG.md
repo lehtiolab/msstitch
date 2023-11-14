@@ -1,9 +1,10 @@
 # Changelog
 
-## [3.15] - 2023-11-07
+## [3.15] - 2023-11-14
 ### Added
 - qvality input can be used for adding FDR to PSM table (8ead34b0cf95fab966634e38fb49cd860b109428)
 - `--report_seqmatch` for annotation of a PSM table with peptide matches in external fasta files
+- `dedupperco` and `deduppsms` to remove duplicate peptides from percolator data and PSM table
 
 ### Changed
 - Trypsinize and storeseq now separate peptides on stop codons, can be ignored if needed (b6629ef8cb012c1e0dcf9a4ad8fd45a1283eef1f)
