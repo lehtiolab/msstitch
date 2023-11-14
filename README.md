@@ -338,6 +338,12 @@ More files, _h2.xml etc can be created by adding more headers.
 msstitch splitperco -i perco.xml --protheaders "novel_p" "known:ENSP;sp|novel:lncRNA;intergenic"`
 ```
 
+Remove duplicate peptides from percolator output (if youve introduced these somehow)
+by only retaining the best peptides:
+
+```
+msstitch dedupperco -i perco.xml -o dedup_peptides.xml
+```
 
 Remove duplicate PSMs from the output if you've introduced those, for very much edge cases like removing identical bare peptides where the only difference is 
 a modification position.

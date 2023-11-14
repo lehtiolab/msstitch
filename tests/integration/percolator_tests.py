@@ -104,3 +104,40 @@ class TestFilterKnown(basetests.BaseTestPycolator):
                 if not thisseq_filter:
                     self.assertIn(oriseq, result_seqs)
         self.assertTrue(all(seq_in_ori.values()))
+
+
+
+class TestDedupPeptides(basetests.BaseTestPycolator):
+    command = 'dedupperco'
+    suffix = '_dedup.xml'
+
+    def test_do_no_duplicate_peps(self):
+        options = []
+        self.run_command(options)
+        perco_input = self.get_psm_pep_ids_from_file(self.infile[0])
+        perco_output = self.get_psm_pep_ids_from_file(self.resultfn)
+        self.assertEqual(perco_input['psm_ids'], perco_output['psm_ids'])
+        self.assertEqual(perco_input['peptide_ids'], perco_output['peptide_ids'])
+        
+    def test_remove_duplicate(self):
+        self.infile = [os.path.join(self.fixdir, 'perco_duplicate.xml')]
+        options = []
+        self.run_command(options)
+        perco_input = self.get_psm_pep_ids_from_file(self.infile[0])
+        perco_output = self.get_psm_pep_ids_from_file(self.resultfn)
+        self.assertEqual(perco_input['psm_ids'], perco_output['psm_ids'])
+        self.assertTrue(len(perco_input['peptide_ids']) > len(perco_output['peptide_ids']))
+        self.assertEqual(set(perco_input['peptide_ids']), set(perco_output['peptide_ids']))
+
+    def test_remove_duplicate_psms_too(self):
+        self.infile = [os.path.join(self.fixdir, 'perco_duplicate.xml')]
+        options = ['--includepsms']
+        self.run_command(options)
+        perco_input = self.get_psm_pep_ids_from_file(self.infile[0])
+        perco_output = self.get_psm_pep_ids_from_file(self.resultfn)
+        self.assertEqual(len(perco_input['psm_ids']) - 1, len(perco_output['psm_ids']))
+        self.assertEqual(len(perco_input['psm_seqs']) - 1, len(perco_output['psm_seqs']))
+        self.assertEqual(set(perco_input['psm_ids']), set(perco_output['psm_ids']))
+        self.assertEqual(set(perco_input['psm_seqs']), set(perco_output['psm_seqs']))
+        self.assertEqual(len(perco_input['peptide_ids']) - 1, len(perco_output['peptide_ids']))
+        self.assertEqual(set(perco_input['peptide_ids']), set(perco_output['peptide_ids']))

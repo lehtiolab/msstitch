@@ -84,6 +84,31 @@ class SplitDriver(base.PercolatorDriver):
         self.features = self.splitfunc(elements_to_split, self.ns, filter_type)
 
 
+class FilterDuplicatePeptideDriver(base.PercolatorDriver):
+    '''This class removes duplicate peptides from a percolator run, in case
+    there have been changes to the output after percolator scoring (e.g. removal
+    of modifications).
+    '''
+    outsuffix = '_pepdedup.xml'
+    command = 'dedupperco'
+    commandhelp = 'Filters out duplicate peptides (by sequence) from percolator output if these are there'
+
+    def set_options(self):
+        super().set_options()
+        self.options.update(self.define_options(['deduppsms'], percolator_options))
+
+    def set_features(self):
+        if self.deduppsms:
+            psmfilter = filters.dedup_psms
+        else:
+            psmfilter = filters.passthrough
+        self.features = {
+                'peptide': filters.filter_best_peptide(self.allpeps, self.ns),
+                'psm': psmfilter(self.allpsms, self.ns),
+                }
+
+
+
 class SplitProteinDriver(SplitDriver):
     """Using --protheaders "novel_ENSP" "ENSP|variant_"  will result in two output files,
     the first containing all PSM/peptides containing at least one mapping with a header novel_ENSP,

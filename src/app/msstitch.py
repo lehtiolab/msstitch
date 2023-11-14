@@ -25,6 +25,7 @@ def main():
                psmtable.SequenceMatchDriver(),
 
                percolator.FilterSequences(),
+               percolator.FilterDuplicatePeptideDriver(),
                percolator.SplitProteinDriver(),
 
                peptable.CreatePeptableDriver(),
