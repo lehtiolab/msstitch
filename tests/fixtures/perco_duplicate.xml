@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<percolator_output 
+xmlns="http://per-colator.com/percolator_out/15" 
+xmlns:p="http://per-colator.com/percolator_out/15" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://per-colator.com/percolator_out/15 https://github.com/percolator/percolator/raw/pout-1-5/src/xml/percolator_out.xsd" 
+p:majorVersion="3" p:minorVersion="04" p:percolator_version="Percolator version 3.04.0">
+
+  <process_info>
+    <command_line>percolator -j percoin.tsv -X perco.xml -N 500000 --decoy-xml-output</command_line>
+    <other_command_line></other_command_line>
+    <pi_0_psms>1</pi_0_psms>
+    <pi_0_peptides>1</pi_0_peptides>
+    <psms_qlevel>0</psms_qlevel>
+    <peptides_qlevel>0</peptides_qlevel>
+  </process_info>
+
+  <psms>
+    <psm p:psm_id="few_spectra_SII_24_1_10023_3_1" p:decoy="false">
+      <svm_score>0.000000</svm_score>
+      <q_value>2.000000e-01</q_value>
+      <pep>2.864478e-02</pep>
+      <exp_mass>819.7480</exp_mass>
+      <calc_mass>819.747</calc_mass>
+      <peptide_seq n="R" c="D" seq="[UNIMOD:737]SEEAHRAEQLQDAEEEK[UNIMOD:737]"/>
+      <protein_id>ENSP00000246024.2</protein_id>
+      <p_value>0.000e+00</p_value>
+    </psm>
+    <psm p:psm_id="few_spectra_SII_24_1_10023_3_1" p:decoy="false">
+      <svm_score>0.000000</svm_score>
+      <q_value>2.000000e-01</q_value>
+      <pep>2.864478e-02</pep>
+      <exp_mass>819.7480</exp_mass>
+      <calc_mass>819.747</calc_mass>
+      <peptide_seq n="R" c="D" seq="[UNIMOD:737]SEEAHRAEQLQDAEEEK[UNIMOD:737]"/>
+      <protein_id>ENSP00000246024.2</protein_id>
+      <p_value>0.000e+00</p_value>
+    </psm>
+    <psm p:psm_id="few_spectra_SII_16_1_10015_4_1" p:decoy="false">
+      <svm_score>-0.046</svm_score>
+      <q_value>2.000e-01</q_value>
+      <pep>3.378e-02</pep>
+      <exp_mass>615.3130</exp_mass>
+      <calc_mass>615.062</calc_mass>
+      <peptide_seq n="R" c="D" seq="[UNIMOD:737]SEEAHRAEQLQDAEEEK[UNIMOD:737]"/>
+      <protein_id>ENSP00000246024.2</protein_id>
+      <p_value>0.000e+00</p_value>
+    </psm>
+    <psm p:psm_id="few_spectra_SII_30_1_10029_3_1" p:decoy="false">
+      <svm_score>-0.097</svm_score>
+      <q_value>2.000e-01</q_value>
+      <pep>4.062e-02</pep>
+      <exp_mass>820.4150</exp_mass>
+      <calc_mass>819.747</calc_mass>
+      <peptide_seq n="R" c="D" seq="[UNIMOD:737]SEEAHRAEQLQDAEEEK[UNIMOD:737]"/>
+      <protein_id>ENSP00000246024.2</protein_id>
+      <p_value>0.000e+00</p_value>
+    </psm>
+  </psms>
+
+  <peptides>
+    <peptide p:peptide_id="[UNIMOD:737]SEEAHRAEQLQDAEEEK[UNIMOD:737]" p:decoy="false">
+      <svm_score>0.000000</svm_score>
+      <q_value>2.500000e-01</q_value>
+      <pep>1.772279e-03</pep>
+      <exp_mass>819.7480</exp_mass>
+      <calc_mass>819.747</calc_mass>
+      <protein_id>ENSP00000246024.2</protein_id>
+      <p_value>0.000e+00</p_value>
+      <psm_ids>
+        <psm_id>few_spectra_SII_24_1_10023_3_1</psm_id>
+        <psm_id>few_spectra_SII_16_1_10015_4_1</psm_id>
+        <psm_id>few_spectra_SII_30_1_10029_3_1</psm_id>
+      </psm_ids>
+    </peptide>
+    <peptide p:peptide_id="[UNIMOD:737]SEEAHRAEQLQDAEEEK[UNIMOD:737]" p:decoy="false">
+      <svm_score>0.000000</svm_score>
+      <q_value>2.500000e-01</q_value>
+      <pep>1.772279e-03</pep>
+      <exp_mass>819.7480</exp_mass>
+      <calc_mass>819.747</calc_mass>
+      <protein_id>ENSP00000246024.2</protein_id>
+      <p_value>0.000e+00</p_value>
+      <psm_ids>
+        <psm_id>few_spectra_SII_24_1_10023_3_1</psm_id>
+        <psm_id>few_spectra_SII_16_1_10015_4_1</psm_id>
+        <psm_id>few_spectra_SII_30_1_10029_3_1</psm_id>
+      </psm_ids>
+    </peptide>
+  </peptides>
+
+</percolator_output>
