@@ -1,7 +1,6 @@
 import re
 import os
 import itertools
-from app.dataformats import mzidtsv as mzidtsvdata
 from app.dataformats import prottable as prottabledata
 
 
@@ -49,63 +48,8 @@ def generate_split_tsv_lines(fn, header):
             yield {x: y for (x, y) in zip(header, line.strip('\n').split('\t'))}
 
 
-def get_psm_id(line, specfncol):
-    return '{0}_{1}_{2}'.format(line[specfncol],
-                                line[mzidtsvdata.HEADER_SPECSCANID],
-                                line[mzidtsvdata.HEADER_PEPTIDE])
-
-
-def get_proteins_from_psm(line):
-    """From a line, return list of proteins reported by Mzid2TSV. When unrolled
-    lines are given, this returns the single protein from the line."""
-    proteins = line[mzidtsvdata.HEADER_PROTEIN].split(';')
-    outproteins = []
-    for protein in proteins:
-        prepost_protein = re.sub('\(pre=.*post=.*\)', '', protein).strip()
-        outproteins.append(prepost_protein)
-    return outproteins
-
-
-def get_psm(line, unroll, specfncol):
-    """Returns from a PSM line peptide sequence,
-    and other information about the PSM.
-    Return values:
-        specfn          -   str
-        psm_id 	 	-   str
-        specscanid      -   str
-        peptideseq      -   str
-        score		-   str
-    """
-    if specfncol is None:
-        specfncol = mzidtsvdata.HEADER_SPECFILE
-    specfn = line[specfncol]
-    psm_id = get_psm_id(line, specfncol)
-    specscanid = line[mzidtsvdata.HEADER_SPECSCANID]
-    peptideseq = get_psm_sequence(line, unroll)
-    score = line[mzidtsvdata.HEADER_MSGFSCORE]
-    return specfn, psm_id, specscanid, peptideseq, score
-
-
-def get_psm_sequence(line, unroll=False):
-    peptideseq = line[mzidtsvdata.HEADER_PEPTIDE]
-    if unroll and '.' in peptideseq:
-        peptideseq = peptideseq.split('.')[1]
-    return peptideseq
-
-
-def get_pepproteins(line, specfncol):
-    """Returns from a PSM line peptide sequence,
-    and other information about the PSM.
-    Return values:
-        psm_id          -   str
-        proteins        -   list of str
-    """
-    psm_id = get_psm_id(line, specfncol)
-    proteins = get_proteins_from_psm(line)
-    return psm_id, proteins
-
-
 def strip_modifications(seq):
+    # FIXME make method of PSM class??? maybe not
     return re.sub('[-+.\d]', '', seq)
 
 

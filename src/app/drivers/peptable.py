@@ -4,9 +4,9 @@ from app.drivers.options import peptable_options
 
 from app.readers import tsv as tsvreader
 
-from app.dataformats import mzidtsv as psmh
 from app.dataformats import peptable as peph 
 from app.dataformats import prottable as proth
+from app.dataformats import psms as psmdata
 
 from app.actions.psmtable import isosummarize
 from app.actions import psmtopeptable
@@ -46,9 +46,9 @@ class CreatePeptableDriver(PepProttableDriver):
         self.precurquantcol = psmtopeptable.get_quantcols(self.precursorquantcolpattern,
                                                  self.oldheader, 'precur')
 
-
     def set_features(self):
-        header = [x for x in self.oldheader if x != psmh.HEADER_SPECFILE]
+        psmhead = psmdata.get_psmheader(self.oldheader)
+        header = [x for x in self.oldheader if x != psmhead.HEADER_SPECFILE]
         qpat = '[a-z]+[0-9]+plex_'
         try:
             isocols = tsvreader.get_columns_by_pattern(header, qpat)
@@ -62,13 +62,13 @@ class CreatePeptableDriver(PepProttableDriver):
             header = [peph.HEADER_AREA if x == self.precurquantcol
                       else x for x in header]
         header = [peph.HEADER_PEPTIDE, peph.HEADER_LINKED_PSMS] + [
-                x for x in header if x != psmh.HEADER_PEPTIDE]
+                x for x in header if x != psmhead.HEADER_PEPTIDE]
         switch_map = {old: new for old, new in zip(
-            [psmh.HEADER_PEPTIDE, psmh.HEADER_PROTEIN, psmh.HEADER_PEPTIDE_Q],
+            [psmhead.HEADER_PEPTIDE, psmhead.HEADER_PROTEIN, psmhead.HEADER_PEPTIDE_Q],
             [peph.HEADER_PEPTIDE, peph.HEADER_PROTEINS, peph.HEADER_QVAL])}
         self.header = [switch_map[field] if field in switch_map else field
                 for field in header]
-        peptides = psmtopeptable.generate_peptides(self.fn, self.oldheader,
+        peptides = psmtopeptable.generate_peptides(self.fn, self.oldheader, psmhead,
                 switch_map, self.scorecol, self.precurquantcol, self.spectracol)
         # Remove quant data if not specified any way to summarize
         if self.quantcolpattern and any([self.denomcols, self.denompatterns,
@@ -85,8 +85,8 @@ class CreatePeptableDriver(PepProttableDriver):
                                                    self.quantcolpattern)
             totalproteome, tpacc, tp_pepacc = False, False, False
             if self.totalprotfn:
-                pep_tp_accs = [psmh.HEADER_MASTER_PROT, psmh.HEADER_SYMBOL,
-                        psmh.HEADER_GENE, peph.HEADER_PROTEINS]
+                pep_tp_accs = [psmhead.HEADER_MASTER_PROT, psmhead.HEADER_SYMBOL,
+                        psmhead.HEADER_GENE, peph.HEADER_PROTEINS]
                 totalphead = tsvreader.get_tsv_header(self.totalprotfn)
                 totalpfield_found = False
                 for tpacc, tp_pepacc in zip(proth.TPROT_HEADER_ACCS, pep_tp_accs):
@@ -105,10 +105,10 @@ class CreatePeptableDriver(PepProttableDriver):
                 mn_factors = tsvreader.generate_split_tsv_lines(self.mednorm_factors, mnhead)
             nopsms = [isosummarize.get_no_psms_field(qf) for qf in quantcols]
             self.header = self.header + quantcols + nopsms + [proth.HEADER_NO_FULLQ_PSMS]
-            peptides = isosummarize.get_isobaric_ratios(self.fn, self.oldheader, 
+            peptides = isosummarize.get_isobaric_ratios(self.fn, self.oldheader, psmhead,
                     quantcols, denomcols, self.mediansweep, self.medianintensity,
                     self.median_or_avg, self.minint, peptides, self.header[0],
-                    psmh.HEADER_PEPTIDE, totalproteome, tpacc, tp_pepacc,
+                    psmhead.HEADER_PEPTIDE, totalproteome, tpacc, tp_pepacc,
                     self.logisoquant, self.mediannormalize, mn_factors, self.keepnapsms)
         if self.modelqvals:
             qix = self.header.index(peph.HEADER_QVAL) + 1

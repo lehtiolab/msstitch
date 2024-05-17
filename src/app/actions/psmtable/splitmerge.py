@@ -1,7 +1,6 @@
 import sys
 
 from app.readers import tsv as tsvreader
-from app.dataformats import mzidtsv as mzidtsvdata
 
 
 def merge_mzidtsvs(fns, header):
@@ -13,13 +12,13 @@ def merge_mzidtsvs(fns, header):
         yield psm
 
 
-def get_splitfield(header, splitcol):
+def get_splitfield(header, splitcol, psmhead):
     """Returns column nr on which to split PSM table. Chooses from flags
     given via bioset and splitcol"""
     if splitcol == 'bioset':
-        return mzidtsvdata.HEADER_SETNAME
+        return psmhead.HEADER_SETNAME
     elif splitcol == 'TD':
-        return mzidtsvdata.HEADER_TARGETDECOY
+        return psmhead.HEADER_TARGETDECOY
     else:
         try:
             splitcol = int(splitcol)

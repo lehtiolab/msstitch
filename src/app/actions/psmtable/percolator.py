@@ -5,7 +5,6 @@ from app.readers import mzidplus as readers
 from app.readers import tsv as tsvreader
 from app.readers import xml
 from app.readers import percolator as percoreader 
-from app.dataformats import mzidtsv as psmheaders
 from app.dataformats import qvality as qvalityheaders
 
 
@@ -92,7 +91,7 @@ def generate_spec_id_items(mzid_specidr, mzns):
             yield scan, specidi
 
 
-def add_fdr_to_mzidtsv(psms, mzid_specidr, mzns, percodata):
+def add_fdr_to_mzidtsv(psms, mzid_specidr, mzns, percodata, psmheaders):
     """Takes PSMs from an mzIdentML and its MSGF+ TSV and a corresponding 
     percolator XML. 
     """
@@ -137,8 +136,3 @@ def add_fdr_to_mzidtsv(psms, mzid_specidr, mzns, percodata):
                     outprots.append(prot)
             outpsm[psmheaders.HEADER_PROTEIN] = ';'.join(outprots)
         yield outpsm
-
-
-def get_header_with_percolator(oldheader):
-    ix = oldheader.index(psmheaders.HEADER_EVALUE) + 1
-    return oldheader[:ix] + psmheaders.PERCO_HEADER + oldheader[ix:]

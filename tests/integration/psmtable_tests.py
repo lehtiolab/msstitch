@@ -6,7 +6,7 @@ from lxml import etree
 from Bio import SeqIO
 from statistics import median
 
-from app.dataformats import mzidtsv as constants
+from app.dataformats import psms as psmh
 from tests.integration import basetests
 
 
@@ -205,11 +205,12 @@ class TestPSMTable(MzidWithDB):
         return psms
 
     def parse_proteingroups(self, fn):
+        psmhead = psmh.PSMTableHeader([])
         with open(fn) as fp:
             header = next(fp).strip().split('\t')
-            master_ix = header.index(constants.HEADER_MASTER_PROT)
-            pgcontent_ix = header.index(constants.HEADER_PG_CONTENT)
-            pgamount_ix = header.index(constants.HEADER_PG_AMOUNT_PROTEIN_HITS)
+            master_ix = header.index(psmhead.HEADER_MASTER_PROT)
+            pgcontent_ix = header.index(psmhead.HEADER_PG_CONTENT)
+            pgamount_ix = header.index(psmhead.HEADER_PG_AMOUNT_PROTEIN_HITS)
             for line in fp:
                 line = line.strip().split('\t')
                 yield {'master': line[master_ix],

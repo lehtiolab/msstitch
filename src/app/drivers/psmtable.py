@@ -8,7 +8,7 @@ from app.drivers.base import PSMDriver
 
 from app.readers import tsv as tsvreader
 from app.readers import mzidplus as mzidreader
-from app.dataformats import mzidtsv as psmhead
+from app.dataformats import psms as psmdata
 from app.dataformats.prottable import HEADER_NO_FULLQ_PSMS
 
 from app.actions.psmtable import splitmerge as splitmerge
@@ -61,7 +61,8 @@ class TSVSplitDriver(PSMDriver):
 
     def set_features(self):
         self.header = self.oldheader[:]
-        splitfield = splitmerge.get_splitfield(self.oldheader, self.splitcol)
+        psmhead = psmdata.get_psmheader(self.oldheader)
+        splitfield = splitmerge.get_splitfield(self.oldheader, self.splitcol, psmhead)
         self.psms = splitmerge.generate_psms_split(self.oldpsms, splitfield)
 
     def write(self):
@@ -105,20 +106,21 @@ class Perco2PSMDriver(PSMDriver):
     def write(self):
         for psmfn, mzidfn in zip(self.fn, self.mzidfns):
             oldheader = tsvreader.get_tsv_header(psmfn)
-            header = perco.get_header_with_percolator(oldheader)
+            # Init header with percolator fields
+            psmhead = psmdata.get_psmheader(oldheader)
+            psmhead.set_header_with_percolator()
             outfn = self.create_outfilepath(psmfn, self.outsuffix)
             mzns = mzidreader.get_mzid_namespace(mzidfn)
             mzidsr = mzidreader.mzid_spec_result_generator(mzidfn, mzns)
             psms = tsvreader.generate_split_tsv_lines(psmfn, oldheader)
-            psms_perco = perco.add_fdr_to_mzidtsv(psms, mzidsr, mzns,
-                    self.percopsms)
+            psms_perco = perco.add_fdr_to_mzidtsv(psms, mzidsr, mzns, self.percopsms, psmhead)
             if self.filtpsm:
                 psms_perco = filtering.filter_psms_conf(psms_perco, psmhead.HEADER_PSMQ,
                         self.filtpsm, True)
             if self.filtpep:
                 psms_perco = filtering.filter_psms_conf(psms_perco, psmhead.HEADER_PEPTIDE_Q,
                         self.filtpep, True)
-            writer.write_tsv(header, psms_perco, outfn)
+            writer.write_tsv(psmhead.header, psms_perco, outfn)
 
 
 class ConfidenceFilterDriver(PSMDriver):
@@ -164,6 +166,7 @@ class DuplicateFilterDriver(PSMDriver):
 
     def set_features(self):
         self.header = self.oldheader[:]
+        psmhead = psmdata.get_psmheader(self.oldheader)
         specfncolnr = int(self.spectracol) - 1
         specfncol = self.oldheader[specfncolnr]
         if self.peptidecolpattern:
@@ -176,9 +179,7 @@ class DuplicateFilterDriver(PSMDriver):
                 seqcol = seqcol[0]
         else:
             seqcol = psmhead.HEADER_PEPTIDE
-        scancol = psmhead.HEADER_SCANNR
-        self.psms = filtering.remove_duplicate_psms(self.oldpsms, specfncol, scancol, seqcol)
-
+        self.psms = filtering.remove_duplicate_psms(self.oldpsms, specfncol, seqcol, psmhead)
 
 
 class SequenceFilterDriver(PSMDriver):
@@ -197,6 +198,7 @@ class SequenceFilterDriver(PSMDriver):
         self.options.update(options)
 
     def set_features(self):
+        psmhead = psmdata.get_psmheader(self.oldheader)
         self.header = self.oldheader[:]
         if self.fullprotein:
             self.psms = filtering.filter_whole_proteins(self.oldpsms, 
@@ -222,6 +224,7 @@ class SequenceMatchDriver(PSMDriver):
         self.options.update(options)
 
     def set_features(self):
+        psmhead = psmdata.get_psmheader(self.oldheader)
         self.header = [*self.oldheader[:], self.matchfilename]
         self.psms = filtering.match_sequence(self.oldpsms, self.lookup, psmhead.HEADER_PEPTIDE,
                 self.matchfilename, self.insourcefrag, self.deamidate, self.minlength, self.forcetryp)
@@ -280,28 +283,30 @@ class PSMTableRefineDriver(PSMDriver):
             self.lookup.drop_pgroup_tables()
         self.lookup.add_tables(self.tabletypes)
 
+        psmhead = psmdata.get_psmheader(self.oldheader)
+
         # Need to place this here since we cannot store before having done add tables, but that
         # has to be done after getting proteingroup knowledge, which depends on knowledge of 
         # having passed an oldpsmfile (because of oldfasta_md5):
         if not self.oldpsmfile:
             proteins = refine.store_proteins_descriptions(self.lookup, self.fasta,
-                    fasta_md5, self.fn, self.oldheader, fastadelim, genefield)
+                    fasta_md5, self.fn, self.oldheader, fastadelim, genefield, psmhead)
 
         refine.create_psm_lookup(self.fn, self.oldheader, proteins, self.lookup, 
-                shiftrows, self.unroll, specfncol, fastadelim, genefield)
+                shiftrows, self.unroll, specfncol, fastadelim, genefield, psmhead)
         isob_header = [x[0] for x in self.lookup.get_all_quantmaps()] if self.isobaric else False
         self.header = refine.create_header(self.oldheader, self.genes, 
                 self.proteingroup, self.precursor, isob_header, self.addbioset, 
-                self.addmiscleav, specfncolnr)
+                self.addmiscleav, specfncolnr, psmhead)
         psms = self.oldpsms
         # Now pass PSMs through multiple generators to add info
         if self.genes:
-            psms = refine.add_genes_to_psm_table(psms, self.lookup)
+            psms = refine.add_genes_to_psm_table(psms, self.lookup, psmhead)
         if self.isobaric or self.precursor:
-            psms = refine.generate_psms_quanted(self.lookup, shiftrows, psms,
-                    isob_header, self.isobaric, self.precursor, self.min_purity)
+            psms = refine.generate_psms_quanted(self.lookup, shiftrows, psms, isob_header,
+                    self.isobaric, self.precursor, self.min_purity, psmhead)
         psms = refine.generate_psms_spectradata(self.lookup, shiftrows, 
-                psms, self.addbioset, self.addmiscleav)
+                psms, self.addbioset, self.addmiscleav, psmhead)
         if self.oldpsmfile:
             prevheader = tsvreader.get_tsv_header(self.oldpsmfile)
             previouspsms = tsvreader.generate_split_tsv_lines(self.oldpsmfile, prevheader)
@@ -312,7 +317,8 @@ class PSMTableRefineDriver(PSMDriver):
         # experiments.
         if self.proteingroup:
             refine.build_proteingroup_db(self.lookup)
-            psms = refine.generate_psms_with_proteingroups(psms, self.lookup, specfncol, self.unroll)
+            psms = refine.generate_psms_with_proteingroups(psms, self.lookup, specfncol, self.unroll,
+                    psmhead)
         self.psms = psms
         
 
@@ -348,13 +354,15 @@ class IsoSummarizeDriver(PSMDriver):
             mnhead = tsvreader.get_tsv_header(self.mednorm_factors)
             mn_factors = tsvreader.generate_split_tsv_lines(self.mednorm_factors, mnhead)
         nopsms = [isosummarize.get_no_psms_field(qf) for qf in quantcols]
+
+        psmhead = psmdata.get_psmheader(self.oldheader)
         if self.featcol:
             self.get_column_header_for_number(['featcol'], self.oldheader)
             self.header = [self.featcol] + quantcols + nopsms + [HEADER_NO_FULLQ_PSMS]
         else:
             self.header = (self.oldheader +
                            ['ratio_{}'.format(x) for x in quantcols])
-        self.psms = isosummarize.get_isobaric_ratios(self.fn, self.oldheader,
+        self.psms = isosummarize.get_isobaric_ratios(self.fn, self.oldheader, psmhead,
                 quantcols, denomcols, self.mediansweep, self.medianintensity,
                 self.median_or_avg, self.minint, False, False, self.featcol,
                 False, False, False, self.logisoquant, self.mediannormalize,
@@ -378,4 +386,5 @@ class DeleteSetDriver(PSMDriver):
         if self.lookup:
             self.lookup.delete_sample_set_shift_rows(self.setnames)
         self.header = self.oldheader
-        self.psms = filtering.filter_psms_remove_set(self.oldpsms, self.setnames)
+        psmhead = psmdata.get_psmheader(self.oldheader)
+        self.psms = filtering.filter_psms_remove_set(self.oldpsms, self.setnames, psmhead)

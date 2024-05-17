@@ -4,7 +4,6 @@ from collections import OrderedDict
 
 from app.readers import tsv as tsvreader
 from app.readers import fasta as fastareader
-from app.dataformats import mzidtsv as mzidtsvdata
 
 from app.lookups.sqlite import psms as lookups
 
@@ -12,35 +11,36 @@ DB_STORE_CHUNK = 100000
 
 
 def create_header(oldheader, genes, proteingroup, precursor, isob_header, bioset,
-        miscleav, specfncolnr):
+        miscleav, specfncolnr, psmhead):
     header = oldheader[:]
-    p_ix = header.index(mzidtsvdata.HEADER_PROTEIN) + 1
+    p_ix = header.index(psmhead.HEADER_PROTEIN) + 1
     if genes:
-        newfields = [mzidtsvdata.HEADER_GENE, mzidtsvdata.HEADER_SYMBOL,
-                     mzidtsvdata.HEADER_DESCRIPTION]
+        newfields = [psmhead.HEADER_GENE, psmhead.HEADER_SYMBOL,
+                     psmhead.HEADER_DESCRIPTION]
         header = header[:p_ix] + newfields + oldheader[p_ix:]
     if proteingroup:
-        header = header[:p_ix] + mzidtsvdata.HEADER_PG + header[p_ix:]
+        header = header[:p_ix] + psmhead.HEADER_PG + header[p_ix:]
     if precursor:
-        header += [mzidtsvdata.HEADER_PRECURSOR_QUANT, mzidtsvdata.HEADER_PRECURSOR_FWHM]
+        header += [psmhead.HEADER_PRECURSOR_QUANT, psmhead.HEADER_PRECURSOR_FWHM]
     if isob_header:
-        header += [mzidtsvdata.HEADER_PREC_PURITY, *isob_header]
-    psmdatafields = mzidtsvdata.MOREDATA_HEADER
+        header += [psmhead.HEADER_PREC_PURITY, *isob_header]
+    psmdatafields = psmhead.MOREDATA_HEADER
     if bioset:
-        psmdatafields = [mzidtsvdata.HEADER_SETNAME] + psmdatafields
+        psmdatafields = [psmhead.HEADER_SETNAME] + psmdatafields
     if miscleav:
-        psmdatafields.append(mzidtsvdata.HEADER_MISSED_CLEAVAGE)
+        psmdatafields.append(psmhead.HEADER_MISSED_CLEAVAGE)
     header = header[:specfncolnr +1] + [x for x in psmdatafields if x not in header] + header[specfncolnr + 1:]
     return header
 
 
-def create_psm_lookup(fn, header, proteins, pgdb, shiftrows, unroll, specfncol, fastadelim, genefield):
+def create_psm_lookup(fn, header, proteins, pgdb, shiftrows, unroll, specfncol, fastadelim,
+        genefield, psmhead):
     """Reads PSMs from file, stores them to a database backend in chunked PSMs.
     """
     mzmlmap = pgdb.get_mzmlfile_map()
     sequences = {}
     for psm in tsvreader.generate_split_tsv_lines(fn, header):
-        seq = tsvreader.get_psm_sequence(psm, unroll)
+        seq = psmhead.get_psm_sequence(psm, unroll)
         sequences[seq] = 1
     pepseqmap = pgdb.get_peptide_seq_map()
     pgdb.store_pepseqs(((seq,) for seq in sequences if seq not in pepseqmap))
@@ -48,7 +48,7 @@ def create_psm_lookup(fn, header, proteins, pgdb, shiftrows, unroll, specfncol, 
     psms = []
     for row, psm in enumerate(tsvreader.generate_split_tsv_lines(fn, header)):
         row += shiftrows
-        specfn, psm_id, specscanid, seq, score = tsvreader.get_psm(psm, unroll, specfncol)
+        specfn, psm_id, specscanid, seq, score = psmhead.get_psm(psm, unroll, specfncol)
         if len(psms) % DB_STORE_CHUNK == 0:
             pgdb.store_psms(psms)
             psms = []
@@ -61,7 +61,7 @@ def create_psm_lookup(fn, header, proteins, pgdb, shiftrows, unroll, specfncol, 
                      })
     pgdb.store_psms(psms)
     pgdb.index_psms()
-    store_psm_protein_relations(fn, header, pgdb, proteins, specfncol)
+    store_psm_protein_relations(fn, header, pgdb, proteins, specfncol, psmhead)
 
 
 def get_fasta_md5(fastafn):
@@ -72,12 +72,12 @@ def get_fasta_md5(fastafn):
     return fasta_md5.hexdigest()
 
 
-def store_proteins_descriptions(pgdb, fastafn, fastamd5, tsvfn, header, fastadelim, genefield):
+def store_proteins_descriptions(pgdb, fastafn, fastamd5, tsvfn, header, fastadelim, genefield,
+        psmhead):
     if not fastafn:
         prots = {}
         for psm in tsvreader.generate_split_tsv_lines(tsvfn, header):
-            prots.update({x: 1 for x in
-                             tsvreader.get_proteins_from_psm(psm)})
+            prots.update({x: 1 for x in psmhead.get_proteins_from_psm(psm)})
         prots = [(protein,) for protein in prots.keys()]
         pgdb.store_proteins(prots)
     else:
@@ -87,7 +87,7 @@ def store_proteins_descriptions(pgdb, fastafn, fastamd5, tsvfn, header, fastadel
     return set([x[0] for x in prots])
 
 
-def store_psm_protein_relations(fn, header, pgdb, proteins, specfncol):
+def store_psm_protein_relations(fn, header, pgdb, proteins, specfncol, psmhead):
     """Reads PSMs from file, extracts their proteins and peptides and passes
     them to a database backend in chunks.
     """
@@ -97,7 +97,7 @@ def store_psm_protein_relations(fn, header, pgdb, proteins, specfncol):
     last_id, psmids_to_store = None, set()
     store_soon = False
     for psm in tsvreader.generate_split_tsv_lines(fn, header):
-        psm_id, prots = tsvreader.get_pepproteins(psm, specfncol)
+        psm_id, prots = psmhead.get_pepproteins(psm, specfncol)
         # TODO can this be removed permanently? 
         # Filter proteins to only include those that match the protein 
         # accessions in fasta so we get the correct names, filter out the badly annotated peptides
@@ -120,16 +120,16 @@ def store_psm_protein_relations(fn, header, pgdb, proteins, specfncol):
     pgdb.index_protein_peptides()
     return allpsms
 
-def add_genes_to_psm_table(psms, pgdb):
+def add_genes_to_psm_table(psms, pgdb, psmhead):
     gpmap = pgdb.get_protein_gene_map()
     for psm in psms:
         outpsm = {x: y for x, y in psm.items()}
-        proteins = tsvreader.get_proteins_from_psm(psm)
-        outpsm[mzidtsvdata.HEADER_GENE] = ';'.join(get_genes(proteins, gpmap))
+        proteins = psmhead.get_proteins_from_psm(psm)
+        outpsm[psmhead.HEADER_GENE] = ';'.join(get_genes(proteins, gpmap))
         symbols = get_symbols(proteins, gpmap)
         desc = get_descriptions(proteins, gpmap)
-        outpsm[mzidtsvdata.HEADER_SYMBOL] = ';'.join(symbols)
-        outpsm[mzidtsvdata.HEADER_DESCRIPTION] = ';'.join(desc)
+        outpsm[psmhead.HEADER_SYMBOL] = ';'.join(symbols)
+        outpsm[psmhead.HEADER_DESCRIPTION] = ';'.join(desc)
         yield outpsm
 
 
@@ -161,17 +161,17 @@ def get_all_proteins_from_unrolled_psm(rownr, pgdb):
 
 
 # FIXME tsv
-def generate_psms_with_proteingroups(psms, pgdb, specfncol, unroll):
+def generate_psms_with_proteingroups(psms, pgdb, specfncol, unroll, psmhead):
     rownr = 0
     use_evi = pgdb.check_evidence_tables()
     all_protein_group_content = pgdb.get_all_psms_proteingroups(use_evi)
     protein = next(all_protein_group_content)
     for psm in psms:
         if unroll:
-            psm_id = tsvreader.get_psm_id(psm, specfncol)
+            psm_id = psmhead.get_psm_id(psm, specfncol)
             lineproteins = get_all_proteins_from_unrolled_psm(psm_id, pgdb)
         else:
-            lineproteins = tsvreader.get_proteins_from_psm(psm)
+            lineproteins = psmhead.get_proteins_from_psm(psm)
         proteins_in_groups = {}
         while protein[0] == rownr:
             try:
@@ -190,10 +190,10 @@ def generate_psms_with_proteingroups(psms, pgdb, specfncol, unroll):
             psm_masters.append(master)
             psm_pg_proteins.append([protein[lookups.PROTEIN_ACC_INDEX]
                                     for protein in group])
-        outpsm = {mzidtsvdata.HEADER_MASTER_PROT: ';'.join(psm_masters),
-                  mzidtsvdata.HEADER_PG_CONTENT: ';'.join(
+        outpsm = {psmhead.HEADER_MASTER_PROT: ';'.join(psm_masters),
+                  psmhead.HEADER_PG_CONTENT: ';'.join(
                       [','.join([y for y in x]) for x in psm_pg_proteins]),
-                  mzidtsvdata.HEADER_PG_AMOUNT_PROTEIN_HITS: ';'.join(
+                  psmhead.HEADER_PG_AMOUNT_PROTEIN_HITS: ';'.join(
                       count_protein_group_hits(lineproteins, psm_pg_proteins))
                   }
         outpsm.update(psm)
@@ -536,7 +536,7 @@ def get_protein_group_content(pgmap, master):
 
 
 def generate_psms_quanted(quantdb, shiftrows, psms, isob_header, isobaric,
-        precursor, min_prec_purity):
+        precursor, min_prec_purity, psmhead):
     """Takes dbfn and connects, gets quants for each line in tsvfn, sorts
     them in line by using keys in quantheader list."""
     allquants, sqlfields = quantdb.select_all_psm_quants(shiftrows, isobaric, precursor)
@@ -548,8 +548,8 @@ def generate_psms_quanted(quantdb, shiftrows, psms, isob_header, isobaric,
             pquant = [quant[sqlfields['precursor']], quant[sqlfields['fwhm']]]
             pquant = ['NA' if x is None else x for x in pquant]
             outpsm.update({
-                mzidtsvdata.HEADER_PRECURSOR_QUANT: str(pquant[0]),
-                mzidtsvdata.HEADER_PRECURSOR_FWHM: str(pquant[1]),
+                psmhead.HEADER_PRECURSOR_QUANT: str(pquant[0]),
+                psmhead.HEADER_PRECURSOR_FWHM: str(pquant[1]),
                 })
         if isobaric:
             isoquants, pif = {}, None
@@ -562,7 +562,7 @@ def generate_psms_quanted(quantdb, shiftrows, psms, isob_header, isobaric,
                 except StopIteration:
                     # last PSM, break from while loop or it is not yielded at all
                     break
-            outpsm.update(get_quant_NAs(isoquants, isob_header, pif, min_prec_purity))
+            outpsm.update(get_quant_NAs(isoquants, isob_header, pif, min_prec_purity, psmhead))
         else:
             try:
                 quant = next(allquants)
@@ -573,7 +573,7 @@ def generate_psms_quanted(quantdb, shiftrows, psms, isob_header, isobaric,
         yield outpsm
 
 
-def get_quant_NAs(quantdata, quantheader, purity, min_purity):
+def get_quant_NAs(quantdata, quantheader, purity, min_purity, psmhead):
     """Takes quantdata in a dict and header with quantkeys
     (eg iTRAQ isotopes). Returns dict of quant intensities
     with missing keys set to NA."""
@@ -582,7 +582,7 @@ def get_quant_NAs(quantdata, quantheader, purity, min_purity):
         out = {k: quantdata.get(k, 'NA') for k in quantheader}
     else:
         out = {k: 'NA' for k in quantheader}
-    out[mzidtsvdata.HEADER_PREC_PURITY] = str(purity or 'NA')
+    out[psmhead.HEADER_PREC_PURITY] = str(purity or 'NA')
     return out
 
 
@@ -598,7 +598,7 @@ def count_missed_cleavage(full_pepseq, count=0):
         return count
 
 
-def generate_psms_spectradata(lookup, shiftrows, psms, bioset, miscleav):
+def generate_psms_spectradata(lookup, shiftrows, psms, bioset, miscleav, psmhead):
     psm_specdata = zip(enumerate(psms), lookup.get_exp_spectra_data_rows(shiftrows))
     for (row, psm), specdata in psm_specdata:
         row += shiftrows
@@ -606,15 +606,15 @@ def generate_psms_spectradata(lookup, shiftrows, psms, bioset, miscleav):
         if row == int(specdata[0]):
             inj = str(specdata[3])
             imob = str(specdata[4])
-            outpsm.update({mzidtsvdata.HEADER_RETENTION_TIME: str(specdata[2]),
-                           mzidtsvdata.HEADER_INJECTION_TIME: inj if inj != 'None' else 'NA',
-                           mzidtsvdata.HEADER_ION_MOB: imob if imob != 'None' else 'NA',
+            outpsm.update({psmhead.HEADER_RETENTION_TIME: str(specdata[2]),
+                           psmhead.HEADER_INJECTION_TIME: inj if inj != 'None' else 'NA',
+                           psmhead.HEADER_ION_MOB: imob if imob != 'None' else 'NA',
                            })
             if bioset:
-                outpsm[mzidtsvdata.HEADER_SETNAME] = str(specdata[1])
+                outpsm[psmhead.HEADER_SETNAME] = str(specdata[1])
         else:
             raise RuntimeError('PSM with row nr {} has no rownr in DB. '
                                'Current DB row is {}'.format(row, specdata[0]))
         if miscleav:
-            outpsm[mzidtsvdata.HEADER_MISSED_CLEAVAGE] = count_missed_cleavage(outpsm[mzidtsvdata.HEADER_PEPTIDE])
+            outpsm[psmhead.HEADER_MISSED_CLEAVAGE] = count_missed_cleavage(outpsm[psmhead.HEADER_PEPTIDE])
         yield outpsm

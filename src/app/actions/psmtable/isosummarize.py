@@ -5,21 +5,20 @@ from statistics import median, StatisticsError
 from collections import OrderedDict
 
 from app.dataformats import prottable as prottabledata
-from app.dataformats import mzidtsv as psmh
 from app.readers import tsv as reader
 
 
 ISOQUANTRATIO_FEAT_ACC = '##isoquant_target_acc##'
 
 
-def get_isobaric_ratios(psmfn, psmheader, channels, denom_channels, sweep,
+def get_isobaric_ratios(psmfn, psmheader, psmhead, channels, denom_channels, sweep,
         report_intensity, summarize_by, min_int, targetfeats, target_acc_field, accessioncol,
         totalprot_feats, totalp_field, totalp_pepfield, logintensities, mediannormalize,
         medianfactors, keep_na_psms, split_multi_entries=False):
     """Main function to calculate ratios for PSMs, peptides, proteins, genes.
     Can do simple ratios, median-of-ratios, median-centering, log2, etc
     """
-    outratios = get_psmratios(psmfn, psmheader, channels, denom_channels,
+    outratios = get_psmratios(psmfn, psmheader, psmhead, channels, denom_channels,
             sweep, report_intensity, summarize_by, min_int, accessioncol, logintensities,
             keep_na_psms, split_multi_entries)
     # at this point, outratios look like:
@@ -103,7 +102,7 @@ def mediancenter_ratios(ratios, channels, logratios, factor_table, report_factor
         yield quant
 
 
-def get_psmratios(psmfn, header, channels, denom_channels, sweep, report_intensity, 
+def get_psmratios(psmfn, header, psmh, channels, denom_channels, sweep, report_intensity, 
         summarize_by, min_int, acc_col, logintensities, keep_na_psms, split_multi_entries):
     allfeats, feat_order, psmratios = {}, OrderedDict(), []
     for psm in reader.generate_split_tsv_lines(psmfn, header):

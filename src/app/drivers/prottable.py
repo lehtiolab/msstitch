@@ -6,7 +6,7 @@ from app.drivers.options import prottable_options
 from app.readers import tsv as tsvreader
 from app.dataformats import prottable as prottabledata
 from app.dataformats import peptable as peptabledata
-from app.dataformats import mzidtsv as mzidtsvdata
+from app.dataformats import psms as psmdata
 
 from app.actions import proteins
 from app.actions.psmtable import isosummarize
@@ -25,14 +25,14 @@ class ProttableDriver(PepProttableDriver):
 
     def get_td_proteins_bestpep(self, theader, dheader):
         self.header = [self.headeraccfield] + prottabledata.PICKED_HEADER
-        tscorecol = tsvreader.get_cols_in_file(self.scorecolpattern, theader, True)
-        dscorecol = tsvreader.get_cols_in_file(self.scorecolpattern, dheader, True)
-        tpeps = tsvreader.generate_split_tsv_lines(self.fn, theader)
-        dpeps = tsvreader.generate_split_tsv_lines(self.decoyfn, dheader)
+        tscorecol = tsvreader.get_cols_in_file(self.scorecolpattern, theader.header, True)
+        dscorecol = tsvreader.get_cols_in_file(self.scorecolpattern, dheader.header, True)
+        tpeps = tsvreader.generate_split_tsv_lines(self.fn, theader.header)
+        dpeps = tsvreader.generate_split_tsv_lines(self.decoyfn, dheader.header)
         targets = proteins.generate_bestpep_proteins(tpeps, tscorecol, 
-                self.minlogscore, self.headeraccfield, self.fixedfeatcol)
+                self.minlogscore, self.headeraccfield, theader, self.fixedfeatcol)
         decoys = proteins.generate_bestpep_proteins(dpeps, dscorecol,
-                self.minlogscore, self.headeraccfield, self.fixedfeatcol)
+                self.minlogscore, self.headeraccfield, dheader, self.fixedfeatcol)
         return targets, decoys
 
     def get_quant(self, theader, features):
@@ -43,6 +43,7 @@ class ProttableDriver(PepProttableDriver):
                     tpeps, self.headeraccfield, self.fixedfeatcol)
         if self.quantcolpattern:
             psmheader = tsvreader.get_tsv_header(self.psmfile)
+            psmh = psmdata.get_psmheader(psmheader)
             denomcols = False
             if self.denomcols is not None:
                 denomcols = [self.number_to_headerfield(col, psmheader)
@@ -66,7 +67,7 @@ class ProttableDriver(PepProttableDriver):
                 mn_factors = tsvreader.generate_split_tsv_lines(self.mednorm_factors, mnhead)
             nopsms = [isosummarize.get_no_psms_field(qf) for qf in quantcols]
             self.header = self.header + quantcols + nopsms + [prottabledata.HEADER_NO_FULLQ_PSMS]
-            features = isosummarize.get_isobaric_ratios(self.psmfile, psmheader,
+            features = isosummarize.get_isobaric_ratios(self.psmfile, psmheader, psmh,
                     quantcols, denomcols, self.mediansweep, self.medianintensity,
                     self.median_or_avg, self.minint, features, self.headeraccfield,
                     self.fixedfeatcol, False, False, False, self.logisoquant, self.mediannormalize,
@@ -75,8 +76,10 @@ class ProttableDriver(PepProttableDriver):
 
     def set_features(self):
         theader = tsvreader.get_tsv_header(self.fn)
+        tpephead = psmdata.get_psmheader(theader)
         dheader = tsvreader.get_tsv_header(self.decoyfn)
-        targets, decoys = self.get_td_proteins_bestpep(theader, dheader)
+        dpephead = psmdata.get_psmheader(theader)
+        targets, decoys = self.get_td_proteins_bestpep(tpephead, dpephead)
         if self.fdrtype == 'picked':
             if not self.t_fasta or not self.d_fasta:
                 print('Must use --targetfasta and --decoyfasta when using picked FDR')
@@ -104,7 +107,7 @@ class GenesDriver(ProttableDriver):
     commandhelp = 'Create a gene table from peptides'
     outsuffix = '_genes.tsv'
     headeraccfield = prottabledata.HEADER_GENENAME
-    fixedfeatcol = mzidtsvdata.HEADER_SYMBOL
+    fixedfeatcol = psmdata.PepPSMHeader.HEADER_SYMBOL
 
 
 class ENSGDriver(GenesDriver):
@@ -112,4 +115,4 @@ class ENSGDriver(GenesDriver):
     commandhelp = 'Create an ENSG table from peptides'
     outsuffix = '_ensg.tsv'
     headeraccfield = prottabledata.HEADER_GENEID
-    fixedfeatcol = mzidtsvdata.HEADER_GENE
+    fixedfeatcol = psmdata.PepPSMHeader.HEADER_GENE

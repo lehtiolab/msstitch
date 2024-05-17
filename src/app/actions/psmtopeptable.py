@@ -3,7 +3,6 @@ from numpy import polyfit
 from math import log
 import sys
 
-from app.dataformats import mzidtsv as mzidtsvdata
 from app.dataformats import peptable as peptabledata
 from app.readers import tsv as reader
 
@@ -18,10 +17,10 @@ def get_quantcols(pattern, oldheader, coltype):
         return reader.get_cols_in_file(pattern, oldheader, single_col=True)
 
 
-def generate_peptides(tsvfn, oldheader, switch_map, scorecol, precurquantcol,
+def generate_peptides(tsvfn, oldheader, psmhead, switch_map, scorecol, precurquantcol,
         fncol=None, higherbetter=True):
     if fncol is None:
-        fncol = mzidtsvdata.HEADER_SPECFILE
+        fncol = psmhead.HEADER_SPECFILE
     peptides = {}
     for psm in reader.generate_split_tsv_lines(tsvfn, oldheader):
         for oldkey, newkey in switch_map.items():
@@ -30,8 +29,7 @@ def generate_peptides(tsvfn, oldheader, switch_map, scorecol, precurquantcol,
             except KeyError:
                 pass
         pepseq = psm[peptabledata.HEADER_PEPTIDE]
-        peptides = evaluate_peptide(peptides, psm, pepseq, higherbetter,
-                                    scorecol, fncol)
+        peptides = evaluate_peptide(peptides, psm, pepseq, higherbetter, psmhead, scorecol, fncol)
         add_quant_values(peptides, psm, precurquantcol)
     for peptide in peptides.values():
         peptide['line'][peptabledata.HEADER_LINKED_PSMS] = '; '.join(
@@ -135,12 +133,11 @@ def add_peptide(allpeps, psm, key, score, fncol=False, new=False):
     allpeps[key] = peptide
 
 
-def add_psm_link(peptide, psm, fncol):
-    peptide['psms'].append('{0}_{1}'.format(psm[fncol],
-                                            psm[mzidtsvdata.HEADER_SPECSCANID]))
+def add_psm_link(peptide, psm, fncol, psmhead):
+    peptide['psms'].append('{0}_{1}'.format(psm[fncol], psm[psmhead.HEADER_SPECSCANID]))
 
 
-def evaluate_peptide(peptides, psm, key, higherbetter, scorecol, fncol=False):
+def evaluate_peptide(peptides, psm, key, higherbetter, psmhead, scorecol, fncol=False):
     try:
         score = float(psm[scorecol])
     except ValueError:
@@ -156,5 +153,5 @@ def evaluate_peptide(peptides, psm, key, higherbetter, scorecol, fncol=False):
         elif not higherbetter and score < existing_score:
             add_peptide(peptides, psm, key, score, fncol)
     if fncol:
-        add_psm_link(peptides[key], psm, fncol)
+        add_psm_link(peptides[key], psm, fncol, psmhead)
     return peptides

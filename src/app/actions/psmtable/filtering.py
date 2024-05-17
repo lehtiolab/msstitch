@@ -1,6 +1,5 @@
 import re
 
-from app.dataformats import mzidtsv as header
 from app.actions.percolator.filters import sequence_to_filterseqs
 
 
@@ -17,19 +16,20 @@ def filter_psms_conf(psms, confkey, conflvl, lower_is_better):
                 yield psm
 
 
-def filter_psms_remove_set(psms, setnames):
+def filter_psms_remove_set(psms, setnames, header):
     biosets = set(setnames)
     for psm in psms:
         if psm[header.HEADER_SETNAME] not in biosets:
             yield psm
 
 
-def remove_duplicate_psms(psms, speccol, scancol, seqcol):
+def remove_duplicate_psms(psms, fncol, seqcol, psmhead):
     '''Removes PSMs that are duplicate, i.e. have identical file/scan/sequence
     combinations'''
     known_seqids = set() 
     for psm in psms:
-        seqid = f'{psm[speccol]}_{psm[scancol]}_{psm[seqcol]}'
+        scan = psmhead.get_scannr(psm)
+        seqid = f'{psm[fncol]}_{scan}_{psm[seqcol]}'
         if seqid not in known_seqids:
             known_seqids.add(seqid)
             yield psm

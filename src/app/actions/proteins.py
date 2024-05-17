@@ -2,13 +2,12 @@ from math import log
 
 from app.dataformats import peptable as peptabledata
 from app.dataformats import prottable as prottabledata
-from app.dataformats import mzidtsv as mzidtsvdata
 
 from app.actions.psmtopeptable import evaluate_peptide
 from app.readers import fasta
 
 
-def generate_bestpep_proteins(peptides, scorecol, minlog, outputaccfield, 
+def generate_bestpep_proteins(peptides, scorecol, minlog, outputaccfield, pephead,
         protcol, higherbetter=True):
     """Best peptide for each protein in a table"""
     protein_peptides = {}
@@ -20,8 +19,8 @@ def generate_bestpep_proteins(peptides, scorecol, minlog, outputaccfield,
         p_acc = peptide[protcol]
         if ';' in p_acc or p_acc == 'NA':
             continue
-        protein_peptides = evaluate_peptide(protein_peptides, peptide, p_acc,
-                higherbetter, scorecol, fncol=False)
+        protein_peptides = evaluate_peptide(protein_peptides, peptide, p_acc, higherbetter,
+                pephead, scorecol, fncol=False)
     if minlog:
         try:
             nextbestscore = min([pep['score'] for pep in
@@ -65,8 +64,7 @@ def generate_classic_fdr(target, decoy, featfield):
         yield protein
 
 
-def generate_pick_fdr(target, decoy, tfastafn, dfastafn, featfield,
-        fastadelim, genefield):
+def generate_pick_fdr(target, decoy, tfastafn, dfastafn, featfield, fastadelim, genefield):
     t_scores, d_scores = {}, {}
     for protein in target:
         acc = protein[featfield]
@@ -79,7 +77,6 @@ def generate_pick_fdr(target, decoy, tfastafn, dfastafn, featfield,
     # FIXME make sure pairs are correct?
     # I mean, they are just names really - we should probably verify the T/D fasta?
     # Also use the concatenated DB instead, which is sort of the point of picking
-    prefixlen = len(mzidtsvdata.DECOY_PREFIX)
     if featfield == prottabledata.HEADER_PROTEIN:
         acctype = 'protein'
     elif featfield == prottabledata.HEADER_GENENAME:
