@@ -291,17 +291,25 @@ class TestPercoTSV(basetests.MzidTSVBaseTest):
     command = 'perco2psm'
     suffix = '_fdr.tsv'
     infilename = 'few_spectra.tsv'
+    mzidfn = 'few_spectra.mzid'
+    percofn = 'perco.xml'
+    expected_fn = 'few_spectra.tsv_fdr.tsv'
+    qval_psms = 'qvality_psms.txt'
+    qval_peps = 'qvality_peps.txt'
+
+    def setUp(self):
+        super().setUp()
 
     def test_conffilt(self):
         threshold = 0.3
-        mzidfn = os.path.join(self.fixdir, 'few_spectra.mzid')
-        percofn = os.path.join(self.fixdir, 'perco.xml')
-        options = ['--mzid', mzidfn, '--perco', percofn, '--filtpep', 
+        options = ['--perco', os.path.join(self.fixdir, self.percofn), '--filtpep', 
             str(threshold), '--filtpsm', str(threshold)]
+        if self.mzidfn:
+            options.extend(['--mzids', os.path.join(self.fixdir, self.mzidfn)])
         self.run_command(options)
         checkfields = ['percolator svm-score', 'PSM q-value', 'peptide q-value',
             'PSM PEP', 'peptide PEP', 'TD']
-        with open(os.path.join(self.fixdir, 'few_spectra.tsv_fdr.tsv')) as fp:
+        with open(os.path.join(self.fixdir, self.expected_fn)) as fp:
             header = next(fp).strip().split('\t')
             expected = [line.strip().split('\t') for line in fp]
         expected = [{field: line[i] for i, field in enumerate(header)} for line in expected]
@@ -315,16 +323,18 @@ class TestPercoTSV(basetests.MzidTSVBaseTest):
                 self.assertEqual(exp[field], res[i][1])
 
     def test_add_fdr(self):
-        mzidfn = os.path.join(self.fixdir, 'few_spectra.mzid')
-        percofn = os.path.join(self.fixdir, 'perco.xml')
-        options = ['--mzid', mzidfn, '--perco', percofn]
+        options = ['--perco', os.path.join(self.fixdir, self.percofn)]
+        if self.mzidfn:
+            options.extend(['--mzids', os.path.join(self.fixdir, self.mzidfn)])
+        print(options)
         self.run_command(options)
         checkfields = ['percolator svm-score', 'PSM q-value', 'peptide q-value',
             'PSM PEP', 'peptide PEP', 'TD']
-        with open(os.path.join(self.fixdir, 'few_spectra.tsv_fdr.tsv')) as fp:
+        with open(os.path.join(self.fixdir, self.expected_fn)) as fp:
             header = next(fp).strip().split('\t')
             expected = [line.strip().split('\t') for line in fp]
         expected = [{field: line[i] for i, field in enumerate(header)} for line in expected]
+        self.assertEqual(len(expected),  len([x for x in self.get_values(checkfields)]))
         for res, exp in zip(self.get_values(checkfields), expected):
             for i, field in enumerate(checkfields):
                 self.assertEqual(field, res[i][0])
@@ -334,25 +344,32 @@ class TestPercoTSV(basetests.MzidTSVBaseTest):
         '''Get FDR data from recalculation in qvality. Qvality input is prepared
         as a TSV with header, for target and decoy (so qvality -d) . In this case 
         I have simply taken the percolator svm/qval/pep scores from perco.xml and 
-        added 0.1 to each PSM (not peptide) q-value using bash:
+        added 0.1 to each PSM (not peptide) q-value using bash, PSMs:
         cat <(echo $'Score\tPEP\tq-value') \
                 <(grep -A3 '<psm p' perco.xml| grep -v psm| grep -v '\-\-' | \
-                sed -E 's/\s*<[\/]*[a-z_]+>//g' | paste - - - ) | \
-                awk -v FS='\t' -v OFS='\t' '{print $1, $3, $2+0.1}' > qvality_psms.txt 
+                sed -E 's/\s*<[\/]*[a-z_]+>//g' | paste - - - | \
+                gawk -v FS='\t' -v OFS='\t' '{print $1, $3, $2+0.1}') > qvality_psms.txt 
+
+        Peptides:
+        cat ...as above \
+                <(grep -A3 '<peptide p' perco.xml| grep -v peptide| grep -v '\-\-' | \
+                sed -E 's/\s*<[\/]*[a-z_]+>//g' | paste - - - | \
+                gawk -v FS='\t' -v OFS='\t' '{print $1, $3, $2}') > qvality_peps.txt 
+
         '''
-        mzidfn = os.path.join(self.fixdir, 'few_spectra.mzid')
-        percofn = os.path.join(self.fixdir, 'perco.xml')
-        qval_psms = os.path.join(self.fixdir, 'qvality_psms.txt')
-        qval_peps = os.path.join(self.fixdir, 'qvality_peps.txt')
-        options = ['--mzid', mzidfn, '--perco', percofn, '--qvalitypsms', qval_psms, '--qvalitypeps',
-                qval_peps]
+        options = ['--perco', os.path.join(self.fixdir, self.percofn),
+                '--qvalitypsms', os.path.join(self.fixdir, self.qval_psms),
+                '--qvalitypeps', os.path.join(self.fixdir, self.qval_peps)]
+        if self.mzidfn:
+            options.extend(['--mzids', os.path.join(self.fixdir, self.mzidfn)])
         self.run_command(options)
         checkfields = ['percolator svm-score', 'PSM q-value', 'peptide q-value',
             'PSM PEP', 'peptide PEP', 'TD']
-        with open(os.path.join(self.fixdir, 'few_spectra.tsv_fdr.tsv')) as fp:
+        with open(os.path.join(self.fixdir, self.expected_fn)) as fp:
             header = next(fp).strip().split('\t')
             expected = [line.strip().split('\t') for line in fp]
         expected = [{field: line[i] for i, field in enumerate(header)} for line in expected]
+        self.assertEqual(len(expected),  len([x for x in self.get_values(checkfields)]))
         for res, exp in zip(self.get_values(checkfields), expected):
             for i, field in enumerate(checkfields):
                 if field == 'PSM q-value':
@@ -381,6 +398,15 @@ class TestPercoTSVTIMS(basetests.MzidTSVBaseTest):
             for i, field in enumerate(header):
                 self.assertEqual(field, res[i][0])
                 self.assertEqual(exp[field], res[i][1])
+
+
+class TestPercoTSVSage(TestPercoTSV):
+    infilename = 'few_spectra.sage.tsv'
+    mzidfn = False
+    percofn = 'perco.sage.xml'
+    expected_fn = 'few_spectra.sage.fdr.tsv'
+    qval_psms = 'qvality_psms.sage.txt'
+    qval_peps = 'qvality_peps.sage.txt'
 
 
 class TestConcatTSV(basetests.MzidTSVBaseTest):

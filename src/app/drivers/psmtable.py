@@ -73,15 +73,11 @@ class TSVSplitDriver(PSMDriver):
 
 class Perco2PSMDriver(PSMDriver):
     """
-    Adds percolator data from mzid file to table.
+    Adds percolator data to PSM table.
     """
     outsuffix = '_fdr.tsv'
     command = 'perco2psm'
-    commandhelp = (
-            'Calculates FDR from percolator output and adds FDR and percolator '
-            ' to the corresponding TSV PSM tables. FDR calculation method is TD-'
-            'competition.'
-            )
+    commandhelp = 'Takes percolator file and adds scoring, q-value, PEP to PSM table'
 
     def set_options(self):
         super().set_options()
@@ -104,23 +100,30 @@ class Perco2PSMDriver(PSMDriver):
 
                 
     def write(self):
-        for psmfn, mzidfn in zip(self.fn, self.mzidfns):
+        for ix, psmfn in enumerate(self.fn):
+        #for psmfn, mzidfn in zip(self.fn, self.mzidfns):
+            if self.mzidfns:
+                mzidfn = self.mzidfns[ix]
+                mzns = mzidreader.get_mzid_namespace(mzidfn)
+            else:
+                mzidfn = False
+                mzns = False
             oldheader = tsvreader.get_tsv_header(psmfn)
             # Init header with percolator fields
-            psmhead = psmdata.get_psmheader(oldheader)
-            psmhead.set_header_with_percolator()
+            psmformat = psmdata.get_psmheader(oldheader)
+            psmformat.set_header_with_percolator()
             outfn = self.create_outfilepath(psmfn, self.outsuffix)
-            mzns = mzidreader.get_mzid_namespace(mzidfn)
             mzidsr = mzidreader.mzid_spec_result_generator(mzidfn, mzns)
+            specidis = perco.generate_spec_id_items(mzidsr, mzns)
             psms = tsvreader.generate_split_tsv_lines(psmfn, oldheader)
-            psms_perco = perco.add_fdr_to_mzidtsv(psms, mzidsr, mzns, self.percopsms, psmhead)
+            psms_perco = psmformat.add_fdr_to_mzidtsv(psms, specidis, self.percopsms)
             if self.filtpsm:
-                psms_perco = filtering.filter_psms_conf(psms_perco, psmhead.HEADER_PSMQ,
+                psms_perco = filtering.filter_psms_conf(psms_perco, psmformat.HEADER_PSMQ,
                         self.filtpsm, True)
             if self.filtpep:
-                psms_perco = filtering.filter_psms_conf(psms_perco, psmhead.HEADER_PEPTIDE_Q,
+                psms_perco = filtering.filter_psms_conf(psms_perco, psmformat.HEADER_PEPTIDE_Q,
                         self.filtpep, True)
-            writer.write_tsv(psmhead.header, psms_perco, outfn)
+            writer.write_tsv(psmformat.header, psms_perco, outfn)
 
 
 class ConfidenceFilterDriver(PSMDriver):

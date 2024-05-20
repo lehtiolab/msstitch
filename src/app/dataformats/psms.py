@@ -1,4 +1,5 @@
 import re
+import os
 
 
 class PepPSMHeader:
@@ -122,8 +123,54 @@ class MSGFPSMTableHeader(PSMTableHeader):
     def get_scannr(self, psm):
         return psm[self.HEADER_SCANNR]
 
+    def add_fdr_to_mzidtsv(self, psms, specidis, percodata):
+        """Takes PSMs from an mzIdentML and its MSGF+ TSV and a corresponding 
+        percolator XML. 
+        """
+        # mzId results and PSM lines can be zipped
+        # but we assume that multi-solution scans (e.g. Isoleucine/leucine)
+        # have identical scoring, i.e. MSGF is run with -n1 (default)
+
+        for psm, (scan, specidi) in zip(psms, specidis):
+            spfile = os.path.splitext(psm[self.HEADER_SPECFILE])[0]
+            psmcharge = psm[self.HEADER_CHARGE]
+            perco_id = f'{spfile}_{specidi.attrib["id"]}_{scan}_{psmcharge}_{specidi.attrib["rank"]}'
+            try:
+                percopsm = percodata[perco_id]
+            except KeyError:
+                continue
+            outpsm = {k: v for k,v in psm.items()}
+            psmscores = {
+                self.HEADER_SVMSCORE: percopsm['svm'], 
+                self.HEADER_PSMQ: percopsm['qval'], 
+                self.HEADER_PSM_PEP: percopsm['pep'], 
+                }
+            try:
+                pepscores = {
+                    self.HEADER_PEPTIDE_Q: percopsm['pepqval'], 
+                    self.HEADER_PEPTIDE_PEP: percopsm['peppep'], 
+                    self.HEADER_TARGETDECOY: percopsm['td'],
+                    }
+            except KeyError:
+                pepscores = {
+                    self.HEADER_PEPTIDE_Q: 1,
+                    self.HEADER_PEPTIDE_PEP: 1,
+                    self.HEADER_TARGETDECOY: 1,
+                    }
+            outpsm.update({**psmscores, **pepscores})
+            # Remove all decoy protein matches from target proteins, to ensure downstream
+            # processing does not trip up on them, e.g. having a decoy master protein.
+            if percopsm['td'] != 'decoy':
+                outprots = []
+                for prot in outpsm[self.HEADER_PROTEIN].split(';'):
+                    if not prot.startswith(self.DECOY_PREFIX):
+                        outprots.append(prot)
+                outpsm[self.HEADER_PROTEIN] = ';'.join(outprots)
+            yield outpsm
+
 
 class SagePSMTableHeader(PSMTableHeader):
+    name = 'sage'
     id_fields_header = ['sage_discriminant_score']
 
     def __init__(self, header):
@@ -134,15 +181,18 @@ class SagePSMTableHeader(PSMTableHeader):
         self.HEADER_CHARGE = 'charge'
         self.HEADER_PEPTIDE = 'peptide'
         self.HEADER_PROTEIN = 'proteins'
-        self.HEADER_PRECURSOR_MZ = 'expmass'
+        self.HEADER_RANK = 'rank'
+        self.HEADER_PSM_ID = 'psm_id'
+        # not used, but we could
+        # self.HEADER_PRECURSOR_MZ = 'expmass'
 
-        # is output:
-        self.HEADER_ION_MOB = 'ion_mobility'
-
-        # has this:
-        self.HEADER_RETENTION_TIME = 'rt'
         self.HEADER_SCORE = 'sage_discriminant_score'
+
+        # is output, need to make sure it wont be added:
+        self.HEADER_ION_MOB = 'ion_mobility'
+        self.HEADER_RETENTION_TIME = 'rt'
         self.HEADER_MISSED_CLEAVAGE = 'missed_cleavages'
+
         self.HEADER_PSMQ = 'spectrum_q'
         self.HEADER_PEPTIDE_Q = 'peptide_q'
         self.MS2INT = 'ms2_intensity'
@@ -150,18 +200,60 @@ class SagePSMTableHeader(PSMTableHeader):
         # Post setting SE specific fields:
         self.MOREDATA_HEADER = [self.HEADER_RETENTION_TIME, self.HEADER_INJECTION_TIME,
                 self.HEADER_ION_MOB]
-        self.PERCO_HEADER = [self.HEADER_SVMSCORE, self.HEADER_PSMQ, self.HEADER_PSM_PEP,
-                self.HEADER_PEPTIDE_Q, self.HEADER_PEPTIDE_PEP, self.HEADER_TARGETDECOY]
 
     def set_header_with_percolator(self):
-        startix = self.header.index(self.SCORE) + 1
+        startix = self.header.index(self.HEADER_SCORE) + 1
         end_ix = self.header.index(self.MS2INT)
         self.post_percolator()
-        self.header = self.header[:ix] + self.PERCO_HEADER + self.header[ix:]
+        self.header = self.header[:startix] + self.PERCO_HEADER + self.header[end_ix:]
 
     def get_scannr(self, psm):
         # controllerType=0 controllerNumber=1 scan=244	
         return psm[self.HEADER_SPECSCANID].split('=')[-1]
+
+    def add_fdr_to_mzidtsv(self, psms, specidis, percodata):
+        """Takes PSMs from an mzIdentML and its MSGF+ TSV and a corresponding 
+        percolator XML. 
+        """
+        # we assume that multi-solution scans (e.g. Isoleucine/leucine)
+        # have identical scoring, i.e. MSGF is run with -n1 (default)
+
+        print(percodata)
+        for psm in psms:
+            try:
+                percopsm = percodata[psm[self.HEADER_PSM_ID]]
+            except KeyError:
+                print('no')
+                print(psm[self.HEADER_PSM_ID])
+                continue
+            outpsm = {k: v for k,v in psm.items()}
+            psmscores = {
+                self.HEADER_SVMSCORE: percopsm['svm'], 
+                self.HEADER_PSMQ: percopsm['qval'], 
+                self.HEADER_PSM_PEP: percopsm['pep'], 
+                }
+            try:
+                pepscores = {
+                    self.HEADER_PEPTIDE_Q: percopsm['pepqval'], 
+                    self.HEADER_PEPTIDE_PEP: percopsm['peppep'], 
+                    self.HEADER_TARGETDECOY: percopsm['td'],
+                    }
+            except KeyError:
+                pepscores = {
+                    self.HEADER_PEPTIDE_Q: 1,
+                    self.HEADER_PEPTIDE_PEP: 1,
+                    self.HEADER_TARGETDECOY: 1,
+                    }
+            outpsm.update({**psmscores, **pepscores})
+            # Remove all decoy protein matches from target proteins, to ensure downstream
+            # processing does not trip up on them, e.g. having a decoy master protein.
+            if percopsm['td'] != 'decoy':
+                outprots = []
+                for prot in outpsm[self.HEADER_PROTEIN].split(';'):
+                    if not prot.startswith(self.DECOY_PREFIX):
+                        outprots.append(prot)
+                outpsm[self.HEADER_PROTEIN] = ';'.join(outprots)
+            yield outpsm
 
 
 def get_psmheader(header):

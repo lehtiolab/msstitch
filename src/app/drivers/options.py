@@ -404,8 +404,8 @@ psmtable_options = {
         'tab separated output containing targets and decoys (i.e. prepared with qvality -d) '
         'for peptide scores ', 'type': 'file', 'required': False},
     'mzidfns': {'driverattr': 'mzidfns', 'clarg': '--mzids', 'help': 'MzIdentML '
-        ' output files belonging to PSM table TSV files, use same order as for TSVs', 
-        'type': 'file', 'nargs': '+'},
+        ' output files belonging to PSM table TSV files, use same order as for TSVs. Must '
+        'be included when using MSGF+.', 'type': 'file', 'nargs': '+', 'required': False},
     'peptidecolpattern': {'driverattr': 'peptidecolpattern',
         'type': str, 'clarg': '--peptidecolpattern', 'default': False,
         'required': False, 'help': 'Regular expression pattern to find header '
