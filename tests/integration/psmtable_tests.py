@@ -62,7 +62,7 @@ class TestPSMTable(MzidWithDB):
         expected_values = self.process_dbvalues_both(self.workdb, sql,
                                                      [1, 2, 3, 4], fields)
         self.check_results_sql(fields, expected_values)
-        for val, exp in zip(self.get_values(['missed_cleavage']), self.get_values(['Peptide'], self.infile[0])):
+        for val, exp in zip(self.get_values(['missed_cleavage']), self.get_values([self.pepkey], self.infile[0])):
             exp = re.sub('[0-9\+\.]', '', exp[0][0])[:-1]
             self.assertEqual(int(val[0][0]), exp.count('K') + exp.count('R') - exp.count('KP') - exp.count('RP'))
 
@@ -94,7 +94,7 @@ class TestPSMTable(MzidWithDB):
         expected_values = self.process_dbvalues_both(self.workdb, sql,
                                                      [1, 2, 3, 4, 5], fields)
         self.check_results_sql(fields, expected_values)
-        for val, exp in zip(self.get_values(['missed_cleavage']), self.get_values(['Peptide'], self.infile[0])):
+        for val, exp in zip(self.get_values(['missed_cleavage']), self.get_values([self.pepkey], self.infile[0])):
             exp = re.sub('[0-9\+\.]', '', exp[0][0])[:-1]
             self.assertEqual(int(val[0][0]), exp.count('K') + exp.count('R') - exp.count('KP') - exp.count('RP'))
 
@@ -192,7 +192,7 @@ class TestPSMTable(MzidWithDB):
     def get_expected_psms(self):
         header = self.get_tsvheader(self.infile[0])
         prot_ix = header.index('Protein')
-        seq_ix = header.index('Peptide')
+        seq_ix = header.index(self.pepkey)
         score_ix = header.index('MSGFScore')
         psms = {}
         for row, line in enumerate(self.get_all_lines(self.infile[0])):
@@ -475,7 +475,7 @@ class TestSeqMatchFastaDB(basetests.MzidTSVBaseTest):
             for line in fp:
                 out_linecount += 1
                 psm = {k: v for k,v in zip(header, line.strip().split('\t'))}
-                seq = re.sub('[^A-Z]', '', psm['Peptide'])
+                seq = re.sub('[^A-Z]', '', psm[self.pepkey])
                 if seq in seqs_nrmap and matching:
                     self.assertEqual(psm[matchcol], f'acc_{seqs_nrmap[seq]}')
                 else:
@@ -488,14 +488,14 @@ class TestSeqMatchFastaDB(basetests.MzidTSVBaseTest):
         self.assertEqual(in_linecount, out_linecount)
 
     def test_noflags(self):
-        seqs = ['AIASWNR']
+        seqs = ['DISTILDEER']
         basetests.create_db(seqs, mapaccession=True)
         options = ['--dbfile', 'seqs.db']
         self.check_peps_in_out(options, seqs)
 
     def test_ntermwildcards(self):
-        seqs = ['XXAIASWNR']
-        seqs_to_filter = ['AIASWNR']
+        seqs = ['XXDISTILDEER']
+        seqs_to_filter = ['DISTILDEER']
         basetests.create_db(seqs, reverse=True, mapaccession=True)
 
         # Find peptide
@@ -511,30 +511,35 @@ class TestSeqMatchFastaDB(basetests.MzidTSVBaseTest):
 
     def test_deamidate(self):
         # deamidation: N -> D
-        seqs = ['NIENLR']
-        seqs_to_filter = ['DIENLR']
+        seqs = ['NISTILDEER']
+        seqs_to_filter = ['DISTILDEER']
         basetests.create_db(seqs, mapaccession=True)
         options = ['--deamidate']
         self.check_peps_in_out(options, seqs_to_filter)
 
     def test_fullprotein(self):
         '''Testing if PSMs with sequence match (except Isoleucine) are removed'''
-        seqs = ['XXXXXXXXXXFMPNNLERYYYYYYY']
-        seqs_to_filter = ['FMPNNIER']
-        basetests.create_db(seqs, fullprotein=True, minlen=6, mapaccession=True)
+        seqs = ['XXXXXXXXXXDISTLLDEERYYYYYYY']
+        seqs_to_filter = ['DISTILDEER']
+        basetests.create_db(seqs, fullprotein=True, minlen=9, mapaccession=True)
         # Find peptide
-        options = ['--fullprotein', '--minlen', '6']
+        options = ['--fullprotein', '--minlen', '9']
         self.check_peps_in_out(options, seqs_to_filter)
 
     def test_fullprotein_minlenwrong(self):
-        '''Do not filter since even with matching 6-aa peptide, the 7th of the PSM does not match'''
-        seqs = ['XXXXXXXXXXALASWNYYYYYYY']
-        seqs_to_filter = ['AIASWNR']
-        basetests.create_db(seqs, fullprotein=True, minlen=6, mapaccession=True)
+        '''Do not filter since even with matching 9-aa peptide, the 7th of the PSM does not match'''
+        seqs = ['XXXXXXXXXXDISTLLDEEYYYYYYY']
+        seqs_to_filter = ['DISTILDEER']
+        basetests.create_db(seqs, fullprotein=True, minlen=9, mapaccession=True)
         # Find peptide
-        options = ['--fullprotein', '--minlen', '6']
+        options = ['--fullprotein', '--minlen', '9']
         self.check_peps_in_out(options, seqs_to_filter, matching=False)
 
+
+
+class TestSeqMatchFastaDBSage(TestSeqMatchFastaDB):
+    infilename = 'few_spectra.sage.tsv'
+    pepkey = 'peptide'
 
 
 class TestRemoveDupPSM(basetests.MzidTSVBaseTest):
@@ -574,9 +579,10 @@ class TestSeqFilt(basetests.MzidTSVBaseTest):
     command = 'seqfilt'
     infilename = 'few_spectra.tsv'
     suffix = '_filtseq.txt'
+    specidkey = 'SpecID'
 
     def test_noflags(self):
-        seqs = ['AIASWNR']
+        seqs = ['DISTILDEER']
         basetests.create_db(seqs)
         options = ['--dbfile', 'seqs.db']
         self.run_command(options)
@@ -593,9 +599,10 @@ class TestSeqFilt(basetests.MzidTSVBaseTest):
             filtpsms = {}
             for line in fp:
                 psm = {k: v for k,v in zip(header, line.strip().split('\t'))}
-                seq = re.sub('[^A-Z]', '', psm['Peptide'])
-                scan = psm['ScanNum']
-                filtpsms[scan] = seq
+                seq = re.sub('[^A-Z]', '', psm[self.pepkey])
+                scan = psm[self.specidkey].split('=')[-1]
+                # Use scan_seq since sometimes have two solutions to same scan at equal score
+                filtpsms[f'{scan}_{seq}'] = seq
                 if seq in seqs:
                     pepfound = True
                     break
@@ -608,19 +615,19 @@ class TestSeqFilt(basetests.MzidTSVBaseTest):
             header = next(fp).strip().split('\t')
             for line in fp:
                 psm = {k: v for k,v in zip(header, line.strip().split('\t'))}
-                seq = re.sub('[^A-Z]', '', psm['Peptide'])
-                scan = psm['ScanNum']
-                allpsms[scan] = seq
+                seq = re.sub('[^A-Z]', '', psm[self.pepkey])
+                scan = psm[self.specidkey].split('=')[-1]
+                allpsms[f'{scan}_{seq}'] = seq
                 if seq in seqs:
                     pepfound = True
                     break
                 else:
-                    self.assertEqual(seq, filtpsms[scan])
+                    self.assertEqual(seq, filtpsms[f'{scan}_{seq}'])
         self.assertTrue(pepfound)
 
     def test_ntermwildcards(self):
-        seqs = ['XXAIASWNR']
-        seqs_to_filter = ['AIASWNR']
+        seqs = ['XXDISTILDEER']
+        seqs_to_filter = ['DISTILDEER']
         basetests.create_db(seqs, reverse=True)
 
         # Find peptide
@@ -637,8 +644,8 @@ class TestSeqFilt(basetests.MzidTSVBaseTest):
 
     def test_deamidate(self):
         # deamidation: N -> D
-        seqs = ['NIENLR']
-        seqs_to_filter = ['DIENLR']
+        seqs = ['NISTLLDEER']
+        seqs_to_filter = ['DISTILDEER']
         basetests.create_db(seqs)
         options = ['--dbfile', 'seqs.db', '--deamidate']
         self.run_command(options)
@@ -646,8 +653,8 @@ class TestSeqFilt(basetests.MzidTSVBaseTest):
 
     def test_fullprotein(self):
         '''Testing if PSMs with sequence match (except Isoleucine) are removed'''
-        seqs = ['XXXXXXXXXXFMPNNLERYYYYYYY']
-        seqs_to_filter = ['FMPNNIER']
+        seqs = ['XXXXXXXXXXDISTLLDEERYYYYYYY']
+        seqs_to_filter = ['DISTILDEER']
         basetests.create_db(seqs, fullprotein=True, minlen=6)
         # Find peptide
         options = ['--dbfile', 'seqs.db', '--fullprotein', '--minlen', '6']
@@ -656,13 +663,19 @@ class TestSeqFilt(basetests.MzidTSVBaseTest):
 
     def test_fullprotein_minlenwrong(self):
         '''Do not filter since even with matching 6-aa peptide, the 7th of the PSM does not match'''
-        seqs = ['XXXXXXXXXXALASWNYYYYYYY']
-        seqs_to_filter = ['AIASWNR']
+        seqs = ['XXXXXXXXXXDISTLLDEEYYYYYYY']
+        seqs_to_filter = ['DISTILDEER']
         basetests.create_db(seqs, fullprotein=True, minlen=6)
         # Find peptide
-        options = ['--dbfile', 'seqs.db', '--fullprotein', '--minlen', '6']
+        options = ['--dbfile', 'seqs.db', '--fullprotein', '--minlen', '9']
         self.run_command(options)
         self.check_peps_in_out(seqs_to_filter, matching=False)
+
+
+class TestSeqFiltSage(TestSeqFilt):
+    infilename = 'few_spectra.sage.tsv'
+    pepkey = 'peptide'
+    specidkey = 'scannr'
 
 
 class TestConffiltTSV(basetests.MzidTSVBaseTest):

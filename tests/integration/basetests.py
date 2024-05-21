@@ -169,6 +169,7 @@ class BaseTestPycolator(BaseTest):
 
 
 class MzidTSVBaseTest(BaseTest):
+    pepkey = 'Peptide'
 
     def rowify(self, records):
         row, rownr = [], 0
