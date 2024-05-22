@@ -330,7 +330,7 @@ mslookup_tables = {'biosets': ['set_id INTEGER PRIMARY KEY',
                                              'master_id INTEGER',
                                              'peptide_count INTEGER',
                                              'psm_count INTEGER',
-                                             'protein_score INTEGER',
+                                             'protein_score REAL',
                                              'FOREIGN KEY(protein_acc) '
                                              'REFERENCES '
                                              'proteins(protein_acc) '

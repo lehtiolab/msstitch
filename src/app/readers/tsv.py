@@ -50,7 +50,7 @@ def generate_split_tsv_lines(fn, header):
 
 def strip_modifications(seq):
     # FIXME make method of PSM class??? maybe not
-    return re.sub('[-+.\d]', '', seq)
+    return re.sub('[^A-Za-z]', '', seq)
 
 
 def get_cols_in_file(pattern, header, single_col=False):

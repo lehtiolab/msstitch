@@ -22,6 +22,20 @@ class TestPSMTable(MzidWithDB):
     command = 'psmtable'
     infilename = 'target.tsv'
     dbfn = 'quant_lookup.sqlite'
+    spectracol = 1
+    protkey = 'Protein'
+    pepkey = 'Peptide'
+    scorekey = 'MSGFScore'
+    rt_key = 'Retention time(min)'
+    ion_key = 'Ion mobility(Vs/cm2)'
+    mc_key = 'missed_cleavage'
+    expected_db = 'target_psms.sqlite'
+    expected_psms = 'target_pg.tsv'
+    timsinfilename ='few_spec_timstof.tsv' 
+    timsdbfn = 'spectra_lookup_timstof.sqlite'
+    # For not-all-have-isoquant test:
+    spec_id_to_rm = '1_controllerType=0 controllerNumber=1 scan=10029'
+
     """DB and PSM table contain:
     - ENSEMBL proteins
     - a Uniprot swiss protein
@@ -32,21 +46,23 @@ class TestPSMTable(MzidWithDB):
     def test_build_full_psmtable(self):
         minpif = '0.4'
         fastafn = os.path.join(self.basefixdir, 'ens99_small.fasta')
-        options = ['--dbfile', self.workdb, '--spectracol', '1', '--addmiscleav',
+        options = ['--dbfile', self.workdb, '--spectracol', f'{self.spectracol}', '--addmiscleav',
                 '--addbioset', '--genes', '--proteingroup', '--ms1quant', '--isobaric',
                 '--fasta', fastafn, '--min-precursor-purity', minpif]
         self.run_command(options)
         self.check_db_fasta(fastafn)
-        self.check_addspec_miscleav_bioset()
+        self.check_addspec_bioset()
+        if self.mc_key:
+            self.check_miscleav()
         self.check_pg()
         self.check_quanttsv(minpif)
         self.check_addgenes()
 
     def test_ionmobility(self):
-        self.infilename = 'few_spec_timstof.tsv'
-        self.dbfn = 'spectra_lookup_timstof.sqlite'
+        self.infilename = self.timsinfilename
+        self.dbfn = self.timsdbfn
         self.setUp()
-        options = ['--dbfile', self.workdb, '--spectracol', '1', '--addmiscleav', '--addbioset']
+        options = ['--dbfile', self.workdb, '--spectracol', f'{self.spectracol}', '--addmiscleav', '--addbioset']
         self.run_command(options)
         sql = ('SELECT pr.rownr, bs.set_name, sp.retention_time, '
                'iit.ion_injection_time, im.ion_mobility '
@@ -57,27 +73,29 @@ class TestPSMTable(MzidWithDB):
                'JOIN mzmlfiles USING(mzmlfile_id) '
                'JOIN biosets AS bs USING(set_id) '
                'ORDER BY pr.rownr')
-        fields = ['Biological set', 'Retention time(min)',
-                  'Ion injection time(ms)', 'Ion mobility(Vs/cm2)']
+        fields = ['Biological set', self.rt_key, 'Ion injection time(ms)', self.ion_key]
         expected_values = self.process_dbvalues_both(self.workdb, sql,
                                                      [1, 2, 3, 4], fields)
         self.check_results_sql(fields, expected_values)
-        for val, exp in zip(self.get_values(['missed_cleavage']), self.get_values([self.pepkey], self.infile[0])):
-            exp = re.sub('[0-9\+\.]', '', exp[0][0])[:-1]
-            self.assertEqual(int(val[0][0]), exp.count('K') + exp.count('R') - exp.count('KP') - exp.count('RP'))
+        if self.mc_key:
+            self.check_miscleav()
 
     def test_no_isoquant_in_some_rows(self):
         '''Test when not all rows of PSMs have isoquant data, e.g. when some are
         CID.'''
         # delete isoquant for first scan in PSM table
         db = sqlite3.connect(self.workdb)
-        spec_id_to_rm = '1_controllerType=0 controllerNumber=1 scan=10029'
-        db.execute(f'DELETE FROM isobaric_quant WHERE spectra_id="{spec_id_to_rm}"')
-        db.execute(f'DELETE FROM precursor_ion_fraction WHERE spectra_id="{spec_id_to_rm}"')
+        db.execute(f'DELETE FROM isobaric_quant WHERE spectra_id="{self.spec_id_to_rm}"')
+        db.execute(f'DELETE FROM precursor_ion_fraction WHERE spectra_id="{self.spec_id_to_rm}"')
         db.commit()
         self.test_build_full_psmtable()
 
-    def check_addspec_miscleav_bioset(self):
+    def check_miscleav(self):
+        for val, exp in zip(self.get_values([self.mc_key]), self.get_values([self.pepkey], self.infile[0])):
+            exp = re.sub('[^A-Za-z]', '', exp[0][0])[:-1]
+            self.assertEqual(int(val[0][0]), exp.count('K') + exp.count('R') - exp.count('KP') - exp.count('RP'))
+
+    def check_addspec_bioset(self):
         sql = ('SELECT pr.rownr, bs.set_name, sp.retention_time, '
                'iit.ion_injection_time, im.ion_mobility, pif.pif '
                'FROM psmrows AS pr JOIN psms USING(psm_id) '
@@ -88,15 +106,11 @@ class TestPSMTable(MzidWithDB):
                'JOIN mzmlfiles USING(mzmlfile_id) '
                'JOIN biosets AS bs USING(set_id) '
                'ORDER BY pr.rownr')
-        fields = ['Biological set', 'Retention time(min)',
-                  'Ion injection time(ms)', 'Ion mobility(Vs/cm2)',
+        fields = ['Biological set', self.rt_key, 'Ion injection time(ms)', self.ion_key,
                   'Precursor ion fraction']
         expected_values = self.process_dbvalues_both(self.workdb, sql,
                                                      [1, 2, 3, 4, 5], fields)
         self.check_results_sql(fields, expected_values)
-        for val, exp in zip(self.get_values(['missed_cleavage']), self.get_values([self.pepkey], self.infile[0])):
-            exp = re.sub('[0-9\+\.]', '', exp[0][0])[:-1]
-            self.assertEqual(int(val[0][0]), exp.count('K') + exp.count('R') - exp.count('KP') - exp.count('RP'))
 
     def check_quanttsv(self, minpif):
         sql = ('SELECT pr.rownr, ic.channel_name, '
@@ -191,9 +205,9 @@ class TestPSMTable(MzidWithDB):
 
     def get_expected_psms(self):
         header = self.get_tsvheader(self.infile[0])
-        prot_ix = header.index('Protein')
+        prot_ix = header.index(self.protkey)
         seq_ix = header.index(self.pepkey)
-        score_ix = header.index('MSGFScore')
+        score_ix = header.index(self.scorekey)
         psms = {}
         for row, line in enumerate(self.get_all_lines(self.infile[0])):
             line = line.strip('\n').split('\t')
@@ -218,24 +232,26 @@ class TestPSMTable(MzidWithDB):
                        'amount': line[pgamount_ix],
                        }
 
-    def do_asserting(self, result, expected, unrolled=False):
-        for res, exp in zip(result, expected):
-            self.assertEqual(set(res['master'].split(';')),
-                             set(exp['master'].split(';')))
-            self.assertEqual(res['amount'], exp['amount'])
-            rescontent = res['content'].split(';')
-            expcontent = exp['content'].split(';')
-            self.assertEqual(set(rescontent), set(expcontent))
-
     def check_pglup(self, sql, keyfun, valfun):
         result = {keyfun(x): valfun(x) for x in
                   self.get_values_from_db(self.workdb, sql)}
-        exp_file = os.path.join(self.fixdir, 'target_psms.sqlite')
+        exp_file = os.path.join(self.fixdir, self.expected_db)
         expected = {keyfun(x): valfun(x) for x in
                     self.get_values_from_db(exp_file, sql)}
         for key, value in result.items():
             self.assertIn(key, expected.keys())
-            self.assertEqual(value, expected[key])
+            if type(value) == tuple:
+                for v, e in zip(value, expected[key]):
+                    try:
+                        self.assertEqual(v, e)
+                    except AssertionError:
+                        # I dont understand why but sometimes the expected value
+                        # is a "long float" 0.12345000000001, and sometimes it's 0.12345
+                        # making this test flaky when comparing protein_score
+                        # which is a REAL (float) for sage
+                        self.assertAlmostEqual(v, e)
+            else:
+                self.assertEqual(value, expected[key])
 
     def check_pg(self):
         sql = 'SELECT * FROM protein_coverage'
@@ -255,13 +271,18 @@ class TestPSMTable(MzidWithDB):
         self.check_pglup(sql, lambda x: x[1], lambda x: 1)
         # Check the output TSV
         result = self.parse_proteingroups(self.resultfn)
-        expected = self.parse_proteingroups(
-            os.path.join(self.fixdir, 'target_pg.tsv'))
-        self.do_asserting(result, expected)
+        expected = self.parse_proteingroups(os.path.join(self.fixdir, self.expected_psms))
+        for res, exp in zip(result, expected):
+            self.assertEqual(set(res['master'].split(';')),
+                             set(exp['master'].split(';')))
+            self.assertEqual(res['amount'], exp['amount'])
+            rescontent = res['content'].split(';')
+            expcontent = exp['content'].split(';')
+            self.assertEqual(set(rescontent), set(expcontent))
+
 
     def check_addgenes(self):
-        for line in self.get_values(['Gene ID', 'Gene Name', 'Description',
-                                     'Protein']):
+        for line in self.get_values(['Gene ID', 'Gene Name', 'Description', self.protkey]):
             genes = line[0][1].split(';')
             assoc_ids = line[1][1].split(';')
             descriptions = ['{}]'.format(x).replace(']]', ']')
@@ -285,6 +306,21 @@ class TestPSMTable(MzidWithDB):
             for exp_set, result in zip([exp_g, exp_assoc, exp_desc],
                                        [genes, assoc_ids, descriptions]):
                 self.assertEqual(0, len(exp_set.difference(result)))
+
+
+class TestPSMTableSage(TestPSMTable):
+    infilename = 'target.sage.tsv'
+    spectracol = 5
+    protkey = 'proteins'
+    pepkey = 'peptide'
+    scorekey = 'sage_discriminant_score'
+    rt_key = 'rt'
+    ion_key = 'ion_mobility'
+    mc_key = False
+    expected_db = 'target_psms.sage.sqlite'
+    expected_psms = 'target_pg.sage.tsv'
+    timsinfilename ='few_spec_timstof.sage.tsv' 
+    spec_id_to_rm = 'controllerType=0 controllerNumber=1 scan=10192'
 
 
 class TestPercoTSV(basetests.MzidTSVBaseTest):
