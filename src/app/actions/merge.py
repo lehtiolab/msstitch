@@ -162,10 +162,10 @@ def build_proteintable(pqdb, mergecutoff, isobaric=False):
 
 
 def protein_pool_fdr_cutoff_ok(fdr, fdrcutoff, feature, setname):
-    if not fdrcutoff:
+    if not fdrcutoff and fdr is not False and fdr != 'NA':
         return True
     warning = False
-    if fdr is False:
+    if fdr is False or fdr == 'NA':
         warning = True
     try:
         fdr = float(fdr)

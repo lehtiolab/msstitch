@@ -204,7 +204,7 @@ def calculate_protein_precursor_quant(top_ms1_peps, prot_acc):
 
 def add_ms1_quant_from_top3_mzidtsv(features, peptides, outputaccfield, featcol):
     """Collects peptides with the highest precursor quant values,
-    adds sum of the top 3 of these to a protein table"""
+    adds average of the top 3 of these to a protein table"""
     top_ms1_peps = generate_top_ms1_peptides(peptides, featcol)
     for feat in features:
         acc = feat[outputaccfield]
