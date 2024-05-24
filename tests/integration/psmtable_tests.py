@@ -409,7 +409,7 @@ class TestPercoTSV(basetests.MzidTSVBaseTest):
         for res, exp in zip(self.get_values(checkfields), expected):
             for i, field in enumerate(checkfields):
                 if field == 'PSM q-value':
-                    self.assertAlmostEqual(float(exp[field]) + 0.1, float(res[i][1]))
+                    self.assertAlmostEqual(float(exp[field]) + 0.1, float(res[i][1]), places=6)
                 else:
                     self.assertEqual(exp[field], res[i][1])
                 self.assertEqual(field, res[i][0])
@@ -524,14 +524,14 @@ class TestSeqMatchFastaDB(basetests.MzidTSVBaseTest):
         self.assertEqual(in_linecount, out_linecount)
 
     def test_noflags(self):
-        seqs = ['DISTILDEER']
+        seqs = ['DGTDVLR']
         basetests.create_db(seqs, mapaccession=True)
         options = ['--dbfile', 'seqs.db']
         self.check_peps_in_out(options, seqs)
 
     def test_ntermwildcards(self):
-        seqs = ['XXDISTILDEER']
-        seqs_to_filter = ['DISTILDEER']
+        seqs = ['XXDGTDVLR']
+        seqs_to_filter = ['DGTDVLR']
         basetests.create_db(seqs, reverse=True, mapaccession=True)
 
         # Find peptide
@@ -547,30 +547,29 @@ class TestSeqMatchFastaDB(basetests.MzidTSVBaseTest):
 
     def test_deamidate(self):
         # deamidation: N -> D
-        seqs = ['NISTILDEER']
-        seqs_to_filter = ['DISTILDEER']
+        seqs = ['NGTDVIR']
+        seqs_to_filter = ['DGTDVLR']
         basetests.create_db(seqs, mapaccession=True)
         options = ['--deamidate']
         self.check_peps_in_out(options, seqs_to_filter)
 
     def test_fullprotein(self):
         '''Testing if PSMs with sequence match (except Isoleucine) are removed'''
-        seqs = ['XXXXXXXXXXDISTLLDEERYYYYYYY']
-        seqs_to_filter = ['DISTILDEER']
-        basetests.create_db(seqs, fullprotein=True, minlen=9, mapaccession=True)
+        seqs = ['XXXXXXXXXXDGTDVIRYYYYYYY']
+        seqs_to_filter = ['DGTDVLR']
+        basetests.create_db(seqs, fullprotein=True, minlen=7, mapaccession=True)
         # Find peptide
-        options = ['--fullprotein', '--minlen', '9']
+        options = ['--fullprotein', '--minlen', '7']
         self.check_peps_in_out(options, seqs_to_filter)
 
     def test_fullprotein_minlenwrong(self):
         '''Do not filter since even with matching 9-aa peptide, the 7th of the PSM does not match'''
-        seqs = ['XXXXXXXXXXDISTLLDEEYYYYYYY']
-        seqs_to_filter = ['DISTILDEER']
-        basetests.create_db(seqs, fullprotein=True, minlen=9, mapaccession=True)
+        seqs = ['XXXXXXXXXXDGTDVLYYYYYYY']
+        seqs_to_filter = ['DGTDVLR']
+        basetests.create_db(seqs, fullprotein=True, minlen=7, mapaccession=True)
         # Find peptide
-        options = ['--fullprotein', '--minlen', '9']
+        options = ['--fullprotein', '--minlen', '7']
         self.check_peps_in_out(options, seqs_to_filter, matching=False)
-
 
 
 class TestSeqMatchFastaDBSage(TestSeqMatchFastaDB):
@@ -618,7 +617,7 @@ class TestSeqFilt(basetests.MzidTSVBaseTest):
     specidkey = 'SpecID'
 
     def test_noflags(self):
-        seqs = ['DISTILDEER']
+        seqs = ['DGTDVLR']
         basetests.create_db(seqs)
         options = ['--dbfile', 'seqs.db']
         self.run_command(options)
@@ -662,8 +661,8 @@ class TestSeqFilt(basetests.MzidTSVBaseTest):
         self.assertTrue(pepfound)
 
     def test_ntermwildcards(self):
-        seqs = ['XXDISTILDEER']
-        seqs_to_filter = ['DISTILDEER']
+        seqs = ['XXDGTDVLR']
+        seqs_to_filter = ['DGTDVLR']
         basetests.create_db(seqs, reverse=True)
 
         # Find peptide
@@ -680,8 +679,8 @@ class TestSeqFilt(basetests.MzidTSVBaseTest):
 
     def test_deamidate(self):
         # deamidation: N -> D
-        seqs = ['NISTLLDEER']
-        seqs_to_filter = ['DISTILDEER']
+        seqs = ['NGTDVIR']
+        seqs_to_filter = ['DGTDVLR']
         basetests.create_db(seqs)
         options = ['--dbfile', 'seqs.db', '--deamidate']
         self.run_command(options)
@@ -689,8 +688,8 @@ class TestSeqFilt(basetests.MzidTSVBaseTest):
 
     def test_fullprotein(self):
         '''Testing if PSMs with sequence match (except Isoleucine) are removed'''
-        seqs = ['XXXXXXXXXXDISTLLDEERYYYYYYY']
-        seqs_to_filter = ['DISTILDEER']
+        seqs = ['XXXXXXXXXXDGTDVIRYYYYYYY']
+        seqs_to_filter = ['DGTDVLR']
         basetests.create_db(seqs, fullprotein=True, minlen=6)
         # Find peptide
         options = ['--dbfile', 'seqs.db', '--fullprotein', '--minlen', '6']
@@ -699,8 +698,8 @@ class TestSeqFilt(basetests.MzidTSVBaseTest):
 
     def test_fullprotein_minlenwrong(self):
         '''Do not filter since even with matching 6-aa peptide, the 7th of the PSM does not match'''
-        seqs = ['XXXXXXXXXXDISTLLDEEYYYYYYY']
-        seqs_to_filter = ['DISTILDEER']
+        seqs = ['XXXXXXXXXXDGTDVLYYYYYYY']
+        seqs_to_filter = ['DGTDVLR']
         basetests.create_db(seqs, fullprotein=True, minlen=6)
         # Find peptide
         options = ['--dbfile', 'seqs.db', '--fullprotein', '--minlen', '9']
@@ -813,6 +812,11 @@ class DeleteSet(MzidWithDB):
         self.assertFalse(db.execute(biosql).fetchone()[0])
 
 
+class DeleteSetSage(DeleteSet):
+    infilename = 'target_pg.sage.tsv'
+    dbfn = 'target_psms.sage.sqlite'
+
+
 class TestIsoSummarize(basetests.MzidTSVBaseTest):
     """Tests producing PSM ratios, not actually summarizing"""
     suffix = '_ratio_isobaric.txt'
@@ -823,6 +827,12 @@ class TestIsoSummarize(basetests.MzidTSVBaseTest):
         result = self.run_command(['--isobquantcolpattern', 'plex',
             '--mediansweep'])
         self.do_check(0, result.stdout, ratiomethod='sweep')
+
+    def test_sage(self):
+        self.infile = os.path.join(self.fixdir, 'set1_target_pg.sage.tsv')
+        result = self.run_command(['--isobquantcolpattern', 'plex',
+            '--mediansweep'])
+        self.do_check(0, result.stdout, ratiomethod='sweep', search='sage')
 
     def test_summarize_avg(self):
         denompats = ['_126']
@@ -879,10 +889,15 @@ class TestIsoSummarize(basetests.MzidTSVBaseTest):
             self.assertEqual(float(stdout_channels[ch]), ch_medians[ch])
         return ch_medians
 
-    def do_check(self, minint, stdout, normalize=False, medianpsms=None,
-                 ratiomethod='denoms', resultch=False, denompats=False):
+    def do_check(self, minint, stdout, normalize=False, medianpsms=None, ratiomethod='denoms',
+            resultch=False, denompats=False, search=False):
         channels = ['tmt10plex_126'] + [x.format('tmt10plex_1', y+27) for x in ['{}{}C', '{}{}N'] for y in range(4)] + ['tmt10plex_131']
-        resultch = ['#SpecFile', 'SpecID'] + ['ratio_{}'.format(x) for x in channels]
+        if search == 'sage':
+            spec_id_fields = ['filename', 'scannr']
+        else:
+            spec_id_fields = ['#SpecFile', 'SpecID'] 
+            
+        resultch = spec_id_fields + [f'ratio_{x}' for x in channels]
         denom_ch = []
         if denompats:
             for denompat in denompats:
@@ -898,7 +913,7 @@ class TestIsoSummarize(basetests.MzidTSVBaseTest):
                             if in_line[ch] != 'NA' and
                             float(in_line[ch]) > minint else 'NA'
                             for ch in channels})
-            specid = f'{in_line["#SpecFile"]}_{in_line["SpecID"]}'
+            specid = f'{in_line[spec_id_fields[0]]}_{in_line[spec_id_fields[1]]}'
             denom = self.get_denominator({ch: in_line[ch] for ch in channels},
                     ratiomethod, denom_ch)
             if denom == 0:
@@ -917,8 +932,6 @@ class TestIsoSummarize(basetests.MzidTSVBaseTest):
             self.assertEqual(resultline[2:], exp_line)
 
 
-
-
 class TestIsoFeatSummarize(basetests.MzidTSVBaseTest):
     suffix = '_ratio_isobaric.txt'
     command = 'isosummarize'
@@ -931,6 +944,14 @@ class TestIsoFeatSummarize(basetests.MzidTSVBaseTest):
 
     def test_isoquant(self):
         options = ['--featcol', '14', '--isobquantcolpattern', 'tmt10plex',
+                   '--denompatterns', '_126']
+        self.run_command(options)
+        self.isoquant_check(os.path.join(self.fixdir, 'proteins_quantonly.txt'),
+            'Master protein(s)', self.channels, self.nopsms)
+
+    def test_sage(self):
+        self.infile = os.path.join(self.fixdir, 'set1_target_pg.sage.tsv')
+        options = ['--featcol', '5', '--isobquantcolpattern', 'tmt10plex',
                    '--denompatterns', '_126']
         self.run_command(options)
         self.isoquant_check(os.path.join(self.fixdir, 'proteins_quantonly.txt'),

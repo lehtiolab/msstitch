@@ -24,10 +24,6 @@ class PSMTableHeader(PepPSMHeader):
     def __init__(self, header):
         self.header = header
 
-        # detect special cases
-        if self.HEADER_SVMSCORE in self.header:
-            self.post_percolator()
-
     def post_percolator(self):
         # if perco is used, we get these. Sometimes it isnt and then there may be others, or not
         # detect this when needed!
@@ -114,6 +110,9 @@ class MSGFPSMTableHeader(PSMTableHeader):
         # Post setting SE specific fields:
         self.MOREDATA_HEADER = [self.HEADER_RETENTION_TIME, self.HEADER_INJECTION_TIME,
                 self.HEADER_ION_MOB]
+        # detect special cases
+        if self.HEADER_SVMSCORE in self.header:
+            self.post_percolator()
 
     def set_header_with_percolator(self):
         ix = self.header.index(self.HEADER_EVALUE) + 1
@@ -200,6 +199,9 @@ class SagePSMTableHeader(PSMTableHeader):
         # Post setting SE specific fields:
         self.MOREDATA_HEADER = [self.HEADER_RETENTION_TIME, self.HEADER_INJECTION_TIME,
                 self.HEADER_ION_MOB]
+        # detect special cases
+        if self.HEADER_SVMSCORE in self.header:
+            self.post_percolator()
 
     def set_header_with_percolator(self):
         startix = self.header.index(self.HEADER_SCORE) + 1

@@ -104,22 +104,23 @@ class BaseTest(unittest.TestCase):
         except ValueError:
             return value
 
-    def check_lines(self, expected, result):
-        with open(expected) as fp, open(result) as resultfp:
-            for expline, resline in zip(fp, resultfp):
-                self.assertEqual(expline, resline)
-
-    def isoquant_check(self, expected_isotable, acc_field, channels, nopsms):
+    def isoquant_check(self, expected_isotable, acc_field, channels, nopsms, searchtype=False):
         isoquant = {}
         accession = self.get_tsvheader(expected_isotable)[0]
         for line in self.tsv_generator(expected_isotable):
             acc = line.pop(accession)
             isoquant[acc] = line
         for result in self.tsv_generator(self.resultfn):
+
+            if searchtype == 'sage':
+                acc = re.sub('[\[\]-]', '', result[acc_field])
+            else:
+                acc = result[acc_field]
+            print(acc)
             for ch in channels + nopsms:
                 try:
                     resval = float(result[ch])
-                    expval = float(isoquant[result[acc_field]][ch])
+                    expval = float(isoquant[acc][ch])
                 except ValueError:
                     # NA found
                     self.assertEqual(result[ch], isoquant[result[acc_field]][ch])
@@ -253,6 +254,11 @@ class ProttableTest(BaseTest):
                                  top_ms1[protein[featout]])
             except ValueError:
                 self.assertNotIn(protein['Protein ID'], top_ms1)
+
+    def check_lines(self, expected, result):
+        with open(expected) as fp, open(result) as resultfp:
+            for expline, resline in zip(fp, resultfp):
+                self.assertEqual(expline, resline)
 
     def dotest_proteintable(self, scorecolpat, featkey, featout,
             summarize_method='denoms', should_error=False):

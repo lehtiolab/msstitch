@@ -78,7 +78,7 @@ class ProttableDriver(PepProttableDriver):
         theader = tsvreader.get_tsv_header(self.fn)
         tpephead = psmdata.get_psmheader(theader)
         dheader = tsvreader.get_tsv_header(self.decoyfn)
-        dpephead = psmdata.get_psmheader(theader)
+        dpephead = psmdata.get_psmheader(dheader)
         targets, decoys = self.get_td_proteins_bestpep(tpephead, dpephead)
         if self.fdrtype == 'picked':
             if not self.t_fasta or not self.d_fasta:

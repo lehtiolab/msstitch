@@ -14,24 +14,32 @@ class TestPSM2Peptable(basetests.BaseTest):
                                                '129C', '130N', '130C',
                                                '131']]
     nopsms = ['{} - Quanted PSM count'.format(ch) for ch in channels]
+    fncol = 1
+    fnkey = '#SpecFile'
+    pepkey = 'Peptide'
+    protkey = 'Protein'
+    specidkey = 'SpecID'
+    search = 'msgf'
 
     def check(self, fncol):
         psms = {}
         for psm in self.tsv_generator(self.infile[0]):
             score = str(float(psm['percolator svm-score']))
             try:
-                psms[psm['Peptide']][score] = psm
+                psms[psm[self.pepkey]][score] = psm
             except KeyError:
-                psms[psm['Peptide']] = {score: psm}
+                psms[psm[self.pepkey]] = {score: psm}
         wildcardstrip = 'tmt10plex_'
-        striplist = ['#SpecFile', 'Files/scans for peptide', 'MS1 area', 
+        striplist = [self.fnkey, 'Files/scans for peptide', 'MS1 area', 
                 'MS1 area (highest of all PSMs)', 'q-value (linear modeled)',
                 'Fully quanted PSM count']
+        with open(self.infile[0]) as fp:
+            fnfield = next(fp).strip().split('\t')[fncol - 1]
         for peptide in self.tsv_generator(self.resultfn):
-            for newkey, oldkey in zip(['Peptide', 'peptide q-value', 'Protein'],
+            for newkey, oldkey in zip([self.pepkey, 'peptide q-value', self.protkey],
                                       ['Peptide sequence', 'q-value', 'Protein(s)']):
                 peptide[newkey] = peptide.pop(oldkey)
-            mapping_psms = psms[peptide['Peptide']]
+            mapping_psms = psms[peptide[self.pepkey]]
             toppsm = mapping_psms[str(max([float(score) for score
                                            in mapping_psms.keys()]))]
             testpeptide = {k: v for k, v in peptide.items()
@@ -49,10 +57,8 @@ class TestPSM2Peptable(basetests.BaseTest):
             self.assertEqual(str(topms1),
                              peptide['MS1 area (highest of all PSMs)'])
             psmfnscans = set(peptide['Files/scans for peptide'].split('; '))
-            with open(self.infile[0]) as fp:
-                fnfield = next(fp).strip().split('\t')[fncol - 1]
             self.assertEqual(psmfnscans,
-                             set(['{}_{}'.format(psm[fnfield], psm['SpecID'])
+                             set(['{}_{}'.format(psm[fnfield], psm[self.specidkey])
                                   for psm in mapping_psms.values()]))
         self.check_modelqvals()
 
@@ -74,20 +80,19 @@ class TestPSM2Peptable(basetests.BaseTest):
             self.assertEqual(line[fdr[1:] + ' (linear modeled)'], 'NA')
 
     def test_psm2peptable_normalized(self):
-        options = ['--spectracol', '1', '--isobquantcolpattern',
+        options = ['--spectracol', f'{self.fncol}', '--isobquantcolpattern',
                    'tmt10plex', '--scorecolpattern', 'svm',
                    '--ms1quantcolpattern', 'MS1', 
                    '--modelqvals', '--qvalthreshold', '1e-5',
                    '--denompatterns', '126', '--median-normalize',
                    ]
         self.run_command(options)
-        self.check(1)
+        self.check(self.fncol)
         self.isoquant_check(os.path.join(self.fixdir, 'target_pep_quant_norm.tsv'),
-                'Peptide sequence', self.channels, self.nopsms)
+                'Peptide sequence', self.channels, self.nopsms, self.search)
 
     def test_psm2peptable(self):
-        fncol = 1
-        options = ['--spectracol', str(fncol), '--isobquantcolpattern',
+        options = ['--spectracol', str(self.fncol), '--isobquantcolpattern',
                    'tmt10plex', '--scorecolpattern', 'svm',
                    '--denompatterns', '126',
                    '--ms1quantcolpattern', 'MS1', 
@@ -95,12 +100,13 @@ class TestPSM2Peptable(basetests.BaseTest):
                    '--minpepnr', str(4),
                    ]
         self.run_command(options)
-        self.check(fncol)
+        self.check(self.fncol)
         self.isoquant_check(os.path.join(self.fixdir, 'target_peptides.tsv'),
-                'Peptide sequence', self.channels, self.nopsms)
+                'Peptide sequence', self.channels, self.nopsms, self.search)
 
     def test_average_summarizing(self):
         options = ['--isobquantcolpattern', 'tmt10plex',
+                '--spectracol', f'{self.fncol}',
                 '--scorecolpattern', 'svm',
                    '--denompatterns', '126',
                    '--summarize-average',
@@ -109,9 +115,9 @@ class TestPSM2Peptable(basetests.BaseTest):
                    '--minpepnr', str(4),
                    ]
         self.run_command(options)
-        self.check(1)
+        self.check(self.fncol)
         self.isoquant_check(os.path.join(self.fixdir, 'target_peptides_avg.tsv'),
-                'Peptide sequence', self.channels, self.nopsms)
+                'Peptide sequence', self.channels, self.nopsms, self.search)
 
     def test_no_spectracol_mediansweep_keep_na(self):
         options = ['--isobquantcolpattern', 'tmt10plex',
@@ -123,12 +129,12 @@ class TestPSM2Peptable(basetests.BaseTest):
                    '--minpepnr', str(4),
                    ]
         self.run_command(options)
-        self.check(1)
+        self.check(self.fncol)
         self.isoquant_check(os.path.join(self.fixdir, 'target_peptides_sweep.tsv'),
-                'Peptide sequence', self.channels, self.nopsms)
+                'Peptide sequence', self.channels, self.nopsms, self.search)
 
     def test_totalproteome(self):
-        options = ['--spectracol', '1', '--isobquantcolpattern',
+        options = ['--spectracol', f'{self.fncol}', '--isobquantcolpattern',
                    'tmt10plex', '--scorecolpattern', 'svm',
                    '--ms1quantcolpattern', 'MS1',
                    '--modelqvals', '--qvalthreshold', '1e-5',
@@ -137,12 +143,12 @@ class TestPSM2Peptable(basetests.BaseTest):
                    '--totalproteome', os.path.join(self.fixdir, 'proteins.txt'),
                    ]
         self.run_command(options)
-        self.check(1)
+        self.check(self.fncol)
         self.isoquant_check(os.path.join(self.fixdir, 'target_peptides_totalprotnorm_nolog.txt'),
-                'Peptide sequence', self.channels, self.nopsms)
+                'Peptide sequence', self.channels, self.nopsms, self.search)
 
     def test_totalproteome_logiso(self):
-        options = ['--spectracol', '1', '--isobquantcolpattern',
+        options = ['--spectracol', f'{self.fncol}', '--isobquantcolpattern',
                    'tmt10plex', '--scorecolpattern', 'svm',
                    '--ms1quantcolpattern', 'MS1', 
                    '--modelqvals', '--qvalthreshold', '1e-5',
@@ -152,15 +158,15 @@ class TestPSM2Peptable(basetests.BaseTest):
                    '--totalproteome', os.path.join(self.fixdir, 'proteins_isonorm_log.txt'),
                    ]
         self.run_command(options)
-        self.check(1)
+        self.check(self.fncol)
         self.isoquant_check(os.path.join(self.fixdir, 'target_peptides_totalprotnorm.txt'),
-                'Peptide sequence', self.channels, self.nopsms)
+                'Peptide sequence', self.channels, self.nopsms, self.search)
 
     def test_totalproteome_logiso_sepnorm(self):
         '''Most proteins/peptides have identical quant in this small exp. So output of
         totalprotnormalizing with median centering is pep - prot - median = 0 - median
         '''
-        options = ['--spectracol', '1', '--isobquantcolpattern',
+        options = ['--spectracol', f'{self.fncol}', '--isobquantcolpattern',
                    'tmt10plex', '--scorecolpattern', 'svm',
                    '--ms1quantcolpattern', 'MS1', 
                    '--modelqvals', '--qvalthreshold', '1e-5',
@@ -172,10 +178,24 @@ class TestPSM2Peptable(basetests.BaseTest):
                    '--normalization-factors-table', os.path.join(self.fixdir, 'proteins_nonorm_log.txt'),
                    ]
         self.run_command(options)
-        self.check(1)
+        self.check(self.fncol)
         self.isoquant_check(os.path.join(self.fixdir, 'target_peptides_totalp_sepnorm.txt'),
-                'Peptide sequence', self.channels, self.nopsms)
+                'Peptide sequence', self.channels, self.nopsms, self.search)
 
+
+class TestPSM2PeptableSage(TestPSM2Peptable):
+    command = 'peptides'
+    suffix = '_peptable.tsv'
+    infilename = 'set1_target_pg.sage.tsv'
+    channels = [f'tmt10plex_{x}' for x in ['126', '127N', '127C', '128N', '128C', '129N',
+        '129C', '130N', '130C', '131']]
+    nopsms = [f'{ch} - Quanted PSM count' for ch in channels]
+    fncol = 11
+    fnkey = 'filename'
+    pepkey = 'peptide'
+    protkey = 'proteins'
+    specidkey = 'scannr'
+    search = 'sage'
 
 
 class TestProteinTable(basetests.ProttableTest):
@@ -230,6 +250,12 @@ class TestProteinTable(basetests.ProttableTest):
         else:
             self.fail('This test should error due to an invalid combination of '
                     '--median-normalize and --medianintensity')
+
+    def test_sage(self):
+        self.infile = os.path.join(self.fixdir, 'target_peptides.sage.tsv')
+        self.psmfile = os.path.join(self.fixdir, 'set1_target_pg.sage.tsv')
+        self.decoyfn = os.path.join(self.fixdir, 'decoy_peptides.sage.tsv')
+        self.test_denoms()
 
 
 class TestGenenameTable(basetests.ProttableTest):
