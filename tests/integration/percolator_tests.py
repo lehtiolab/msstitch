@@ -120,7 +120,7 @@ class TestDedupPeptides(basetests.BaseTestPycolator):
         self.assertEqual(perco_input['peptide_ids'], perco_output['peptide_ids'])
         
     def test_remove_duplicate(self):
-        self.infile = [os.path.join(self.fixdir, 'perco_duplicate.xml')]
+        self.infile = [os.path.join(self.basefixdir, 'perco_duplicate.xml')]
         options = []
         self.run_command(options)
         perco_input = self.get_psm_pep_ids_from_file(self.infile[0])
@@ -130,7 +130,7 @@ class TestDedupPeptides(basetests.BaseTestPycolator):
         self.assertEqual(set(perco_input['peptide_ids']), set(perco_output['peptide_ids']))
 
     def test_remove_duplicate_psms_too(self):
-        self.infile = [os.path.join(self.fixdir, 'perco_duplicate.xml')]
+        self.infile = [os.path.join(self.basefixdir, 'perco_duplicate.xml')]
         options = ['--includepsms']
         self.run_command(options)
         perco_input = self.get_psm_pep_ids_from_file(self.infile[0])

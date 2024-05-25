@@ -533,7 +533,7 @@ class TestSpecQuantLookup(basetests.MSLookupTest):
         LEFT OUTER JOIN ms1_align AS ma USING(spectra_id)
         WHERE bs.set_name != 'Set3'
         """
-        exemptscans = {'dino': [10229], 'kr': [10148, 10229]}
+        exemptscans = {'dino': [10056, 10229], 'kr': [10015, 10148, 10229]}
         exemptscans = [f'controllerType=0 controllerNumber=1 scan={x}' for x 
                 in exemptscans[feattype]]
         for scan, featid in self.get_values_from_db(self.resultfn, sql):
