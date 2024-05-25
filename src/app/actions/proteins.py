@@ -98,7 +98,6 @@ def generate_pick_fdr(target, decoy, tfastafn, dfastafn, featfield, fastadelim, 
             picked_proteins.append(picked)
     sorted_proteins = sorted(picked_proteins, key=lambda x: get_score(x),
                              reverse=True)
-    #fdrheader = headerfields['proteinfdr'][prottabledata.HEADER_QVAL][None]
     fdrheader = prottabledata.HEADER_QVAL
     for protein in qvalue_generator(fdrheader, sorted_proteins, featfield):
         yield protein
@@ -211,6 +210,4 @@ def add_ms1_quant_from_top3_mzidtsv(features, peptides, outputaccfield, featcol)
         prec_area = calculate_protein_precursor_quant(top_ms1_peps, acc)
         outfeat = {k: v for k, v in feat.items()}
         outfeat[prottabledata.HEADER_AREA] = str(prec_area)
-#        outprotein[headerfields['precursorquant'][
-#            prottabledata.HEADER_AREA][None]] = str(prec_area)
         yield outfeat 

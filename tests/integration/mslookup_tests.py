@@ -266,7 +266,6 @@ class TestPepProtMapLookup(SearchspaceLookup):
                'seq=? LIMIT 1)')
         for seq in sequences:
             seqs_in_db.add((seq, db.execute(sql, (seq,)).fetchone()[0] == 1))
-        print(seqs_in_db)
         [self.assertTrue(x[1]) for x in seqs_in_db]
         seqcount_db = db.execute('SELECT COUNT(*) FROM protein_peptides').fetchone()[0]
         db.close()

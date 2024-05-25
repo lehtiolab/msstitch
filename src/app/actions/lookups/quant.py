@@ -22,7 +22,6 @@ def create_isobaric_quant_lookup(quantdb, specfns, isobaricfns):
         channels_store = ((name,) for name, c_id
                           in sorted(channelmap.items(), key=lambda x: int(x[1])))
         quantdb.store_channelmap(channels_store)
-        print(channelmap)
         channelmap_dbid = {channelmap[ch_name]: ch_id for ch_id, ch_name in
                 quantdb.get_channelmap() if ch_name in channelmap}
         # Get DB spectra IDs keyed by scan SIDs

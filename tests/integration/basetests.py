@@ -7,7 +7,6 @@ import re
 from lxml import etree
 from tempfile import mkdtemp
 
-
 class BaseTest(unittest.TestCase):
     testdir = 'tests'
     fixdir = os.path.join(os.getcwd(), testdir, 'fixtures')
@@ -41,6 +40,7 @@ class BaseTest(unittest.TestCase):
         cmd = self.get_std_options()
         cmd.extend(options)
         check = not return_error
+        print(cmd)
         try:
             complete = subprocess.run(cmd, capture_output=True, text=True, check=check)
         except subprocess.CalledProcessError as e:
@@ -116,7 +116,6 @@ class BaseTest(unittest.TestCase):
                 acc = re.sub('[\[\]-]', '', result[acc_field])
             else:
                 acc = result[acc_field]
-            print(acc)
             for ch in channels + nopsms:
                 try:
                     resval = float(result[ch])

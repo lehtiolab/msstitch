@@ -220,13 +220,10 @@ class SagePSMTableHeader(PSMTableHeader):
         # we assume that multi-solution scans (e.g. Isoleucine/leucine)
         # have identical scoring, i.e. MSGF is run with -n1 (default)
 
-        print(percodata)
         for psm in psms:
             try:
                 percopsm = percodata[psm[self.HEADER_PSM_ID]]
             except KeyError:
-                print('no')
-                print(psm[self.HEADER_PSM_ID])
                 continue
             outpsm = {k: v for k,v in psm.items()}
             psmscores = {

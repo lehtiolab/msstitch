@@ -362,7 +362,6 @@ class TestPercoTSV(basetests.MzidTSVBaseTest):
         options = ['--perco', os.path.join(self.fixdir, self.percofn)]
         if self.mzidfn:
             options.extend(['--mzids', os.path.join(self.fixdir, self.mzidfn)])
-        print(options)
         self.run_command(options)
         checkfields = ['percolator svm-score', 'PSM q-value', 'peptide q-value',
             'PSM PEP', 'peptide PEP', 'TD']
