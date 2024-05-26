@@ -170,8 +170,15 @@ class DuplicateFilterDriver(PSMDriver):
     def set_features(self):
         self.header = self.oldheader[:]
         psmhead = psmdata.get_psmheader(self.oldheader)
-        specfncolnr = int(self.spectracol) - 1
-        specfncol = self.oldheader[specfncolnr]
+        if self.spectracol:
+            specfncol = self.oldheader[int(self.spectracol) - 1]
+        else:
+            specfncol = psmhead.HEADER_SPECFILE
+            try:
+                self.oldheader.index(specfncol)
+            except IndexError:
+                raise RuntimeError('Could not find file name column '
+                f'"{specfncol}" in the header of the PSM table')
         if self.peptidecolpattern:
             seqcol = tsvreader.get_columns_by_pattern(self.oldheader, self.peptidecolpattern)
             if len(seqcol) > 1:
@@ -251,9 +258,8 @@ class PSMTableRefineDriver(PSMDriver):
     def set_features(self):
         """Creates iterator to write to new tsv. Contains input tsv
         lines plus quant data for these."""
-        # First prepare the data, read PSM table to SQLite
-        specfncolnr = int(self.spectracol) - 1
-        specfncol = self.oldheader[specfncolnr]
+        # First prepare the data, read PSM table to SQLite, start
+        # with fasta
         fastadelim, genefield = self.get_fastadelim_genefield(self.fastadelim,
                                                               self.genefield)
 
@@ -287,6 +293,16 @@ class PSMTableRefineDriver(PSMDriver):
         self.lookup.add_tables(self.tabletypes)
 
         psmhead = psmdata.get_psmheader(self.oldheader)
+        if self.spectracol:
+            specfncolnr = int(self.spectracol) - 1
+            specfncol = self.oldheader[specfncolnr]
+        else:
+            specfncol = psmhead.HEADER_SPECFILE
+            try:
+                specfncolnr = self.oldheader.index(specfncol)
+            except IndexError:
+                raise RuntimeError('Could not find file name column '
+                f'"{specfncol}" in the header of the PSM table')
 
         # Need to place this here since we cannot store before having done add tables, but that
         # has to be done after getting proteingroup knowledge, which depends on knowledge of 

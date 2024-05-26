@@ -40,7 +40,6 @@ class CreatePeptableDriver(PepProttableDriver):
 
     def prepare(self):
         self.oldheader = tsvreader.get_tsv_header(self.fn)
-        self.get_column_header_for_number(['spectracol'])
         self.scorecol = tsvreader.get_cols_in_file(self.scorecolpattern,
                                                    self.oldheader, True)
         self.precurquantcol = psmtopeptable.get_quantcols(self.precursorquantcolpattern,
@@ -48,6 +47,15 @@ class CreatePeptableDriver(PepProttableDriver):
 
     def set_features(self):
         psmhead = psmdata.get_psmheader(self.oldheader)
+        if self.spectracol:
+            self.get_column_header_for_number(['spectracol'])
+        else:
+            self.spectracol = psmhead.HEADER_SPECFILE
+            try:
+                self.oldheader.index(self.spectracol)
+            except IndexError:
+                raise RuntimeError('Could not find file name column '
+                f'"{specfncol}" in the header of the PSM table')
         header = [x for x in self.oldheader if x != psmhead.HEADER_SPECFILE]
         qpat = '[a-z]+[0-9]+plex_'
         try:

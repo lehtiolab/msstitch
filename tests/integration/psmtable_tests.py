@@ -46,7 +46,7 @@ class TestPSMTable(MzidWithDB):
     def test_build_full_psmtable(self):
         minpif = '0.4'
         fastafn = os.path.join(self.basefixdir, 'ens99_small.fasta')
-        options = ['--dbfile', self.workdb, '--spectracol', f'{self.spectracol}', '--addmiscleav',
+        options = ['--dbfile', self.workdb,
                 '--addbioset', '--genes', '--proteingroup', '--ms1quant', '--isobaric',
                 '--fasta', fastafn, '--min-precursor-purity', minpif]
         self.run_command(options)

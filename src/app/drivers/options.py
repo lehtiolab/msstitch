@@ -22,8 +22,7 @@ shared_options = {
                    'type': int, 'clarg': '--spectracol', 'help':
                    'Column number in which spectra file names are, '
                    'in case some framework has changed the file '
-                   'names. First column number is 1.', 'required': False,
-                   'default': 1},
+                   'names. First column number is 1.', 'required': False,},
     'proline': {'driverattr': 'proline', 'required': False,
                 'clarg': '--cutproline', 'action': 'store_const',
                 'const': True, 'default': False, 'help': 'Flag to make '

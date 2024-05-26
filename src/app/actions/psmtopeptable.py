@@ -18,7 +18,7 @@ def get_quantcols(pattern, oldheader, coltype):
 
 
 def generate_peptides(tsvfn, oldheader, psmhead, switch_map, scorecol, precurquantcol,
-        fncol=None, higherbetter=True):
+        fncol, higherbetter=True):
     if fncol is None:
         fncol = psmhead.HEADER_SPECFILE
     peptides = {}

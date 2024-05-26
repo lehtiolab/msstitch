@@ -92,7 +92,7 @@ class TestPSM2Peptable(basetests.BaseTest):
                 'Peptide sequence', self.channels, self.nopsms, self.search)
 
     def test_psm2peptable(self):
-        options = ['--spectracol', str(self.fncol), '--isobquantcolpattern',
+        options = ['--isobquantcolpattern',
                    'tmt10plex', '--scorecolpattern', 'svm',
                    '--denompatterns', '126',
                    '--ms1quantcolpattern', 'MS1', 
