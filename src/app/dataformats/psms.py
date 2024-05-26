@@ -197,8 +197,7 @@ class SagePSMTableHeader(PSMTableHeader):
         self.MS2INT = 'ms2_intensity'
 
         # Post setting SE specific fields:
-        self.MOREDATA_HEADER = [self.HEADER_RETENTION_TIME, self.HEADER_INJECTION_TIME,
-                self.HEADER_ION_MOB]
+        self.MOREDATA_HEADER = [self.HEADER_INJECTION_TIME]
         # detect special cases
         if self.HEADER_SVMSCORE in self.header:
             self.post_percolator()

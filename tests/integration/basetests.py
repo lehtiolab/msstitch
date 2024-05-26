@@ -181,14 +181,6 @@ class MzidTSVBaseTest(BaseTest):
                 row = [record[1:]]
                 rownr += 1
 
-    def check_results_sql(self, checkfields, expected_values):
-        for resultvals, exp_vals in zip(self.get_values(checkfields),
-                                        expected_values):
-            for resultval, expectval in zip(resultvals, exp_vals):
-                self.assertEqual([str(x) if x is not None else 'NA'
-                                  for x in expectval],
-                                 [str(x) for x in resultval])
-
     def process_dbvalues_both(self, dbfile, sql, permfieldnrs, permfieldnames):
         '''FIXME what does this do, is it same as rowify but with fields?'''
         dbvals = self.get_values_from_db(dbfile, sql)
@@ -202,18 +194,19 @@ class MzidTSVBaseTest(BaseTest):
                 permvals.extend([record[nr] for nr in permfieldnrs])
 
     def get_values(self, checkfields, outfile=False):
+        '''Get values from result file in order for test'''
         if not outfile:
             outfile = self.resultfn
         with open(outfile) as fp:
             header = next(fp).strip('\n').split('\t')
-            fieldindices = [header.index(field) for field in checkfields]
+            fieldindices = [header.index(field) if field else False for field in checkfields]
             for line in fp:
                 line = line.strip('\n').split('\t')
                 if len(checkfields) > 1:
-                    yield [(field, line[ix]) for field, ix in
+                    yield [(field, line[ix]) if ix is not False else (False, False) for field, ix in
                            zip(checkfields, fieldindices)]
                 else:
-                    yield [(line[ix],) for ix in fieldindices]
+                    yield [(line[ix],) if ix is not False else (False,) for ix in fieldindices]
 
 
 class MSLookupTest(BaseTest):

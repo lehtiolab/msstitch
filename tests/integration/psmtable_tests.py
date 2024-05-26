@@ -203,6 +203,15 @@ class TestPSMTable(MzidWithDB):
         for protpsm in self.get_values_from_db(self.workdb, ppsql):
             self.assertIn(protpsm[0], expected_psms[protpsm[1]]['proteins'])
 
+    def check_results_sql(self, checkfields, expected_values):
+        for resultvals, exp_vals in zip(self.get_values(checkfields),
+                                        expected_values):
+            for field, resultval, expectval in zip(checkfields, resultvals, exp_vals):
+                if field:
+                    self.assertEqual([str(x) if x is not None else 'NA'
+                                      for x in expectval],
+                                     [str(x) for x in resultval])
+
     def get_expected_psms(self):
         header = self.get_tsvheader(self.infile[0])
         prot_ix = header.index(self.protkey)
@@ -314,8 +323,8 @@ class TestPSMTableSage(TestPSMTable):
     protkey = 'proteins'
     pepkey = 'peptide'
     scorekey = 'sage_discriminant_score'
-    rt_key = 'rt'
-    ion_key = 'ion_mobility'
+    rt_key = False
+    ion_key = False
     mc_key = False
     expected_db = 'target_psms.sage.sqlite'
     expected_psms = 'target_pg.sage.tsv'

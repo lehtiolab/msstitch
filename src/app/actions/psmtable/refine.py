@@ -599,17 +599,20 @@ def count_missed_cleavage(full_pepseq, count=0):
 
 
 def generate_psms_spectradata(lookup, shiftrows, psms, bioset, miscleav, psmhead):
-    psm_specdata = zip(enumerate(psms), lookup.get_exp_spectra_data_rows(shiftrows))
-    for (row, psm), specdata in psm_specdata:
+    get_ion = psmhead.HEADER_ION_MOB in psmhead.MOREDATA_HEADER
+    get_rt = psmhead.HEADER_RETENTION_TIME in psmhead.MOREDATA_HEADER
+    field_ix, specrows = lookup.get_exp_spectra_data_rows(shiftrows, get_ion, get_rt, psmhead)
+    for (row, psm), specdata in zip(enumerate(psms), specrows):
         row += shiftrows
         outpsm = {x: y for x, y in psm.items()}
         if row == int(specdata[0]):
-            inj = str(specdata[3])
-            imob = str(specdata[4])
-            outpsm.update({psmhead.HEADER_RETENTION_TIME: str(specdata[2]),
-                           psmhead.HEADER_INJECTION_TIME: inj if inj != 'None' else 'NA',
-                           psmhead.HEADER_ION_MOB: imob if imob != 'None' else 'NA',
-                           })
+            if get_rt:
+                outpsm[psmhead.HEADER_RETENTION_TIME] = str(specdata[field_ix[psmhead.HEADER_RETENTION_TIME]])
+            if get_ion:
+                imob = str(specdata[field_ix[psmhead.HEADER_ION_MOB]])
+                outpsm[psmhead.HEADER_ION_MOB] = imob if imob != 'None' else 'NA'
+            inj = str(specdata[field_ix[psmhead.HEADER_INJECTION_TIME]])
+            outpsm[psmhead.HEADER_INJECTION_TIME] = inj if inj != 'None' else 'NA'
             if bioset:
                 outpsm[psmhead.HEADER_SETNAME] = str(specdata[1])
         else:

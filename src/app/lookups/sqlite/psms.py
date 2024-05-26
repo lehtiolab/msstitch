@@ -160,11 +160,21 @@ class PSMDB(ResultLookupInterface):
         self.index_column('proteinpsm_index', 'protein_psm', 'protein_acc')
         self.index_column('protpsmid_index', 'protein_psm', 'psm_id')
 
-    def get_exp_spectra_data_rows(self, shiftrows):
+    def get_exp_spectra_data_rows(self, shiftrows, get_ionm, get_rt, psmh):
+        # FIXME skip ion mob and rt if not needed!
         cursor = self.get_cursor()
         rowlim = 'WHERE pr.rownr>{} '.format(shiftrows - 1) if shiftrows else ''
-        return cursor.execute('SELECT pr.rownr, bs.set_name, sp.retention_time, '
-                              'iit.ion_injection_time, im.ion_mobility '
+        field_ix = {psmh.HEADER_RETENTION_TIME: 2, psmh.HEADER_ION_MOB: 4, psmh.HEADER_INJECTION_TIME: 3}
+        rt, ion_m = '', ''
+        if get_rt:
+            rt = 'sp.retention_time, '
+        else:
+            field_ix[psmh.HEADER_ION_MOB] = 3
+            field_ix[psmh.HEADER_INJECTION_TIME] = 2
+        if get_ionm:
+            ion_m = ', im.ion_mobility'
+        return field_ix, cursor.execute(f'SELECT pr.rownr, bs.set_name, {rt}'
+                              f'iit.ion_injection_time{ion_m} '
                               'FROM psmrows AS pr '
                               'JOIN psms AS p USING(psm_id) '
                               'JOIN mzml AS sp USING(spectra_id) '
