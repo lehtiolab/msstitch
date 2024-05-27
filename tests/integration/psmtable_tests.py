@@ -49,6 +49,8 @@ class TestPSMTable(MzidWithDB):
         options = ['--dbfile', self.workdb,
                 '--addbioset', '--genes', '--proteingroup', '--ms1quant', '--isobaric',
                 '--fasta', fastafn, '--min-precursor-purity', minpif]
+        if self.mc_key:
+            options.append('--addmiscleav')
         self.run_command(options)
         self.check_db_fasta(fastafn)
         self.check_addspec_bioset()
