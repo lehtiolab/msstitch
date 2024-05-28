@@ -2,9 +2,19 @@
 
 Shotgun proteomics has a number of bioinformatic tools available for identification 
 and quantification of peptides, and the subsequent protein inference. `msstitch` is a 
-tool to integrate a number of these tools, generating ready to use result files.
+tool to integrate a number of these tools, generating ready to use result files. Supported
+formats are currently:
 
-If you need support for a specific program, there is limited time but infinite gratitude :)
+- mzML files
+- Fasta peptides
+- MSGF+ PSM tables (and mzIdentML)
+- Sage PSM tables (not for quant yet)
+- Percolator output
+- OpenMS consensusXML isobaric quant
+- Hardklor/Kronik MS1 quant output
+- Dinosaur MS1 quant output
+
+If you need support for another format, there is limited time but infinite gratitude :)
 
 ## Usage
 
@@ -88,6 +98,15 @@ msstitch concat -i psms1.txt psms2.txt -o allpsms.txt
 msstitch split -i allpsms.txt --splitcol TD
 ```
 
+If you're running Sage instead of MSGFplus, you will not need the mzIdentML, so the `perco2psm`
+commands above can be written e.g.:
+```
+msstitch perco2psm -i psms1.sage.txt -o psms.sage.percolated.txt \
+  --perco percolator1.xml \
+  --filtpsm 0.01 --filtpep 0.01
+... etc
+```
+
 Now refine the PSM tables, using the earlier created SQLite DB, 
 adding more information (sample name, MS1 precursor quant,
 isobaric quant, proteingroups, genes). In this example we set isobaric
@@ -101,6 +120,10 @@ msstitch psmtable -i target.tsv -o target_psmtable.txt --fasta uniprot.fasta \
 msstitch psmtable -i decoy.tsv -o decoy_psmtable.txt --fasta decoy.fasta \
   --dbfile decoy_db.sqlite --proteingroup --genes --addbioset
 ```
+
+When using Sage results, you will have missed cleavages out of the box (and retention time, ion mobility)! So leave
+out `--addmiscleav`. Otherwise msstitch will accept the Sage file format as well.
+
 
 If necessary (e.g. multiple TMT sample sets), split the table before making
 protein/peptide tables:

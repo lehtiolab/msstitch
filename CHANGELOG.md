@@ -1,5 +1,14 @@
 # Changelog
 
+## [3.16] - 2024-04-28
+### Added
+- Support for Sage search engine output
+
+### Fixed
+- Output MS1 quant correctly if there are missing scans in isobaric quant (15ba5883efbf3043995ff222925b5e8467ee5e20)
+- Merge protein crash when some protein was not in DB (2b073aa59cec8c3730e785771fd95099f7e55d8f)
+
+
 ## [3.15] - 2023-11-14
 ### Added
 - qvality input can be used for adding FDR to PSM table (8ead34b0cf95fab966634e38fb49cd860b109428)
