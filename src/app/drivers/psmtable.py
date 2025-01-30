@@ -116,7 +116,7 @@ class Perco2PSMDriver(PSMDriver):
             mzidsr = mzidreader.mzid_spec_result_generator(mzidfn, mzns)
             specidis = perco.generate_spec_id_items(mzidsr, mzns)
             psms = tsvreader.generate_split_tsv_lines(psmfn, oldheader)
-            psms_perco = psmformat.add_fdr_to_mzidtsv(psms, specidis, self.percopsms)
+            psms_perco = psmformat.add_fdr_to_mzidtsv(psms, specidis, self.percopsms, mzns)
             if self.filtpsm:
                 psms_perco = filtering.filter_psms_conf(psms_perco, psmformat.HEADER_PSMQ,
                         self.filtpsm, True)

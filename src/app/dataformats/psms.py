@@ -106,6 +106,7 @@ class MSGFPSMTableHeader(PSMTableHeader):
         # exclusives
         self.HEADER_SCORE = 'MSGFScore'
         self.HEADER_EVALUE = 'EValue'
+        self.HEADER_EXPLAINED_MS2 = 'ExplainedIonCurrentRatio'
         
         # Post setting SE specific fields:
         self.MOREDATA_HEADER = [self.HEADER_RETENTION_TIME, self.HEADER_INJECTION_TIME,
@@ -117,14 +118,15 @@ class MSGFPSMTableHeader(PSMTableHeader):
     def set_header_with_percolator(self):
         ix = self.header.index(self.HEADER_EVALUE) + 1
         self.post_percolator()
-        self.header = self.header[:ix] + self.PERCO_HEADER + self.header[ix:]
+        self.header = [*self.header[:ix], self.HEADER_EXPLAINED_MS2, *self.PERCO_HEADER,
+                *self.header[ix:]]
 
     def get_scannr(self, psm):
         return psm[self.HEADER_SCANNR]
 
-    def add_fdr_to_mzidtsv(self, psms, specidis, percodata):
+    def add_fdr_to_mzidtsv(self, psms, specidis, percodata, mzns):
         """Takes PSMs from an mzIdentML and its MSGF+ TSV and a corresponding 
-        percolator XML. 
+        percolator XML. Also adds explained ion current ratio from mzid
         """
         # mzId results and PSM lines can be zipped
         # but we assume that multi-solution scans (e.g. Isoleucine/leucine)
@@ -134,6 +136,7 @@ class MSGFPSMTableHeader(PSMTableHeader):
             spfile = os.path.splitext(psm[self.HEADER_SPECFILE])[0]
             psmcharge = psm[self.HEADER_CHARGE]
             perco_id = f'{spfile}_{specidi.attrib["id"]}_{scan}_{psmcharge}_{specidi.attrib["rank"]}'
+            expl_ratio = specidi.find(f'{{{mzns["xmlns"]}}}userParam[@name="ExplainedIonCurrentRatio"]')
             try:
                 percopsm = percodata[perco_id]
             except KeyError:
@@ -143,6 +146,7 @@ class MSGFPSMTableHeader(PSMTableHeader):
                 self.HEADER_SVMSCORE: percopsm['svm'], 
                 self.HEADER_PSMQ: percopsm['qval'], 
                 self.HEADER_PSM_PEP: percopsm['pep'], 
+                self.HEADER_EXPLAINED_MS2: expl_ratio.attrib['value'],
                 }
             try:
                 pepscores = {
@@ -212,7 +216,7 @@ class SagePSMTableHeader(PSMTableHeader):
         # controllerType=0 controllerNumber=1 scan=244	
         return psm[self.HEADER_SPECSCANID].split('=')[-1]
 
-    def add_fdr_to_mzidtsv(self, psms, specidis, percodata):
+    def add_fdr_to_mzidtsv(self, psms, specidis, percodata, mzns):
         """Takes PSMs from an mzIdentML and its MSGF+ TSV and a corresponding 
         percolator XML. 
         """

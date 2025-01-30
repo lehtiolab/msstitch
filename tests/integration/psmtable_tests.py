@@ -351,11 +351,12 @@ class TestPercoTSV(basetests.MzidTSVBaseTest):
         threshold = 0.3
         options = ['--perco', os.path.join(self.fixdir, self.percofn), '--filtpep', 
             str(threshold), '--filtpsm', str(threshold)]
-        if self.mzidfn:
-            options.extend(['--mzids', os.path.join(self.fixdir, self.mzidfn)])
-        self.run_command(options)
         checkfields = ['percolator svm-score', 'PSM q-value', 'peptide q-value',
             'PSM PEP', 'peptide PEP', 'TD']
+        if self.mzidfn:
+            options.extend(['--mzids', os.path.join(self.fixdir, self.mzidfn)])
+            checkfields.append('ExplainedIonCurrentRatio')
+        self.run_command(options)
         with open(os.path.join(self.fixdir, self.expected_fn)) as fp:
             header = next(fp).strip().split('\t')
             expected = [line.strip().split('\t') for line in fp]
@@ -371,11 +372,12 @@ class TestPercoTSV(basetests.MzidTSVBaseTest):
 
     def test_add_fdr(self):
         options = ['--perco', os.path.join(self.fixdir, self.percofn)]
-        if self.mzidfn:
-            options.extend(['--mzids', os.path.join(self.fixdir, self.mzidfn)])
-        self.run_command(options)
         checkfields = ['percolator svm-score', 'PSM q-value', 'peptide q-value',
             'PSM PEP', 'peptide PEP', 'TD']
+        if self.mzidfn:
+            options.extend(['--mzids', os.path.join(self.fixdir, self.mzidfn)])
+            checkfields.append('ExplainedIonCurrentRatio')
+        self.run_command(options)
         with open(os.path.join(self.fixdir, self.expected_fn)) as fp:
             header = next(fp).strip().split('\t')
             expected = [line.strip().split('\t') for line in fp]
