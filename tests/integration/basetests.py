@@ -113,7 +113,7 @@ class BaseTest(unittest.TestCase):
         for result in self.tsv_generator(self.resultfn):
 
             if searchtype == 'sage':
-                acc = re.sub('[\[\]-]', '', result[acc_field])
+                acc = re.sub(r'[\[\]-]', '', result[acc_field])
             else:
                 acc = result[acc_field]
             for ch in channels + nopsms:
@@ -165,7 +165,7 @@ class BaseTestPycolator(BaseTest):
         return [element.find('{%s}%s' % (ns, subel)) for element in elements]
 
     def strip_modifications(self, pep):
-        return re.sub('\[UNIMOD:\d*\]', '', pep)
+        return re.sub(r'\[UNIMOD:\d*\]', '', pep)
 
 
 class MzidTSVBaseTest(BaseTest):

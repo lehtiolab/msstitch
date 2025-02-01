@@ -94,7 +94,7 @@ class TestPSMTable(MzidWithDB):
 
     def check_miscleav(self):
         for val, exp in zip(self.get_values([self.mc_key]), self.get_values([self.pepkey], self.infile[0])):
-            exp = re.sub('[^A-Za-z]', '', exp[0][0])[:-1]
+            exp = re.sub(r'[^A-Za-z]', '', exp[0][0])[:-1]
             self.assertEqual(int(val[0][0]), exp.count('K') + exp.count('R') - exp.count('KP') - exp.count('RP'))
 
     def check_addspec_bioset(self):
@@ -344,8 +344,6 @@ class TestPercoTSV(basetests.MzidTSVBaseTest):
     qval_psms = 'qvality_psms.txt'
     qval_peps = 'qvality_peps.txt'
 
-    def setUp(self):
-        super().setUp()
 
     def test_conffilt(self):
         threshold = 0.3
@@ -392,16 +390,17 @@ class TestPercoTSV(basetests.MzidTSVBaseTest):
         '''Get FDR data from recalculation in qvality. Qvality input is prepared
         as a TSV with header, for target and decoy (so qvality -d) . In this case 
         I have simply taken the percolator svm/qval/pep scores from perco.xml and 
-        added 0.1 to each PSM (not peptide) q-value using bash, PSMs:
+        added 0.1 to each PSM (not peptide) q-value using bash, PSMs (double backslashes
+        for python):
         cat <(echo $'Score\tPEP\tq-value') \
-                <(grep -A3 '<psm p' perco.xml| grep -v psm| grep -v '\-\-' | \
-                sed -E 's/\s*<[\/]*[a-z_]+>//g' | paste - - - | \
+                <(grep -A3 '<psm p' perco.xml| grep -v psm| grep -v '\\-\\-' | \
+                sed -E 's/\\s*<[\\/]*[a-z_]+>//g' | paste - - - | \
                 gawk -v FS='\t' -v OFS='\t' '{print $1, $3, $2+0.1}') > qvality_psms.txt 
 
         Peptides:
         cat ...as above \
-                <(grep -A3 '<peptide p' perco.xml| grep -v peptide| grep -v '\-\-' | \
-                sed -E 's/\s*<[\/]*[a-z_]+>//g' | paste - - - | \
+                <(grep -A3 '<peptide p' perco.xml| grep -v peptide| grep -v '\\-\\-' | \
+                sed -E 's/\\s*<[\\/]*[a-z_]+>//g' | paste - - - | \
                 gawk -v FS='\t' -v OFS='\t' '{print $1, $3, $2}') > qvality_peps.txt 
 
         '''
@@ -523,7 +522,7 @@ class TestSeqMatchFastaDB(basetests.MzidTSVBaseTest):
             for line in fp:
                 out_linecount += 1
                 psm = {k: v for k,v in zip(header, line.strip().split('\t'))}
-                seq = re.sub('[^A-Z]', '', psm[self.pepkey])
+                seq = re.sub(r'[^A-Z]', '', psm[self.pepkey])
                 if seq in seqs_nrmap and matching:
                     self.assertEqual(psm[matchcol], f'acc_{seqs_nrmap[seq]}')
                 else:
@@ -646,7 +645,7 @@ class TestSeqFilt(basetests.MzidTSVBaseTest):
             filtpsms = {}
             for line in fp:
                 psm = {k: v for k,v in zip(header, line.strip().split('\t'))}
-                seq = re.sub('[^A-Z]', '', psm[self.pepkey])
+                seq = re.sub(r'[^A-Z]', '', psm[self.pepkey])
                 scan = psm[self.specidkey].split('=')[-1]
                 # Use scan_seq since sometimes have two solutions to same scan at equal score
                 filtpsms[f'{scan}_{seq}'] = seq
@@ -662,7 +661,7 @@ class TestSeqFilt(basetests.MzidTSVBaseTest):
             header = next(fp).strip().split('\t')
             for line in fp:
                 psm = {k: v for k,v in zip(header, line.strip().split('\t'))}
-                seq = re.sub('[^A-Z]', '', psm[self.pepkey])
+                seq = re.sub(r'[^A-Z]', '', psm[self.pepkey])
                 scan = psm[self.specidkey].split('=')[-1]
                 allpsms[f'{scan}_{seq}'] = seq
                 if seq in seqs:

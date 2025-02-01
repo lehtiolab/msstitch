@@ -25,8 +25,8 @@ class PSMTableHeader(PepPSMHeader):
         self.header = header
 
     def post_percolator(self):
-        # if perco is used, we get these. Sometimes it isnt and then there may be others, or not
-        # detect this when needed!
+        # if perco is used, we get these. Sometimes it isnt and then there may be others, or not.
+        # Detect when this is needed!
         self.HEADER_PSMQ = 'PSM q-value'
         self.HEADER_PSM_PEP = 'PSM PEP'
         self.HEADER_PEPTIDE_Q = 'peptide q-value'
@@ -45,7 +45,7 @@ class PSMTableHeader(PepPSMHeader):
         proteins = line[self.HEADER_PROTEIN].split(';')
         outproteins = []
         for protein in proteins:
-            prepost_protein = re.sub('\(pre=.*post=.*\)', '', protein).strip()
+            prepost_protein = re.sub(r'\(pre=.*post=.*\)', '', protein).strip()
             outproteins.append(prepost_protein)
         return outproteins
 
@@ -173,7 +173,6 @@ class MSGFPSMTableHeader(PSMTableHeader):
 
 
 class SagePSMTableHeader(PSMTableHeader):
-    name = 'sage'
     id_fields_header = ['sage_discriminant_score']
 
     def __init__(self, header):
