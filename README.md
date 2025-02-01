@@ -98,6 +98,8 @@ msstitch concat -i psms1.txt psms2.txt -o allpsms.txt
 msstitch split -i allpsms.txt --splitcol TD
 ```
 
+This also adds ExplainedIonCurrentRatio, which is parsed from the mzIdentML file as delivered by MSGF+.
+
 If you're running Sage instead of MSGFplus, you will not need the mzIdentML, so the `perco2psm`
 commands above can be written e.g.:
 ```

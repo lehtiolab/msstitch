@@ -1,5 +1,10 @@
 # Changelog
 
+## [3.17] - 2025-02-01
+### Added
+- Output ExplainedIonCurrentRatio to PSM table when adding percolator to it from MSGF+
+
+
 ## [3.16] - 2024-04-28
 ### Added
 - Support for Sage search engine output
