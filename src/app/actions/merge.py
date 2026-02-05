@@ -24,6 +24,8 @@ def create_lookup(fns, pqdb, poolnames, featcolnr, ms1_qcolpattern,
         psmcolmap = get_colmap(fns, psmnrpattern)
         create_isobaric_quant_lookup(fns, tablefn_map, feat_map, pqdb, featcolnr,
                 isocolmap, psmcolmap)
+    delete_feats = {acc_id for _, [acc_id, used] in feat_map.items() if not used}
+    pqdb.delete_features(delete_feats)
 
 
 def create_tablefn_map(fns, pqdb, poolnames):
@@ -68,7 +70,8 @@ def store_single_col_data(fns, prottable_id_map, pacc_map, pqdbmethod, colmap):
     in lookup"""
     to_store = []
     for fn, header, pquant in tsvreader.generate_tsv_pep_protein_quants(fns):
-        pacc_id = pacc_map[pquant[header[0]]]
+        pacc_id = pacc_map[pquant[header[0]]][0]
+        pacc_map[pquant[header[0]]][1] = True
         pqdata = (pacc_id, prottable_id_map[fn], pquant[colmap[fn]])
         to_store.append(pqdata)
         if len(to_store) > 10000:
@@ -113,7 +116,8 @@ def map_psmnrcol_to_quantcol(quantcols, psmcols, tablefn_map):
 def get_isob_quant_data(pquant, featfield, fnid, featmap, qmap):
     """Turns a dict from a line of protein/peptide quant data into a set of
     tuples that can be stored in db"""
-    feat_dbid = featmap[pquant[featfield]]
+    feat_dbid = featmap[pquant[featfield]][0]
+    featmap[pquant[featfield]][1] = True
     for channel_name, (channel_id, psmfield) in qmap[fnid].items():
         if psmfield is None:
             yield (feat_dbid, channel_id, pquant[channel_name])
@@ -146,7 +150,7 @@ def build_proteintable(pqdb, mergecutoff, isobaric=False):
             if isobaric:
                 channels = setfeatvals[len(pqdb.singlefields)].split(',')
                 quants = setfeatvals[len(pqdb.singlefields)+1].split(',')
-                try: 
+                try:
                     ampsms = setfeatvals[len(pqdb.singlefields)+2].split(',')
                 except AttributeError:
                     ampsms = [0] * len(channels)
@@ -160,20 +164,22 @@ def build_proteintable(pqdb, mergecutoff, isobaric=False):
         yield outfeat
 
 
-
 def protein_pool_fdr_cutoff_ok(fdr, fdrcutoff, feature, setname):
-    if not fdrcutoff and fdr is not False and fdr != 'NA':
+    '''See if feature output meets the FDR cutoff, if any such cutoff exists.
+    If there is no cutoff, we still need to be sure that the feature is in the input data,
+    and not only in the input DB which is from a PSM table.'''
+    if fdrcutoff is False:
         return True
     warning = False
-    if fdr is False or fdr == 'NA':
+    if fdr is False:
         warning = True
     try:
         fdr = float(fdr)
     except (TypeError, ValueError):
+        # Catch 'NA', or other string or weird other type
         warning = True
     if warning:
-        print('WARNING, filtering merge table on FDR but feat ID {} in '
-                'set {} has FDR value "{}" in '
-                'lookup.'.format(feature, setname, fdr))
+        print(f'WARNING, filtering merge table on FDR but feat ID {feature} in '
+                f'set {setname} has FDR value "{fdr}" in lookup.')
         return False
     return fdr < fdrcutoff

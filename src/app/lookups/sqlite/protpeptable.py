@@ -104,12 +104,24 @@ class ProtPepTable(ResultLookupInterface):
         return {fn: table_id for (table_id, setid, fn) in cursor}
 
     def get_feature_map(self):
+        '''Create map of all features in feature table, output:
+        {accession_id: [accession_name, False]} where the False is a check to be set
+        to True if an accession is in the input txt file (the features exist in the DB
+        beforehand from the PSM table, but may for some reason not be in a protein table).
+        '''
         table = self.table_map[self.datatype]['feattable']
         columns = self.colmap[table][0:2]
         cursor = self.get_cursor()
-        cursor.execute('SELECT {}, {} FROM {}'.format(columns[0], columns[1],
-                                                      table))
-        return {acc: table_id for (table_id, acc) in cursor}
+        cursor.execute(f'SELECT {columns[0]}, {columns[1]} FROM {table}')
+        return {acc: [table_id, False] for (table_id, acc) in cursor}
+
+    def delete_features(self, delete_ids):
+        table = self.table_map[self.datatype]['feattable']
+        acc_id = self.colmap[table][0]
+        cursor = self.get_cursor()
+        for feat in delete_ids:
+            cursor.execute(f'DELETE FROM {table} WHERE {acc_id} = {feat}')
+        self.conn.commit()
 
     def store_singlecol(self, tablekey, vals):
         table = self.table_map[self.datatype][tablekey]
