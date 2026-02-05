@@ -16,7 +16,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
   </process_info>
 
   <psms>
-    <psm p:psm_id="60" p:decoy="false">
+    <psm p:psm_id="86" p:decoy="false">
       <svm_score>0.000000</svm_score>
       <q_value>1.666667e-01</q_value>
       <pep>1.269104e-02</pep>
@@ -26,7 +26,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000254108.7;ENSP00000369594.3;ENSP00000455282.1</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="98" p:decoy="false">
+    <psm p:psm_id="24" p:decoy="false">
       <svm_score>-0.391</svm_score>
       <q_value>1.667e-01</q_value>
       <pep>1.001e-01</pep>
@@ -36,7 +36,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000294671.2</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="26" p:decoy="false">
+    <psm p:psm_id="23" p:decoy="false">
       <svm_score>-0.444</svm_score>
       <q_value>1.667e-01</q_value>
       <pep>1.323e-01</pep>
@@ -46,7 +46,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000263545.7;ENSP00000347005.4;ENSP00000440222.1;ENSP00000441604.1;ENSP00000483438.1</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="15" p:decoy="false">
+    <psm p:psm_id="19" p:decoy="false">
       <svm_score>-0.574</svm_score>
       <q_value>1.667e-01</q_value>
       <pep>2.625e-01</pep>
@@ -56,7 +56,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000254108.7;ENSP00000369594.3;ENSP00000455282.1</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="75" p:decoy="false">
+    <psm p:psm_id="58" p:decoy="false">
       <svm_score>-0.607</svm_score>
       <q_value>1.667e-01</q_value>
       <pep>3.130e-01</pep>
@@ -66,7 +66,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000252999.3</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="68" p:decoy="false">
+    <psm p:psm_id="39" p:decoy="false">
       <svm_score>-0.618</svm_score>
       <q_value>1.667e-01</q_value>
       <pep>3.313e-01</pep>
@@ -76,7 +76,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000311513.6;ENSP00000434509.1</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="47" p:decoy="true">
+    <psm p:psm_id="15" p:decoy="true">
       <svm_score>-0.628</svm_score>
       <q_value>2.857e-01</q_value>
       <pep>3.502e-01</pep>
@@ -96,7 +96,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000252999.3</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="82" p:decoy="true">
+    <psm p:psm_id="102" p:decoy="true">
       <svm_score>-0.652</svm_score>
       <q_value>3.750e-01</q_value>
       <pep>3.963e-01</pep>
@@ -106,7 +106,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000269243.4;decoy_ENSP00000353590.3;decoy_ENSP00000369315.5</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="19" p:decoy="false">
+    <psm p:psm_id="45" p:decoy="false">
       <svm_score>-0.724</svm_score>
       <q_value>3.750e-01</q_value>
       <pep>5.758e-01</pep>
@@ -116,7 +116,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000396301.2;ENSP00000422641.1;ENSP00000426764.2</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="20" p:decoy="true">
+    <psm p:psm_id="21" p:decoy="true">
       <svm_score>-0.727</svm_score>
       <q_value>4.167e-01</q_value>
       <pep>5.865e-01</pep>
@@ -126,7 +126,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000364979.4</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="11" p:decoy="false">
+    <psm p:psm_id="9" p:decoy="false">
       <svm_score>-0.739</svm_score>
       <q_value>4.167e-01</q_value>
       <pep>6.246e-01</pep>
@@ -136,7 +136,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000358992.1;ENSP00000358994.3;ENSP00000358998.4;ENSP00000359002.3;ENSP00000478013.1;ENSP00000487348.2</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="92" p:decoy="true">
+    <psm p:psm_id="38" p:decoy="true">
       <svm_score>-0.740</svm_score>
       <q_value>4.167e-01</q_value>
       <pep>6.266e-01</pep>
@@ -146,7 +146,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000254108.7;decoy_ENSP00000369594.3;decoy_ENSP00000455282.1</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="93" p:decoy="false">
+    <psm p:psm_id="8" p:decoy="false">
       <svm_score>-0.750</svm_score>
       <q_value>4.167e-01</q_value>
       <pep>6.589e-01</pep>
@@ -156,7 +156,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000348551.4;ENSP00000384018.1;ENSP00000384202.1;ENSP00000385618.3;ENSP00000400281.2</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="12" p:decoy="false">
+    <psm p:psm_id="41" p:decoy="false">
       <svm_score>-0.752</svm_score>
       <q_value>4.167e-01</q_value>
       <pep>6.663e-01</pep>
@@ -166,7 +166,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000350937.4;ENSP00000377121.2</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="41" p:decoy="false">
+    <psm p:psm_id="28" p:decoy="false">
       <svm_score>-0.753</svm_score>
       <q_value>4.167e-01</q_value>
       <pep>6.705e-01</pep>
@@ -176,7 +176,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000318165.7;ENSP00000373798.6</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="23" p:decoy="true">
+    <psm p:psm_id="17" p:decoy="true">
       <svm_score>-0.757</svm_score>
       <q_value>4.375e-01</q_value>
       <pep>6.839e-01</pep>
@@ -186,7 +186,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000263545.7;decoy_ENSP00000441604.1</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="40" p:decoy="false">
+    <psm p:psm_id="32" p:decoy="false">
       <svm_score>-0.762</svm_score>
       <q_value>4.375e-01</q_value>
       <pep>7.021e-01</pep>
@@ -196,7 +196,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000300527.4;ENSP00000312529.5;ENSP00000380870.1;ENSP00000387115.1</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="56" p:decoy="true">
+    <psm p:psm_id="89" p:decoy="true">
       <svm_score>-0.781</svm_score>
       <q_value>4.375e-01</q_value>
       <pep>7.730e-01</pep>
@@ -206,7 +206,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000396024.1</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="61" p:decoy="false">
+    <psm p:psm_id="54" p:decoy="false">
       <svm_score>-0.784</svm_score>
       <q_value>4.375e-01</q_value>
       <pep>7.864e-01</pep>
@@ -216,7 +216,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000243286.3;ENSP00000361710.5;ENSP00000361711.1</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="89" p:decoy="false">
+    <psm p:psm_id="5" p:decoy="false">
       <svm_score>-0.785</svm_score>
       <q_value>4.375e-01</q_value>
       <pep>7.908e-01</pep>
@@ -226,7 +226,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000374370.4;ENSP00000374372.3</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="102" p:decoy="false">
+    <psm p:psm_id="63" p:decoy="false">
       <svm_score>-0.790</svm_score>
       <q_value>4.375e-01</q_value>
       <pep>8.103e-01</pep>
@@ -236,7 +236,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000271636.7</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="24" p:decoy="true">
+    <psm p:psm_id="22" p:decoy="true">
       <svm_score>-0.790</svm_score>
       <q_value>5.000e-01</q_value>
       <pep>8.114e-01</pep>
@@ -246,7 +246,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000465461.1;decoy_ENSP00000465489.1;decoy_ENSP00000466012.1;decoy_ENSP00000466134.1</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="39" p:decoy="true">
+    <psm p:psm_id="71" p:decoy="true">
       <svm_score>-0.794</svm_score>
       <q_value>5.000e-01</q_value>
       <pep>8.280e-01</pep>
@@ -256,7 +256,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000396024.1</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="45" p:decoy="false">
+    <psm p:psm_id="35" p:decoy="false">
       <svm_score>-0.794</svm_score>
       <q_value>5.000e-01</q_value>
       <pep>8.291e-01</pep>
@@ -266,7 +266,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000374370.4;ENSP00000374372.3</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="51" p:decoy="false">
+    <psm p:psm_id="80" p:decoy="false">
       <svm_score>-0.796</svm_score>
       <q_value>5.000e-01</q_value>
       <pep>8.363e-01</pep>
@@ -276,7 +276,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000297954.4;ENSP00000378860.2;ENSP00000415038.1</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="76" p:decoy="true">
+    <psm p:psm_id="82" p:decoy="true">
       <svm_score>-0.796</svm_score>
       <q_value>5.263e-01</q_value>
       <pep>8.381e-01</pep>
@@ -286,7 +286,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000298701.7;decoy_ENSP00000358321.1;decoy_ENSP00000358324.3;decoy_ENSP00000358327.3;decoy_ENSP00000398107.2;decoy_ENSP00000478999.1;decoy_ENSP00000480584.1</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="103" p:decoy="false">
+    <psm p:psm_id="48" p:decoy="false">
       <svm_score>-0.816</svm_score>
       <q_value>5.263e-01</q_value>
       <pep>9.269e-01</pep>
@@ -296,7 +296,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000006658.6;ENSP00000348878.4;ENSP00000483295.1</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="69" p:decoy="true">
+    <psm p:psm_id="87" p:decoy="true">
       <svm_score>-0.831</svm_score>
       <q_value>5.789e-01</q_value>
       <pep>1.000e+00</pep>
@@ -306,7 +306,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000365606.5;decoy_ENSP00000469842.2;decoy_ENSP00000477574.1</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="16" p:decoy="true">
+    <psm p:psm_id="75" p:decoy="true">
       <svm_score>-0.836</svm_score>
       <q_value>6.000e-01</q_value>
       <pep>1.000e+00</pep>
@@ -316,7 +316,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000358992.1;decoy_ENSP00000358994.3;decoy_ENSP00000358998.4;decoy_ENSP00000359002.3;decoy_ENSP00000478013.1;decoy_ENSP00000487348.2</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="44" p:decoy="false">
+    <psm p:psm_id="81" p:decoy="false">
       <svm_score>-0.847</svm_score>
       <q_value>6.000e-01</q_value>
       <pep>1.000e+00</pep>
@@ -336,7 +336,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000322577.7;decoy_ENSP00000334624.4;decoy_ENSP00000384315.4;decoy_ENSP00000452658.1;decoy_ENSP00000453724.1</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="18" p:decoy="true">
+    <psm p:psm_id="16" p:decoy="true">
       <svm_score>-0.860</svm_score>
       <q_value>7.000e-01</q_value>
       <pep>1.000e+00</pep>
@@ -346,7 +346,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000260956.4;decoy_ENSP00000386636.1</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="10" p:decoy="true">
+    <psm p:psm_id="12" p:decoy="true">
       <svm_score>-0.873</svm_score>
       <q_value>7.391e-01</q_value>
       <pep>1.000e+00</pep>
@@ -356,7 +356,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000262056.9;decoy_ENSP00000388806.3;decoy_ENSP00000412530.3</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="87" p:decoy="true">
+    <psm p:psm_id="85" p:decoy="true">
       <svm_score>-0.876</svm_score>
       <q_value>7.391e-01</q_value>
       <pep>1.000e+00</pep>
@@ -366,7 +366,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000405111.2;decoy_ENSP00000482275.1</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="9" p:decoy="true">
+    <psm p:psm_id="36" p:decoy="true">
       <svm_score>-0.877</svm_score>
       <q_value>7.391e-01</q_value>
       <pep>1.000e+00</pep>
@@ -376,7 +376,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000260956.4;decoy_ENSP00000386636.1</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="65" p:decoy="false">
+    <psm p:psm_id="59" p:decoy="false">
       <svm_score>-0.880</svm_score>
       <q_value>7.391e-01</q_value>
       <pep>1.000e+00</pep>
@@ -386,7 +386,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000363880.1;ENSP00000363881.3;ENSP00000363883.3;ENSP00000414095.2;ENSP00000444856.2</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="72" p:decoy="false">
+    <psm p:psm_id="96" p:decoy="false">
       <svm_score>-0.885</svm_score>
       <q_value>7.391e-01</q_value>
       <pep>1.000e+00</pep>
@@ -396,7 +396,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000358992.1;ENSP00000358994.3;ENSP00000358998.4;ENSP00000359002.3;ENSP00000399406.1;ENSP00000478013.1</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="57" p:decoy="false">
+    <psm p:psm_id="93" p:decoy="false">
       <svm_score>-0.889</svm_score>
       <q_value>7.391e-01</q_value>
       <pep>1.000e+00</pep>
@@ -406,7 +406,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000294671.2</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="31" p:decoy="true">
+    <psm p:psm_id="29" p:decoy="true">
       <svm_score>-0.904</svm_score>
       <q_value>7.778e-01</q_value>
       <pep>1.000e+00</pep>
@@ -416,7 +416,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000374370.4;decoy_ENSP00000374372.3</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="83" p:decoy="true">
+    <psm p:psm_id="97" p:decoy="true">
       <svm_score>-0.906</svm_score>
       <q_value>7.778e-01</q_value>
       <pep>1.000e+00</pep>
@@ -426,7 +426,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000334156.5;decoy_ENSP00000349259.4;decoy_ENSP00000479037.1</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="78" p:decoy="true">
+    <psm p:psm_id="52" p:decoy="true">
       <svm_score>-0.910</svm_score>
       <q_value>7.778e-01</q_value>
       <pep>1.000e+00</pep>
@@ -436,7 +436,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000372324.2;decoy_ENSP00000372327.2;decoy_ENSP00000479904.1</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="27" p:decoy="false">
+    <psm p:psm_id="69" p:decoy="false">
       <svm_score>-0.916</svm_score>
       <q_value>7.778e-01</q_value>
       <pep>1.000e+00</pep>
@@ -446,7 +446,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000311489.2;ENSP00000432568.1;ENSP00000433593.1;ENSP00000480692.1;ENSP00000482000.1</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="90" p:decoy="false">
+    <psm p:psm_id="67" p:decoy="false">
       <svm_score>-0.917</svm_score>
       <q_value>7.778e-01</q_value>
       <pep>1.000e+00</pep>
@@ -456,7 +456,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000363880.1;ENSP00000363881.3;ENSP00000363883.3;ENSP00000414095.2;ENSP00000444856.2</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="32" p:decoy="true">
+    <psm p:psm_id="46" p:decoy="true">
       <svm_score>-0.922</svm_score>
       <q_value>7.778e-01</q_value>
       <pep>1.000e+00</pep>
@@ -466,7 +466,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000360195.4</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="43" p:decoy="false">
+    <psm p:psm_id="78" p:decoy="false">
       <svm_score>-0.934</svm_score>
       <q_value>7.778e-01</q_value>
       <pep>1.000e+00</pep>
@@ -476,7 +476,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000306330.3</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="86" p:decoy="false">
+    <psm p:psm_id="57" p:decoy="false">
       <svm_score>-0.934</svm_score>
       <q_value>7.778e-01</q_value>
       <pep>1.000e+00</pep>
@@ -486,7 +486,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000331902.6;ENSP00000354505.2</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="55" p:decoy="true">
+    <psm p:psm_id="47" p:decoy="true">
       <svm_score>-0.935</svm_score>
       <q_value>8.148e-01</q_value>
       <pep>1.000e+00</pep>
@@ -496,7 +496,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000396024.1</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="97" p:decoy="true">
+    <psm p:psm_id="72" p:decoy="true">
       <svm_score>-0.938</svm_score>
       <q_value>8.519e-01</q_value>
       <pep>1.000e+00</pep>
@@ -506,7 +506,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000252999.3</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="53" p:decoy="true">
+    <psm p:psm_id="62" p:decoy="true">
       <svm_score>-0.938</svm_score>
       <q_value>8.571e-01</q_value>
       <pep>1.000e+00</pep>
@@ -516,7 +516,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000338173.5;decoy_ENSP00000385992.1;decoy_ENSP00000387399.1</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="96" p:decoy="false">
+    <psm p:psm_id="25" p:decoy="false">
       <svm_score>-0.947</svm_score>
       <q_value>8.571e-01</q_value>
       <pep>1.000e+00</pep>
@@ -526,7 +526,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000282633.5;ENSP00000314417.7;ENSP00000337541.5;ENSP00000344037.6;ENSP00000352922.6;ENSP00000363482.2;ENSP00000382277.2;ENSP00000439811.1;ENSP00000442128.1;ENSP00000481763.1;ENSP00000485513.1</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="30" p:decoy="true">
+    <psm p:psm_id="11" p:decoy="true">
       <svm_score>-0.947</svm_score>
       <q_value>8.621e-01</q_value>
       <pep>1.000e+00</pep>
@@ -536,7 +536,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000348551.4;decoy_ENSP00000384018.1;decoy_ENSP00000385618.3;decoy_ENSP00000400281.2</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="63" p:decoy="false">
+    <psm p:psm_id="92" p:decoy="false">
       <svm_score>-0.948</svm_score>
       <q_value>8.621e-01</q_value>
       <pep>1.000e+00</pep>
@@ -546,7 +546,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000254108.7;ENSP00000369594.3;ENSP00000455282.1</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="71" p:decoy="true">
+    <psm p:psm_id="88" p:decoy="true">
       <svm_score>-0.952</svm_score>
       <q_value>8.667e-01</q_value>
       <pep>1.000e+00</pep>
@@ -556,7 +556,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000358992.1;decoy_ENSP00000358994.3;decoy_ENSP00000358998.4;decoy_ENSP00000359002.3;decoy_ENSP00000478013.1;decoy_ENSP00000487348.2</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="3" p:decoy="false">
+    <psm p:psm_id="1" p:decoy="false">
       <svm_score>-0.954</svm_score>
       <q_value>8.667e-01</q_value>
       <pep>1.000e+00</pep>
@@ -566,7 +566,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000360869.3;ENSP00000441968.1</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="62" p:decoy="true">
+    <psm p:psm_id="44" p:decoy="true">
       <svm_score>-0.960</svm_score>
       <q_value>9.000e-01</q_value>
       <pep>1.000e+00</pep>
@@ -576,7 +576,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000364979.4</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="34" p:decoy="true">
+    <psm p:psm_id="49" p:decoy="true">
       <svm_score>-0.969</svm_score>
       <q_value>9.333e-01</q_value>
       <pep>1.000e+00</pep>
@@ -586,7 +586,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000368887.3</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="35" p:decoy="true">
+    <psm p:psm_id="42" p:decoy="true">
       <svm_score>-0.970</svm_score>
       <q_value>9.355e-01</q_value>
       <pep>1.000e+00</pep>
@@ -596,7 +596,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000252999.3</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="74" p:decoy="false">
+    <psm p:psm_id="100" p:decoy="false">
       <svm_score>-0.973</svm_score>
       <q_value>9.355e-01</q_value>
       <pep>1.000e+00</pep>
@@ -606,7 +606,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000348551.4;ENSP00000384018.1;ENSP00000384202.1;ENSP00000385618.3;ENSP00000400281.2</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="67" p:decoy="true">
+    <psm p:psm_id="73" p:decoy="true">
       <svm_score>-0.983</svm_score>
       <q_value>9.677e-01</q_value>
       <pep>1.000e+00</pep>
@@ -616,7 +616,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000376826.2;decoy_ENSP00000395710.1;decoy_ENSP00000419673.1</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="59" p:decoy="true">
+    <psm p:psm_id="43" p:decoy="true">
       <svm_score>-0.993</svm_score>
       <q_value>1.000e+00</q_value>
       <pep>1.000e+00</pep>
@@ -626,7 +626,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000463382.1</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="21" p:decoy="true">
+    <psm p:psm_id="13" p:decoy="true">
       <svm_score>-1.000</svm_score>
       <q_value>1.000e+00</q_value>
       <pep>1.000e+00</pep>
@@ -636,7 +636,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000372324.2;decoy_ENSP00000372327.2;decoy_ENSP00000479904.1</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="17" p:decoy="true">
+    <psm p:psm_id="70" p:decoy="true">
       <svm_score>-1.004</svm_score>
       <q_value>1.000e+00</q_value>
       <pep>1.000e+00</pep>
@@ -646,7 +646,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000396024.1</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="46" p:decoy="true">
+    <psm p:psm_id="79" p:decoy="true">
       <svm_score>-1.008</svm_score>
       <q_value>1.000e+00</q_value>
       <pep>1.000e+00</pep>
@@ -656,7 +656,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000444793.1;decoy_ENSP00000445920.1;decoy_ENSP00000474881.1;decoy_ENSP00000474981.1;decoy_ENSP00000483818.1</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="25" p:decoy="true">
+    <psm p:psm_id="40" p:decoy="true">
       <svm_score>-1.009</svm_score>
       <q_value>1.000e+00</q_value>
       <pep>1.000e+00</pep>
@@ -666,7 +666,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000282633.5;decoy_ENSP00000314417.7;decoy_ENSP00000337541.5;decoy_ENSP00000344037.6;decoy_ENSP00000352922.6;decoy_ENSP00000363482.2;decoy_ENSP00000382277.2;decoy_ENSP00000439811.1;decoy_ENSP00000485513.1</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="64" p:decoy="true">
+    <psm p:psm_id="94" p:decoy="true">
       <svm_score>-1.012</svm_score>
       <q_value>1.000e+00</q_value>
       <pep>1.000e+00</pep>
@@ -676,7 +676,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000317955.8</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="79" p:decoy="false">
+    <psm p:psm_id="50" p:decoy="false">
       <svm_score>-1.017</svm_score>
       <q_value>1.000e+00</q_value>
       <pep>1.000e+00</pep>
@@ -686,7 +686,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000331902.6;ENSP00000354505.2</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="38" p:decoy="false">
+    <psm p:psm_id="91" p:decoy="false">
       <svm_score>-1.021</svm_score>
       <q_value>1.000e+00</q_value>
       <pep>1.000e+00</pep>
@@ -696,7 +696,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000297954.4</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="48" p:decoy="true">
+    <psm p:psm_id="34" p:decoy="true">
       <svm_score>-1.021</svm_score>
       <q_value>1.000e+00</q_value>
       <pep>1.000e+00</pep>
@@ -706,7 +706,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000354513.2;decoy_ENSP00000354826.2;decoy_ENSP00000376826.2;decoy_ENSP00000393621.1;decoy_ENSP00000395710.1;decoy_ENSP00000398826.1;decoy_ENSP00000407522.1;decoy_ENSP00000411476.2;decoy_ENSP00000419673.1</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="88" p:decoy="false">
+    <psm p:psm_id="20" p:decoy="false">
       <svm_score>-1.031</svm_score>
       <q_value>1.000e+00</q_value>
       <pep>1.000e+00</pep>
@@ -716,7 +716,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000258341.3</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="100" p:decoy="false">
+    <psm p:psm_id="61" p:decoy="false">
       <svm_score>-1.032</svm_score>
       <q_value>1.000e+00</q_value>
       <pep>1.000e+00</pep>
@@ -726,7 +726,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000355751.3;ENSP00000482784.1</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="49" p:decoy="true">
+    <psm p:psm_id="18" p:decoy="true">
       <svm_score>-1.032</svm_score>
       <q_value>1.000e+00</q_value>
       <pep>1.000e+00</pep>
@@ -736,7 +736,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000006658.6;decoy_ENSP00000348878.4;decoy_ENSP00000424538.1;decoy_ENSP00000483295.1</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="29" p:decoy="false">
+    <psm p:psm_id="77" p:decoy="false">
       <svm_score>-1.036</svm_score>
       <q_value>1.000e+00</q_value>
       <pep>1.000e+00</pep>
@@ -746,7 +746,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000310901.5;ENSP00000449824.1;ENSP00000450056.1;ENSP00000450143.1</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="54" p:decoy="true">
+    <psm p:psm_id="76" p:decoy="true">
       <svm_score>-1.045</svm_score>
       <q_value>1.000e+00</q_value>
       <pep>1.000e+00</pep>
@@ -766,7 +766,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000254108.7;decoy_ENSP00000369594.3;decoy_ENSP00000455282.1</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="80" p:decoy="true">
+    <psm p:psm_id="103" p:decoy="true">
       <svm_score>-1.054</svm_score>
       <q_value>1.000e+00</q_value>
       <pep>1.000e+00</pep>
@@ -776,7 +776,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000398107.2</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="58" p:decoy="true">
+    <psm p:psm_id="83" p:decoy="true">
       <svm_score>-1.054</svm_score>
       <q_value>1.000e+00</q_value>
       <pep>1.000e+00</pep>
@@ -786,7 +786,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000378669.2</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="8" p:decoy="true">
+    <psm p:psm_id="7" p:decoy="true">
       <svm_score>-1.055</svm_score>
       <q_value>1.000e+00</q_value>
       <pep>1.000e+00</pep>
@@ -796,7 +796,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000465461.1;decoy_ENSP00000465489.1;decoy_ENSP00000466012.1;decoy_ENSP00000466134.1</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="7" p:decoy="true">
+    <psm p:psm_id="27" p:decoy="true">
       <svm_score>-1.057</svm_score>
       <q_value>1.000e+00</q_value>
       <pep>1.000e+00</pep>
@@ -806,7 +806,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000359038.1;decoy_ENSP00000359042.4</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="84" p:decoy="false">
+    <psm p:psm_id="56" p:decoy="false">
       <svm_score>-1.058</svm_score>
       <q_value>1.000e+00</q_value>
       <pep>1.000e+00</pep>
@@ -816,7 +816,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000418563.1;ENSP00000420210.2;ENSP00000422011.1;ENSP00000430816.1</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="85" p:decoy="true">
+    <psm p:psm_id="95" p:decoy="true">
       <svm_score>-1.059</svm_score>
       <q_value>1.000e+00</q_value>
       <pep>1.000e+00</pep>
@@ -826,7 +826,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000277165.5</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="42" p:decoy="true">
+    <psm p:psm_id="84" p:decoy="true">
       <svm_score>-1.059</svm_score>
       <q_value>1.000e+00</q_value>
       <pep>1.000e+00</pep>
@@ -836,7 +836,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000300527.4;decoy_ENSP00000312529.5;decoy_ENSP00000380870.1;decoy_ENSP00000387115.1</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="1" p:decoy="true">
+    <psm p:psm_id="6" p:decoy="true">
       <svm_score>-1.065</svm_score>
       <q_value>1.000e+00</q_value>
       <pep>1.000e+00</pep>
@@ -846,7 +846,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000331201.4</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="66" p:decoy="true">
+    <psm p:psm_id="37" p:decoy="true">
       <svm_score>-1.066</svm_score>
       <q_value>1.000e+00</q_value>
       <pep>1.000e+00</pep>
@@ -856,7 +856,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000261978.4;decoy_ENSP00000451477.1;decoy_ENSP00000452110.1</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="6" p:decoy="false">
+    <psm p:psm_id="60" p:decoy="false">
       <svm_score>-1.067</svm_score>
       <q_value>1.000e+00</q_value>
       <pep>1.000e+00</pep>
@@ -866,7 +866,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000319664.5;ENSP00000400981.1;ENSP00000404020.2</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="77" p:decoy="true">
+    <psm p:psm_id="10" p:decoy="true">
       <svm_score>-1.067</svm_score>
       <q_value>1.000e+00</q_value>
       <pep>1.000e+00</pep>
@@ -876,7 +876,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000396301.2</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="13" p:decoy="true">
+    <psm p:psm_id="64" p:decoy="true">
       <svm_score>-1.067</svm_score>
       <q_value>1.000e+00</q_value>
       <pep>1.000e+00</pep>
@@ -886,7 +886,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000310901.5;decoy_ENSP00000449824.1;decoy_ENSP00000450056.1;decoy_ENSP00000450143.1</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="52" p:decoy="true">
+    <psm p:psm_id="55" p:decoy="true">
       <svm_score>-1.067</svm_score>
       <q_value>1.000e+00</q_value>
       <pep>1.000e+00</pep>
@@ -906,7 +906,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000286091.5</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="28" p:decoy="true">
+    <psm p:psm_id="31" p:decoy="true">
       <svm_score>-1.074</svm_score>
       <q_value>1.000e+00</q_value>
       <pep>1.000e+00</pep>
@@ -916,7 +916,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000218789.5;decoy_ENSP00000364888.4;decoy_ENSP00000397068.2</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="73" p:decoy="true">
+    <psm p:psm_id="51" p:decoy="true">
       <svm_score>-1.094</svm_score>
       <q_value>1.000e+00</q_value>
       <pep>1.000e+00</pep>
@@ -926,7 +926,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000396301.2;decoy_ENSP00000422641.1;decoy_ENSP00000424622.1;decoy_ENSP00000425564.1;decoy_ENSP00000426764.2</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="50" p:decoy="true">
+    <psm p:psm_id="3" p:decoy="true">
       <svm_score>-1.097</svm_score>
       <q_value>1.000e+00</q_value>
       <pep>1.000e+00</pep>
@@ -936,7 +936,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000349056.3;decoy_ENSP00000380942.2;decoy_ENSP00000432984.1</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="99" p:decoy="true">
+    <psm p:psm_id="33" p:decoy="true">
       <svm_score>-1.100</svm_score>
       <q_value>1.000e+00</q_value>
       <pep>1.000e+00</pep>
@@ -946,7 +946,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000338173.5;decoy_ENSP00000385992.1;decoy_ENSP00000387399.1</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="5" p:decoy="true">
+    <psm p:psm_id="30" p:decoy="true">
       <svm_score>-1.100</svm_score>
       <q_value>1.000e+00</q_value>
       <pep>1.000e+00</pep>
@@ -956,7 +956,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000331201.4;decoy_ENSP00000458987.1</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="94" p:decoy="true">
+    <psm p:psm_id="90" p:decoy="true">
       <svm_score>-1.103</svm_score>
       <q_value>1.000e+00</q_value>
       <pep>1.000e+00</pep>
@@ -966,7 +966,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000307275.3;decoy_ENSP00000347540.3;decoy_ENSP00000458542.1;decoy_ENSP00000461521.1</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="37" p:decoy="false">
+    <psm p:psm_id="74" p:decoy="false">
       <svm_score>-1.103</svm_score>
       <q_value>1.000e+00</q_value>
       <pep>1.000e+00</pep>
@@ -976,7 +976,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000262056.9;ENSP00000388806.3;ENSP00000412530.3</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="91" p:decoy="true">
+    <psm p:psm_id="68" p:decoy="true">
       <svm_score>-1.103</svm_score>
       <q_value>1.000e+00</q_value>
       <pep>1.000e+00</pep>
@@ -986,7 +986,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000355124.3;decoy_ENSP00000408759.1</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="81" p:decoy="true">
+    <psm p:psm_id="53" p:decoy="true">
       <svm_score>-1.113</svm_score>
       <q_value>1.000e+00</q_value>
       <pep>1.000e+00</pep>
@@ -996,7 +996,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000333667.3;decoy_ENSP00000406881.3;decoy_ENSP00000413770.3;decoy_ENSP00000452315.1;decoy_ENSP00000452419.1</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="95" p:decoy="false">
+    <psm p:psm_id="98" p:decoy="false">
       <svm_score>-1.114</svm_score>
       <q_value>1.000e+00</q_value>
       <pep>1.000e+00</pep>
@@ -1006,7 +1006,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000269243.4;ENSP00000353590.3;ENSP00000369315.5</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="33" p:decoy="true">
+    <psm p:psm_id="26" p:decoy="true">
       <svm_score>-1.116</svm_score>
       <q_value>1.000e+00</q_value>
       <pep>1.000e+00</pep>
@@ -1016,7 +1016,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000418563.1;decoy_ENSP00000422011.1</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="70" p:decoy="true">
+    <psm p:psm_id="99" p:decoy="true">
       <svm_score>-1.120</svm_score>
       <q_value>1.000e+00</q_value>
       <pep>1.000e+00</pep>
@@ -1026,7 +1026,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000396024.1</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="22" p:decoy="false">
+    <psm p:psm_id="65" p:decoy="false">
       <svm_score>-1.120</svm_score>
       <q_value>1.000e+00</q_value>
       <pep>1.000e+00</pep>
@@ -1036,7 +1036,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000348551.4;ENSP00000384018.1;ENSP00000384202.1;ENSP00000385618.3;ENSP00000400281.2</protein_id>
       <p_value>0.000e+00</p_value>
     </psm>
-    <psm p:psm_id="36" p:decoy="true">
+    <psm p:psm_id="66" p:decoy="true">
       <svm_score>-1.136</svm_score>
       <q_value>1.000e+00</q_value>
       <pep>1.000e+00</pep>
@@ -1058,7 +1058,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000254108.7;ENSP00000369594.3;ENSP00000455282.1</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>60</psm_id>
+        <psm_id>86</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-LVDTM[+15.9949]EK" p:decoy="false">
@@ -1070,7 +1070,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000294671.2</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>98</psm_id>
+        <psm_id>24</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-EEREK" p:decoy="false">
@@ -1082,7 +1082,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000263545.7;ENSP00000347005.4;ENSP00000440222.1;ENSP00000441604.1;ENSP00000483438.1</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>26</psm_id>
+        <psm_id>23</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-GRGGPM[+15.9949]GRGGYGGGGSGGG" p:decoy="false">
@@ -1094,7 +1094,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000254108.7;ENSP00000369594.3;ENSP00000455282.1</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>15</psm_id>
+        <psm_id>19</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-SPVAM[+15.9949]TRSVEVHGAVGASGC[+57.0215]P" p:decoy="false">
@@ -1106,7 +1106,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000252999.3</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>75</psm_id>
+        <psm_id>58</psm_id>
         <psm_id>14</psm_id>
       </psm_ids>
     </peptide>
@@ -1119,7 +1119,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000311513.6;ENSP00000434509.1</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>68</psm_id>
+        <psm_id>39</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-DAVKSVA" p:decoy="true">
@@ -1131,7 +1131,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000238256.3;decoy_ENSP00000416158.2</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>47</psm_id>
+        <psm_id>15</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-GVDDKSSMLDEMDARL" p:decoy="true">
@@ -1143,7 +1143,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000269243.4;decoy_ENSP00000353590.3;decoy_ENSP00000369315.5</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>82</psm_id>
+        <psm_id>102</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-AVGPTAEADKSAA" p:decoy="false">
@@ -1155,7 +1155,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000396301.2;ENSP00000422641.1;ENSP00000426764.2</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>19</psm_id>
+        <psm_id>45</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-GPM[+15.9949]GPQGPFGPDGKD" p:decoy="true">
@@ -1167,7 +1167,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000364979.4</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>20</psm_id>
+        <psm_id>21</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-AEAC[+57.0215]IKM[+15.9949]" p:decoy="false">
@@ -1179,7 +1179,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000358992.1;ENSP00000358994.3;ENSP00000358998.4;ENSP00000359002.3;ENSP00000478013.1;ENSP00000487348.2</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>11</psm_id>
+        <psm_id>9</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-GGGGSGGGGYGGRGM[+15.9949]PG" p:decoy="true">
@@ -1191,7 +1191,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000254108.7;decoy_ENSP00000369594.3;decoy_ENSP00000455282.1</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>92</psm_id>
+        <psm_id>38</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-QEQLS" p:decoy="false">
@@ -1203,7 +1203,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000348551.4;ENSP00000384018.1;ENSP00000384202.1;ENSP00000385618.3;ENSP00000400281.2</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>93</psm_id>
+        <psm_id>8</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-EGDPAIYA" p:decoy="false">
@@ -1215,7 +1215,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000350937.4;ENSP00000377121.2</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>12</psm_id>
+        <psm_id>41</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-ERGDPER" p:decoy="false">
@@ -1227,7 +1227,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000318165.7;ENSP00000373798.6</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>41</psm_id>
+        <psm_id>28</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-ESAGQ" p:decoy="true">
@@ -1239,7 +1239,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000263545.7;decoy_ENSP00000441604.1</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>23</psm_id>
+        <psm_id>17</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-GDPGPEG" p:decoy="false">
@@ -1251,7 +1251,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000300527.4;ENSP00000312529.5;ENSP00000380870.1;ENSP00000387115.1</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>40</psm_id>
+        <psm_id>32</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-QVAADLEM" p:decoy="true">
@@ -1263,7 +1263,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000396024.1</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>56</psm_id>
+        <psm_id>89</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-EC[+57.0215]GDVSRAQEE" p:decoy="false">
@@ -1275,7 +1275,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000243286.3;ENSP00000361710.5;ENSP00000361711.1</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>61</psm_id>
+        <psm_id>54</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-AVEDY" p:decoy="false">
@@ -1287,7 +1287,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000374370.4;ENSP00000374372.3</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>89</psm_id>
+        <psm_id>5</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-RSM[+15.9949]QDATQDHAVLEAER" p:decoy="false">
@@ -1299,7 +1299,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000271636.7</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>102</psm_id>
+        <psm_id>63</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-M[+15.9949]ASFKDHDPGIWSGWTGLSTPSGGLK" p:decoy="true">
@@ -1311,7 +1311,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000465461.1;decoy_ENSP00000465489.1;decoy_ENSP00000466012.1;decoy_ENSP00000466134.1</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>24</psm_id>
+        <psm_id>22</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-ESVDL" p:decoy="true">
@@ -1323,7 +1323,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000396024.1</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>39</psm_id>
+        <psm_id>71</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-EKLQQVM" p:decoy="false">
@@ -1335,7 +1335,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000374370.4;ENSP00000374372.3</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>45</psm_id>
+        <psm_id>35</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-LVDEWT" p:decoy="false">
@@ -1347,7 +1347,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000297954.4;ENSP00000378860.2;ENSP00000415038.1</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>51</psm_id>
+        <psm_id>80</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-TLIQMIEL" p:decoy="true">
@@ -1359,7 +1359,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000298701.7;decoy_ENSP00000358321.1;decoy_ENSP00000358324.3;decoy_ENSP00000358327.3;decoy_ENSP00000398107.2;decoy_ENSP00000478999.1;decoy_ENSP00000480584.1</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>76</psm_id>
+        <psm_id>82</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-FLKRHM[+15.9949]FDVAS" p:decoy="false">
@@ -1371,7 +1371,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000006658.6;ENSP00000348878.4;ENSP00000483295.1</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>103</psm_id>
+        <psm_id>48</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-EEKEM[+15.9949]E" p:decoy="true">
@@ -1383,7 +1383,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000365606.5;decoy_ENSP00000469842.2;decoy_ENSP00000477574.1</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>69</psm_id>
+        <psm_id>87</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-EKEMEEQ" p:decoy="true">
@@ -1395,7 +1395,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000358992.1;decoy_ENSP00000358994.3;decoy_ENSP00000358998.4;decoy_ENSP00000359002.3;decoy_ENSP00000478013.1;decoy_ENSP00000487348.2</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>16</psm_id>
+        <psm_id>75</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-VDM[+15.9949]GSM[+15.9949]KG" p:decoy="false">
@@ -1407,7 +1407,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000364979.4</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>44</psm_id>
+        <psm_id>81</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-EEDKQARSEI" p:decoy="true">
@@ -1431,7 +1431,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000260956.4;decoy_ENSP00000386636.1</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>18</psm_id>
+        <psm_id>16</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-GGYRDMDRRPG" p:decoy="true">
@@ -1443,7 +1443,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000262056.9;decoy_ENSP00000388806.3;decoy_ENSP00000412530.3</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>10</psm_id>
+        <psm_id>12</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-AQWDY" p:decoy="true">
@@ -1455,7 +1455,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000405111.2;decoy_ENSP00000482275.1</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>87</psm_id>
+        <psm_id>85</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-SAPEEKDTE" p:decoy="true">
@@ -1467,7 +1467,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000260956.4;decoy_ENSP00000386636.1</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>9</psm_id>
+        <psm_id>36</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-GGEDPN[+229.16293]" p:decoy="false">
@@ -1479,7 +1479,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000363880.1;ENSP00000363881.3;ENSP00000363883.3;ENSP00000414095.2;ENSP00000444856.2</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>65</psm_id>
+        <psm_id>59</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-RKQEEE" p:decoy="false">
@@ -1491,7 +1491,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000358992.1;ENSP00000358994.3;ENSP00000358998.4;ENSP00000359002.3;ENSP00000399406.1;ENSP00000478013.1</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>72</psm_id>
+        <psm_id>96</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-IEQDYTLV" p:decoy="false">
@@ -1503,7 +1503,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000294671.2</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>57</psm_id>
+        <psm_id>93</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-VRQYSDQHGDIE" p:decoy="true">
@@ -1515,7 +1515,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000374370.4;decoy_ENSP00000374372.3</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>31</psm_id>
+        <psm_id>29</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-DGTDV" p:decoy="true">
@@ -1527,7 +1527,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000334156.5;decoy_ENSP00000349259.4;decoy_ENSP00000479037.1</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>83</psm_id>
+        <psm_id>97</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-C[+57.0215]LQSC[+57.0215]YN[+229.16293]C[+57.0215]TVC[+57.0215" p:decoy="true">
@@ -1539,8 +1539,8 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000372324.2;decoy_ENSP00000372327.2;decoy_ENSP00000479904.1</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>78</psm_id>
-        <psm_id>21</psm_id>
+        <psm_id>52</psm_id>
+        <psm_id>13</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-STESAHAATLP" p:decoy="false">
@@ -1552,7 +1552,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000311489.2;ENSP00000432568.1;ENSP00000433593.1;ENSP00000480692.1;ENSP00000482000.1</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>27</psm_id>
+        <psm_id>69</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-DTPQEMEQ" p:decoy="false">
@@ -1564,7 +1564,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000363880.1;ENSP00000363881.3;ENSP00000363883.3;ENSP00000414095.2;ENSP00000444856.2</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>90</psm_id>
+        <psm_id>67</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-HGWSESEM[+15.9949]SGLLN[+229.16293]VEI" p:decoy="true">
@@ -1576,7 +1576,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000360195.4</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>32</psm_id>
+        <psm_id>46</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-LAEQA" p:decoy="false">
@@ -1588,7 +1588,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000306330.3</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>43</psm_id>
+        <psm_id>78</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-GEPGGITFKG" p:decoy="false">
@@ -1600,7 +1600,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000331902.6;ENSP00000354505.2</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>86</psm_id>
+        <psm_id>57</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-GFDKVEIGT" p:decoy="true">
@@ -1612,7 +1612,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000396024.1</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>55</psm_id>
+        <psm_id>47</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-ELTQPGFRELC[+57.0215]" p:decoy="true">
@@ -1624,8 +1624,8 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000252999.3</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>97</psm_id>
-        <psm_id>35</psm_id>
+        <psm_id>72</psm_id>
+        <psm_id>42</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-QVM[+15.9949]IPQSMSHHSAGWAT" p:decoy="true">
@@ -1637,7 +1637,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000338173.5;decoy_ENSP00000385992.1;decoy_ENSP00000387399.1</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>53</psm_id>
+        <psm_id>62</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-EESSSSKP" p:decoy="false">
@@ -1649,7 +1649,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000282633.5;ENSP00000314417.7;ENSP00000337541.5;ENSP00000344037.6;ENSP00000352922.6;ENSP00000363482.2;ENSP00000382277.2;ENSP00000439811.1;ENSP00000442128.1;ENSP00000481763.1;ENSP00000485513.1</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>96</psm_id>
+        <psm_id>25</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-GGGGPSTLTHD" p:decoy="true">
@@ -1661,7 +1661,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000348551.4;decoy_ENSP00000384018.1;decoy_ENSP00000385618.3;decoy_ENSP00000400281.2</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>30</psm_id>
+        <psm_id>11</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-GGRGGM[+15.9949]GGSDRGGFN[+229.16293" p:decoy="false">
@@ -1673,7 +1673,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000254108.7;ENSP00000369594.3;ENSP00000455282.1</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>63</psm_id>
+        <psm_id>92</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-TGGATTLM" p:decoy="true">
@@ -1685,7 +1685,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000358992.1;decoy_ENSP00000358994.3;decoy_ENSP00000358998.4;decoy_ENSP00000359002.3;decoy_ENSP00000478013.1;decoy_ENSP00000487348.2</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>71</psm_id>
+        <psm_id>88</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-IEQASL" p:decoy="false">
@@ -1697,7 +1697,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000360869.3;ENSP00000441968.1</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>3</psm_id>
+        <psm_id>1</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-EGPSGPFGAIGQD" p:decoy="true">
@@ -1709,7 +1709,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000364979.4</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>62</psm_id>
+        <psm_id>44</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-DQKLKW" p:decoy="true">
@@ -1721,7 +1721,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000368887.3</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>34</psm_id>
+        <psm_id>49</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-SYVEAQEDY" p:decoy="false">
@@ -1733,7 +1733,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000348551.4;ENSP00000384018.1;ENSP00000384202.1;ENSP00000385618.3;ENSP00000400281.2</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>74</psm_id>
+        <psm_id>100</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-TGKEEGQN[+229.16293]EGIS" p:decoy="true">
@@ -1745,7 +1745,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000376826.2;decoy_ENSP00000395710.1;decoy_ENSP00000419673.1</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>67</psm_id>
+        <psm_id>73</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-AAIAVQHME" p:decoy="true">
@@ -1757,7 +1757,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000463382.1</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>59</psm_id>
+        <psm_id>43</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-HESLKEEAEHSSS" p:decoy="true">
@@ -1769,7 +1769,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000396024.1</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>17</psm_id>
+        <psm_id>70</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-EGTFTSSF" p:decoy="true">
@@ -1781,7 +1781,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000444793.1;decoy_ENSP00000445920.1;decoy_ENSP00000474881.1;decoy_ENSP00000474981.1;decoy_ENSP00000483818.1</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>46</psm_id>
+        <psm_id>79</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-AEGSPLTTPEED" p:decoy="true">
@@ -1793,7 +1793,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000282633.5;decoy_ENSP00000314417.7;decoy_ENSP00000337541.5;decoy_ENSP00000344037.6;decoy_ENSP00000352922.6;decoy_ENSP00000363482.2;decoy_ENSP00000382277.2;decoy_ENSP00000439811.1;decoy_ENSP00000485513.1</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>25</psm_id>
+        <psm_id>40</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-QDKDGI" p:decoy="true">
@@ -1805,7 +1805,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000317955.8</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>64</psm_id>
+        <psm_id>94</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-GDDGIPGPPG" p:decoy="false">
@@ -1817,7 +1817,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000331902.6;ENSP00000354505.2</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>79</psm_id>
+        <psm_id>50</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-VPPTAC[+57.0215]C[+57.0215]GHSTQ" p:decoy="false">
@@ -1829,7 +1829,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000297954.4</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>38</psm_id>
+        <psm_id>91</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-DM[+15.9949]FSKVEEKP" p:decoy="true">
@@ -1841,7 +1841,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000354513.2;decoy_ENSP00000354826.2;decoy_ENSP00000376826.2;decoy_ENSP00000393621.1;decoy_ENSP00000395710.1;decoy_ENSP00000398826.1;decoy_ENSP00000407522.1;decoy_ENSP00000411476.2;decoy_ENSP00000419673.1</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>48</psm_id>
+        <psm_id>34</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-EVMDL" p:decoy="false">
@@ -1853,7 +1853,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000258341.3</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>88</psm_id>
+        <psm_id>20</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-N[+229.16293]MSAC[+57.0215]WQD" p:decoy="false">
@@ -1865,7 +1865,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000355751.3;ENSP00000482784.1</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>100</psm_id>
+        <psm_id>61</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-DGVSIE" p:decoy="true">
@@ -1877,7 +1877,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000006658.6;decoy_ENSP00000348878.4;decoy_ENSP00000424538.1;decoy_ENSP00000483295.1</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>49</psm_id>
+        <psm_id>18</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-C[+57.0215]GDSVYAA" p:decoy="false">
@@ -1889,7 +1889,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000310901.5;ENSP00000449824.1;ENSP00000450056.1;ENSP00000450143.1</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>29</psm_id>
+        <psm_id>77</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-DDISD" p:decoy="true">
@@ -1901,7 +1901,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000334156.5;decoy_ENSP00000349259.4;decoy_ENSP00000479037.1</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>54</psm_id>
+        <psm_id>76</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-SDM[+15.9949]KGPGFG" p:decoy="true">
@@ -1925,7 +1925,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000398107.2</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>80</psm_id>
+        <psm_id>103</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-KEPGGSSSGD" p:decoy="true">
@@ -1937,7 +1937,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000378669.2</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>58</psm_id>
+        <psm_id>83</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-TVEAM[+15.9949]QQLS" p:decoy="true">
@@ -1949,7 +1949,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000465461.1;decoy_ENSP00000465489.1;decoy_ENSP00000466012.1;decoy_ENSP00000466134.1</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>8</psm_id>
+        <psm_id>7</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-KEEVEGR" p:decoy="true">
@@ -1961,7 +1961,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000359038.1;decoy_ENSP00000359042.4</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>7</psm_id>
+        <psm_id>27</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-DERHK" p:decoy="false">
@@ -1973,7 +1973,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000418563.1;ENSP00000420210.2;ENSP00000422011.1;ENSP00000430816.1</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>84</psm_id>
+        <psm_id>56</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-STASYYGI" p:decoy="true">
@@ -1985,7 +1985,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000277165.5</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>85</psm_id>
+        <psm_id>95</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-TGPDG" p:decoy="true">
@@ -1997,7 +1997,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000300527.4;decoy_ENSP00000312529.5;decoy_ENSP00000380870.1;decoy_ENSP00000387115.1</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>42</psm_id>
+        <psm_id>84</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-EAEEA" p:decoy="true">
@@ -2009,7 +2009,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000331201.4</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>1</psm_id>
+        <psm_id>6</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-ALTGEGAAS" p:decoy="true">
@@ -2021,7 +2021,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000261978.4;decoy_ENSP00000451477.1;decoy_ENSP00000452110.1</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>66</psm_id>
+        <psm_id>37</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-ARQEAE" p:decoy="false">
@@ -2033,7 +2033,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000319664.5;ENSP00000400981.1;ENSP00000404020.2</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>6</psm_id>
+        <psm_id>60</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-DLEAKDN[+229.16293]T" p:decoy="true">
@@ -2045,7 +2045,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000396301.2</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>77</psm_id>
+        <psm_id>10</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-EAGGYKQA" p:decoy="true">
@@ -2057,7 +2057,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000310901.5;decoy_ENSP00000449824.1;decoy_ENSP00000450056.1;decoy_ENSP00000450143.1</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>13</psm_id>
+        <psm_id>64</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-ELTERL" p:decoy="true">
@@ -2069,7 +2069,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000482245.1;decoy_ENSP00000482797.1</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>52</psm_id>
+        <psm_id>55</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-DGGEFKVPN[+229.16293]" p:decoy="true">
@@ -2093,7 +2093,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000218789.5;decoy_ENSP00000364888.4;decoy_ENSP00000397068.2</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>28</psm_id>
+        <psm_id>31</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-EALER" p:decoy="true">
@@ -2105,7 +2105,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000396301.2;decoy_ENSP00000422641.1;decoy_ENSP00000424622.1;decoy_ENSP00000425564.1;decoy_ENSP00000426764.2</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>73</psm_id>
+        <psm_id>51</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-SDATSAL" p:decoy="true">
@@ -2117,7 +2117,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000349056.3;decoy_ENSP00000380942.2;decoy_ENSP00000432984.1</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>50</psm_id>
+        <psm_id>3</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-TSDDPEW" p:decoy="true">
@@ -2129,7 +2129,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000338173.5;decoy_ENSP00000385992.1;decoy_ENSP00000387399.1</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>99</psm_id>
+        <psm_id>33</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-EFTGSGR" p:decoy="true">
@@ -2141,7 +2141,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000331201.4;decoy_ENSP00000458987.1</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>5</psm_id>
+        <psm_id>30</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-ERRDLEE" p:decoy="true">
@@ -2153,7 +2153,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000307275.3;decoy_ENSP00000347540.3;decoy_ENSP00000458542.1;decoy_ENSP00000461521.1</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>94</psm_id>
+        <psm_id>90</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-DGYRDGP" p:decoy="false">
@@ -2165,7 +2165,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000262056.9;ENSP00000388806.3;ENSP00000412530.3</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>37</psm_id>
+        <psm_id>74</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-TRFDDAA" p:decoy="true">
@@ -2177,7 +2177,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000355124.3;decoy_ENSP00000408759.1</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>91</psm_id>
+        <psm_id>68</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-C[+57.0215]QRDK" p:decoy="true">
@@ -2189,7 +2189,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000333667.3;decoy_ENSP00000406881.3;decoy_ENSP00000413770.3;decoy_ENSP00000452315.1;decoy_ENSP00000452419.1</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>81</psm_id>
+        <psm_id>53</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-EQEVAE" p:decoy="false">
@@ -2201,7 +2201,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000269243.4;ENSP00000353590.3;ENSP00000369315.5</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>95</psm_id>
+        <psm_id>98</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-ERELEK" p:decoy="true">
@@ -2213,7 +2213,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000418563.1;decoy_ENSP00000422011.1</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>33</psm_id>
+        <psm_id>26</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-EFQEIW" p:decoy="true">
@@ -2225,7 +2225,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000396024.1</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>70</psm_id>
+        <psm_id>99</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-VSGRPS" p:decoy="false">
@@ -2237,7 +2237,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>ENSP00000348551.4;ENSP00000384018.1;ENSP00000384202.1;ENSP00000385618.3;ENSP00000400281.2</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>22</psm_id>
+        <psm_id>65</psm_id>
       </psm_ids>
     </peptide>
     <peptide p:peptide_id="229.16293]-ASIAH" p:decoy="true">
@@ -2249,7 +2249,7 @@ p:majorVersion="3" p:minorVersion="06" p:percolator_version="Percolator version 
       <protein_id>decoy_ENSP00000247461.4;decoy_ENSP00000391646.2;decoy_ENSP00000424063.1</protein_id>
       <p_value>0.000e+00</p_value>
       <psm_ids>
-        <psm_id>36</psm_id>
+        <psm_id>66</psm_id>
       </psm_ids>
     </peptide>
   </peptides>
