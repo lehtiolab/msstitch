@@ -1,5 +1,10 @@
 # Changelog
 
+## [3.18] - 2026-02-06
+### Fixed
+- Merge protein without --mergecutoff did not include proteins from input table without an FDR (e.g when NA or not specified),
+resulting from 3.16 update 2b073aa59 commit
+
 ## [3.17] - 2025-02-01
 ### Added
 - Output ExplainedIonCurrentRatio to PSM table when adding percolator to it from MSGF+
