@@ -375,12 +375,13 @@ class DatabaseConnection(object):
     def __init__(self, fn=None):
         """SQLite connecting when given filename"""
         self.fn = fn
-        if self.fn is not None:
-            self.connect(self.fn)
+        if fn is not None:
+            self.conn = sqlite3.connect(fn)
+            cur = self.get_cursor()
+            cur.execute('PRAGMA FOREIGN_KEYS=ON')
+            cur.execute('PRAGMA journal_mode=MEMORY')
+            cur.execute('PRAGMA synchronous=OFF')
 
-    def get_fn(self):
-        """Returns lookup filename"""
-        return self.fn
 
     def create_tables(self, tables):
         """Creates database tables in sqlite lookup db"""
@@ -397,16 +398,6 @@ class DatabaseConnection(object):
                       'new.'.format(table))
             else:
                 self.conn.commit()
-
-    def connect(self, fn):
-        """SQLite connect method initialize db"""
-        self.conn = sqlite3.connect(fn)
-        cur = self.get_cursor()
-        cur.execute('PRAGMA page_size=4096')
-        cur.execute('PRAGMA FOREIGN_KEYS=ON')
-        cur.execute('PRAGMA cache_size=10000')
-        cur.execute('PRAGMA journal_mode=MEMORY')
-        cur.execute('PRAGMA synchronous=OFF')
 
     def get_cursor(self):
         """Quickly get cursor, abstracting connection"""

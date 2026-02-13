@@ -30,6 +30,7 @@ class DecoySeqDriver(base.BaseDriver):
         outfn = self.create_outfilepath(self.fn, self.outsuffix)
         if self.lookup is None and not self.ignoretarget:
             self.initialize_lookup('decoychecker.sqlite')
+            self.lookup.add_tables(self.tabletypes)
             seqlup.create_searchspace(self.lookup, self.fn, self.minlength, reverse_seqs=False,
                     miss_cleavage=self.miss_cleavage)
         decoyfa = sequence.create_decoy_fa(self.fn, self.scramble, self.lookup, self.trypsinize,

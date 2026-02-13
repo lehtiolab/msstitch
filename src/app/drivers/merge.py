@@ -64,7 +64,7 @@ class MergeDriver(base.PepProttableDriver):
 
     def set_features(self):
         # FIXME need check to see same poolnames correlate with self.fn len
-        self.initialize_lookup()
+        self.lookup.add_tables(self.tabletypes)
         self.featcol = self.featcol - 1
         self.setnames = [x.replace('"', '') for x in self.setnames]
         merge.create_lookup(self.fn, self.lookup, self.setnames, self.featcol,
