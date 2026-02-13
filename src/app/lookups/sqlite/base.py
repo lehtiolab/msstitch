@@ -382,6 +382,16 @@ class DatabaseConnection(object):
             cur.execute('PRAGMA journal_mode=MEMORY')
             cur.execute('PRAGMA synchronous=OFF')
 
+    def use_in_memory_db(self):
+        memconn = sqlite3.connect(':memory:')
+        self.conn.backup(memconn)
+        memconn.execute('PRAGMA FOREIGN_KEYS=ON')
+        memconn.execute('PRAGMA journal_mode=MEMORY')
+        self.conn = memconn
+
+    def dump_memory_back_to_fn(self):
+        fnconn = sqlite3.connect(self.fn)
+        self.conn.backup(fnconn)
 
     def create_tables(self, tables):
         """Creates database tables in sqlite lookup db"""

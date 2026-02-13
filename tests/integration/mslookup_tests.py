@@ -116,10 +116,10 @@ class TestDecoyFa(SearchspaceLookup):
         self.run_with_existing_db(['--scramble', 'tryp_rev', '--maxshuffle', '10', '--keep-target'])
         self.check_seqs('decoy_tryprev_tcheck_keeptarget_twoproteins.fasta', dbcheck=True, keep_maxscrambled=True)
 
-    def test_tryprev_yesdb(self):
+    def test_tryprev_yesdb_inmem(self):
         '''Tests making decoy where target hits are validated against DB, removed if
         matching target despite shuffling'''
-        self.run_without_predb(['--scramble', 'tryp_rev'])
+        self.run_without_predb(['--scramble', 'tryp_rev', '--in-memory'])
         self.check_seqs('decoy_tryprev_targetcheck_twoproteins.fasta', dbcheck=True)
 
     def test_tryprev_yesdb_minlen(self):
@@ -138,11 +138,11 @@ class TestDecoyFa(SearchspaceLookup):
         self.run_without_predb(['--scramble', 'prot_rev'])
         self.check_seqs('decoy_twoproteins.fasta')
 
-    def test_pretryp_predb(self):
+    def test_pretryp_predb_inmem(self):
         '''Tests making decoy where sequences are trypsinized before hand, and supplying
         an existing SQLite DB for matching target. Persistent (despite shuffling) target-matching 
         sequences will be removed'''
-        options = ['--scramble', 'tryp_rev', '--notrypsin']
+        options = ['--scramble', 'tryp_rev', '--notrypsin', '--in-memory']
         self.infilename = 'trypsinized_twoproteins.fasta'
         self.infile = [os.path.join(self.fixdir, self.infilename)]
         self.run_with_existing_db(options)
@@ -200,7 +200,7 @@ class TestTrypticLookup(SearchspaceLookup):
         self.run_without_db(['--cutproline'], 'proline_cuts')
 
     def test_cutproline_yesdb(self):
-        self.run_with_existing_db(['--cutproline'], 'proline_cuts')
+        self.run_with_existing_db(['--cutproline', '--in-memory'], 'proline_cuts')
 
     def test_ntermwildcards_nodb(self):
         self.run_without_db(['--insourcefrag'], 'insourcefrag')

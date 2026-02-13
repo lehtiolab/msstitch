@@ -8,8 +8,8 @@ from tests.integration import basetests
 class TestPeptideMerge(basetests.MergeTest):
     infilename = 'target_peptides.tsv'
 
-    def test_proteincentric(self):
-        self.options.extend(['--pepcolpattern', 'peptide PEP'])
+    def test_proteincentric_in_memory(self):
+        self.options.extend(['--pepcolpattern', 'peptide PEP', '--in-memory'])
         self.run_command(self.options)
         sql = ('SELECT ps.sequence, p.psm_id, prot.protein_acc, pd.description, '
                'g.gene_acc, aid.assoc_id, pc.coverage, pseq.sequence '
@@ -27,9 +27,9 @@ class TestPeptideMerge(basetests.MergeTest):
                'JOIN protein_coverage AS pc USING(protein_acc) ')
         self.check_iso_and_peptide_relations(sql, proteincentric=True)
 
-    def test_genecentric(self):
+    def test_genecentric_in_memory(self):
         self.options.append('--genecentric')
-        self.options.extend(['--pepcolpattern', 'peptide PEP'])
+        self.options.extend(['--pepcolpattern', 'peptide PEP', '--in-memory'])
         self.options.extend(['--flrcolpattern', 'q-value'])
         self.run_command(self.options)
         sql = ('SELECT ps.sequence, p.psm_id, "NA", pd.description, '
@@ -204,7 +204,7 @@ class TestProteinMerge(basetests.MergeTest):
         JOIN gene_iso_quanted AS pi USING(gene_id)
         JOIN genequant_channels AS pc USING(channel_id)
         """
-        self.ensgcentric('ensg_nopsms.txt', isosql, nopsms=True)
+        self.ensgcentric_in_memory('ensg_nopsms.txt', isosql, nopsms=True)
 
     def test_ensgcentric(self):
         isosql = """
@@ -215,11 +215,11 @@ class TestProteinMerge(basetests.MergeTest):
         JOIN gene_iso_fullpsms AS fqp USING(gene_id)
         JOIN genequant_channels AS pc USING(channel_id)
         """
-        self.ensgcentric('ensg.txt', isosql)
+        self.ensgcentric_in_memory('ensg.txt', isosql)
 
-    def ensgcentric(self, infile, isosql, nopsms=False):
+    def ensgcentric_in_memory(self, infile, isosql, nopsms=False):
         self.infilename = infile
-        self.run_command(self.options)
+        self.run_command([*self.options, '--in-memory'])
         sql = ('SELECT g.gene_acc, bs.set_name, gf.fdr, gp.quant '
                'FROM genes AS g '
                'JOIN biosets AS bs '

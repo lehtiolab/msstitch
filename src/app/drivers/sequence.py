@@ -22,7 +22,7 @@ class DecoySeqDriver(base.BaseDriver):
     def set_options(self):
         super().set_options()
         self.options.update(self.define_options([
-            'fn', 'outfile', 'lookupfn', 'scramble', 'ignoretarget', 'trypsinize', 
+            'fn', 'outfile', 'lookupfn', 'lookupinmem', 'scramble', 'ignoretarget', 'trypsinize', 
             'miss_cleavage', 'minlength', 'max_shuffle', 'keep_target'], sequence_options))
         self.options['lookupfn'].update({'required': False, 'default': None})
 
@@ -33,6 +33,8 @@ class DecoySeqDriver(base.BaseDriver):
             self.lookup.add_tables(self.tabletypes)
             seqlup.create_searchspace(self.lookup, self.fn, self.minlength, reverse_seqs=False,
                     miss_cleavage=self.miss_cleavage)
+        if self.lookup and self.inmemory:
+            self.lookup.use_in_memory_db()
         decoyfa = sequence.create_decoy_fa(self.fn, self.scramble, self.lookup, self.trypsinize,
                 self.miss_cleavage, self.minlength, self.max_shuffle, self.keep_target)
         with open(outfn, 'w') as fp:

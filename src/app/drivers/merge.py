@@ -14,7 +14,7 @@ class MergeDriver(base.PepProttableDriver):
 
     def set_options(self):
         super().set_options()
-        self.options.update(self.define_options(['setnames',
+        self.options.update(self.define_options(['setnames', 'lookupinmem',
             'quantcolpattern', 'precursorquantcolpattern', 'fdrcolpattern',
             'flrcolpattern', 'multifiles', 'nogroup', 
             'featcol'], lookup_options))
@@ -67,6 +67,8 @@ class MergeDriver(base.PepProttableDriver):
         self.lookup.add_tables(self.tabletypes)
         self.featcol = self.featcol - 1
         self.setnames = [x.replace('"', '') for x in self.setnames]
+        if self.inmemory:
+            self.lookup.use_in_memory_db()
         merge.create_lookup(self.fn, self.lookup, self.setnames, self.featcol,
                 self.precursorquantcolpattern, self.quantcolpattern,
                 self.fdrcolpattern, self.pepcolpattern, self.flrcolpattern)
@@ -89,3 +91,5 @@ class MergeDriver(base.PepProttableDriver):
                 self.header.extend([f'{setn}_{ph.HEADER_NO_FULLQ_PSMS}' for setn in self.setnames])
                 self.header.extend([x[1] for x in channels])
         self.features = merge.build_proteintable(self.lookup, self.mergecutoff, self.quantcolpattern)
+        if self.inmemory:
+            self.lookup.dump_memory_back_to_fn()

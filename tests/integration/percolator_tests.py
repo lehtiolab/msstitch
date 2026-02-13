@@ -60,10 +60,10 @@ class TestFilterKnown(basetests.BaseTestPycolator):
         basetests.create_db([f'{falloff}{x}' for x in seqs], reverse=True)
         self.assert_seqs_correct(seqs, ['--insourcefrag', f'{len(falloff)+1}'])
 
-    def test_deamidate(self):
+    def test_deamidate_inmem(self):
         seqs = ['NSGTLQSQEAK']
         basetests.create_db(seqs)
-        self.assert_seqs_correct(seqs, ['--deamidate'], deamidate=True)
+        self.assert_seqs_correct(seqs, ['--deamidate', '--in-memory'], deamidate=True)
 
     def test_fullprotein(self):
         seqs = ['SEEAHRAEQLQDAEEEK']

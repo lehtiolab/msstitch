@@ -152,12 +152,16 @@ class LookupDriver(BaseDriver):
         del(self.options['fn'])
         del(self.options['outfile'])
         del(self.options['outdir'])
-        self.options.update(self.define_options(['lookupfn'],
-                                                lookup_options))
+        self.options.update(self.define_options(['lookupfn', 'lookupinmem'], lookup_options))
 
     def run(self):
         self.initialize_lookup()
+        if self.inmemory:
+            self.lookup.use_in_memory_db()
+        self.lookup.add_tables(self.tabletypes)
         self.create_lookup()
+        if self.inmemory:
+            self.lookup.dump_memory_back_to_fn()
 
 
 class PSMDriver(BaseDriver):
@@ -173,8 +177,14 @@ class PSMDriver(BaseDriver):
             self.first_infile = self.fn
         self.oldheader = tsvreader.get_tsv_header(self.first_infile)
         self.oldpsms = tsvreader.generate_split_tsv_lines(self.fn, self.oldheader)
+        # prepare lookup if needed
+        if self.lookup and self.inmemory:
+            self.lookup.use_in_memory_db()
 
     def write(self):
+        # Dump in-mem db contents after writing it, before generating refined PSM table
+        if self.lookup and self.inmemory:
+            self.lookup.dump_memory_back_to_fn()
         outfn = self.create_outfilepath(self.first_infile, self.outsuffix)
         tsvwriter.write_tsv(self.header, self.psms, outfn)
 

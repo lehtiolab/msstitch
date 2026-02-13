@@ -13,6 +13,12 @@ shared_options = {
                    'type': 'file', 'nargs': '+'},
     'lookupfn': {'driverattr': 'lookupfn', 'clarg': '--dbfile',
                  'type': 'file', 'help': 'Database lookup file'},
+    'lookupinmem': {'driverattr': 'inmemory', 'clarg': '--in-memory',
+                'action': 'store_const', 'const': True, 'default': False,
+                'help': 'Run sqlite lookup reading (not writing) in memory '
+                'in case of not having access to a fast file system',
+                'required': False,
+                },
     'setnames': {'driverattr': 'setnames',
                  'type': str, 'nargs': '+', 'clarg': '--setnames',
                  'help': 'Names of biological sets. Can be '

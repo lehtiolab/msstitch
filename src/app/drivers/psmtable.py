@@ -200,7 +200,7 @@ class SequenceFilterDriver(PSMDriver):
 
     def set_options(self):
         super().set_options()
-        options = self.define_options(['fullprotein', 'lookupfn', 'unroll',
+        options = self.define_options(['fullprotein', 'lookupfn', 'lookupinmem', 'unroll',
             'minlength'], psmtable_options)
         self.options.update(options)
         options = self.define_options(['deamidate', 'forcetryp', 'insourcefrag'],
@@ -227,7 +227,8 @@ class SequenceMatchDriver(PSMDriver):
 
     def set_options(self):
         super().set_options()
-        options = self.define_options(['fullprotein', 'lookupfn', 'unroll', 'minlength', 'matchfilename'],
+        options = self.define_options(['fullprotein', 'lookupfn', 'lookupinmem', 'unroll',
+            'minlength', 'matchfilename'],
                 psmtable_options)
         self.options.update(options)
         options = self.define_options(['deamidate', 'forcetryp', 'insourcefrag'], percolator_options)
@@ -250,8 +251,8 @@ class PSMTableRefineDriver(PSMDriver):
 
     def set_options(self):
         super().set_options()
-        options = self.define_options(['oldpsmfile', 'lookupfn', 'precursor', 'isobaric',
-            'minpurity', 'unroll', 'spectracol', 'addbioset', 'addmiscleav', 'genes',
+        options = self.define_options(['oldpsmfile', 'lookupfn', 'lookupinmem', 'precursor',
+            'isobaric', 'minpurity', 'unroll', 'spectracol', 'addbioset', 'addmiscleav', 'genes',
             'proteingroup', 'fasta', 'genefield', 'fastadelim'], psmtable_options)
         self.options.update(options)
 
@@ -396,7 +397,8 @@ class DeleteSetDriver(PSMDriver):
 
     def set_options(self):
         super().set_options()
-        self.options.update(self.define_options(['lookupfn', 'setnames'], psmtable_options))
+        self.options.update(self.define_options(['lookupfn', 'lookupinmem', 'setnames'],
+            psmtable_options))
         self.options['lookupfn'].update({'required': False, 'default': None})
 
     def set_features(self):

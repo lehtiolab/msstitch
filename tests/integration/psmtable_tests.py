@@ -60,11 +60,12 @@ class TestPSMTable(MzidWithDB):
         self.check_quanttsv(minpif)
         self.check_addgenes()
 
-    def test_ionmobility(self):
+    def test_ionmobility_db_inmem(self):
         self.infilename = self.timsinfilename
         self.dbfn = self.timsdbfn
         self.setUp()
-        options = ['--dbfile', self.workdb, '--spectracol', f'{self.spectracol}', '--addmiscleav', '--addbioset']
+        options = ['--dbfile', self.workdb, '--in-memory', '--spectracol', f'{self.spectracol}',
+                '--addmiscleav', '--addbioset']
         self.run_command(options)
         sql = ('SELECT pr.rownr, bs.set_name, sp.retention_time, '
                'iit.ion_injection_time, im.ion_mobility '
@@ -540,14 +541,14 @@ class TestSeqMatchFastaDB(basetests.MzidTSVBaseTest):
         options = ['--dbfile', 'seqs.db']
         self.check_peps_in_out(options, seqs)
 
-    def test_ntermwildcards(self):
+    def test_ntermwildcards_inmem(self):
         seqs = ['XXDGTDVLR']
         seqs_to_filter = ['DGTDVLR']
         basetests.create_db(seqs, reverse=True, mapaccession=True)
 
         # Find peptide
         max_falloff = 2
-        options = ['--insourcefrag', str(max_falloff)]
+        options = ['--insourcefrag', str(max_falloff), '--in-memory']
         self.check_peps_in_out(options, seqs_to_filter)
 
 # FIXME
@@ -627,10 +628,10 @@ class TestSeqFilt(basetests.MzidTSVBaseTest):
     suffix = '_filtseq.txt'
     specidkey = 'SpecID'
 
-    def test_noflags(self):
+    def test_noflags_inmem(self):
         seqs = ['DGTDVLR']
         basetests.create_db(seqs)
-        options = ['--dbfile', 'seqs.db']
+        options = ['--dbfile', 'seqs.db', '--in-memory']
         self.run_command(options)
         self.check_peps_in_out(seqs, matching=True)
 
@@ -780,12 +781,12 @@ class TestConffiltTSV(basetests.MzidTSVBaseTest):
             self.fail('This test should error')
 
 
-class DeleteSet(MzidWithDB):
+class TestDeleteSet(MzidWithDB):
     command = 'deletesets'
     infilename = 'target_pg.tsv'
     dbfn = 'target_psms.sqlite'
 
-    def test_deleteset(self):
+    def do_deleteset(self, options):
         set_to_del = 'Set1'
         db = sqlite3.connect(self.workdb)
         # Add peptide which is to be deleted since it will not belong to a remaining
@@ -804,7 +805,7 @@ class DeleteSet(MzidWithDB):
                 line = {h: l for h, l in zip(head, line.strip('\n').split('\t'))}
                 if line['Biological set'] != set_to_del:
                     exprownr += 1
-        self.run_command(['--dbfile', self.workdb, '--setnames', 'Set1'])
+        self.run_command(['--dbfile', self.workdb, '--setnames', set_to_del, *options])
         newrownr = 0
         with open(self.resultfn) as fp:
             head = next(fp).strip('\n').split('\t')
@@ -822,8 +823,14 @@ class DeleteSet(MzidWithDB):
         biosql = """SELECT COUNT(set_name) FROM biosets WHERE set_name='Set1'"""
         self.assertFalse(db.execute(biosql).fetchone()[0])
 
+    def test_db_fn(self):
+        self.do_deleteset([])
 
-class DeleteSetSage(DeleteSet):
+    def test_db_inmem(self):
+        self.do_deleteset(['--in-memory'])
+
+
+class TestDeleteSetSage(TestDeleteSet):
     infilename = 'target_pg.sage.tsv'
     dbfn = 'target_psms.sage.sqlite'
 

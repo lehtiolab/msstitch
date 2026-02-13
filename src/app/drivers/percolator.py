@@ -18,10 +18,12 @@ class FilterSequences(base.PercolatorDriver):
     def set_options(self):
         super().set_options()
         self.options.update(self.define_options(['fullprotein', 'deamidate', 
-            'minlength', 'lookupfn', 'forcetryp', 'insourcefrag'],
+            'minlength', 'lookupfn', 'lookupinmem', 'forcetryp', 'insourcefrag'],
             percolator_options))
 
     def set_features(self):
+        if self.lookup and self.inmemory:
+            self.lookup.use_in_memory_db()
         if self.fullprotein:
             self.features = {
                 'peptide': filters.filter_whole_proteins(self.allpeps,
