@@ -137,10 +137,7 @@ class TestPeptideMerge(basetests.MergeTest):
 
 class TestProteinMerge(basetests.MergeTest):
 
-    def proteins(self, cutoff=False):
-        self.infilename = 'proteins.txt'
-        if cutoff:
-            self.options.extend(['--mergecutoff', str(cutoff)])
+    def proteins(self, centric='proteincentric', cutoff=False):
         self.run_command(self.options)
         sql = ('SELECT p.protein_acc, bs.set_name, pf.fdr, pp.quant FROM proteins AS p '
                'JOIN biosets AS bs '
@@ -184,15 +181,19 @@ class TestProteinMerge(basetests.MergeTest):
         JOIN peptide_sequences AS ps USING(pep_id)
         WHERE bs.set_name='Set1'
         """
-        self.check_protein_data('proteincentric', sql, psm_sql)
+        self.check_protein_data(centric, sql, psm_sql)
 
     def test_proteins(self):
+        self.infilename = 'proteins.txt'
         self.proteins()
 
     def test_mergecutoff(self):
         # FIXME need worse peptides, all FDR is 0.0, cutoff not tested!!
         # test is in check_built_isobaric
-        self.proteins(0.0001)
+        self.infilename = 'proteins.txt'
+        cutoff= 0.0001
+        self.options.extend(['--mergecutoff', str(cutoff)])
+        self.proteins(cutoff=cutoff)
 
     def test_nopsmnrs(self):
         """Given input tables with NO amount psm information, output a nice gene
@@ -205,6 +206,11 @@ class TestProteinMerge(basetests.MergeTest):
         JOIN genequant_channels AS pc USING(channel_id)
         """
         self.ensgcentric_in_memory('ensg_nopsms.txt', isosql, nopsms=True)
+
+    def test_nogroups(self):
+        self.options.append('--no-group-annotation')
+        self.infilename = 'proteins.txt'
+        self.proteins(centric='protnogroup')
 
     def test_ensgcentric(self):
         isosql = """

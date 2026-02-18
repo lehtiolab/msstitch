@@ -68,19 +68,44 @@ SELECT pgm.master_id, p.protein_acc, IFNULL(g.gene_acc, 'NA'),
         return pgdata
 
     def merge_features(self):
-        sql = """
-    SELECT bs.set_name, pgm.master_id, COUNT(DISTINCT ppg.psm_id), 
-    COUNT (DISTINCT ps.pep_id), COUNT(DISTINCT uni.pep_id), 
-    IFNULL(pf.fdr, 'NA'), ppq.quant, fqpsm.amount_psms, GROUP_CONCAT(pqc.channel_name), GROUP_CONCAT(piq.quantvalue),
-    GROUP_CONCAT(piq.amount_psms)
+        cursor = self.get_cursor()
+        cursor.execute('''
+    CREATE TABLE prot_psmpep_counts(prot_id INTEGER, set_id INTEGER, psm_count INTEGER,
+	pep_count INTEGER, uniqpsm_count INTEGER, FOREIGN KEY(prot_id) REFERENCES protein_group_master(master_id)
+	FOREIGN KEY(set_id) REFERENCES biosets(set_id))
+        ''')
+        
+        cursor = self.get_cursor()
+        cursor.execute('''
+    INSERT INTO prot_psmpep_counts(prot_id, set_id, psm_count, pep_count, uniqpsm_count)
+    SELECT pgm.master_id, bs.set_id, COUNT(DISTINCT ppg.psm_id),
+    COUNT (DISTINCT ps.pep_id), COUNT(DISTINCT uniq.pep_id)
         FROM psm_protein_groups AS ppg 
-        INNER JOIN psms ON ppg.psm_id=psms.psm_id 
+        INNER JOIN psms ON ppg.psm_id=psms.psm_id
         INNER JOIN mzml ON psms.spectra_id=mzml.spectra_id
         INNER JOIN mzmlfiles ON mzml.mzmlfile_id=mzmlfiles.mzmlfile_id
         INNER JOIN biosets AS bs ON mzmlfiles.set_id=bs.set_id
         INNER JOIN peptide_sequences AS ps ON psms.pep_id=ps.pep_id
-        INNER JOIN protein_tables AS pt ON pt.set_id=bs.set_id
         INNER JOIN protein_group_master AS pgm ON pgm.master_id=ppg.master_id
+        LEFT OUTER JOIN (
+                SELECT ppg.pep_id AS pep_id FROM (
+                    SELECT psms.pep_id AS pep_id, COUNT (DISTINCT ppg.master_id) AS nrpep 
+                        FROM psm_protein_groups AS ppg INNER JOIN psms USING(psm_id)
+                        GROUP BY psms.pep_id
+                    ) AS ppg WHERE ppg.nrpep==1
+                ) AS uniq ON uniq.pep_id=ps.pep_id
+        GROUP BY pgm.master_id, bs.set_id
+        ''')
+        self.conn.commit()
+
+        sql = """
+    SELECT bs.set_name, pgm.master_id, ppp.psm_count, ppp.pep_count, ppp.uniqpsm_count,
+    IFNULL(pf.fdr, 'NA'), ppq.quant, fqpsm.amount_psms, GROUP_CONCAT(pqc.channel_name), GROUP_CONCAT(piq.quantvalue),
+    GROUP_CONCAT(piq.amount_psms)
+        FROM biosets AS bs
+        INNER JOIN protein_tables AS pt ON pt.set_id=bs.set_id
+        INNER JOIN prot_psmpep_counts AS ppp ON ppp.set_id=bs.set_id
+        INNER JOIN protein_group_master AS pgm ON pgm.master_id=ppp.prot_id
         INNER JOIN proteins AS prots ON prots.pacc_id=pgm.pacc_id
         LEFT OUTER JOIN protein_fdr AS pf ON pf.prottable_id=pt.prottable_id AND 
             pf.pacc_id=prots.pacc_id
@@ -91,13 +116,6 @@ SELECT pgm.master_id, p.protein_acc, IFNULL(g.gene_acc, 'NA'),
         LEFT OUTER JOIN protquant_channels AS pqc ON pqc.prottable_id=pt.prottable_id
         LEFT OUTER JOIN protein_iso_quanted AS piq ON piq.channel_id=pqc.channel_id AND
             piq.pacc_id=prots.pacc_id
-        LEFT OUTER JOIN (
-                SELECT ppg.pep_id AS pep_id FROM (
-                    SELECT psms.pep_id AS pep_id, COUNT (DISTINCT ppg.master_id) AS nrpep 
-                        FROM psm_protein_groups AS ppg INNER JOIN psms USING(psm_id)
-                        GROUP BY psms.pep_id
-                    ) AS ppg WHERE ppg.nrpep==1
-                ) AS uni ON uni.pep_id=ps.pep_id
         GROUP BY pgm.master_id, bs.set_id
         """
         cursor = self.get_cursor()
@@ -127,19 +145,44 @@ class ProtTableNoGroupNoMapDB(ProtGeneTableBase):
         return {pid: {ph.HEADER_PROTEIN: pacc} for pid, pacc in cursor.execute(sql)}
 
     def merge_features(self):
-        sql = """
-    SELECT bs.set_name, prots.pacc_id, COUNT(DISTINCT pp.psm_id), 
-    COUNT (DISTINCT ps.pep_id), COUNT(DISTINCT uni.pep_id), 
-    IFNULL(pf.fdr, 'NA'), ppq.quant, fqpsm.amount_psms, GROUP_CONCAT(pqc.channel_name), GROUP_CONCAT(piq.quantvalue),
-    GROUP_CONCAT(piq.amount_psms)
+        cursor = self.get_cursor()
+        cursor.execute('''
+    CREATE TABLE prot_psmpep_counts(prot_id INTEGER, set_id INTEGER, psm_count INTEGER,
+	pep_count INTEGER, uniqpsm_count INTEGER, FOREIGN KEY(prot_id) REFERENCES proteins(pacc_id)
+	FOREIGN KEY(set_id) REFERENCES biosets(set_id))
+        ''')
+        
+        cursor = self.get_cursor()
+        cursor.execute('''
+    INSERT INTO prot_psmpep_counts(prot_id, set_id, psm_count, pep_count, uniqpsm_count)
+    SELECT prots.pacc_id, bs.set_id, COUNT(DISTINCT pp.psm_id), 
+    COUNT (DISTINCT ps.pep_id), COUNT(DISTINCT uni.pep_id)
         FROM protein_psm AS pp 
         INNER JOIN psms ON pp.psm_id=psms.psm_id 
         INNER JOIN mzml ON psms.spectra_id=mzml.spectra_id
         INNER JOIN mzmlfiles ON mzml.mzmlfile_id=mzmlfiles.mzmlfile_id
         INNER JOIN biosets AS bs ON mzmlfiles.set_id=bs.set_id
         INNER JOIN peptide_sequences AS ps ON psms.pep_id=ps.pep_id
-        INNER JOIN protein_tables AS pt ON pt.set_id=bs.set_id
         INNER JOIN proteins AS prots ON prots.protein_acc=pp.protein_acc
+        LEFT OUTER JOIN (
+                SELECT ppg.pep_id AS pep_id FROM (
+                    SELECT psms.pep_id AS pep_id, COUNT (DISTINCT pp.protein_acc) AS nrpep 
+                        FROM protein_psm AS pp INNER JOIN psms USING(psm_id)
+                        GROUP BY psms.pep_id
+                    ) AS ppg WHERE ppg.nrpep==1
+                ) AS uni ON uni.pep_id=ps.pep_id
+        GROUP BY prots.pacc_id, bs.set_id
+        ''')
+        self.conn.commit()
+
+        sql = """
+    SELECT bs.set_name, prots.pacc_id, ppp.psm_count, ppp.pep_count, ppp.uniqpsm_count,
+    IFNULL(pf.fdr, 'NA'), ppq.quant, fqpsm.amount_psms, GROUP_CONCAT(pqc.channel_name), GROUP_CONCAT(piq.quantvalue),
+    GROUP_CONCAT(piq.amount_psms)
+        FROM biosets AS bs
+        INNER JOIN protein_tables AS pt ON pt.set_id=bs.set_id
+        INNER JOIN prot_psmpep_counts AS ppp ON ppp.set_id=bs.set_id
+        INNER JOIN proteins AS prots ON prots.pacc_id=ppp.prot_id
         LEFT OUTER JOIN protein_fdr AS pf ON pf.prottable_id=pt.prottable_id AND 
             pf.pacc_id=prots.pacc_id
         LEFT OUTER JOIN protein_precur_quanted AS ppq ON ppq.prottable_id=pt.prottable_id AND 
@@ -149,13 +192,6 @@ class ProtTableNoGroupNoMapDB(ProtGeneTableBase):
         LEFT OUTER JOIN protquant_channels AS pqc ON pqc.prottable_id=pt.prottable_id
         LEFT OUTER JOIN protein_iso_quanted AS piq ON piq.channel_id=pqc.channel_id AND
             piq.pacc_id=prots.pacc_id
-        LEFT OUTER JOIN (
-                SELECT ppg.pep_id AS pep_id FROM (
-                    SELECT psms.pep_id AS pep_id, COUNT (DISTINCT pp.protein_acc) AS nrpep 
-                        FROM protein_psm AS pp INNER JOIN psms USING(psm_id)
-                        GROUP BY psms.pep_id
-                    ) AS ppg WHERE ppg.nrpep==1
-                ) AS uni ON uni.pep_id=ps.pep_id
         GROUP BY prots.pacc_id, bs.set_id
         """
         cursor = self.get_cursor()
@@ -202,23 +238,50 @@ SELECT g.gene_acc, GROUP_CONCAT(p.protein_acc, ';'), IFNULL(aid.assoc_id, 'NA'),
         return pgdata
 
     def merge_features(self):
-  ### protein_acc on gene table is indexed??
-        sql = """
-    SELECT bs.set_name, g.gene_acc, COUNT(DISTINCT ppsm.psm_id), 
-    COUNT (DISTINCT ps.pep_id), COUNT(DISTINCT uniq.pep_id), 
-    IFNULL(gf.fdr, 'NA'), gpq.quant, fqpsm.amount_psms,
-    GROUP_CONCAT(gqc.channel_name), GROUP_CONCAT(giq.quantvalue),
-    GROUP_CONCAT(giq.amount_psms)
+        cursor = self.get_cursor()
+        cursor.execute('''
+    CREATE TABLE gene_psmpep_counts(gene_id INTEGER, set_id INTEGER, psm_count INTEGER,
+	pep_count INTEGER, uniqpsm_count INTEGER, FOREIGN KEY(gene_id) REFERENCES genes(gene_id)
+	FOREIGN KEY(set_id) REFERENCES biosets(set_id))
+        ''')
+        
+        cursor = self.get_cursor()
+        cursor.execute('''
+    INSERT INTO gene_psmpep_counts(gene_id, set_id, psm_count, pep_count, uniqpsm_count)
+    SELECT g.gene_id, bs.set_id, COUNT(DISTINCT ppsm.psm_id),
+    COUNT (DISTINCT ps.pep_id), COUNT(DISTINCT uniq.pep_id)
         FROM protein_psm AS ppsm
-        INNER JOIN psms ON ppsm.psm_id=psms.psm_id 
+        INNER JOIN psms ON ppsm.psm_id=psms.psm_id
         INNER JOIN mzml ON psms.spectra_id=mzml.spectra_id
         INNER JOIN mzmlfiles ON mzml.mzmlfile_id=mzmlfiles.mzmlfile_id
         INNER JOIN biosets AS bs ON mzmlfiles.set_id=bs.set_id
         INNER JOIN peptide_sequences AS ps ON psms.pep_id=ps.pep_id
-        INNER JOIN gene_tables AS gt ON gt.set_id=bs.set_id
         INNER JOIN proteins AS p ON p.protein_acc=ppsm.protein_acc
         INNER JOIN ensg_proteins AS egp ON egp.pacc_id=p.pacc_id
         INNER JOIN genes AS g ON g.gene_id=egp.gene_id
+        LEFT OUTER JOIN (
+                SELECT psmg.pep_id AS pep_id FROM (
+                    SELECT psms.pep_id AS pep_id, COUNT (DISTINCT g.gene_acc) AS nrpep
+                        FROM protein_psm AS ppsm INNER JOIN psms USING(psm_id)
+                        INNER JOIN proteins AS p ON p.protein_acc=ppsm.protein_acc
+                        INNER JOIN ensg_proteins AS egp ON egp.pacc_id=p.pacc_id
+                        INNER JOIN genes AS g ON g.gene_id=egp.gene_id
+                        GROUP BY psms.pep_id
+                    ) AS psmg WHERE psmg.nrpep==1
+                ) AS uniq ON uniq.pep_id=ps.pep_id
+        GROUP BY g.gene_id, bs.set_id
+        ''')
+        self.conn.commit()
+        
+        sql = """
+    SELECT bs.set_name, g.gene_acc, gpp.psm_count, gpp.pep_count, gpp.uniqpsm_count,
+    IFNULL(gf.fdr, 'NA'), gpq.quant, fqpsm.amount_psms,
+    GROUP_CONCAT(gqc.channel_name), GROUP_CONCAT(giq.quantvalue),
+    GROUP_CONCAT(giq.amount_psms)
+        FROM biosets AS bs
+        INNER JOIN gene_tables AS gt ON gt.set_id=bs.set_id
+        INNER JOIN gene_psmpep_counts AS gpp ON gpp.set_id=bs.set_id
+        INNER JOIN genes AS g ON g.gene_id=gpp.gene_id
         INNER JOIN gene_fdr AS gf ON gf.genetable_id=gt.genetable_id AND 
             gf.gene_id=g.gene_id
         LEFT OUTER JOIN gene_precur_quanted AS gpq ON gpq.genetable_id=gt.genetable_id AND 
@@ -228,19 +291,8 @@ SELECT g.gene_acc, GROUP_CONCAT(p.protein_acc, ';'), IFNULL(aid.assoc_id, 'NA'),
         LEFT OUTER JOIN genequant_channels AS gqc ON gqc.genetable_id=gt.genetable_id
         LEFT OUTER JOIN gene_iso_quanted AS giq ON giq.channel_id=gqc.channel_id AND
             giq.gene_id=g.gene_id
-
-        LEFT OUTER JOIN (
-                SELECT psmg.pep_id AS pep_id FROM (
-                    SELECT psms.pep_id AS pep_id, COUNT (DISTINCT g.gene_acc) AS nrpep 
-                        FROM protein_psm AS ppsm INNER JOIN psms USING(psm_id)
-                        INNER JOIN proteins AS p ON p.protein_acc=ppsm.protein_acc
-                        INNER JOIN ensg_proteins AS egp ON egp.pacc_id=p.pacc_id
-                        INNER JOIN genes AS g ON g.gene_id=egp.gene_id
-                        GROUP BY psms.pep_id
-                    ) AS psmg WHERE psmg.nrpep==1
-                ) AS uniq ON uniq.pep_id=ps.pep_id
         GROUP BY g.gene_id, bs.set_id
-        """
+            """
         cursor = self.get_cursor()
         cursor.execute(sql)
         return cursor
@@ -286,32 +338,27 @@ SELECT gn.assoc_id, GROUP_CONCAT(p.protein_acc, ';'), IFNULL(g.gene_acc, 'NA'),
     def merge_features(self):
   ### protein_acc on gene table is indexed??
   ### check distinct stuff, pgroups etc need it, matched with content numbers (which cnanot habe it)
-        sql = """
-    SELECT bs.set_name, gn.assoc_id, COUNT(DISTINCT ppsm.psm_id), 
-    COUNT (DISTINCT ps.pep_id), COUNT(DISTINCT uniq.pep_id), 
-    IFNULL(gf.fdr, 'NA'), gpq.quant, fqpsm.amount_psms,
-    GROUP_CONCAT(gqc.channel_name), GROUP_CONCAT(giq.quantvalue),
-    GROUP_CONCAT(giq.amount_psms)
+        cursor = self.get_cursor()
+        cursor.execute('''
+    CREATE TABLE gn_psmpep_counts(gn_id INTEGER, set_id INTEGER, psm_count INTEGER,
+	pep_count INTEGER, uniqpsm_count INTEGER, FOREIGN KEY(gn_id) REFERENCES associated_ids(gn_id)
+	FOREIGN KEY(set_id) REFERENCES biosets(set_id))
+        ''')
+        
+        cursor = self.get_cursor()
+        cursor.execute('''
+    INSERT INTO gn_psmpep_counts(gn_id, set_id, psm_count, pep_count, uniqpsm_count)
+    SELECT gn.gn_id, bs.set_id, COUNT(DISTINCT ppsm.psm_id), 
+    COUNT (DISTINCT ps.pep_id), COUNT(DISTINCT uniq.pep_id) 
         FROM protein_psm AS ppsm
         INNER JOIN psms ON ppsm.psm_id=psms.psm_id 
         INNER JOIN mzml ON psms.spectra_id=mzml.spectra_id
         INNER JOIN mzmlfiles ON mzml.mzmlfile_id=mzmlfiles.mzmlfile_id
         INNER JOIN biosets AS bs ON mzmlfiles.set_id=bs.set_id
         INNER JOIN peptide_sequences AS ps ON psms.pep_id=ps.pep_id
-        INNER JOIN gene_tables AS gt ON gt.set_id=bs.set_id
         INNER JOIN proteins AS p ON p.protein_acc=ppsm.protein_acc
         INNER JOIN genename_proteins AS gnp ON gnp.pacc_id=p.pacc_id
         INNER JOIN associated_ids AS gn ON gn.gn_id=gnp.gn_id
-        INNER JOIN assoc_fdr AS gf ON gf.genetable_id=gt.genetable_id AND 
-            gf.gn_id=gn.gn_id
-        LEFT OUTER JOIN assoc_precur_quanted AS gpq ON gpq.genetable_id=gt.genetable_id AND 
-            gpq.gn_id=gn.gn_id
-        LEFT OUTER JOIN assoc_iso_fullpsms AS fqpsm ON fqpsm.genetable_id=gt.genetable_id AND 
-            fqpsm.gn_id=gn.gn_id
-        LEFT OUTER JOIN genequant_channels AS gqc ON gqc.genetable_id=gt.genetable_id
-        LEFT OUTER JOIN assoc_iso_quanted AS giq ON giq.channel_id=gqc.channel_id AND
-            giq.gn_id=gn.gn_id
-
         LEFT OUTER JOIN (
                 SELECT psmg.pep_id AS pep_id FROM (
                     SELECT psms.pep_id AS pep_id, COUNT (DISTINCT gn.assoc_id) AS nrpep 
@@ -322,6 +369,28 @@ SELECT gn.assoc_id, GROUP_CONCAT(p.protein_acc, ';'), IFNULL(g.gene_acc, 'NA'),
                         GROUP BY psms.pep_id
                     ) AS psmg WHERE psmg.nrpep==1
                 ) AS uniq ON uniq.pep_id=ps.pep_id
+        GROUP BY gn.gn_id, bs.set_id
+        ''')
+        self.conn.commit()
+        
+        sql = """
+    SELECT bs.set_name, gn.assoc_id, gpp.psm_count, gpp.pep_count, gpp.uniqpsm_count,
+    IFNULL(gf.fdr, 'NA'), gpq.quant, fqpsm.amount_psms,
+    GROUP_CONCAT(gqc.channel_name), GROUP_CONCAT(giq.quantvalue),
+    GROUP_CONCAT(giq.amount_psms)
+        FROM biosets AS bs
+        INNER JOIN gene_tables AS gt ON gt.set_id=bs.set_id
+        INNER JOIN gn_psmpep_counts AS gpp ON gpp.set_id=bs.set_id
+        INNER JOIN associated_ids AS gn ON gn.gn_id=gpp.gn_id
+        INNER JOIN assoc_fdr AS gf ON gf.genetable_id=gt.genetable_id AND 
+            gf.gn_id=gn.gn_id
+        LEFT OUTER JOIN assoc_precur_quanted AS gpq ON gpq.genetable_id=gt.genetable_id AND 
+            gpq.gn_id=gn.gn_id
+        LEFT OUTER JOIN assoc_iso_fullpsms AS fqpsm ON fqpsm.genetable_id=gt.genetable_id AND 
+            fqpsm.gn_id=gn.gn_id
+        LEFT OUTER JOIN genequant_channels AS gqc ON gqc.genetable_id=gt.genetable_id
+        LEFT OUTER JOIN assoc_iso_quanted AS giq ON giq.channel_id=gqc.channel_id AND
+            giq.gn_id=gn.gn_id
         GROUP BY gn.gn_id, bs.set_id
         """
         cursor = self.get_cursor()

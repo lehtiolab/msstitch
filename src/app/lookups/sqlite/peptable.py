@@ -125,16 +125,32 @@ class PepTableProteinCentricDB(ProtPepTable):
         return pgdata
 
     def merge_features(self):
-        sql = """
-    SELECT bs.set_name, ps.pep_id, COUNT(DISTINCT psms.psm_id), pf.fdr, pp.pep,
-            flr.flr, ppq.quant, fqpsm.amount_psms, GROUP_CONCAT(pqc.channel_name),
-            GROUP_CONCAT(piq.quantvalue), GROUP_CONCAT(piq.amount_psms)
+        cursor = self.get_cursor()
+        cursor.execute('''
+    CREATE TABLE pep_psmpep_counts(pep_id INTEGER, set_id INTEGER, psm_count INTEGER,
+	FOREIGN KEY(pep_id) REFERENCES peptide_sequences(pep_id)
+	FOREIGN KEY(set_id) REFERENCES biosets(set_id))
+        ''')
+        cursor = self.get_cursor()
+        cursor.execute('''
+    INSERT INTO pep_psmpep_counts(pep_id, set_id, psm_count) 
+    SELECT ps.pep_id, bs.set_id, COUNT(DISTINCT psms.psm_id) 
         FROM peptide_sequences AS ps
         INNER JOIN psms ON ps.pep_id=psms.pep_id 
         INNER JOIN mzml ON psms.spectra_id=mzml.spectra_id
         INNER JOIN mzmlfiles ON mzml.mzmlfile_id=mzmlfiles.mzmlfile_id
         INNER JOIN biosets AS bs ON mzmlfiles.set_id=bs.set_id
+        GROUP BY ps.pep_id, bs.set_id
+        ''')
+
+        sql = """
+    SELECT bs.set_name, ps.pep_id, ppp.psm_count, pf.fdr, pp.pep,
+            flr.flr, ppq.quant, fqpsm.amount_psms, GROUP_CONCAT(pqc.channel_name),
+            GROUP_CONCAT(piq.quantvalue), GROUP_CONCAT(piq.amount_psms)
+        FROM biosets AS bs
         INNER JOIN peptide_tables AS pt ON pt.set_id=bs.set_id
+        INNER JOIN pep_psmpep_counts AS ppp ON ppp.set_id=bs.set_id
+        INNER JOIN peptide_sequences AS ps ON ps.pep_id=ppp.pep_id
         INNER JOIN peptide_fdr AS pf ON pf.peptable_id=pt.peptable_id AND 
             pf.pep_id=ps.pep_id
         LEFT OUTER JOIN peptide_pep AS pp ON pp.peptable_id=pt.peptable_id AND 
@@ -199,35 +215,6 @@ SELECT ps.pep_id, ps.sequence, GROUP_CONCAT(IFNULL(gsub.ensg, 'NA'), ';'),
                     }
         return pgdata
 
-    def merge_features(self):
-        sql = """
-    SELECT bs.set_name, ps.pep_id, COUNT(DISTINCT psms.psm_id), pf.fdr, pp.pep,
-            flr.flr, ppq.quant, fqpsm.amount_psms, GROUP_CONCAT(pqc.channel_name),
-            GROUP_CONCAT(piq.quantvalue), GROUP_CONCAT(piq.amount_psms)
-        FROM peptide_sequences AS ps
-        JOIN biosets AS bs 
-        INNER JOIN psms ON ps.pep_id=psms.pep_id 
-        INNER JOIN peptide_tables AS pt ON pt.set_id=bs.set_id
-        INNER JOIN peptide_fdr AS pf ON pf.peptable_id=pt.peptable_id AND 
-            pf.pep_id=ps.pep_id
-        LEFT OUTER JOIN peptide_pep AS pp ON pp.peptable_id=pt.peptable_id AND 
-            pp.pep_id=ps.pep_id
-        LEFT OUTER JOIN ptm_flr AS flr ON flr.peptable_id=pt.peptable_id AND
-            flr.pep_id=ps.pep_id
-        LEFT OUTER JOIN peptide_precur_quanted AS ppq ON ppq.peptable_id=pt.peptable_id AND
-            ppq.pep_id=ps.pep_id
-        LEFT OUTER JOIN peptide_iso_fullpsms AS fqpsm ON fqpsm.peptable_id=pt.peptable_id AND
-            fqpsm.pep_id=ps.pep_id
-        LEFT OUTER JOIN pepquant_channels AS pqc ON pqc.peptable_id=pt.peptable_id
-        LEFT OUTER JOIN peptide_iso_quanted AS piq ON piq.channel_id=pqc.channel_id AND
-            piq.pep_id=ps.pep_id
-        GROUP BY ps.pep_id, bs.set_id
-        """
-        cursor = self.get_cursor()
-        cursor.execute(sql)
-        return cursor
-
-
 
 class PepTablePlainDB(PepTableProteinCentricDB):
     datatype = 'peptide'
@@ -271,30 +258,3 @@ class PepTablePlainDB(PepTableProteinCentricDB):
                     ph.HEADER_STARTSTOP: ';'.join(startstop)
                     }
         return pgdata
-
-    def merge_features(self):
-        sql = """
-    SELECT bs.set_name, ps.pep_id, COUNT(DISTINCT psms.psm_id), pf.fdr, pp.pep,
-            flr.flr, ppq.quant, fqpsm.amount_psms, GROUP_CONCAT(pqc.channel_name),
-            GROUP_CONCAT(piq.quantvalue), GROUP_CONCAT(piq.amount_psms)
-        FROM peptide_sequences AS ps
-        JOIN biosets AS bs 
-        INNER JOIN psms ON ps.pep_id=psms.pep_id 
-        INNER JOIN peptide_tables AS pt ON pt.set_id=bs.set_id
-        INNER JOIN peptide_fdr AS pf ON pf.peptable_id=pt.peptable_id AND 
-            pf.pep_id=ps.pep_id
-        LEFT OUTER JOIN peptide_pep AS pp ON pp.peptable_id=pt.peptable_id AND 
-            pp.pep_id=ps.pep_id
-        LEFT OUTER JOIN ptm_flr AS flr ON flr.peptable_id=pt.peptable_id AND flr.pep_id=ps.pep_id
-        LEFT OUTER JOIN peptide_precur_quanted AS ppq ON ppq.peptable_id=pt.peptable_id AND
-            ppq.pep_id=ps.pep_id
-        LEFT OUTER JOIN peptide_iso_fullpsms AS fqpsm ON fqpsm.peptable_id=pt.peptable_id AND
-            fqpsm.pep_id=ps.pep_id
-        LEFT OUTER JOIN pepquant_channels AS pqc ON pqc.peptable_id=pt.peptable_id
-        LEFT OUTER JOIN peptide_iso_quanted AS piq ON piq.channel_id=pqc.channel_id AND
-            piq.pep_id=ps.pep_id
-        GROUP BY ps.pep_id, bs.set_id
-        """
-        cursor = self.get_cursor()
-        cursor.execute(sql)
-        return cursor

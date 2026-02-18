@@ -312,6 +312,8 @@ class MergeTest(BaseTest):
                 ]
 
     def check_build_values(self, sql, fields, accession, cutoff=False):
+        '''Run passed sql on merge DB to get expected data, then go through
+        result TSV file to see if that is correctly applied'''
         expected = {}
         sql = sql + ' WHERE bs.set_name="Set1"'
         for rec in self.get_values_from_db(self.dbfile, sql):
@@ -375,21 +377,21 @@ class MergeTest(BaseTest):
             expected.pop(line[accession])
         self.check_exp_empty(expected, cutoff)
 
-    def check_protein_data(self, centrictype, sql, psm_sql):
-        centric = {'proteincentric': 'pc', 'genecentric': 'gc',
-                   'assoccentric': 'ac'}[centrictype]
+    def check_protein_data(self, centric, sql, psm_sql):
         expected = {rec[0]: [x if x else 'NA' for x in rec[1:]] for rec in
                     self.get_values_from_db(self.dbfile, sql)}
         pdatalup = {
-                'pc': {'acc': 'Protein ID', 'fields': [('Gene ID', 0), ('Gene Name', 1), ('Coverage', 3)]},
-                'gc': {'acc': 'Gene ID', 'fields': [('Gene Name', 0), ('Protein ID(s)', 1)]},
-                'ac': {'acc': 'Gene Name', 'fields': [('Gene ID', 0), ('Protein ID(s)', 1)]},
+                'proteincentric': {'acc': 'Protein ID', 'fields': [('Gene ID', 0), ('Gene Name', 1), ('Coverage', 3)]},
+                'genecentric': {'acc': 'Gene ID', 'fields': [('Gene Name', 0), ('Protein ID(s)', 1)]},
+                'assoccentric': {'acc': 'Gene Name', 'fields': [('Gene ID', 0), ('Protein ID(s)', 1)]},
+                'protnogroup': {'acc': 'Protein ID', 'fields' :[]},
                 }
         for row in self.tsv_generator(self.resultfn):
             acc = row[pdatalup[centric]['acc']]
             for (field, ix) in pdatalup[centric]['fields']:
                 self.assertEqual(set(str(row[field]).split(';')), set(str(expected[acc][ix]).split(',')))
-            self.assertEqual(row['Description'], expected[acc][2])
+            if centric != 'protnogroup':
+                self.assertEqual(row['Description'], expected[acc][2])
         expected, unipeps = {}, {}
         for rec in self.get_values_from_db(self.dbfile, psm_sql):
             pacc = rec[0]
@@ -404,6 +406,7 @@ class MergeTest(BaseTest):
                                   'unipep': 0}
             else:
                 expected[pacc]['pep'].add(rec[2])
+        
         for pep, prot in unipeps.items():
             if len(prot) == 1:
                 expected[prot.pop()]['unipep'] += 1
