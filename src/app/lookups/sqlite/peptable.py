@@ -164,7 +164,7 @@ class PepTableProteinCentricDB(ProtPepTable):
         LEFT OUTER JOIN pepquant_channels AS pqc ON pqc.peptable_id=pt.peptable_id
         LEFT OUTER JOIN peptide_iso_quanted AS piq ON piq.channel_id=pqc.channel_id AND
             piq.pep_id=ps.pep_id
-        GROUP BY ps.pep_id, bs.set_id
+        GROUP BY ps.pep_id, bs.set_id ORDER BY ps.pep_id
         """
         cursor = self.get_cursor()
         cursor.execute(sql)

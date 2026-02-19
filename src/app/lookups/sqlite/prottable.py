@@ -116,7 +116,7 @@ SELECT pgm.master_id, p.protein_acc, IFNULL(g.gene_acc, 'NA'),
         LEFT OUTER JOIN protquant_channels AS pqc ON pqc.prottable_id=pt.prottable_id
         LEFT OUTER JOIN protein_iso_quanted AS piq ON piq.channel_id=pqc.channel_id AND
             piq.pacc_id=prots.pacc_id
-        GROUP BY pgm.master_id, bs.set_id
+        GROUP BY pgm.master_id, bs.set_id ORDER BY pgm.master_id
         """
         cursor = self.get_cursor()
         cursor.execute(sql)
@@ -192,7 +192,7 @@ class ProtTableNoGroupNoMapDB(ProtGeneTableBase):
         LEFT OUTER JOIN protquant_channels AS pqc ON pqc.prottable_id=pt.prottable_id
         LEFT OUTER JOIN protein_iso_quanted AS piq ON piq.channel_id=pqc.channel_id AND
             piq.pacc_id=prots.pacc_id
-        GROUP BY prots.pacc_id, bs.set_id
+        GROUP BY prots.pacc_id, bs.set_id ORDER BY prots.pacc_id
         """
         cursor = self.get_cursor()
         cursor.execute(sql)
@@ -291,7 +291,7 @@ SELECT g.gene_acc, GROUP_CONCAT(p.protein_acc, ';'), IFNULL(aid.assoc_id, 'NA'),
         LEFT OUTER JOIN genequant_channels AS gqc ON gqc.genetable_id=gt.genetable_id
         LEFT OUTER JOIN gene_iso_quanted AS giq ON giq.channel_id=gqc.channel_id AND
             giq.gene_id=g.gene_id
-        GROUP BY g.gene_id, bs.set_id
+        GROUP BY g.gene_id, bs.set_id ORDER BY g.gene_id
             """
         cursor = self.get_cursor()
         cursor.execute(sql)
@@ -391,7 +391,7 @@ SELECT gn.assoc_id, GROUP_CONCAT(p.protein_acc, ';'), IFNULL(g.gene_acc, 'NA'),
         LEFT OUTER JOIN genequant_channels AS gqc ON gqc.genetable_id=gt.genetable_id
         LEFT OUTER JOIN assoc_iso_quanted AS giq ON giq.channel_id=gqc.channel_id AND
             giq.gn_id=gn.gn_id
-        GROUP BY gn.gn_id, bs.set_id
+        GROUP BY gn.gn_id, bs.set_id ORDER BY gn.gn_id
         """
         cursor = self.get_cursor()
         cursor.execute(sql)
