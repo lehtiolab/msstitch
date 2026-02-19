@@ -39,8 +39,6 @@ class PepTableProteinCentricDB(ProtPepTable):
     def store_pep(self, pep):
         self.store_singlecol('peptable', pep)
         table = self.table_map[self.datatype]['peptable']
-        self.singlecols_to_index.append(('pep_acc_ix', table, self.colmap[table][0]))
-        self.singlecols_to_index.append(('pep_table_ix', table, self.colmap[table][1]))
 
     def create_pdata_map(self):
         """This runs only once, returns the data which is not dependent on sets,

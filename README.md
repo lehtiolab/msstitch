@@ -126,6 +126,9 @@ msstitch psmtable -i decoy.tsv -o decoy_psmtable.txt --fasta decoy.fasta \
 When using Sage results, you will have missed cleavages out of the box (and retention time, ion mobility)! So leave
 out `--addmiscleav`. Otherwise msstitch will accept the Sage file format as well.
 
+For most commands which use a `--dbfile`, you can use the `--in-memory` flag to make the SQLite file
+load in memory, which can be faster at the cost of memory use, in the case of slower (e.g. networked)
+disks
 
 If necessary (e.g. multiple TMT sample sets), split the table before making
 protein/peptide tables:

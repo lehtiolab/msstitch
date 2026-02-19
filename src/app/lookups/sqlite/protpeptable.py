@@ -40,7 +40,6 @@ class ProtPepTable(ResultLookupInterface):
 
     def __init__(self, fn=None):
         super().__init__(fn)
-        self.singlecols_to_index = []
 
     def get_all_poolnames(self):
         cursor = self.get_cursor()
@@ -93,10 +92,6 @@ class ProtPepTable(ResultLookupInterface):
         self.index_column('isoq_acc_ix', table, self.colmap[table][1])
         self.index_column('isoq_ch_ix', table, self.colmap[table][2])
 
-    def index_singlecol_data(self):
-        for ixname, table, col in self.singlecols_to_index:
-            self.index_column(ixname, table, col)
-
     def get_tablefn_map(self):
         table = self.table_map[self.datatype]['fntable']
         cursor = self.get_cursor()
@@ -133,14 +128,10 @@ class ProtPepTable(ResultLookupInterface):
     def store_precursor_quants(self, quants):
         self.store_singlecol('prectable', quants)
         table = self.table_map[self.datatype]['prectable']
-        self.singlecols_to_index.append(('precursor_acc_ix', table, self.colmap[table][0]))
-        self.singlecols_to_index.append(('precursor_table_ix', table, self.colmap[table][1]))
 
     def store_fdr(self, fdr):
         self.store_singlecol('fdrtable', fdr)
         table = self.table_map[self.datatype]['fdrtable']
-        self.singlecols_to_index.append(('fdr_acc_ix', table, self.colmap[table][0]))
-        self.singlecols_to_index.append(('fdr_table_ix', table, self.colmap[table][1]))
 
     def store_pep(self, pep):
         '''Overridden in peptide table lookup'''
@@ -149,14 +140,10 @@ class ProtPepTable(ResultLookupInterface):
     def store_fullq_psms(self, fullqpsms):
         self.store_singlecol('fullqpsmtable', fullqpsms)
         table = self.table_map[self.datatype]['fullqpsmtable']
-        self.singlecols_to_index.append(('fullq_acc_ix', table, self.colmap[table][0]))
-        self.singlecols_to_index.append(('fullq_table_ix', table, self.colmap[table][1]))
 
     def store_ptm_flr(self, flrs):
         self.store_singlecol('flrtable', flrs)
         table = self.table_map[self.datatype]['flrtable']
-        self.singlecols_to_index.append(('flr_acc_ix', table, self.colmap[table][0]))
-        self.singlecols_to_index.append(('flr_table_ix', table, self.colmap[table][1]))
 
     def check_isoquant_psmnrs(self):
         cursor = self.get_cursor()

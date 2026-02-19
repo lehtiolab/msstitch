@@ -15,7 +15,7 @@ shared_options = {
                  'type': 'file', 'help': 'Database lookup file'},
     'lookupinmem': {'driverattr': 'inmemory', 'clarg': '--in-memory',
                 'action': 'store_const', 'const': True, 'default': False,
-                'help': 'Run sqlite lookup reading (not writing) in memory '
+                'help': 'Load sqlite lookup in memory '
                 'in case of not having access to a fast file system',
                 'required': False,
                 },

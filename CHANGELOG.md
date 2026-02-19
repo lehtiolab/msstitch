@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.19] - 2026-02-19
+### Added
+- In-memory SQL for when dealing with slow disks, e.g. on networks
+
+### Fixed
+- Slow merge due to massive SQL join, broke SQL into parts
+
+
 ## [3.18] - 2026-02-06
 ### Fixed
 - Merge protein without --mergecutoff did not include proteins from input table without an FDR (e.g when NA or not specified),

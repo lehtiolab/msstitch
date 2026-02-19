@@ -91,5 +91,7 @@ class MergeDriver(base.PepProttableDriver):
                 self.header.extend([f'{setn}_{ph.HEADER_NO_FULLQ_PSMS}' for setn in self.setnames])
                 self.header.extend([x[1] for x in channels])
         self.features = merge.build_proteintable(self.lookup, self.mergecutoff, self.quantcolpattern)
+        # We can dump here or earlier, since the lookup is already created, count data
+        # can be generated again on the fly (it is non-normalized)
         if self.inmemory:
             self.lookup.dump_memory_back_to_fn()
