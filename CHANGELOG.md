@@ -1,5 +1,10 @@
 # Changelog
 
+## [3.20] - 2026-04-02
+### Fixed
+- Fixed bug in removing features from DB before merging if they were not in the individual tables, needed to be per-set
+
+
 ## [3.19] - 2026-02-19
 ### Added
 - In-memory SQL for when dealing with slow disks, e.g. on networks
