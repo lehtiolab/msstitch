@@ -137,7 +137,59 @@ class TestPeptideMerge(basetests.MergeTest):
 
 class TestProteinMerge(basetests.MergeTest):
 
-    def proteins(self, centric='proteincentric', cutoff=False):
+    def test_proteins(self):
+        self.infilename = 'proteins.txt'
+        self.run_command(self.options)
+        sql = ('SELECT p.protein_acc, bs.set_name, pf.fdr, pp.quant FROM proteins AS p '
+               'JOIN biosets AS bs '
+               'JOIN protein_fdr AS pf USING(pacc_id) '
+               'JOIN protein_precur_quanted AS pp USING(pacc_id) '
+               )
+        self.check_build_values(sql, ['q-value', 'MS1 precursor area'],
+                'Protein ID', False)
+        sql = ('SELECT p.protein_acc, bs.set_name, pc.channel_name, '
+               'pi.quantvalue, pi.amount_psms, fqp.amount_psms, pf.fdr '
+               'FROM proteins AS p '
+               'JOIN biosets AS bs '
+               'JOIN protein_iso_quanted AS pi USING(pacc_id) '
+               'JOIN protein_iso_fullpsms AS fqp USING(pacc_id) '
+               'JOIN protquant_channels AS pc USING(channel_id) '
+               'JOIN protein_fdr AS pf WHERE pf.prottable_id=pc.prottable_id '
+               'AND pf.pacc_id=p.pacc_id'
+               )
+        self.check_built_isobaric(sql, 'Protein ID', cutoff=False)
+        sql = """
+        SELECT p.protein_acc,GROUP_CONCAT(g.gene_acc),GROUP_CONCAT(aid.assoc_id),pd.description,pcov.coverage
+        FROM protein_group_master AS pgm 
+        INNER JOIN proteins AS p ON p.pacc_id=pgm.pacc_id 
+        LEFT OUTER JOIN genename_proteins AS gnp ON gnp.pacc_id=p.pacc_id
+        LEFT OUTER JOIN associated_ids AS aid ON aid.gn_id=gnp.gn_id
+        LEFT OUTER JOIN ensg_proteins AS egp ON egp.pacc_id=p.pacc_id
+        LEFT OUTER JOIN genes AS g ON g.gene_id=egp.gene_id
+        LEFT OUTER JOIN prot_desc AS pd USING(pacc_id) 
+        JOIN protein_coverage AS pcov ON pcov.protein_acc=p.protein_acc
+        GROUP BY pgm.pacc_id
+        """
+        psm_sql = """
+        SELECT x.protein_acc, pp.psm_id, ps.sequence
+        FROM protein_group_master AS pgm
+        INNER JOIN proteins AS x ON x.pacc_id=pgm.pacc_id
+        JOIN protein_psm AS pp ON pp.protein_acc=x.protein_acc
+        JOIN psms USING(psm_id)
+        JOIN mzml USING(spectra_id)
+        JOIN mzmlfiles USING(mzmlfile_id)
+        JOIN biosets AS bs USING(set_id)
+        JOIN peptide_sequences AS ps USING(pep_id)
+        WHERE bs.set_name='Set1'
+        """
+        self.check_protein_data('proteincentric', sql, psm_sql)
+
+    def test_mergecutoff(self):
+        # FIXME need worse peptides, all FDR is 0.0, cutoff not tested!!
+        # test is in check_built_isobaric
+        self.infilename = 'proteins.txt'
+        cutoff= 0.0001
+        self.options.extend(['--mergecutoff', str(cutoff)])
         self.run_command(self.options)
         sql = ('SELECT p.protein_acc, bs.set_name, pf.fdr, pp.quant FROM proteins AS p '
                'JOIN biosets AS bs '
@@ -181,19 +233,7 @@ class TestProteinMerge(basetests.MergeTest):
         JOIN peptide_sequences AS ps USING(pep_id)
         WHERE bs.set_name='Set1'
         """
-        self.check_protein_data(centric, sql, psm_sql)
-
-    def test_proteins(self):
-        self.infilename = 'proteins.txt'
-        self.proteins()
-
-    def test_mergecutoff(self):
-        # FIXME need worse peptides, all FDR is 0.0, cutoff not tested!!
-        # test is in check_built_isobaric
-        self.infilename = 'proteins.txt'
-        cutoff= 0.0001
-        self.options.extend(['--mergecutoff', str(cutoff)])
-        self.proteins(cutoff=cutoff)
+        self.check_protein_data('proteincentric', sql, psm_sql)
 
     def test_nopsmnrs(self):
         """Given input tables with NO amount psm information, output a nice gene
@@ -210,7 +250,49 @@ class TestProteinMerge(basetests.MergeTest):
     def test_nogroups(self):
         self.options.append('--no-group-annotation')
         self.infilename = 'proteins.txt'
-        self.proteins(centric='protnogroup')
+        self.run_command(self.options)
+        sql = ('SELECT p.protein_acc, bs.set_name, pf.fdr, pp.quant FROM proteins AS p '
+               'JOIN biosets AS bs '
+               'JOIN protein_fdr AS pf USING(pacc_id) '
+               'JOIN protein_precur_quanted AS pp USING(pacc_id) '
+               )
+        self.check_build_values(sql, ['q-value', 'MS1 precursor area'],
+                'Protein ID', False)
+        sql = ('SELECT p.protein_acc, bs.set_name, pc.channel_name, '
+               'pi.quantvalue, pi.amount_psms, fqp.amount_psms, pf.fdr '
+               'FROM proteins AS p '
+               'JOIN biosets AS bs '
+               'JOIN protein_iso_quanted AS pi USING(pacc_id) '
+               'JOIN protein_iso_fullpsms AS fqp USING(pacc_id) '
+               'JOIN protquant_channels AS pc USING(channel_id) '
+               'JOIN protein_fdr AS pf WHERE pf.prottable_id=pc.prottable_id '
+               'AND pf.pacc_id=p.pacc_id'
+               )
+        self.check_built_isobaric(sql, 'Protein ID', cutoff=False)
+        sql = """
+        SELECT p.protein_acc,GROUP_CONCAT(g.gene_acc),GROUP_CONCAT(aid.assoc_id),pd.description,pcov.coverage
+        FROM protein_group_master AS pgm 
+        INNER JOIN proteins AS p ON p.pacc_id=pgm.pacc_id 
+        LEFT OUTER JOIN genename_proteins AS gnp ON gnp.pacc_id=p.pacc_id
+        LEFT OUTER JOIN associated_ids AS aid ON aid.gn_id=gnp.gn_id
+        LEFT OUTER JOIN ensg_proteins AS egp ON egp.pacc_id=p.pacc_id
+        LEFT OUTER JOIN genes AS g ON g.gene_id=egp.gene_id
+        LEFT OUTER JOIN prot_desc AS pd USING(pacc_id) 
+        JOIN protein_coverage AS pcov ON pcov.protein_acc=p.protein_acc
+        GROUP BY pgm.pacc_id
+        """
+        psm_sql = """
+        SELECT x.protein_acc, pp.psm_id, ps.sequence
+        FROM proteins AS x
+        JOIN protein_psm AS pp ON pp.protein_acc=x.protein_acc
+        JOIN psms USING(psm_id)
+        JOIN mzml USING(spectra_id)
+        JOIN mzmlfiles USING(mzmlfile_id)
+        JOIN biosets AS bs USING(set_id)
+        JOIN peptide_sequences AS ps USING(pep_id)
+        WHERE bs.set_name='Set1'
+        """
+        self.check_protein_data('protnogroup', sql, psm_sql)
 
     def test_ensgcentric(self):
         isosql = """

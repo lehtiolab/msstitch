@@ -30,6 +30,7 @@ class ProtTableDB(ProtGeneTableBase):
               'protein_iso_quanted': ['proteinquant_id', 'pacc_id',
                                       'channel_id', 'quantvalue',
                                       'amount_psms'],
+              'prot_psmpep_counts': ['prot_id'],
               }
 
     def create_pdata_map(self):
@@ -67,18 +68,18 @@ SELECT pgm.master_id, p.protein_acc, IFNULL(g.gene_acc, 'NA'),
                     }
         return pgdata
 
-    def merge_features(self):
+    def store_psmpep_counts(self):
         cursor = self.get_cursor()
         cursor.execute('''
     CREATE TABLE prot_psmpep_counts(prot_id INTEGER, set_id INTEGER, psm_count INTEGER,
-	pep_count INTEGER, uniqpsm_count INTEGER, FOREIGN KEY(prot_id) REFERENCES protein_group_master(master_id)
+	pep_count INTEGER, uniqpsm_count INTEGER, FOREIGN KEY(prot_id) REFERENCES proteins(pacc_id)
 	FOREIGN KEY(set_id) REFERENCES biosets(set_id))
         ''')
         
         cursor = self.get_cursor()
         cursor.execute('''
     INSERT INTO prot_psmpep_counts(prot_id, set_id, psm_count, pep_count, uniqpsm_count)
-    SELECT pgm.master_id, bs.set_id, COUNT(DISTINCT ppg.psm_id),
+    SELECT pgm.pacc_id, bs.set_id, COUNT(DISTINCT ppg.psm_id),
     COUNT (DISTINCT ps.pep_id), COUNT(DISTINCT uniq.pep_id)
         FROM psm_protein_groups AS ppg 
         INNER JOIN psms ON ppg.psm_id=psms.psm_id
@@ -94,10 +95,11 @@ SELECT pgm.master_id, p.protein_acc, IFNULL(g.gene_acc, 'NA'),
                         GROUP BY psms.pep_id
                     ) AS ppg WHERE ppg.nrpep==1
                 ) AS uniq ON uniq.pep_id=ps.pep_id
-        GROUP BY pgm.master_id, bs.set_id
+        GROUP BY pgm.pacc_id, bs.set_id
         ''')
         self.conn.commit()
 
+    def merge_features(self):
         sql = """
     SELECT bs.set_name, pgm.master_id, ppp.psm_count, ppp.pep_count, ppp.uniqpsm_count,
     IFNULL(pf.fdr, 'NA'), ppq.quant, fqpsm.amount_psms, GROUP_CONCAT(pqc.channel_name), GROUP_CONCAT(piq.quantvalue),
@@ -105,7 +107,7 @@ SELECT pgm.master_id, p.protein_acc, IFNULL(g.gene_acc, 'NA'),
         FROM biosets AS bs
         INNER JOIN protein_tables AS pt ON pt.set_id=bs.set_id
         INNER JOIN prot_psmpep_counts AS ppp ON ppp.set_id=bs.set_id
-        INNER JOIN protein_group_master AS pgm ON pgm.master_id=ppp.prot_id
+        INNER JOIN protein_group_master AS pgm ON pgm.pacc_id=ppp.prot_id
         INNER JOIN proteins AS prots ON prots.pacc_id=pgm.pacc_id
         LEFT OUTER JOIN protein_fdr AS pf ON pf.prottable_id=pt.prottable_id AND 
             pf.pacc_id=prots.pacc_id
@@ -135,7 +137,9 @@ class ProtTableNoGroupNoMapDB(ProtGeneTableBase):
               'protein_iso_quanted': ['proteinquant_id', 'pacc_id',
                                       'channel_id', 'quantvalue',
                                       'amount_psms'],
+              'prot_psmpep_counts': ['prot_id'],
               }
+
 
     def create_pdata_map(self):
         """This runs only once, returns the data which is not dependent on sets,
@@ -144,7 +148,7 @@ class ProtTableNoGroupNoMapDB(ProtGeneTableBase):
         cursor = self.get_cursor()
         return {pid: {ph.HEADER_PROTEIN: pacc} for pid, pacc in cursor.execute(sql)}
 
-    def merge_features(self):
+    def store_psmpep_counts(self):
         cursor = self.get_cursor()
         cursor.execute('''
     CREATE TABLE prot_psmpep_counts(prot_id INTEGER, set_id INTEGER, psm_count INTEGER,
@@ -175,6 +179,7 @@ class ProtTableNoGroupNoMapDB(ProtGeneTableBase):
         ''')
         self.conn.commit()
 
+    def merge_features(self):
         sql = """
     SELECT bs.set_name, prots.pacc_id, ppp.psm_count, ppp.pep_count, ppp.uniqpsm_count,
     IFNULL(pf.fdr, 'NA'), ppq.quant, fqpsm.amount_psms, GROUP_CONCAT(pqc.channel_name), GROUP_CONCAT(piq.quantvalue),
@@ -210,6 +215,7 @@ class GeneTableDB(ProtGeneTableBase):
                                      'channel_name', 'amount_psms_name'],
               'gene_iso_quanted': ['genequant_id', 'gene_id',
                                    'channel_id', 'quantvalue', 'amount_psms'],
+              'gene_psmpep_counts': ['gene_id'],
               }
 
     def create_pdata_map(self):
@@ -237,7 +243,7 @@ SELECT g.gene_acc, GROUP_CONCAT(p.protein_acc, ';'), IFNULL(aid.assoc_id, 'NA'),
                     }
         return pgdata
 
-    def merge_features(self):
+    def store_psmpep_counts(self):
         cursor = self.get_cursor()
         cursor.execute('''
     CREATE TABLE gene_psmpep_counts(gene_id INTEGER, set_id INTEGER, psm_count INTEGER,
@@ -273,6 +279,7 @@ SELECT g.gene_acc, GROUP_CONCAT(p.protein_acc, ';'), IFNULL(aid.assoc_id, 'NA'),
         ''')
         self.conn.commit()
         
+    def merge_features(self):
         sql = """
     SELECT bs.set_name, g.gene_acc, gpp.psm_count, gpp.pep_count, gpp.uniqpsm_count,
     IFNULL(gf.fdr, 'NA'), gpq.quant, fqpsm.amount_psms,
@@ -308,6 +315,7 @@ class GeneTableAssocIDsDB(GeneTableDB):
                                      'channel_name', 'amount_psms_name'],
               'assoc_iso_quanted': ['genequant_id', 'gn_id',
                                    'channel_id', 'quantvalue', 'amount_psms'],
+              'gn_psmpep_counts': ['gn_id'],
               }
 
     def create_pdata_map(self):
@@ -335,7 +343,7 @@ SELECT gn.assoc_id, GROUP_CONCAT(p.protein_acc, ';'), IFNULL(g.gene_acc, 'NA'),
                     }
         return pgdata
 
-    def merge_features(self):
+    def store_psmpep_counts(self):
   ### protein_acc on gene table is indexed??
   ### check distinct stuff, pgroups etc need it, matched with content numbers (which cnanot habe it)
         cursor = self.get_cursor()
@@ -373,6 +381,7 @@ SELECT gn.assoc_id, GROUP_CONCAT(p.protein_acc, ';'), IFNULL(g.gene_acc, 'NA'),
         ''')
         self.conn.commit()
         
+    def merge_features(self):
         sql = """
     SELECT bs.set_name, gn.assoc_id, gpp.psm_count, gpp.pep_count, gpp.uniqpsm_count,
     IFNULL(gf.fdr, 'NA'), gpq.quant, fqpsm.amount_psms,

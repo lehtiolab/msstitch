@@ -9,6 +9,7 @@ class ProtPepTable(ResultLookupInterface):
                              'prectable': 'protein_precur_quanted',
                              'fdrtable': 'protein_fdr',
                              'fullqpsmtable': 'protein_iso_fullpsms',
+                             'psmcounts': 'prot_psmpep_counts',
                              },
                  'gene': {'fntable': 'gene_tables',
                           'feattable': 'genes',
@@ -17,6 +18,7 @@ class ProtPepTable(ResultLookupInterface):
                           'prectable': 'gene_precur_quanted',
                           'fdrtable': 'gene_fdr',
                           'fullqpsmtable': 'gene_iso_fullpsms',
+                          'psmcounts': 'gene_psmpep_counts',
                           },
                  'assoc': {'fntable': 'gene_tables',
                            'feattable': 'associated_ids',
@@ -25,6 +27,7 @@ class ProtPepTable(ResultLookupInterface):
                            'prectable': 'assoc_precur_quanted',
                            'fdrtable': 'assoc_fdr',
                            'fullqpsmtable': 'assoc_iso_fullpsms',
+                           'psmcounts': 'gn_psmpep_counts',
                            },
                  'peptide': {'fntable': 'peptide_tables',
                              'feattable': 'peptide_sequences',
@@ -35,6 +38,7 @@ class ProtPepTable(ResultLookupInterface):
                              'peptable': 'peptide_pep',
                              'fullqpsmtable': 'peptide_iso_fullpsms',
                              'flrtable': 'ptm_flr',
+                             'psmcounts': 'pep_psmpep_counts',
                              }
                  }
 
@@ -92,13 +96,13 @@ class ProtPepTable(ResultLookupInterface):
         self.index_column('isoq_acc_ix', table, self.colmap[table][1])
         self.index_column('isoq_ch_ix', table, self.colmap[table][2])
 
-    def get_tablefn_map(self):
+    def get_tablefnset_map(self):
         table = self.table_map[self.datatype]['fntable']
         cursor = self.get_cursor()
-        cursor.execute('SELECT * FROM {} '.format(table))
-        return {fn: table_id for (table_id, setid, fn) in cursor}
+        cursor.execute(f'SELECT * FROM {table}')
+        return {fn: [table_id, setid] for (table_id, setid, fn) in cursor}
 
-    def get_feature_map(self):
+    def get_feature_map(self, setids):
         '''Create map of all features in feature table, output:
         {accession_id: [accession_name, False]} where the False is a check to be set
         to True if an accession is in the input txt file (the features exist in the DB
@@ -108,14 +112,13 @@ class ProtPepTable(ResultLookupInterface):
         columns = self.colmap[table][0:2]
         cursor = self.get_cursor()
         cursor.execute(f'SELECT {columns[0]}, {columns[1]} FROM {table}')
-        return {acc: [table_id, False] for (table_id, acc) in cursor}
+        return {acc: [table_id, set(setids)] for (table_id, acc) in cursor}
 
     def delete_features(self, delete_ids):
-        table = self.table_map[self.datatype]['feattable']
+        table = self.table_map[self.datatype]['psmcounts']
         acc_id = self.colmap[table][0]
         cursor = self.get_cursor()
-        for feat in delete_ids:
-            cursor.execute(f'DELETE FROM {table} WHERE {acc_id} = {feat}')
+        cursor.executemany(f'DELETE FROM {table} WHERE {acc_id} = ? AND set_id = ?', ((acc, setid) for acc, setids in delete_ids.items() for setid in setids))
         self.conn.commit()
 
     def store_singlecol(self, tablekey, vals):

@@ -11,30 +11,25 @@ def create_lookup(fns, pqdb, poolnames, featcolnr, ms1_qcolpattern,
             flrcolpattern]
     storefuns = [pqdb.store_precursor_quants, pqdb.store_fdr, pqdb.store_pep,
             pqdb.store_fullq_psms, pqdb.store_ptm_flr]
-    tablefn_map = create_tablefn_map(fns, pqdb, poolnames)
-    feat_map = pqdb.get_feature_map()
+    poolmap = {name: set_id for (name, set_id) in pqdb.get_all_poolnames()}
+    pqdb.store_table_files([(poolmap[pool], os.path.basename(fn))
+                            for fn, pool in zip(fns, poolnames)])
+    tablefnset_map = pqdb.get_tablefnset_map()
+    feat_map = pqdb.get_feature_map(poolmap.values())
     for pattern, storefun in zip(patterns, storefuns):
         if pattern is None:
             continue
         colmap = get_colmap(fns, pattern, single_col=True)
         if colmap:
-            store_single_col_data(fns, tablefn_map, feat_map, storefun, colmap)
+            store_single_col_data(fns, tablefnset_map, feat_map, storefun, colmap)
     if isobqcolpattern:
         isocolmap = get_colmap(fns, isobqcolpattern, antipattern=psmnrpattern)
         psmcolmap = get_colmap(fns, psmnrpattern)
-        create_isobaric_quant_lookup(fns, tablefn_map, feat_map, pqdb, featcolnr,
+        create_isobaric_quant_lookup(fns, tablefnset_map, feat_map, pqdb, featcolnr,
                 isocolmap, psmcolmap)
-    delete_feats = {acc_id for _, [acc_id, used] in feat_map.items() if not used}
+    pqdb.store_psmpep_counts()
+    delete_feats = {acc_id: setids for _, [acc_id, setids] in feat_map.items() if setids}
     pqdb.delete_features(delete_feats)
-
-
-def create_tablefn_map(fns, pqdb, poolnames):
-    """Stores protein/peptide table names in DB, returns a map with their
-    respective DB IDs"""
-    poolmap = {name: pid for (name, pid) in pqdb.get_all_poolnames()}
-    pqdb.store_table_files([(poolmap[pool], os.path.basename(fn))
-                            for fn, pool in zip(fns, poolnames)])
-    return pqdb.get_tablefn_map()
 
 
 def get_colmap(fns, pattern, single_col=False, antipattern=False):
@@ -65,14 +60,15 @@ def get_colmap(fns, pattern, single_col=False, antipattern=False):
     return colmap
 
 
-def store_single_col_data(fns, prottable_id_map, pacc_map, pqdbmethod, colmap):
+def store_single_col_data(fns, prottable_id_set_map, pacc_map, pqdbmethod, colmap):
     """General method to store single column data from protein tables
     in lookup"""
     to_store = []
     for fn, header, pquant in tsvreader.generate_tsv_pep_protein_quants(fns):
         pacc_id = pacc_map[pquant[header[0]]][0]
-        pacc_map[pquant[header[0]]][1] = True
-        pqdata = (pacc_id, prottable_id_map[fn], pquant[colmap[fn]])
+        # Mark feature for used in this set
+        pacc_map[pquant[header[0]]][1].discard(prottable_id_set_map[fn][1])
+        pqdata = (pacc_id, prottable_id_set_map[fn][0], pquant[colmap[fn]])
         to_store.append(pqdata)
         if len(to_store) > 10000:
             pqdbmethod(to_store)
@@ -80,19 +76,19 @@ def store_single_col_data(fns, prottable_id_map, pacc_map, pqdbmethod, colmap):
     pqdbmethod(to_store)
 
 
-def create_isobaric_quant_lookup(fns, tablefn_map, featmap, pqdb,
+def create_isobaric_quant_lookup(fns, tablefnset_map, featmap, pqdb,
                                  featcolnr, allquantcols, psmcolmap):
     """Creates a lookup dict from peptide/protein quant input files and some
     input parameters. This assumes the order of quant columns and
     number-of-PSM columns is the same."""
     pqdb.store_quant_channels(
-            map_psmnrcol_to_quantcol(allquantcols, psmcolmap, tablefn_map),
+            map_psmnrcol_to_quantcol(allquantcols, psmcolmap, tablefnset_map),
             psmcolmap)
     quantmap = pqdb.get_quantchannel_map()
     to_store = []
     for fn, header, pquant in tsvreader.generate_tsv_pep_protein_quants(fns):
-        pqdata = get_isob_quant_data(pquant, header[featcolnr], tablefn_map[fn],
-                                     featmap, quantmap)
+        pqdata = get_isob_quant_data(pquant, header[featcolnr], tablefnset_map[fn][0],
+                                     featmap, tablefnset_map[fn][1], quantmap)
         to_store.extend(pqdata)
         if len(to_store) > 10000:
             pqdb.store_isobaric_quants(to_store, psmcolmap)
@@ -100,24 +96,24 @@ def create_isobaric_quant_lookup(fns, tablefn_map, featmap, pqdb,
     pqdb.store_isobaric_quants(to_store, psmcolmap)
 
 
-def map_psmnrcol_to_quantcol(quantcols, psmcols, tablefn_map):
+def map_psmnrcol_to_quantcol(quantcols, psmcols, tablefnset_map):
     """This function yields tuples of table filename, isobaric quant column
     and if necessary number-of-PSM column"""
     if not psmcols:
         for fn in quantcols:
             for qcol in quantcols[fn]:
-                yield (tablefn_map[fn], qcol)
+                yield (tablefnset_map[fn][0], qcol)
     else:
         for fn in quantcols:
             for qcol, psmcol in zip(quantcols[fn], psmcols[fn]):
-                yield (tablefn_map[fn], qcol, psmcol)
+                yield (tablefnset_map[fn][0], qcol, psmcol)
 
 
-def get_isob_quant_data(pquant, featfield, fnid, featmap, qmap):
+def get_isob_quant_data(pquant, featfield, fnid, featmap, set_id, qmap):
     """Turns a dict from a line of protein/peptide quant data into a set of
     tuples that can be stored in db"""
     feat_dbid = featmap[pquant[featfield]][0]
-    featmap[pquant[featfield]][1] = True
+    featmap[pquant[featfield]][1].discard(set_id)
     for channel_name, (channel_id, psmfield) in qmap[fnid].items():
         if psmfield is None:
             yield (feat_dbid, channel_id, pquant[channel_name])

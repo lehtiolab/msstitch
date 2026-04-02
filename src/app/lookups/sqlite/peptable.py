@@ -28,6 +28,7 @@ class PepTableProteinCentricDB(ProtPepTable):
               'peptide_iso_quanted': ['peptidequant_id', 'pep_id',
                                       'channel_id', 'quantvalue',
                                       'amount_psms'],
+              'pep_psmpep_counts': ['pep_id'],
               }
 
     def add_tables(self, tabletypes=[]):
@@ -122,7 +123,7 @@ class PepTableProteinCentricDB(ProtPepTable):
             pgdata[pid][ph.HEADER_PEPTIDE] = seq
         return pgdata
 
-    def merge_features(self):
+    def store_psmpep_counts(self):
         cursor = self.get_cursor()
         cursor.execute('''
     CREATE TABLE pep_psmpep_counts(pep_id INTEGER, set_id INTEGER, psm_count INTEGER,
@@ -141,6 +142,7 @@ class PepTableProteinCentricDB(ProtPepTable):
         GROUP BY ps.pep_id, bs.set_id
         ''')
 
+    def merge_features(self):
         sql = """
     SELECT bs.set_name, ps.pep_id, ppp.psm_count, pf.fdr, pp.pep,
             flr.flr, ppq.quant, fqpsm.amount_psms, GROUP_CONCAT(pqc.channel_name),
